@@ -20,6 +20,7 @@
 class Resolucao {
 public:
   Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+  Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pSolucaoTxt);
   virtual ~Resolucao();
 
   void start();
@@ -28,16 +29,18 @@ private:
   int camadasTamanho;
   int perfisTamanho;
   
+  std::string solucaoTxt;
+  
   std::map<std::string, Professor*> professores;
   std::map<std::string, Disciplina*> disciplinas;
 
   std::vector<AlunoPerfil*> alunoPerfis;
 
-  std::vector<ProfessorDisciplina*> professorDisciplinas;
+  std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
   
   std::vector<Solucao*> solucoes;
   
-  void init();
+  void init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
 
   void carregarDados();
 
@@ -47,7 +50,8 @@ private:
   void carregarAlunoPerfis();
 
   void carregarDadosProfessorDisciplinas();
+  
+  void carregarSolucao();
 };
 
 #endif	/* RESOLUCAO_H */
-

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "Semana.h"
+
 #include "UUID.h"
 
 #define DISCIPLINA_ID             0
@@ -41,6 +43,8 @@ public:
   int getCargaHoraria();
   void setCargaHoraria(int pCargaHoraria);
 
+  int getAulasSemana();
+
   void addPreRequisito(std::string pDisciplina);
   bool isPreRequisito(std::string pDisciplina);
 private:
@@ -52,6 +56,7 @@ private:
   std::string curso;
 
   int cargaHoraria;
+  int aulasSemana;
 
 
   std::vector<std::string> preRequisitos;

@@ -1,14 +1,20 @@
 #include "Resolucao.h"
 
 Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
+  init(pBlocosTamanho, pCamadasTamanho, pPerfisTamanho);
+}
+
+Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pSolucaoTxt) {
+  solucaoTxt = pSolucaoTxt;
+
+  init(pBlocosTamanho, pCamadasTamanho, pPerfisTamanho);
+}
+
+void Resolucao::init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
   blocosTamanho = pBlocosTamanho;
   camadasTamanho = pCamadasTamanho;
   perfisTamanho = pPerfisTamanho;
 
-  init();
-}
-
-void Resolucao::init() {
   carregarDados();
 }
 
@@ -35,7 +41,7 @@ void Resolucao::carregarDadosProfessores() {
     }
     myfile.close();
   } else {
-    std::cout << "Unable to open file";
+    std::cout << "Unable to open file " << TXT_PROFESSOR;
     exit(EXIT_FAILURE);
   }
 }
@@ -62,15 +68,13 @@ void Resolucao::carregarDadosDisciplinas() {
     }
     myfile.close();
   } else {
-    std::cout << "Unable to open file";
+    std::cout << "Unable to open file " << TXT_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas() {
   Util util;
-
-  ProfessorDisciplina *pd;
 
   double competenciaPeso;
 
@@ -83,26 +87,24 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      pd = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]);
+      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]] = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]);
 
       competenciaPeso = 1.0;
       if (pieces.size() == (PROFESSOR_DISCIPLINA_PESO + 1)) {
         competenciaPeso = atof(pieces[PROFESSOR_DISCIPLINA_PESO].c_str());
       }
-      pd->professor->addCompetencia(pieces[1], competenciaPeso);
-
-      professorDisciplinas.push_back(pd);
+      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]]->professor->addCompetencia(pieces[PROFESSOR_DISCIPLINA_DISCIPLINA], competenciaPeso);
     }
     myfile.close();
   } else {
-    std::cout << "Unable to open file";
+    std::cout << "Unable to open file " << TXT_PROFESSOR_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
 }
 
 void Resolucao::carregarAlunoPerfis() {
   Util util;
-  
+
   AlunoPerfil *ap;
 
   std::vector<std::string> pieces;
@@ -110,22 +112,22 @@ void Resolucao::carregarAlunoPerfis() {
   std::vector<std::string> fRestante;
   std::string line;
 
-  std::ifstream myfile(TXT_PROFESSOR);
+  std::ifstream myfile(TXT_ALUNO_PERFIL);
 
   if (myfile.is_open()) {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
       ap = new AlunoPerfil(atof(pieces[ALUNO_PERFIL_PESO].c_str()), pieces[ALUNO_PERFIL_ID]);
-      
+
       fCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
       ap->cursadas = fCursadas;
-      
+
       if (pieces.size() == (ALUNO_PERFIL_RESTANTE + 1)) {
         fRestante = util.strSplit(pieces[ALUNO_PERFIL_RESTANTE], '|');
         ap->restante = fRestante;
       }
-      
+
       alunoPerfis.push_back(ap);
     }
     myfile.close();
@@ -140,6 +142,11 @@ Resolucao::~Resolucao() {
 }
 
 void Resolucao::start() {
-
+  if (solucaoTxt != "") {
+    carregarSolucao();
+  }
 }
 
+void Resolucao::carregarSolucao() {
+  Solucao *s = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+}

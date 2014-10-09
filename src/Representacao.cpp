@@ -57,17 +57,7 @@ void Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplin
 }
 
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
-  int x, y, z;
-
-  z = pLinear / (blocosTamanho * camadasTamanho);
-  pLinear -= z * (blocosTamanho * camadasTamanho);
-
-  y = pLinear / blocosTamanho;
-  pLinear -= y * blocosTamanho;
-
-  x = pLinear / 1;
-
-  triDimensional[0] = y;
-  triDimensional[1] = x;
-  triDimensional[2] = z;
+  Util util;
+  
+  util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
 }

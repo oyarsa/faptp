@@ -8,6 +8,7 @@
 #include "Semana.h"
 
 #include "ProfessorDisciplina.h"
+#include "Util.h"
 
 class Representacao {
 public:

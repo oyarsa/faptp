@@ -1,4 +1,4 @@
-USE siga;
+USE `siga-producao`;
 
 DESC TBL_GRADE;
 DESC TBL_GRADE_ITEM;
@@ -10,7 +10,10 @@ DESC TBL_FUNCIONARIO;
 
 SELECT
 	#grd_codigo
-	grdd_sigla, dsp_titulo, grdd_carga_horaria_acumulada, grdi_cod_GRADE_ITEM_PERIODO, cur_titulo, grdd_pre_requisito
+	grdg_codigo
+	#grdd_codigo
+	#grdd_codigo, grdg_codigo, 
+	#grdd_sigla, dsp_titulo, grdd_carga_horaria_acumulada, grdi_cod_GRADE_ITEM_PERIODO, cur_titulo, grdd_pre_requisito
 	#DISTINCT fun_codigo, fun_nome
 	#fun_codigo, grdd_sigla
 FROM
@@ -23,7 +26,7 @@ FROM
 			reflet_codigo, reflet_descricao, 
 
 
-			grdd_sigla, dsp_titulo, grdd_carga_horaria_acumulada, grdi_cod_GRADE_ITEM_PERIODO, cur_titulo,
+			grdd_sigla, grdg_identificacao, dsp_titulo, grdd_carga_horaria_acumulada, grdi_cod_GRADE_ITEM_PERIODO, cur_titulo,
 			(
 				SELECT
 					GROUP_CONCAT(PR.grdd_sigla)
@@ -51,6 +54,8 @@ WHERE
 	grd_codigo = 35
 GROUP BY 
 	grdd_codigo
+ORDER BY
+	grdi_cod_GRADE_ITEM_PERIODO
 ;
 
 
@@ -101,3 +106,6 @@ WHERE
 GROUP BY
 	dsp_restante, dsp_cursadas
 ;
+
+
+DESC TBL_HORARIO;

@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "Disciplina.h"
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso) {
@@ -18,6 +20,8 @@ void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::s
   cargaHoraria = pCargaHoraria;
   periodo = pPeriodo;
   curso = pCurso;
+  
+  aulasSemana = ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
           
   setNome(pNome);
 }
@@ -62,6 +66,10 @@ int Disciplina::getCargaHoraria() {
 
 void Disciplina::setCargaHoraria(int pCargaHoraria) {
   cargaHoraria = pCargaHoraria;
+}
+
+int Disciplina::getAulasSemana() {
+  return aulasSemana;
 }
 
 void Disciplina::addPreRequisito(std::string pDisciplina) {

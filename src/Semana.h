@@ -15,6 +15,12 @@ extern "C" {
 #define SABADO    5
 #define DOMINGO   6
 
+#define HORA_MINUTO 60.0
+#define MINUTO_ALUA 60.0
+#define SEMANA_MES 4.0
+#define MES_SEMESTRE 6.0
+#define CARGA_HORARIA ((double)(MINUTO_ALUA/HORA_MINUTO))
+
 #ifdef	__cplusplus
 }
 #endif
