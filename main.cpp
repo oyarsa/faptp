@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
   }
   */
   
-  Resolucao *resolucao = new Resolucao(4, 8, 2, TXT_SOLUCAO);
+  Resolucao *resolucao = new Resolucao(2, 2, 5, TXT_SOLUCAO);
   resolucao->start();
 
   return EXIT_SUCCESS;

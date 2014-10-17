@@ -17,8 +17,8 @@ public:
 
   ProfessorDisciplina* at(int pBloco, int pDia, int pCamada);
   ProfessorDisciplina* at(int position);
-  void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-  void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+  virtual void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
+  virtual void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
   void get3DMatrix(int pLinear, int* triDimensional);
 

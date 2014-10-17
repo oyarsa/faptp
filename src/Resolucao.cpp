@@ -120,12 +120,12 @@ void Resolucao::carregarAlunoPerfis() {
 
       ap = new AlunoPerfil(atof(pieces[ALUNO_PERFIL_PESO].c_str()), pieces[ALUNO_PERFIL_ID]);
 
-      fCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
-      ap->cursadas = fCursadas;
+      fRestante = util.strSplit(pieces[ALUNO_PERFIL_RESTANTE], '|');
+      ap->restante = fRestante;
 
-      if (pieces.size() == (ALUNO_PERFIL_RESTANTE + 1)) {
-        fRestante = util.strSplit(pieces[ALUNO_PERFIL_RESTANTE], '|');
-        ap->restante = fRestante;
+      if (pieces.size() == (ALUNO_PERFIL_CURSADAS + 1)) {
+        fCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
+        ap->cursadas = fCursadas;
       }
 
       alunoPerfis.push_back(ap);
@@ -148,5 +148,24 @@ void Resolucao::start() {
 }
 
 void Resolucao::carregarSolucao() {
+  Util util;
+
   Solucao *s = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+
+  std::vector<std::string> pieces;
+  std::string line;
+
+  std::ifstream myfile(solucaoTxt.c_str());
+
+  if (myfile.is_open()) {
+    while (std::getline(myfile, line)) {
+      pieces = util.strSplit(line, ';');
+      
+      s->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]]);
+    }
+    myfile.close();
+  } else {
+    std::cout << "Unable to open file";
+    exit(EXIT_FAILURE);
+  }
 }

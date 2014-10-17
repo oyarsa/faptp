@@ -35,29 +35,13 @@ void Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplin
 
 void Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
   int position = getPosition(pBloco, pDia, pCamada);
-  bool professorAlocado = false;
 
-  if (alocados[position] == "" || force) {
-    int positionCamada;
-
-    for (int i = 0; i < camadasTamanho; i++) {
-      positionCamada = getPosition(pBloco, pDia, i);
-      if (alocados[positionCamada] == pProfessorDisciplina->id) {
-        professorAlocado = true;
-        break;
-      }
-    }
-
-    if (professorAlocado || force) {
-      matriz[position] = pProfessorDisciplina;
-      alocados[position] = pProfessorDisciplina->professor->id;
-    }
-  }
-  //matriz.insert((matriz.begin() + getPosition(pBloco, pDia, pCamada)), pProfessorDisciplina);
+  matriz[position] = pProfessorDisciplina;
+  alocados[position] = pProfessorDisciplina->professor->id;
 }
 
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
   Util util;
-  
+
   util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
 }

@@ -13,6 +13,8 @@
 #include "ProfessorDisciplina.h"
 #include "AlunoPerfil.h"
 #include "Solucao.h"
+#include "Horario.h"
+
 #include "Util.h"
 
 #include "Files.h"

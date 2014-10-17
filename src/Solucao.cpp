@@ -4,6 +4,8 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
   blocosTamanho = pBlocosTamanho;
   camadasTamanho = pCamadasTamanho;
   perfisTamanho = pPerfisTamanho;
+
+  init();
 }
 
 void Solucao::init() {

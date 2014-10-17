@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=faptp-svn
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/faptp-svn
+CND_ARTIFACT_NAME_Debug=faptp
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/faptp
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=faptp-svn.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/faptp-svn.tar
+CND_PACKAGE_NAME_Debug=faptp.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/faptp.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=faptp-svn
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/faptp-svn
+CND_ARTIFACT_NAME_Release=faptp
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/faptp
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=faptp-svn.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/faptp-svn.tar
+CND_PACKAGE_NAME_Release=faptp.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/faptp.tar
 #
 # include compiler specific variables
 #
