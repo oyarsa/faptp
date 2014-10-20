@@ -19,6 +19,7 @@
       <itemPath>input/Disciplina.txt</itemPath>
       <itemPath>input/Professor.txt</itemPath>
       <itemPath>input/ProfessorDisciplina.txt</itemPath>
+      <itemPath>input/Solucao.txt</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Arquivos de Recurso"
@@ -88,6 +89,8 @@
       <item path="input/Professor.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/ProfessorDisciplina.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="input/Solucao.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/[TESTE] Dados iniciais.ods" ex="false" tool="3" flavor2="0">
       </item>
@@ -177,6 +180,8 @@
       <item path="input/Professor.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/ProfessorDisciplina.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="input/Solucao.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/[TESTE] Dados iniciais.ods" ex="false" tool="3" flavor2="0">
       </item>
