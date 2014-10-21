@@ -19,6 +19,8 @@
 
 #include "Files.h"
 
+#define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO   1
+
 class Resolucao {
 public:
   Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
@@ -26,6 +28,8 @@ public:
   virtual ~Resolucao();
 
   void start();
+  
+  int gerarGrade(int pTipo);
 private:
   int blocosTamanho;
   int camadasTamanho;
@@ -36,7 +40,7 @@ private:
   std::map<std::string, Professor*> professores;
   std::map<std::string, Disciplina*> disciplinas;
 
-  std::vector<AlunoPerfil*> alunoPerfis;
+  std::map<std::string, AlunoPerfil*> alunoPerfis;
 
   std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
   
@@ -54,6 +58,8 @@ private:
   void carregarDadosProfessorDisciplinas();
   
   void carregarSolucao();
+  
+  int gerarGradeTipoGuloso();
 };
 
 #endif	/* RESOLUCAO_H */

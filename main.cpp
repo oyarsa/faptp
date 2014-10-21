@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
   
   Resolucao *resolucao = new Resolucao(2, 2, 5, TXT_SOLUCAO);
   resolucao->start();
+  delete resolucao;
 
   return EXIT_SUCCESS;
 }

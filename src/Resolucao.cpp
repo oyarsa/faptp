@@ -128,7 +128,7 @@ void Resolucao::carregarAlunoPerfis() {
         ap->cursadas = fCursadas;
       }
 
-      alunoPerfis.push_back(ap);
+      alunoPerfis[pieces[ALUNO_PERFIL_ID]] = ap;
     }
     myfile.close();
   } else {
@@ -167,5 +167,27 @@ void Resolucao::carregarSolucao() {
   } else {
     std::cout << "Unable to open file";
     exit(EXIT_FAILURE);
+  }
+}
+
+int Resolucao::gerarGrade(int pTipo) {
+  switch (pTipo) {
+    case RESOLUCAO_GERAR_GRADE_TIPO_GULOSO:
+
+      return gerarGradeTipoGuloso();
+
+      break;
+  }
+
+  return 0;
+}
+
+int Resolucao::gerarGradeTipoGuloso() {
+  int i = 0;
+  std::map<std::string, AlunoPerfil*>::iterator iter = alunoPerfis.begin();
+  std::map<std::string, AlunoPerfil*>::iterator endIter = alunoPerfis.end();
+  
+  for (; iter != endIter; ++iter, i++) {
+    iter->first;
   }
 }
