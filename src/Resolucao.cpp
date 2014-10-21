@@ -141,16 +141,18 @@ Resolucao::~Resolucao() {
 
 }
 
-void Resolucao::start() {
+void Resolucao::start(int pTipo) {
   if (solucaoTxt != "") {
     carregarSolucao();
   }
+
+  gerarGrade(pTipo);
 }
 
 void Resolucao::carregarSolucao() {
   Util util;
 
-  Solucao *s = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+  Solucao *solucao = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 
   std::vector<std::string> pieces;
   std::string line;
@@ -160,14 +162,16 @@ void Resolucao::carregarSolucao() {
   if (myfile.is_open()) {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
-      
-      s->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]]);
+
+      solucao->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]]);
     }
     myfile.close();
   } else {
     std::cout << "Unable to open file";
     exit(EXIT_FAILURE);
   }
+
+  solucoes.push_back(solucao);
 }
 
 int Resolucao::gerarGrade(int pTipo) {
@@ -183,11 +187,46 @@ int Resolucao::gerarGrade(int pTipo) {
 }
 
 int Resolucao::gerarGradeTipoGuloso() {
-  int i = 0;
-  std::map<std::string, AlunoPerfil*>::iterator iter = alunoPerfis.begin();
-  std::map<std::string, AlunoPerfil*>::iterator endIter = alunoPerfis.end();
+  Util util;
   
-  for (; iter != endIter; ++iter, i++) {
-    iter->first;
+  std::vector<Solucao*>::iterator sIter = solucoes.begin();
+  std::vector<Solucao*>::iterator sEndIter = solucoes.end();
+  Solucao *solucao;
+  Horario *horario;
+
+  Grade *apGrade;
+
+  std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
+  std::map<std::string, AlunoPerfil*>::iterator apEndIter = alunoPerfis.end();
+  AlunoPerfil *alunoPerfil;
+
+  int i, triDimensional[3];
+  int bloco, diaSemana, perfil;
+
+  std::vector<std::string> apRestante;
+  std::vector<std::string> apCursadas;
+
+  for (; sIter != sEndIter; ++sIter) {
+    solucao = *sIter;
+    horario = solucao->horario;
+    
+    for (; apIter != apEndIter; ++apIter) {
+      alunoPerfil = alunoPerfis[apIter->first];
+
+      apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil);
+
+      apRestante = alunoPerfil->restante;
+      apCursadas = alunoPerfil->cursadas;
+
+      for (i = 0; i < horario->size; i++) {
+        util.get3DMatrix(i, triDimensional, horario->blocosTamanho, horario->camadasTamanho);
+        
+        bloco = triDimensional[0];
+        diaSemana = triDimensional[1];
+        perfil = triDimensional[2];
+        
+        apGrade->insert(bloco, diaSemana, perfil, horario);
+      }
+    }
   }
 }

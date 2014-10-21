@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
   */
   
   Resolucao *resolucao = new Resolucao(2, 2, 5, TXT_SOLUCAO);
-  resolucao->start();
+  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
+
   delete resolucao;
 
   return EXIT_SUCCESS;

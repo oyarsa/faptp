@@ -6,11 +6,11 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
-void Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
-  Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina);
+bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+  return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina);
 }
 
-void Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
   int position = getPosition(pBloco, pDia, pCamada);
   bool professorAlocado = false;
 
@@ -26,9 +26,11 @@ void Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pPr
     }
 
     if (professorAlocado || force) {
-      Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina, force);
+      return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina, force);
     }
   }
+  
+  return false;
 }
 
 double Horario::getObjectiveFunction() {

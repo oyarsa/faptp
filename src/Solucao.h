@@ -1,6 +1,9 @@
 #ifndef SOLUCAO_H
 #define	SOLUCAO_H
 
+#include <string>
+#include <vector>
+
 #include "Horario.h"
 #include "Grade.h"
 

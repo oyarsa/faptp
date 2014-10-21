@@ -1,17 +1,26 @@
 #include "Grade.h"
 
-Grade::Grade(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho) {
-  perfisTamanho = pPerfisTamanho;
+Grade::Grade(int pBlocosTamanho, int pCamadasTamanho, AlunoPerfil* pAlunoPerfil) : Representacao(pBlocosTamanho, pCamadasTamanho) {
+  alunoPerfil = pAlunoPerfil;
 
   init();
 }
 
 void Grade::init() {
-  perfis.resize(perfisTamanho);
 }
 
 Grade::~Grade() {
 }
+
+bool Grade::insert(int pBloco, int pDia, int pCamada, Horario* pHorario) {
+  return insert(pBloco, pDia, pCamada, pHorario, false);
+}
+
+bool Grade::insert(int pBloco, int pDia, int pCamada, Horario* pHorario, bool force) {
+  ProfessorDisciplina *professorDisciplina = at(pBloco, pDia, pCamada);
+  return true;
+}
+
 
 double Grade::getObjectiveFunction() {
   ProfessorDisciplina *pd;
@@ -29,7 +38,7 @@ double Grade::getObjectiveFunction() {
     diaSemana = triDimensional[1];
     perfil = triDimensional[2];
 
-    fo += (pd->disciplina->cargaHoraria * perfis[perfil]->peso) + (100 * pd->professor->diasDisponiveis[diaSemana]);
+    fo += (pd->disciplina->cargaHoraria) + (100 * pd->professor->diasDisponiveis[diaSemana]);
   }
 
   return fo;

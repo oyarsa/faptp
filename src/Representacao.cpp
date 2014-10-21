@@ -29,15 +29,17 @@ ProfessorDisciplina* Representacao::at(int position) {
   return matriz[position];
 }
 
-void Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
-  insert(pBloco, pDia, pCamada, pProfessorDisciplina, false);
+bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+  return insert(pBloco, pDia, pCamada, pProfessorDisciplina, false);
 }
 
-void Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
   int position = getPosition(pBloco, pDia, pCamada);
 
   matriz[position] = pProfessorDisciplina;
   alocados[position] = pProfessorDisciplina->professor->id;
+  
+  return true;
 }
 
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {

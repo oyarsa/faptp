@@ -11,14 +11,16 @@
 #include "Util.h"
 
 class Representacao {
+  friend class Resolucao;
 public:
   Representacao(int pBlocosTamanho, int pCamadasTamanho);
   virtual ~Representacao();
 
   ProfessorDisciplina* at(int pBloco, int pDia, int pCamada);
   ProfessorDisciplina* at(int position);
-  virtual void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-  virtual void insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+
+  virtual bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
+  virtual bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
   void get3DMatrix(int pLinear, int* triDimensional);
 
