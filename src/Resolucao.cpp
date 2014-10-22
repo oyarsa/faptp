@@ -48,6 +48,8 @@ void Resolucao::carregarDadosProfessores() {
 
 void Resolucao::carregarDadosDisciplinas() {
   Util util;
+  
+  Disciplina *disciplina;
 
   std::vector<std::string> pieces;
   std::vector<std::string> fPreRequisitos;
@@ -59,18 +61,22 @@ void Resolucao::carregarDadosDisciplinas() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      disciplinas[pieces[DISCIPLINA_ID]] = new Disciplina(pieces[DISCIPLINA_NOME], atoi(pieces[DISCIPLINA_CARGA_HORARIA].c_str()), atoi(pieces[DISCIPLINA_PERIODO].c_str()), pieces[DISCIPLINA_CURSO], pieces[DISCIPLINA_ID]);
+      disciplina = new Disciplina(pieces[DISCIPLINA_NOME], atoi(pieces[DISCIPLINA_CARGA_HORARIA].c_str()), atoi(pieces[DISCIPLINA_PERIODO].c_str()), pieces[DISCIPLINA_CURSO], pieces[DISCIPLINA_ID]);
 
       if (pieces.size() == (DISCIPLINA_PRE_REQUISITO + 1)) {
         fPreRequisitos = util.strSplit(pieces[DISCIPLINA_PRE_REQUISITO], '|');
-        disciplinas[pieces[DISCIPLINA_ID]]->preRequisitos = fPreRequisitos;
+        disciplina->preRequisitos = fPreRequisitos;
       }
+      
+      disciplinas.push_back(disciplina);
     }
     myfile.close();
   } else {
     std::cout << "Unable to open file " << TXT_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
+  
+  ordenarDisciplinas();
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas() {
@@ -87,7 +93,7 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]] = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]);
+      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]] = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[disciplinasIndex[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]]);
 
       competenciaPeso = 1.0;
       if (pieces.size() == (PROFESSOR_DISCIPLINA_PESO + 1)) {
@@ -172,6 +178,18 @@ void Resolucao::carregarSolucao() {
   }
 
   solucoes.push_back(solucao);
+}
+
+void Resolucao::ordenarDisciplinas() {
+  std::vector<Disciplina*>::iterator dIter = disciplinas.begin();
+  std::vector<Disciplina*>::iterator dIterEnd = disciplinas.begin();
+
+  std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
+  
+  disciplinasIndex.clear();
+  for (int i = 0; dIter != dIterEnd; ++dIter, i++) {
+    disciplinasIndex[(*dIter)->id] = i;
+  }
 }
 
 int Resolucao::gerarGrade(int pTipo) {

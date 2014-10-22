@@ -40,7 +40,7 @@ public:
   std::string getCurso();
   void setCurso(std::string pCurso);
 
-  int getCargaHoraria();
+  int getCargaHoraria() const;
   void setCargaHoraria(int pCargaHoraria);
 
   int getAulasSemana();

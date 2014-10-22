@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>src/Files.h</itemPath>
       <itemPath>src/Semana.h</itemPath>
+      <itemPath>template/sortTemplate.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Arquivos de Código-Fonte"
@@ -148,6 +149,8 @@
       </item>
       <item path="src/Util.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="template/sortTemplate.h" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -238,6 +241,8 @@
       <item path="src/Util.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Util.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="template/sortTemplate.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -9,6 +9,8 @@
 #include <map>
 #include <vector>
 
+#include "../template/sortTemplate.h"
+
 #include "Professor.h"
 #include "Disciplina.h"
 #include "ProfessorDisciplina.h"
@@ -39,7 +41,8 @@ private:
   std::string solucaoTxt;
 
   std::map<std::string, Professor*> professores;
-  std::map<std::string, Disciplina*> disciplinas;
+  std::map<std::string, int> disciplinasIndex;
+  std::vector<Disciplina*> disciplinas;
 
   std::map<std::string, AlunoPerfil*> alunoPerfis;
 
@@ -59,6 +62,8 @@ private:
   void carregarDadosProfessorDisciplinas();
 
   void carregarSolucao();
+  
+  void ordenarDisciplinas();
 
   int gerarGradeTipoGuloso();
 };

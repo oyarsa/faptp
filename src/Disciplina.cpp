@@ -60,7 +60,7 @@ void Disciplina::setCurso(std::string pCurso) {
   curso = pCurso;
 }
 
-int Disciplina::getCargaHoraria() {
+int Disciplina::getCargaHoraria() const {
   return cargaHoraria;
 }
 
