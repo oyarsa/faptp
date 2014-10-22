@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <sstream>
 #include <vector>
 
+#include "src/Disciplina.cpp"
 #include "src/Professor.h"
 #include "src/Horario.h"
 #include "src/Util.h"
@@ -77,6 +79,8 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
   */
+  std::vector<Disciplina*> teste;
+  std::sort(teste.begin(), teste.end(), [](Disciplina *a, Disciplina *b){return a->getCargaHoraria() > b->getCargaHoraria();});
   
   Resolucao *resolucao = new Resolucao(2, 2, 5, TXT_SOLUCAO);
   resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);

@@ -188,7 +188,7 @@ int Resolucao::gerarGrade(int pTipo) {
 
 int Resolucao::gerarGradeTipoGuloso() {
   Util util;
-  
+
   std::vector<Solucao*>::iterator sIter = solucoes.begin();
   std::vector<Solucao*>::iterator sEndIter = solucoes.end();
   Solucao *solucao;
@@ -209,7 +209,7 @@ int Resolucao::gerarGradeTipoGuloso() {
   for (; sIter != sEndIter; ++sIter) {
     solucao = *sIter;
     horario = solucao->horario;
-    
+
     for (; apIter != apEndIter; ++apIter) {
       alunoPerfil = alunoPerfis[apIter->first];
 
@@ -220,11 +220,11 @@ int Resolucao::gerarGradeTipoGuloso() {
 
       for (i = 0; i < horario->size; i++) {
         util.get3DMatrix(i, triDimensional, horario->blocosTamanho, horario->camadasTamanho);
-        
+
         bloco = triDimensional[0];
         diaSemana = triDimensional[1];
         perfil = triDimensional[2];
-        
+
         apGrade->insert(bloco, diaSemana, perfil, horario);
       }
     }

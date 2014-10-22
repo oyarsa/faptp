@@ -20,9 +20,9 @@ void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::s
   cargaHoraria = pCargaHoraria;
   periodo = pPeriodo;
   curso = pCurso;
-  
+
   aulasSemana = ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
-          
+
   setNome(pNome);
 }
 
