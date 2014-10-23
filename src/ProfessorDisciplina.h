@@ -22,6 +22,8 @@ public:
   ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina);
   ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina, std::string pId);
   virtual ~ProfessorDisciplina();
+  
+  Disciplina* getDisciplina() const;
 private:
   std::string id;
 

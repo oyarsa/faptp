@@ -29,7 +29,7 @@ bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pPr
       return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina, force);
     }
   }
-  
+
   return false;
 }
 

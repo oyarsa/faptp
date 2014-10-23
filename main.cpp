@@ -82,9 +82,6 @@ int main(int argc, char** argv) {
   }
   */
   
-  std::vector<Disciplina*> teste;
-  std::sort(teste.begin(), teste.end(), DisciplinaCargaHorariaDesc());
-  
   Resolucao *resolucao = new Resolucao(2, 2, 5, TXT_SOLUCAO);
   resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
   delete resolucao;

@@ -41,12 +41,14 @@ private:
   std::string solucaoTxt;
 
   std::map<std::string, Professor*> professores;
+
   std::map<std::string, int> disciplinasIndex;
   std::vector<Disciplina*> disciplinas;
 
   std::map<std::string, AlunoPerfil*> alunoPerfis;
 
-  std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
+  std::map<std::string, int> professorDisciplinasIndex;
+  std::vector<ProfessorDisciplina*> professorDisciplinas;
 
   std::vector<Solucao*> solucoes;
 
@@ -64,6 +66,9 @@ private:
   void carregarSolucao();
   
   void ordenarDisciplinas();
+  void atualizarDisciplinasIndex();
+  void ordenarProfessorDisciplinas();
+  void atualizarProfessorDisciplinasIndex();
 
   int gerarGradeTipoGuloso();
 };

@@ -15,6 +15,10 @@ void Representacao::initMatriz() {
 
   matriz.resize(size);
   alocados.resize(size);
+
+  for (int i = 0; i < size; i++) {
+    matriz[i] = NULL;
+  }
 }
 
 int Representacao::getPosition(int pBloco, int pDia, int pCamada) {
@@ -38,7 +42,7 @@ bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplin
 
   matriz[position] = pProfessorDisciplina;
   alocados[position] = pProfessorDisciplina->professor->id;
-  
+
   return true;
 }
 
@@ -46,4 +50,21 @@ void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
   Util util;
 
   util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
+}
+
+int Representacao::getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina) {
+  return getFirstProfessorDisciplina(pProfessorDisciplina, matriz);
+}
+
+int Representacao::getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
+  int x = -1;
+  std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
+  std::vector<ProfessorDisciplina*>::iterator mIterEnd = pMatriz.end();
+
+  std::vector<ProfessorDisciplina*>::iterator xIter = std::find(mIter, mIterEnd, pProfessorDisciplina);
+  if (xIter != mIterEnd) {
+    x = xIter - mIter;
+  }
+
+  return x;
 }

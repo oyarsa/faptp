@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "../src/Disciplina.h"
+#include "../src/ProfessorDisciplina.h"
 
 template<typename T, typename M, template<typename> class C = std::less>
 struct member_comparer : std::binary_function<T, T, bool> {
@@ -57,6 +58,13 @@ struct DisciplinaCargaHorariaDesc {
 
   bool operator() (const Disciplina *a, const Disciplina *b) {
     return a->getCargaHoraria() > b->getCargaHoraria();
+  }
+};
+
+struct ProfessorDisciplinaCargaHorariaDesc {
+
+  bool operator() (const ProfessorDisciplina *a, const ProfessorDisciplina *b) {
+    return a->getDisciplina()->getCargaHoraria() > b->getDisciplina()->getCargaHoraria();
   }
 };
 

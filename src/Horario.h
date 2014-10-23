@@ -17,6 +17,7 @@ public:
 
   bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
   bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+
   double getObjectiveFunction();
 private:
 

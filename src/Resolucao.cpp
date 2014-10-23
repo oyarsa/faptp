@@ -48,7 +48,7 @@ void Resolucao::carregarDadosProfessores() {
 
 void Resolucao::carregarDadosDisciplinas() {
   Util util;
-  
+
   Disciplina *disciplina;
 
   std::vector<std::string> pieces;
@@ -67,7 +67,7 @@ void Resolucao::carregarDadosDisciplinas() {
         fPreRequisitos = util.strSplit(pieces[DISCIPLINA_PRE_REQUISITO], '|');
         disciplina->preRequisitos = fPreRequisitos;
       }
-      
+
       disciplinas.push_back(disciplina);
     }
     myfile.close();
@@ -75,12 +75,14 @@ void Resolucao::carregarDadosDisciplinas() {
     std::cout << "Unable to open file " << TXT_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
-  
+
   ordenarDisciplinas();
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas() {
   Util util;
+
+  ProfessorDisciplina *professorDisciplina;
 
   double competenciaPeso;
 
@@ -93,19 +95,23 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]] = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[disciplinasIndex[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]]);
+      professorDisciplina = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[disciplinasIndex[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]]);
 
       competenciaPeso = 1.0;
       if (pieces.size() == (PROFESSOR_DISCIPLINA_PESO + 1)) {
         competenciaPeso = atof(pieces[PROFESSOR_DISCIPLINA_PESO].c_str());
       }
-      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]]->professor->addCompetencia(pieces[PROFESSOR_DISCIPLINA_DISCIPLINA], competenciaPeso);
+      professorDisciplina->professor->addCompetencia(pieces[PROFESSOR_DISCIPLINA_DISCIPLINA], competenciaPeso);
+
+      professorDisciplinas.push_back(professorDisciplina);
     }
     myfile.close();
   } else {
     std::cout << "Unable to open file " << TXT_PROFESSOR_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
+
+  ordenarProfessorDisciplinas();
 }
 
 void Resolucao::carregarAlunoPerfis() {
@@ -169,7 +175,7 @@ void Resolucao::carregarSolucao() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      solucao->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]]);
+      solucao->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[disciplinasIndex[pieces[HORARIO_PROFESSOR_DISCIPLINA]]]);
     }
     myfile.close();
   } else {
@@ -185,10 +191,36 @@ void Resolucao::ordenarDisciplinas() {
   std::vector<Disciplina*>::iterator dIterEnd = disciplinas.begin();
 
   std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
-  
+
+  atualizarDisciplinasIndex();
+}
+
+void Resolucao::atualizarDisciplinasIndex() {
+  std::vector<Disciplina*>::iterator dIter = disciplinas.begin();
+  std::vector<Disciplina*>::iterator dIterEnd = disciplinas.begin();
+
   disciplinasIndex.clear();
   for (int i = 0; dIter != dIterEnd; ++dIter, i++) {
     disciplinasIndex[(*dIter)->id] = i;
+  }
+}
+
+void Resolucao::ordenarProfessorDisciplinas() {
+  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.begin();
+
+  std::sort(pdIter, pdIterEnd, ProfessorDisciplinaCargaHorariaDesc());
+
+  atualizarProfessorDisciplinasIndex();
+}
+
+void Resolucao::atualizarProfessorDisciplinasIndex() {
+  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.begin();
+
+  professorDisciplinasIndex.clear();
+  for (int i = 0; pdIter != pdIterEnd; ++pdIter, i++) {
+    professorDisciplinasIndex[(*pdIter)->id] = i;
   }
 }
 
@@ -205,18 +237,20 @@ int Resolucao::gerarGrade(int pTipo) {
 }
 
 int Resolucao::gerarGradeTipoGuloso() {
-  Util util;
-
   std::vector<Solucao*>::iterator sIter = solucoes.begin();
-  std::vector<Solucao*>::iterator sEndIter = solucoes.end();
+  std::vector<Solucao*>::iterator sIterEnd = solucoes.end();
   Solucao *solucao;
-  Horario *horario;
 
+  Horario *horario;
   Grade *apGrade;
 
   std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
-  std::map<std::string, AlunoPerfil*>::iterator apEndIter = alunoPerfis.end();
+  std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
   AlunoPerfil *alunoPerfil;
+
+  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
+  ProfessorDisciplina *professorDisciplina;
 
   int i, triDimensional[3];
   int bloco, diaSemana, perfil;
@@ -224,11 +258,11 @@ int Resolucao::gerarGradeTipoGuloso() {
   std::vector<std::string> apRestante;
   std::vector<std::string> apCursadas;
 
-  for (; sIter != sEndIter; ++sIter) {
+  for (; sIter != sIterEnd; ++sIter) {
     solucao = *sIter;
     horario = solucao->horario;
 
-    for (; apIter != apEndIter; ++apIter) {
+    for (; apIter != apIterEnd; ++apIter) {
       alunoPerfil = alunoPerfis[apIter->first];
 
       apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil);
@@ -236,15 +270,15 @@ int Resolucao::gerarGradeTipoGuloso() {
       apRestante = alunoPerfil->restante;
       apCursadas = alunoPerfil->cursadas;
 
-      for (i = 0; i < horario->size; i++) {
-        util.get3DMatrix(i, triDimensional, horario->blocosTamanho, horario->camadasTamanho);
+      for (; pdIter != pdIterEnd; ++pdIter) {
+        professorDisciplina = *pdIter;
 
-        bloco = triDimensional[0];
-        diaSemana = triDimensional[1];
-        perfil = triDimensional[2];
-
-        apGrade->insert(bloco, diaSemana, perfil, horario);
+        apGrade->insert(professorDisciplina, horario);
       }
+
+      solucao->insertGrade(apGrade);
     }
+
+    std::cout << solucao->getObjectiveFunction();
   }
 }

@@ -12,15 +12,51 @@ void Grade::init() {
 Grade::~Grade() {
 }
 
-bool Grade::insert(int pBloco, int pDia, int pCamada, Horario* pHorario) {
-  return insert(pBloco, pDia, pCamada, pHorario, false);
+bool Grade::insert(ProfessorDisciplina* pProfessorDisciplina, Horario* pHorario) {
+  return insert(pProfessorDisciplina, pHorario, false);
 }
 
-bool Grade::insert(int pBloco, int pDia, int pCamada, Horario* pHorario, bool force) {
-  ProfessorDisciplina *professorDisciplina = at(pBloco, pDia, pCamada);
+bool Grade::insert(ProfessorDisciplina* pProfessorDisciplina, Horario* pHorario, bool force) {
+  int x = getFirstProfessorDisciplina(pProfessorDisciplina, pHorario->matriz);
+  int triDimensional[3];
+  int bloco, dia, camada;
+
+  int currentPosition;
+  ProfessorDisciplina *currentProfessorDisciplina;
+
+  get3DMatrix(x, triDimensional);
+  bloco = triDimensional[0];
+  dia = triDimensional[1];
+  camada = triDimensional[2];
+
+  for (int i = 0; i < SEMANA; i++) {
+    for (int j = 0; j < blocosTamanho; j++) {
+      currentPosition = getPosition(j, i, camada);
+      currentProfessorDisciplina = pHorario->matriz[currentPosition];
+
+      if (currentProfessorDisciplina != NULL && currentProfessorDisciplina == pProfessorDisciplina) {
+        if (matriz[currentPosition] != NULL) {
+          return false;
+        }
+      }
+
+    }
+  }
+
+  for (int i = 0; i < SEMANA; i++) {
+    for (int j = 0; j < blocosTamanho; j++) {
+      currentPosition = getPosition(j, i, camada);
+      currentProfessorDisciplina = pHorario->matriz[currentPosition];
+
+      if (currentProfessorDisciplina != NULL && currentProfessorDisciplina == pProfessorDisciplina) {
+        matriz[currentPosition] = currentProfessorDisciplina;
+      }
+
+    }
+  }
+
   return true;
 }
-
 
 double Grade::getObjectiveFunction() {
   ProfessorDisciplina *pd;

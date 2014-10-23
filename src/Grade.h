@@ -8,14 +8,15 @@
 #include "Representacao.h"
 #include "Horario.h"
 #include "AlunoPerfil.h"
+#include "ProfessorDisciplina.h"
 
 class Grade : public Representacao {
 public:
   Grade(int pBlocosTamanho, int pCamadasTamanho, AlunoPerfil* pAlunoPerfil);
   virtual ~Grade();
 
-  bool insert(int pBloco, int pDia, int pCamada, Horario* pHorario);
-  bool insert(int pBloco, int pDia, int pCamada, Horario* pHorario, bool force);
+  bool insert(ProfessorDisciplina* pProfessorDisciplina, Horario* pHorario);
+  bool insert(ProfessorDisciplina* pProfessorDisciplina, Horario* pHorario, bool force);
 
   double getObjectiveFunction();
 private:

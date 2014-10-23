@@ -1,6 +1,7 @@
 #ifndef REPRESENTACAO_H
 #define	REPRESENTACAO_H
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -23,6 +24,9 @@ public:
   virtual bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
   void get3DMatrix(int pLinear, int* triDimensional);
+
+  int getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina);
+  int getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
 
   virtual double getObjectiveFunction() = 0;
 protected:
