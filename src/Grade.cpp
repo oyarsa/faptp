@@ -59,7 +59,7 @@ bool Grade::insert(ProfessorDisciplina* pProfessorDisciplina, Horario* pHorario,
 }
 
 double Grade::getObjectiveFunction() {
-  ProfessorDisciplina *pd;
+  ProfessorDisciplina *professorDisciplina;
 
   double fo = 0;
 
@@ -67,14 +67,16 @@ double Grade::getObjectiveFunction() {
   int perfil, diaSemana;
 
   for (int i = 0; i < size; i++) {
-    pd = at(i);
+    professorDisciplina = at(i);
 
     get3DMatrix(i, triDimensional);
 
     diaSemana = triDimensional[1];
     perfil = triDimensional[2];
 
-    fo += (pd->disciplina->cargaHoraria) + (100 * pd->professor->diasDisponiveis[diaSemana]);
+    if (professorDisciplina != NULL) {
+      fo += (professorDisciplina->disciplina->cargaHoraria) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
+    }
   }
 
   return fo;

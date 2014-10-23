@@ -25,7 +25,7 @@ bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pPr
       }
     }
 
-    if (professorAlocado || force) {
+    if (!professorAlocado || force) {
       return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina, force);
     }
   }
