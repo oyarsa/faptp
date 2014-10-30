@@ -37,10 +37,10 @@ bool AlunoPerfil::isCursada(std::string pCursada) {
   return std::find(cursadas.begin(), cursadas.end(), pCursada) != cursadas.end();
 }
 
-void AlunoPerfil::addRestante(std::string pRestante) {
+void AlunoPerfil::addRestante(Disciplina* pRestante) {
   restante.push_back(pRestante);
 }
 
-bool AlunoPerfil::isRestante(std::string pRestante) {
+bool AlunoPerfil::isRestante(Disciplina* pRestante) {
   return std::find(restante.begin(), restante.end(), pRestante) != restante.end();
 }

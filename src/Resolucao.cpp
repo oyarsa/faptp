@@ -110,19 +110,19 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
     std::cout << "Unable to open file " << TXT_PROFESSOR_DISCIPLINA;
     exit(EXIT_FAILURE);
   }
-
-  ordenarProfessorDisciplinas();
 }
 
 void Resolucao::carregarAlunoPerfis() {
   Util util;
 
-  AlunoPerfil *ap;
+  AlunoPerfil *alunoPerfil;
 
   std::vector<std::string> pieces;
-  std::vector<std::string> fCursadas;
-  std::vector<std::string> fRestante;
+  std::vector<std::string> fStringCursadas;
+  std::vector<std::string> fStringRestante;
   std::string line;
+
+  Disciplina *disciplina;
 
   std::ifstream myfile(TXT_ALUNO_PERFIL);
 
@@ -130,17 +130,21 @@ void Resolucao::carregarAlunoPerfis() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      ap = new AlunoPerfil(atof(pieces[ALUNO_PERFIL_PESO].c_str()), pieces[ALUNO_PERFIL_ID]);
+      alunoPerfil = new AlunoPerfil(atof(pieces[ALUNO_PERFIL_PESO].c_str()), pieces[ALUNO_PERFIL_ID]);
 
-      fRestante = util.strSplit(pieces[ALUNO_PERFIL_RESTANTE], '|');
-      ap->restante = fRestante;
+      fStringRestante = util.strSplit(pieces[ALUNO_PERFIL_RESTANTE], '|');
+      for (int i = 0; i < fStringRestante.size(); i++) {
+        disciplina = disciplinas[disciplinasIndex[fStringRestante[i]]];
+        alunoPerfil->addRestante(disciplina);
+      }
+      ordenarDisciplinas(alunoPerfil->restante);
 
       if (pieces.size() == (ALUNO_PERFIL_CURSADAS + 1)) {
-        fCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
-        ap->cursadas = fCursadas;
+        fStringCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
+        alunoPerfil->cursadas = fStringCursadas;
       }
 
-      alunoPerfis[pieces[ALUNO_PERFIL_ID]] = ap;
+      alunoPerfis[pieces[ALUNO_PERFIL_ID]] = alunoPerfil;
     }
     myfile.close();
   } else {
@@ -165,6 +169,10 @@ void Resolucao::carregarSolucao() {
   Util util;
 
   Solucao *solucao = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+  
+  ProfessorDisciplina *professorDisciplina;
+
+  int bloco, dia, camada;
 
   std::vector<std::string> pieces;
   std::string line;
@@ -175,7 +183,13 @@ void Resolucao::carregarSolucao() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      solucao->horario->insert(atoi(pieces[HORARIO_BLOCO].c_str()), atoi(pieces[HORARIO_DIA].c_str()), atoi(pieces[HORARIO_CAMADA].c_str()), professorDisciplinas[disciplinasIndex[pieces[HORARIO_PROFESSOR_DISCIPLINA]]]);
+      bloco = atoi(pieces[HORARIO_BLOCO].c_str());
+      dia = atoi(pieces[HORARIO_DIA].c_str());
+      camada = atoi(pieces[HORARIO_CAMADA].c_str());
+      
+      professorDisciplina = professorDisciplinas[disciplinasIndex[pieces[HORARIO_PROFESSOR_DISCIPLINA]]];
+
+      solucao->horario->insert(bloco, dia, camada, professorDisciplina);
     }
     myfile.close();
   } else {
@@ -187,27 +201,34 @@ void Resolucao::carregarSolucao() {
 }
 
 void Resolucao::ordenarDisciplinas() {
-  std::vector<Disciplina*>::iterator dIter = disciplinas.begin();
-  std::vector<Disciplina*>::iterator dIterEnd = disciplinas.begin();
-
-  std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
+  ordenarDisciplinas(disciplinas);
 
   atualizarDisciplinasIndex();
 }
 
+void Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas) {
+  std::vector<Disciplina*>::iterator dIter = pDisciplinas.begin();
+  std::vector<Disciplina*>::iterator dIterEnd = pDisciplinas.end();
+
+  std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
+}
+
 void Resolucao::atualizarDisciplinasIndex() {
+  Disciplina *disciplina;
+
   std::vector<Disciplina*>::iterator dIter = disciplinas.begin();
-  std::vector<Disciplina*>::iterator dIterEnd = disciplinas.begin();
+  std::vector<Disciplina*>::iterator dIterEnd = disciplinas.end();
 
   disciplinasIndex.clear();
   for (int i = 0; dIter != dIterEnd; ++dIter, i++) {
-    disciplinasIndex[(*dIter)->id] = i;
+    disciplina = *dIter;
+    disciplinasIndex[disciplina->id] = i;
   }
 }
 
 void Resolucao::ordenarProfessorDisciplinas() {
   std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
-  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
 
   std::sort(pdIter, pdIterEnd, ProfessorDisciplinaCargaHorariaDesc());
 
@@ -216,7 +237,7 @@ void Resolucao::ordenarProfessorDisciplinas() {
 
 void Resolucao::atualizarProfessorDisciplinasIndex() {
   std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
-  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
 
   professorDisciplinasIndex.clear();
   for (int i = 0; pdIter != pdIterEnd; ++pdIter, i++) {
@@ -248,14 +269,14 @@ int Resolucao::gerarGradeTipoGuloso() {
   std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
   AlunoPerfil *alunoPerfil;
 
-  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
-  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
-  ProfessorDisciplina *professorDisciplina;
+  std::vector<Disciplina*>::iterator dIter;
+  std::vector<Disciplina*>::iterator dIterEnd;
+  Disciplina *disciplina;
 
   int i, triDimensional[3];
   int bloco, diaSemana, perfil;
 
-  std::vector<std::string> apRestante;
+  std::vector<Disciplina*> apRestante;
   std::vector<std::string> apCursadas;
 
   for (; sIter != sIterEnd; ++sIter) {
@@ -265,15 +286,18 @@ int Resolucao::gerarGradeTipoGuloso() {
     for (; apIter != apIterEnd; ++apIter) {
       alunoPerfil = alunoPerfis[apIter->first];
 
-      apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil);
+      apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil, horario);
 
       apRestante = alunoPerfil->restante;
       apCursadas = alunoPerfil->cursadas;
 
-      for (; pdIter != pdIterEnd; ++pdIter) {
-        professorDisciplina = *pdIter;
+      dIter = apRestante.begin();
+      dIterEnd = apRestante.end();
 
-        apGrade->insert(professorDisciplina, horario);
+      for (; dIter != dIterEnd; ++dIter) {
+        disciplina = *dIter;
+
+        apGrade->insert(disciplina);
       }
 
       solucao->insertGrade(apGrade);

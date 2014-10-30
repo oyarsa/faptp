@@ -2,8 +2,8 @@
 #define	SORTTEMPLATE_H
 
 #include <functional>
+#include <string>
 
-#include "../src/Disciplina.h"
 #include "../src/ProfessorDisciplina.h"
 
 template<typename T, typename M, template<typename> class C = std::less>
@@ -65,6 +65,22 @@ struct ProfessorDisciplinaCargaHorariaDesc {
 
   bool operator() (const ProfessorDisciplina *a, const ProfessorDisciplina *b) {
     return a->getDisciplina()->getCargaHoraria() > b->getDisciplina()->getCargaHoraria();
+  }
+};
+
+struct HorarioFindDisciplina {
+
+  const Disciplina* disciplina;
+
+  HorarioFindDisciplina(const Disciplina* pDisciplina) : disciplina(pDisciplina) {
+  }
+
+  bool operator()(const ProfessorDisciplina* pProfessorDisciplina) const {
+    bool find = false;
+    if (pProfessorDisciplina != NULL) {
+      find = pProfessorDisciplina->getDisciplina() == disciplina;
+    }
+    return find;
   }
 };
 

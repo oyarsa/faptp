@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "../template/Algorithms.h"
 #include "Semana.h"
 
 #include "ProfessorDisciplina.h"
@@ -25,8 +26,8 @@ public:
 
   void get3DMatrix(int pLinear, int* triDimensional);
 
-  int getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina);
-  int getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
+  int getFirstDisciplina(Disciplina* pDisciplina);
+  int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
 
   virtual double getObjectiveFunction() = 0;
 protected:

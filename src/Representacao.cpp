@@ -52,16 +52,16 @@ void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
   util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
 }
 
-int Representacao::getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina) {
-  return getFirstProfessorDisciplina(pProfessorDisciplina, matriz);
+int Representacao::getFirstDisciplina(Disciplina* pDisciplina) {
+  return getFirstDisciplina(pDisciplina, matriz);
 }
 
-int Representacao::getFirstProfessorDisciplina(ProfessorDisciplina* pProfessorDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
+int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
   int x = -1;
   std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
   std::vector<ProfessorDisciplina*>::iterator mIterEnd = pMatriz.end();
 
-  std::vector<ProfessorDisciplina*>::iterator xIter = std::find(mIter, mIterEnd, pProfessorDisciplina);
+  std::vector<ProfessorDisciplina*>::iterator xIter = std::find_if(mIter, mIterEnd, HorarioFindDisciplina(pDisciplina));
   if (xIter != mIterEnd) {
     x = xIter - mIter;
   }

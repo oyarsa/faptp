@@ -29,7 +29,7 @@ public:
   Disciplina(const Disciplina& orig);
   virtual ~Disciplina();
 
-  std::string getId();
+  std::string getId() const;
 
   std::string getNome();
   void setNome(std::string pNome);

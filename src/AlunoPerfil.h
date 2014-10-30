@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "Disciplina.h"
 #include "UUID.h"
 
 #define ALUNO_PERFIL_ID         0
@@ -26,15 +27,15 @@ public:
   void addCursada(std::string pCursada);
   bool isCursada(std::string pCursada);
   
-  void addRestante(std::string pRestante);
-  bool isRestante(std::string pRestante);
+  void addRestante(Disciplina* pRestante);
+  bool isRestante(Disciplina* pRestante);
 private:
   std::string id;
   
   double peso;
   
   std::vector<std::string> cursadas;
-  std::vector<std::string> restante;
+  std::vector<Disciplina*> restante;
   
   void init(double pPeso, std::string pId);
 };

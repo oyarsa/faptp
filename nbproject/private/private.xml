@@ -8,10 +8,17 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/Pedro/NetBeansProjects/faPTP/main.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/AlunoPerfil.h</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Grade.h</file>
             <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Grade.cpp</file>
-            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Horario.cpp</file>
-            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Solucao.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Representacao.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Resolucao.h</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/template/Algorithms.h</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Disciplina.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/AlunoPerfil.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Disciplina.h</file>
             <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Resolucao.cpp</file>
+            <file>file:/home/Pedro/NetBeansProjects/faPTP/src/Representacao.h</file>
         </group>
     </open-files>
 </project-private>

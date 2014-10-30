@@ -8,7 +8,7 @@
 #include <sstream>
 #include <vector>
 
-#include "template/sortTemplate.h"
+#include "template/Algorithms.h"
 
 #include "src/Disciplina.h"
 #include "src/Professor.h"

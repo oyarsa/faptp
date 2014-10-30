@@ -32,7 +32,7 @@ Disciplina::Disciplina(const Disciplina& orig) {
 Disciplina::~Disciplina() {
 }
 
-std::string Disciplina::getId() {
+std::string Disciplina::getId() const {
   return id;
 }
 

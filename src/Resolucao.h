@@ -9,7 +9,7 @@
 #include <map>
 #include <vector>
 
-#include "../template/sortTemplate.h"
+#include "../template/Algorithms.h"
 
 #include "Professor.h"
 #include "Disciplina.h"
@@ -66,6 +66,7 @@ private:
   void carregarSolucao();
   
   void ordenarDisciplinas();
+  void ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
   void atualizarDisciplinasIndex();
   void ordenarProfessorDisciplinas();
   void atualizarProfessorDisciplinasIndex();
