@@ -95,7 +95,7 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
     while (std::getline(myfile, line)) {
       pieces = util.strSplit(line, ';');
 
-      professorDisciplina = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[disciplinasIndex[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]]);
+      professorDisciplina = new ProfessorDisciplina(professores[pieces[PROFESSOR_DISCIPLINA_PROFESSOR]], disciplinas[disciplinasIndex[pieces[PROFESSOR_DISCIPLINA_DISCIPLINA]]], pieces[PROFESSOR_DISCIPLINA_ID]);
 
       competenciaPeso = 1.0;
       if (pieces.size() == (PROFESSOR_DISCIPLINA_PESO + 1)) {
@@ -103,7 +103,7 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
       }
       professorDisciplina->professor->addCompetencia(pieces[PROFESSOR_DISCIPLINA_DISCIPLINA], competenciaPeso);
 
-      professorDisciplinas.push_back(professorDisciplina);
+      professorDisciplinas[pieces[PROFESSOR_DISCIPLINA_ID]] = professorDisciplina;
     }
     myfile.close();
   } else {
@@ -187,7 +187,7 @@ void Resolucao::carregarSolucao() {
       dia = atoi(pieces[HORARIO_DIA].c_str());
       camada = atoi(pieces[HORARIO_CAMADA].c_str());
       
-      professorDisciplina = professorDisciplinas[disciplinasIndex[pieces[HORARIO_PROFESSOR_DISCIPLINA]]];
+      professorDisciplina = professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]];
 
       solucao->horario->insert(bloco, dia, camada, professorDisciplina);
     }
@@ -223,25 +223,6 @@ void Resolucao::atualizarDisciplinasIndex() {
   for (int i = 0; dIter != dIterEnd; ++dIter, i++) {
     disciplina = *dIter;
     disciplinasIndex[disciplina->id] = i;
-  }
-}
-
-void Resolucao::ordenarProfessorDisciplinas() {
-  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
-  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
-
-  std::sort(pdIter, pdIterEnd, ProfessorDisciplinaCargaHorariaDesc());
-
-  atualizarProfessorDisciplinasIndex();
-}
-
-void Resolucao::atualizarProfessorDisciplinasIndex() {
-  std::vector<ProfessorDisciplina*>::iterator pdIter = professorDisciplinas.begin();
-  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = professorDisciplinas.end();
-
-  professorDisciplinasIndex.clear();
-  for (int i = 0; pdIter != pdIterEnd; ++pdIter, i++) {
-    professorDisciplinasIndex[(*pdIter)->id] = i;
   }
 }
 
@@ -297,7 +278,7 @@ int Resolucao::gerarGradeTipoGuloso() {
       for (; dIter != dIterEnd; ++dIter) {
         disciplina = *dIter;
 
-        apGrade->insert(disciplina);
+        apGrade->insert(disciplina, true);
       }
 
       solucao->insertGrade(apGrade);

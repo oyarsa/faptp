@@ -8,7 +8,7 @@ Grade::Grade(int pBlocosTamanho, int pCamadasTamanho, AlunoPerfil* pAlunoPerfil,
 }
 
 void Grade::init() {
-  gradeMontada = false;
+  fo = 0;
 }
 
 Grade::~Grade() {
@@ -59,6 +59,9 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int camada) {
       currentProfessorDisciplina = horario->matriz[currentPosition];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
+
+        professorDisciplinaTemp = currentProfessorDisciplina;
+
         if (matriz[currentPosition] != NULL) {
           colisao = true;
         }
@@ -74,9 +77,7 @@ bool Grade::isViable(Disciplina* pDisciplina, int camada) {
   bool viavel = true;
 
   viavel = havePreRequisitos(pDisciplina);
-  if (viavel) {
-    viavel = checkCollision(pDisciplina, camada);
-  }
+  viavel = checkCollision(pDisciplina, camada) && viavel;
 
   return viavel;
 }
@@ -109,14 +110,24 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 
   bool viavel = true;
 
+  professorDisciplinaTemp = NULL;
+
   get3DMatrix(x, triDimensional);
   camada = triDimensional[2];
-
-  gradeMontada = false;
 
   viavel = isViable(pDisciplina, camada);
   if (viavel) {
     add(pDisciplina, camada);
+  }
+  if (viavel || force) {
+    if (professorDisciplinaTemp != NULL) {
+      professorDisciplinas.push_back(professorDisciplinaTemp);
+    }
+  }
+  if (!viavel && force) {
+    if (professorDisciplinaTemp != NULL) {
+      problemas.push_back(professorDisciplinaTemp->disciplina->id);
+    }
   }
 
   return viavel;
@@ -126,8 +137,9 @@ int Grade::remove(Disciplina* pDisciplina) {
   int i = 0;
   int x = getFirstDisciplina(pDisciplina, matriz);
 
+  problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
+
   while (x >= 0) {
-    gradeMontada = false;
 
     matriz[x] = NULL;
     x = getFirstDisciplina(pDisciplina, matriz);
@@ -146,16 +158,20 @@ double Grade::getObjectiveFunction() {
   int triDimensional[3];
   int perfil, diaSemana;
 
-  for (int i = 0; i < size; i++) {
-    professorDisciplina = at(i);
+  if (problemas.size() > 0) {
+    fo = -1;
+  } else {
+    for (int i = 0; i < size; i++) {
+      professorDisciplina = at(i);
 
-    get3DMatrix(i, triDimensional);
+      get3DMatrix(i, triDimensional);
 
-    diaSemana = triDimensional[1];
-    perfil = triDimensional[2];
+      diaSemana = triDimensional[1];
+      perfil = triDimensional[2];
 
-    if (professorDisciplina != NULL) {
-      fo += (professorDisciplina->disciplina->cargaHoraria) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
+      if (professorDisciplina != NULL) {
+        fo += (professorDisciplina->disciplina->cargaHoraria) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
+      }
     }
   }
 

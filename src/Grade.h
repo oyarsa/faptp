@@ -11,6 +11,7 @@
 #include "Horario.h"
 #include "AlunoPerfil.h"
 #include "Disciplina.h"
+#include "ProfessorDisciplina.h"
 
 class Grade : public Representacao {
 public:
@@ -25,9 +26,11 @@ public:
 private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;
-  std::vector<Disciplina*> disciplinas;
   
-  bool gradeMontada;
+  int fo;
+  std::vector<ProfessorDisciplina*> professorDisciplinas;
+  std::vector<std::string> problemas;
+  ProfessorDisciplina *professorDisciplinaTemp;
 
   void init();
   

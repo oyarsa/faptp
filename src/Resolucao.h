@@ -47,8 +47,7 @@ private:
 
   std::map<std::string, AlunoPerfil*> alunoPerfis;
 
-  std::map<std::string, int> professorDisciplinasIndex;
-  std::vector<ProfessorDisciplina*> professorDisciplinas;
+  std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
 
   std::vector<Solucao*> solucoes;
 
@@ -68,8 +67,6 @@ private:
   void ordenarDisciplinas();
   void ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
   void atualizarDisciplinasIndex();
-  void ordenarProfessorDisciplinas();
-  void atualizarProfessorDisciplinasIndex();
 
   int gerarGradeTipoGuloso();
 };
