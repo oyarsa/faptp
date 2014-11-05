@@ -278,7 +278,7 @@ int Resolucao::gerarGradeTipoGuloso() {
       for (; dIter != dIterEnd; ++dIter) {
         disciplina = *dIter;
 
-        apGrade->insert(disciplina, true);
+        apGrade->insert(disciplina);
       }
 
       solucao->insertGrade(apGrade);

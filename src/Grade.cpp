@@ -106,28 +106,40 @@ bool Grade::insert(Disciplina* pDisciplina) {
 
 bool Grade::insert(Disciplina* pDisciplina, bool force) {
   int camada, triDimensional[3];
-  int x = getFirstDisciplina(pDisciplina, horario->matriz);
+  int x;
+  
+  std::vector<ProfessorDisciplina*>::iterator pdIter = horario->matriz.begin();
+  std::vector<ProfessorDisciplina*>::iterator pdIterEnd = horario->matriz.end();
+  std::vector<ProfessorDisciplina*>::iterator pdIterFound = horario->matriz.begin();
 
-  bool viavel = true;
+  bool viavel = false;
+  bool first = true;
 
-  professorDisciplinaTemp = NULL;
+  while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
+    x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
+    
+    professorDisciplinaTemp = NULL;
 
-  get3DMatrix(x, triDimensional);
-  camada = triDimensional[2];
+    get3DMatrix(x, triDimensional);
+    camada = triDimensional[2];
 
-  viavel = isViable(pDisciplina, camada);
-  if (viavel) {
-    add(pDisciplina, camada);
-  }
-  if (viavel || force) {
-    if (professorDisciplinaTemp != NULL) {
-      professorDisciplinas.push_back(professorDisciplinaTemp);
+    viavel = isViable(pDisciplina, camada);
+    if (viavel) {
+      add(pDisciplina, camada);
     }
-  }
-  if (!viavel && force) {
-    if (professorDisciplinaTemp != NULL) {
-      problemas.push_back(professorDisciplinaTemp->disciplina->id);
+    if (viavel || force) {
+      if (professorDisciplinaTemp != NULL) {
+        professorDisciplinas.push_back(professorDisciplinaTemp);
+      }
     }
+    if (!viavel && force) {
+      if (professorDisciplinaTemp != NULL) {
+        problemas.push_back(professorDisciplinaTemp->disciplina->id);
+      }
+    }
+    
+    first = false;
+    pdIterFound++;
   }
 
   return viavel;
@@ -170,7 +182,7 @@ double Grade::getObjectiveFunction() {
       perfil = triDimensional[2];
 
       if (professorDisciplina != NULL) {
-        fo += (professorDisciplina->disciplina->cargaHoraria) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
+        fo += (1) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
       }
     }
   }

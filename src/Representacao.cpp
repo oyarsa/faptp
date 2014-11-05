@@ -52,18 +52,32 @@ void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
   util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
 }
 
+std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {
+  std::vector<ProfessorDisciplina*>::iterator xIter = std::find_if(iter, iterEnd, HorarioFindDisciplina(pDisciplina));
+
+  return xIter;
+}
+
 int Representacao::getFirstDisciplina(Disciplina* pDisciplina) {
   return getFirstDisciplina(pDisciplina, matriz);
 }
 
 int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
-  int x = -1;
+  int x;
   std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
   std::vector<ProfessorDisciplina*>::iterator mIterEnd = pMatriz.end();
 
-  std::vector<ProfessorDisciplina*>::iterator xIter = std::find_if(mIter, mIterEnd, HorarioFindDisciplina(pDisciplina));
-  if (xIter != mIterEnd) {
-    x = xIter - mIter;
+  std::vector<ProfessorDisciplina*>::iterator xIter = getFirstDisciplina(mIter, mIterEnd, pDisciplina);
+  x = getPositionDisciplina(mIter, mIterEnd, xIter);
+
+  return x;
+}
+
+int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound) {
+  int x = -1;
+
+  if (iterFound != iterEnd) {
+    x = iterFound - iter;
   }
 
   return x;
