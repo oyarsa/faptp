@@ -125,6 +125,7 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 
     viavel = isViable(pDisciplina, camada);
     if (viavel) {
+std::cout << pDisciplina->id << std::endl;
       add(pDisciplina, camada);
     }
     if (viavel || force) {

@@ -265,6 +265,7 @@ int Resolucao::gerarGradeTipoGuloso() {
     horario = solucao->horario;
 
     for (; apIter != apIterEnd; ++apIter) {
+std::cout << apIter->first << std::endl;
       alunoPerfil = alunoPerfis[apIter->first];
 
       apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil, horario);
