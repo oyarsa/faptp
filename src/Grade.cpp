@@ -1,6 +1,6 @@
 #include "Grade.h"
 
-Grade::Grade(int pBlocosTamanho, int pCamadasTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario) : Representacao(pBlocosTamanho, pCamadasTamanho) {
+Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario) : Representacao(pBlocosTamanho, 1) {
   alunoPerfil = pAlunoPerfil;
   horario = pHorario;
 
@@ -49,20 +49,23 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
 
 bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
   bool colisao = false;
-  int currentPosition;
+  int currentPositionHorario;
+  int currentPositionGrade;
 
   ProfessorDisciplina *currentProfessorDisciplina;
 
   for (int i = 0; i < SEMANA; i++) {
     for (int j = 0; j < blocosTamanho; j++) {
-      currentPosition = getPosition(i, j, pCamada);
-      currentProfessorDisciplina = horario->matriz[currentPosition];
+      currentPositionHorario = getPosition(i, j, pCamada);
+      currentPositionGrade = getPosition(i, j, 0);
+      
+      currentProfessorDisciplina = horario->matriz[currentPositionHorario];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
 
         professorDisciplinaTemp = currentProfessorDisciplina;
 
-        if (matriz[currentPosition] != NULL) {
+        if (matriz[currentPositionGrade] != NULL) {
           colisao = true;
         }
       }
@@ -83,18 +86,21 @@ bool Grade::isViable(Disciplina* pDisciplina, int pCamada) {
 }
 
 void Grade::add(Disciplina* pDisciplina, int pCamada) {
-  int currentPosition;
+  int currentPositionHorario;
+  int currentPositionGrade;
 
   ProfessorDisciplina *currentProfessorDisciplina;
 
   for (int i = 0; i < SEMANA; i++) {
     for (int j = 0; j < blocosTamanho; j++) {
-      currentPosition = getPosition(i, j, pCamada);
-      currentProfessorDisciplina = horario->matriz[currentPosition];
+      currentPositionHorario = getPosition(i, j, pCamada);
+      currentPositionGrade = getPosition(i, j, 0);
+      
+      currentProfessorDisciplina = horario->matriz[currentPositionHorario];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
-std::cout << currentPosition << ", ";
-        matriz[currentPosition] = currentProfessorDisciplina;
+        std::cout << currentPositionHorario << ", ";
+        matriz[currentPositionGrade] = currentProfessorDisciplina;
       }
 
     }
@@ -108,7 +114,7 @@ bool Grade::insert(Disciplina* pDisciplina) {
 bool Grade::insert(Disciplina* pDisciplina, bool force) {
   int camada, triDimensional[3];
   int x;
-  
+
   std::vector<ProfessorDisciplina*>::iterator pdIter = horario->matriz.begin();
   std::vector<ProfessorDisciplina*>::iterator pdIterEnd = horario->matriz.end();
   std::vector<ProfessorDisciplina*>::iterator pdIterFound = horario->matriz.begin();
@@ -118,7 +124,7 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 
   while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
     x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
-    
+
     professorDisciplinaTemp = NULL;
 
     get3DMatrix(x, triDimensional);
@@ -126,9 +132,9 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 
     viavel = isViable(pDisciplina, camada);
     if (viavel) {
-std::cout << pDisciplina->id << "[";
+      std::cout << pDisciplina->id << "[";
       add(pDisciplina, camada);
-std::cout << "]" << std::endl;
+      std::cout << "]" << std::endl;
     }
     if (viavel || force) {
       if (professorDisciplinaTemp != NULL) {
@@ -140,7 +146,7 @@ std::cout << "]" << std::endl;
         problemas.push_back(professorDisciplinaTemp->disciplina->id);
       }
     }
-    
+
     first = false;
     pdIterFound++;
   }

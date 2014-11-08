@@ -15,7 +15,7 @@
 
 class Grade : public Representacao {
 public:
-  Grade(int pBlocosTamanho, int pCamadasTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario);
+  Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);

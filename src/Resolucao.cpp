@@ -273,7 +273,7 @@ int Resolucao::gerarGradeTipoGuloso() {
 std::cout << apIter->first << std::endl;
       alunoPerfil = alunoPerfis[apIter->first];
 
-      apGrade = new Grade(blocosTamanho, camadasTamanho, alunoPerfil, horario);
+      apGrade = new Grade(blocosTamanho, alunoPerfil, horario);
 
       apRestante = alunoPerfil->restante;
       apCursadas = alunoPerfil->cursadas;
