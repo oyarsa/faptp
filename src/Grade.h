@@ -35,10 +35,10 @@ private:
   void init();
   
   bool havePreRequisitos(Disciplina *pDisciplina);
-  bool checkCollision(Disciplina* pDisciplina, int camada);
-  bool isViable(Disciplina* pDisciplina, int camada);
+  bool checkCollision(Disciplina* pDisciplina, int pCamada);
+  bool isViable(Disciplina* pDisciplina, int pCamada);
   
-  void add(Disciplina* pDisciplina, int camada);
+  void add(Disciplina* pDisciplina, int pCamada);
 };
 
 #endif	/* GRADE_H */

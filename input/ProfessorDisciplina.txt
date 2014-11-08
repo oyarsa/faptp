@@ -4,4 +4,4 @@ B;P2;B
 E;P2;E
 F;P2;F
 C;P3;C
-D;P3;P3
+D;P3;D

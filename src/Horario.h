@@ -15,8 +15,8 @@ public:
   Horario(int pBlocosTamanho, int pCamadasTamanho);
   virtual ~Horario();
 
-  bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-  bool insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+  bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
+  bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
   double getObjectiveFunction();
 private:

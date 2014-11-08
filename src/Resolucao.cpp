@@ -76,7 +76,7 @@ void Resolucao::carregarDadosDisciplinas() {
     exit(EXIT_FAILURE);
   }
 
-  ordenarDisciplinas();
+  disciplinas = ordenarDisciplinas();
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas() {
@@ -137,7 +137,7 @@ void Resolucao::carregarAlunoPerfis() {
         disciplina = disciplinas[disciplinasIndex[fStringRestante[i]]];
         alunoPerfil->addRestante(disciplina);
       }
-      ordenarDisciplinas(alunoPerfil->restante);
+      alunoPerfil->restante = ordenarDisciplinas(alunoPerfil->restante);
 
       if (pieces.size() == (ALUNO_PERFIL_CURSADAS + 1)) {
         fStringCursadas = util.strSplit(pieces[ALUNO_PERFIL_CURSADAS], '|');
@@ -188,9 +188,10 @@ void Resolucao::carregarSolucao() {
       camada = atoi(pieces[HORARIO_CAMADA].c_str());
       
       professorDisciplina = professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]];
-
-      solucao->horario->insert(bloco, dia, camada, professorDisciplina);
+std::cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - DSP:" << professorDisciplina->disciplina->nome << "  - P:";
+      solucao->horario->insert(dia, bloco, camada, professorDisciplina);
     }
+std::cout << "-----------------------------------------" << std::endl;
     myfile.close();
   } else {
     std::cout << "Unable to open file";
@@ -200,17 +201,21 @@ void Resolucao::carregarSolucao() {
   solucoes.push_back(solucao);
 }
 
-void Resolucao::ordenarDisciplinas() {
-  ordenarDisciplinas(disciplinas);
+std::vector<Disciplina*> Resolucao::ordenarDisciplinas() {
+  disciplinas = ordenarDisciplinas(disciplinas);
 
   atualizarDisciplinasIndex();
+  
+  return disciplinas;
 }
 
-void Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas) {
+std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas) {
   std::vector<Disciplina*>::iterator dIter = pDisciplinas.begin();
   std::vector<Disciplina*>::iterator dIterEnd = pDisciplinas.end();
 
   std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
+  
+  return pDisciplinas;
 }
 
 void Resolucao::atualizarDisciplinasIndex() {

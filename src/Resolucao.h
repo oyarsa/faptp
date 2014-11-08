@@ -64,8 +64,8 @@ private:
 
   void carregarSolucao();
   
-  void ordenarDisciplinas();
-  void ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
+  std::vector<Disciplina*> ordenarDisciplinas();
+  std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
   void atualizarDisciplinasIndex();
 
   int gerarGradeTipoGuloso();

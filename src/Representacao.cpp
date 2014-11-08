@@ -11,7 +11,7 @@ Representacao::~Representacao() {
 }
 
 void Representacao::initMatriz() {
-  size = (blocosTamanho * SEMANA * camadasTamanho);
+  size = (camadasTamanho * blocosTamanho * SEMANA);
 
   matriz.resize(size);
   alocados.resize(size);
@@ -21,24 +21,24 @@ void Representacao::initMatriz() {
   }
 }
 
-int Representacao::getPosition(int pBloco, int pDia, int pCamada) {
-  return (pDia + (pBloco * blocosTamanho) + (pCamada * blocosTamanho * camadasTamanho));
+int Representacao::getPosition(int pDia, int pBloco, int pCamada) {
+  return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * SEMANA));
 }
 
-ProfessorDisciplina* Representacao::at(int pBloco, int pDia, int pCamada) {
-  return at(getPosition(pBloco, pDia, pCamada));
+ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) {
+  return at(getPosition(pDia, pBloco, pCamada));
 }
 
 ProfessorDisciplina* Representacao::at(int position) {
   return matriz[position];
 }
 
-bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
-  return insert(pBloco, pDia, pCamada, pProfessorDisciplina, false);
+bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+  return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
-  int position = getPosition(pBloco, pDia, pCamada);
+bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+  int position = getPosition(pDia, pBloco, pCamada);
 
   matriz[position] = pProfessorDisciplina;
   alocados[position] = pProfessorDisciplina->professor->id;
@@ -49,7 +49,7 @@ bool Representacao::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplin
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
   Util util;
 
-  util.get3DMatrix(pLinear, triDimensional, blocosTamanho, camadasTamanho);
+  util.get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
 }
 
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {

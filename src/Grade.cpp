@@ -47,7 +47,7 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
   return viavel;
 }
 
-bool Grade::checkCollision(Disciplina* pDisciplina, int camada) {
+bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
   bool colisao = false;
   int currentPosition;
 
@@ -55,7 +55,7 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int camada) {
 
   for (int i = 0; i < SEMANA; i++) {
     for (int j = 0; j < blocosTamanho; j++) {
-      currentPosition = getPosition(j, i, camada);
+      currentPosition = getPosition(i, j, pCamada);
       currentProfessorDisciplina = horario->matriz[currentPosition];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
@@ -73,26 +73,27 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int camada) {
   return (!colisao);
 }
 
-bool Grade::isViable(Disciplina* pDisciplina, int camada) {
+bool Grade::isViable(Disciplina* pDisciplina, int pCamada) {
   bool viavel = true;
 
   viavel = havePreRequisitos(pDisciplina);
-  viavel = checkCollision(pDisciplina, camada) && viavel;
+  viavel = checkCollision(pDisciplina, pCamada) && viavel;
 
   return viavel;
 }
 
-void Grade::add(Disciplina* pDisciplina, int camada) {
+void Grade::add(Disciplina* pDisciplina, int pCamada) {
   int currentPosition;
 
   ProfessorDisciplina *currentProfessorDisciplina;
 
   for (int i = 0; i < SEMANA; i++) {
     for (int j = 0; j < blocosTamanho; j++) {
-      currentPosition = getPosition(j, i, camada);
+      currentPosition = getPosition(i, j, pCamada);
       currentProfessorDisciplina = horario->matriz[currentPosition];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
+std::cout << currentPosition << ", ";
         matriz[currentPosition] = currentProfessorDisciplina;
       }
 
@@ -125,8 +126,9 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 
     viavel = isViable(pDisciplina, camada);
     if (viavel) {
-std::cout << pDisciplina->id << std::endl;
+std::cout << pDisciplina->id << "[";
       add(pDisciplina, camada);
+std::cout << "]" << std::endl;
     }
     if (viavel || force) {
       if (professorDisciplinaTemp != NULL) {

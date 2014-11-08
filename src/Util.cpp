@@ -10,16 +10,13 @@ int Util::getPosition(int y, int x, int z, int Y, int Z) {
   return (x + (y * Y) + (z * Y * Z));
 }
 
-void Util::get3DMatrix(int pLinear, int* triDimensional, int Y, int Z) {
+void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
   int x, y, z;
+  int tamanho = (X*Y*Z);
 
-  z = pLinear / (Y * Z);
-  pLinear -= z * (Y * Z);
-
-  y = pLinear / Y;
-  pLinear -= y * Y;
-
-  x = pLinear / 1;
+  x = ((pLinear % tamanho) / Y);
+  y = ((pLinear % tamanho) % Y);
+  z = pLinear / tamanho;
 
   triDimensional[0] = y;
   triDimensional[1] = x;

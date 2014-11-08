@@ -6,19 +6,20 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
-bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
-  return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina);
+bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+  return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
-  int position = getPosition(pBloco, pDia, pCamada);
+bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+  int position = getPosition(pDia, pBloco, pCamada);
   bool professorAlocado = false;
 
+std::cout << "(" << position << ")" << std::endl;
   if (alocados[position] == "" || force) {
     int positionCamada;
 
     for (int i = 0; i < camadasTamanho; i++) {
-      positionCamada = getPosition(pBloco, pDia, i);
+      positionCamada = getPosition(pDia, pBloco, i);
       if (alocados[positionCamada] == pProfessorDisciplina->id) {
         professorAlocado = true;
         break;
@@ -26,7 +27,7 @@ bool Horario::insert(int pBloco, int pDia, int pCamada, ProfessorDisciplina* pPr
     }
 
     if (!professorAlocado || force) {
-      return Representacao::insert(pBloco, pDia, pCamada, pProfessorDisciplina, force);
+      return Representacao::insert(pDia, pBloco, pCamada, pProfessorDisciplina, force);
     }
   }
 
