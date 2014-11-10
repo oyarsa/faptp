@@ -23,6 +23,7 @@
 #include "Files.h"
 
 #define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO   1
+#define RESOLUCAO_GERAR_GRADE_TIPO_GRASP    2
 
 class Resolucao {
 public:
@@ -69,6 +70,7 @@ private:
   void atualizarDisciplinasIndex();
 
   int gerarGradeTipoGuloso();
+  int gerarGradeTipoGrasp(double alpha);
 };
 
 #endif	/* RESOLUCAO_H */

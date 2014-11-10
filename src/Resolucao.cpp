@@ -169,7 +169,7 @@ void Resolucao::carregarSolucao() {
   Util util;
 
   Solucao *solucao = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
-  
+
   ProfessorDisciplina *professorDisciplina;
 
   int bloco, dia, camada;
@@ -186,12 +186,12 @@ void Resolucao::carregarSolucao() {
       bloco = atoi(pieces[HORARIO_BLOCO].c_str());
       dia = atoi(pieces[HORARIO_DIA].c_str());
       camada = atoi(pieces[HORARIO_CAMADA].c_str());
-      
+
       professorDisciplina = professorDisciplinas[pieces[HORARIO_PROFESSOR_DISCIPLINA]];
-std::cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - DSP:" << professorDisciplina->disciplina->nome << "  - P:";
+      std::cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - DSP:" << professorDisciplina->disciplina->nome << "  - P:";
       solucao->horario->insert(dia, bloco, camada, professorDisciplina);
     }
-std::cout << "-----------------------------------------" << std::endl;
+    std::cout << "-----------------------------------------" << std::endl;
     myfile.close();
   } else {
     std::cout << "Unable to open file";
@@ -205,7 +205,7 @@ std::vector<Disciplina*> Resolucao::ordenarDisciplinas() {
   disciplinas = ordenarDisciplinas(disciplinas);
 
   atualizarDisciplinasIndex();
-  
+
   return disciplinas;
 }
 
@@ -214,7 +214,7 @@ std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> 
   std::vector<Disciplina*>::iterator dIterEnd = pDisciplinas.end();
 
   std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
-  
+
   return pDisciplinas;
 }
 
@@ -237,6 +237,12 @@ int Resolucao::gerarGrade(int pTipo) {
 
       return gerarGradeTipoGuloso();
 
+      break;
+
+    case RESOLUCAO_GERAR_GRADE_TIPO_GRASP:
+
+      return gerarGradeTipoGrasp(.5);
+      
       break;
   }
 
@@ -270,7 +276,7 @@ int Resolucao::gerarGradeTipoGuloso() {
     horario = solucao->horario;
 
     for (; apIter != apIterEnd; ++apIter) {
-std::cout << apIter->first << std::endl;
+      std::cout << apIter->first << std::endl;
       alunoPerfil = alunoPerfis[apIter->first];
 
       apGrade = new Grade(blocosTamanho, alunoPerfil, horario);
@@ -292,4 +298,8 @@ std::cout << apIter->first << std::endl;
 
     std::cout << solucao->getObjectiveFunction();
   }
+}
+
+int Resolucao::gerarGradeTipoGrasp(double alpha) {
+
 }
