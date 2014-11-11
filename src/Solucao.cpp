@@ -31,8 +31,14 @@ double Solucao::getObjectiveFunction() {
   double fo = 0;
 
   for (int i = 0; i < grades.size(); i++) {
-    fo += grades[i]->getObjectiveFunction();
+    if (grades[i] != NULL) {
+      fo += grades[i]->getObjectiveFunction();
+    }
   }
 
   return fo;
+}
+
+Solucao* Solucao::clone() const {
+  return new Solucao(*this);
 }

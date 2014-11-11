@@ -17,6 +17,8 @@ public:
   void insertGrade(Grade* grade, int position);
 
   double getObjectiveFunction();
+  
+  Solucao* clone() const;
 private:
   Horario *horario;
   std::vector<Grade*> grades;

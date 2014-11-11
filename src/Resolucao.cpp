@@ -157,12 +157,12 @@ Resolucao::~Resolucao() {
 
 }
 
-void Resolucao::start(int pTipo) {
+void Resolucao::start(int pTipo, double x) {
   if (solucaoTxt != "") {
     carregarSolucao();
   }
 
-  gerarGrade(pTipo);
+  gerarGrade(pTipo, x);
 }
 
 void Resolucao::carregarSolucao() {
@@ -231,7 +231,7 @@ void Resolucao::atualizarDisciplinasIndex() {
   }
 }
 
-int Resolucao::gerarGrade(int pTipo) {
+int Resolucao::gerarGrade(int pTipo, double x) {
   switch (pTipo) {
     case RESOLUCAO_GERAR_GRADE_TIPO_GULOSO:
 
@@ -241,8 +241,8 @@ int Resolucao::gerarGrade(int pTipo) {
 
     case RESOLUCAO_GERAR_GRADE_TIPO_GRASP:
 
-      return gerarGradeTipoGrasp(.5);
-      
+      return gerarGradeTipoGrasp(x);
+
       break;
   }
 
@@ -264,10 +264,6 @@ int Resolucao::gerarGradeTipoGuloso() {
   std::vector<Disciplina*>::iterator dIter;
   std::vector<Disciplina*>::iterator dIterEnd;
   Disciplina *disciplina;
-
-  int i, triDimensional[3];
-  int bloco, diaSemana, perfil;
-
   std::vector<Disciplina*> apRestante;
   std::vector<std::string> apCursadas;
 
@@ -300,6 +296,94 @@ int Resolucao::gerarGradeTipoGuloso() {
   }
 }
 
-int Resolucao::gerarGradeTipoGrasp(double alpha) {
+Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao, double alpha) {
+  Horario *horario;
+  Grade *apGrade;
 
+  std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
+  std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
+  AlunoPerfil *alunoPerfil;
+
+  std::vector<std::string> apCursadas;
+  std::vector<Disciplina*> apRestante;
+  std::vector<Disciplina*>::iterator dIter;
+  std::vector<Disciplina*>::iterator dIterLimit;
+  std::vector<Disciplina*>::iterator dIterEnd;
+  std::vector<Disciplina*>::iterator current;
+  Disciplina *disciplina;
+
+  Util util;
+
+  int adicionados = 0;
+  int disponivel = (SEMANA - 2) * camadasTamanho;
+
+  horario = pSolucao->horario;
+
+  for (; apIter != apIterEnd; ++apIter) {
+    std::cout << apIter->first << std::endl;
+    alunoPerfil = alunoPerfis[apIter->first];
+
+    apGrade = new Grade(blocosTamanho, alunoPerfil, horario);
+
+    apCursadas = alunoPerfil->cursadas;
+    apRestante = alunoPerfil->restante;
+
+    dIter = apRestante.begin();
+    dIterLimit = dIter + (apRestante.size() * alpha);
+    dIterEnd = apRestante.end();
+
+    while (apRestante.size() != 0 && dIter != dIterEnd) {
+      
+      current = dIter + util.randomBetween(0, std::distance(dIter, dIterLimit));
+      disciplina = *current;
+
+      if (apGrade->insert(disciplina)) {
+        adicionados++;
+      }
+
+      apRestante.erase(current);
+      
+      dIter = apRestante.begin();
+      dIterLimit = dIter + (apRestante.size() * alpha);
+    }
+
+    pSolucao->insertGrade(apGrade);
+  }
+
+  return pSolucao;
+}
+
+int Resolucao::gerarGradeTipoGrasp(double alpha) {
+  std::vector<Solucao*>::iterator sIter = solucoes.begin();
+  std::vector<Solucao*>::iterator sIterEnd = solucoes.end();
+  Solucao *solucao;
+  Solucao *currentSolucao;
+  Solucao *bestSolucao;
+
+  Util util;
+
+  clock_t t0;
+  double diff = 0;
+
+  for (; sIter != sIterEnd; ++sIter) {
+    solucao = *sIter;
+    bestSolucao = solucao->clone();
+
+    while (diff <= RESOLUCAO_GRASP_TEMPO_CONSTRUCAO) {
+      currentSolucao = solucao->clone();
+      
+      t0 = clock();
+
+      gerarGradeTipoGraspConstrucao(currentSolucao, alpha);
+
+      diff += util.timeDiff(clock(), t0);
+      
+      if (bestSolucao->getObjectiveFunction() < currentSolucao->getObjectiveFunction()) {
+        bestSolucao = currentSolucao;
+      }
+      std::cout << "-------------------------------------------------" << std::endl;
+    }
+
+    std::cout << bestSolucao->getObjectiveFunction() << std::endl;
+  }
 }

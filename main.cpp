@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   std::cout << "[" << (testeStr == testeChar) << "]" << std::endl;
   std::cout << "[" << testeInt.size()  << "]" << std::endl;
   std::cout << "[" << uuid.GenerateUuid()  << "]" << std::endl;
-  */
+   */
 
   /*
   Util util;
@@ -80,10 +80,30 @@ int main(int argc, char** argv) {
     std::cout << "Unable to open file";
     exit(EXIT_FAILURE);
   }
+   */
+  /*
+  Util util;
+  clock_t t0 = clock();
+  while (util.timeDiff(clock(), t0) <= 700);
+  return 0;
   */
-  
+  /*
+  std::vector<int>teste;
+  teste.push_back(0);
+  teste.push_back(1);
+  teste.push_back(2);
+  teste.push_back(3);
+  teste.push_back(4);
+  std::vector<int>::iterator it = teste.begin();
+  srand (time(NULL));
+  std::cout << (rand()%(5-0))+0 << std::endl;
+  std::cout << (rand()%(5-0))+0 << std::endl;
+  std::cout << (rand()%(5-0))+0 << std::endl;
+  return 0;
+  */
+
   Resolucao *resolucao = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
+  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, .5);
   delete resolucao;
 
   return EXIT_SUCCESS;
