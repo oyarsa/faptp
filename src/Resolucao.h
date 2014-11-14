@@ -27,7 +27,7 @@
 #define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO   1
 #define RESOLUCAO_GERAR_GRADE_TIPO_GRASP    2
 
-#define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO    5
+#define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO    50
 
 class Resolucao {
 public:
@@ -76,6 +76,7 @@ private:
   int gerarGradeTipoGuloso();
 
   Solucao* gerarGradeTipoGraspConstrucao(Solucao *solucao, double alpha);
+  Solucao* gerarGradeTipoGraspRefinamento(Solucao *solucao);
   int gerarGradeTipoGrasp(double alpha);
 };
 

@@ -14,6 +14,8 @@
 #include "ProfessorDisciplina.h"
 
 class Grade : public Representacao {
+  friend class Solucao;
+  friend class Resolucao;
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario);
   virtual ~Grade();
@@ -31,6 +33,7 @@ private:
   std::vector<ProfessorDisciplina*> professorDisciplinas;
   std::vector<std::string> problemas;
   ProfessorDisciplina *professorDisciplinaTemp;
+  std::vector<Disciplina*> disciplinasAdicionadas;
 
   void init();
   

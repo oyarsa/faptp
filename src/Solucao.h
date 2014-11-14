@@ -2,7 +2,7 @@
 #define	SOLUCAO_H
 
 #include <string>
-#include <vector>
+#include <map>
 
 #include "Horario.h"
 #include "Grade.h"
@@ -14,14 +14,13 @@ public:
   virtual ~Solucao();
 
   void insertGrade(Grade* grade);
-  void insertGrade(Grade* grade, int position);
 
   double getObjectiveFunction();
   
   Solucao* clone() const;
 private:
   Horario *horario;
-  std::vector<Grade*> grades;
+  std::map<std::string, Grade*> grades;
 
   int blocosTamanho;
   int camadasTamanho;

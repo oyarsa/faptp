@@ -58,7 +58,7 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
     for (int j = 0; j < blocosTamanho; j++) {
       currentPositionHorario = getPosition(i, j, pCamada);
       currentPositionGrade = getPosition(i, j, 0);
-      
+
       currentProfessorDisciplina = horario->matriz[currentPositionHorario];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
@@ -95,7 +95,7 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
     for (int j = 0; j < blocosTamanho; j++) {
       currentPositionHorario = getPosition(i, j, pCamada);
       currentPositionGrade = getPosition(i, j, 0);
-      
+
       currentProfessorDisciplina = horario->matriz[currentPositionHorario];
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
@@ -105,6 +105,8 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
 
     }
   }
+
+  std::lower_bound(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina, DisciplinaCargaHorariaDesc());
 }
 
 bool Grade::insert(Disciplina* pDisciplina) {
@@ -122,33 +124,35 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
   bool viavel = false;
   bool first = true;
 
-  while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
-    x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
+  if (std::find(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina) == disciplinasAdicionadas.end()) {
+    while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
+      x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
 
-    professorDisciplinaTemp = NULL;
+      professorDisciplinaTemp = NULL;
 
-    get3DMatrix(x, triDimensional);
-    camada = triDimensional[2];
+      get3DMatrix(x, triDimensional);
+      camada = triDimensional[2];
 
-    viavel = isViable(pDisciplina, camada);
-    if (viavel) {
-      std::cout << pDisciplina->id << "[";
-      add(pDisciplina, camada);
-      std::cout << "]" << std::endl;
-    }
-    if (viavel || force) {
-      if (professorDisciplinaTemp != NULL) {
-        professorDisciplinas.push_back(professorDisciplinaTemp);
+      viavel = isViable(pDisciplina, camada);
+      if (viavel) {
+        std::cout << pDisciplina->id << "[";
+        add(pDisciplina, camada);
+        std::cout << "]" << std::endl;
       }
-    }
-    if (!viavel && force) {
-      if (professorDisciplinaTemp != NULL) {
-        problemas.push_back(professorDisciplinaTemp->disciplina->id);
+      if (viavel || force) {
+        if (professorDisciplinaTemp != NULL) {
+          professorDisciplinas.push_back(professorDisciplinaTemp);
+        }
       }
-    }
+      if (!viavel && force) {
+        if (professorDisciplinaTemp != NULL) {
+          problemas.push_back(professorDisciplinaTemp->disciplina->id);
+        }
+      }
 
-    first = false;
-    pdIterFound++;
+      first = false;
+      pdIterFound++;
+    }
   }
 
   return viavel;
@@ -166,6 +170,9 @@ int Grade::remove(Disciplina* pDisciplina) {
     x = getFirstDisciplina(pDisciplina, matriz);
 
     i++;
+  }
+  if (i > 0) {
+    disciplinasAdicionadas.erase(std::remove(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina), disciplinasAdicionadas.end());
   }
 
   return i;
@@ -191,7 +198,7 @@ double Grade::getObjectiveFunction() {
       perfil = triDimensional[2];
 
       if (professorDisciplina != NULL) {
-        fo += (1) + (100 * professorDisciplina->professor->diasDisponiveis[diaSemana]);
+        fo += ((1) * (alunoPerfil->peso));
       }
     }
   }

@@ -10,7 +10,6 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
 
 void Solucao::init() {
   horario = new Horario(blocosTamanho, camadasTamanho);
-  grades.resize(perfisTamanho);
 
   gradesLength = 0;
 }
@@ -19,20 +18,23 @@ Solucao::~Solucao() {
 }
 
 void Solucao::insertGrade(Grade* grade) {
-  insertGrade(grade, gradesLength);
+  grades[grade->alunoPerfil->id] = grade;
   gradesLength++;
 }
 
-void Solucao::insertGrade(Grade* grade, int position) {
-  grades[position] = grade;
-}
-
 double Solucao::getObjectiveFunction() {
+  std::map<std::string, Grade*>::iterator gIter = grades.begin();
+  std::map<std::string, Grade*>::iterator gIterEnd = grades.end();
+  
+  Grade *grade;
+
   double fo = 0;
 
-  for (int i = 0; i < grades.size(); i++) {
-    if (grades[i] != NULL) {
-      fo += grades[i]->getObjectiveFunction();
+  for (; gIter != gIterEnd; ++gIter) {
+    grade = gIter->second;
+    
+    if (grade != NULL) {
+      fo += grade->getObjectiveFunction();
     }
   }
 

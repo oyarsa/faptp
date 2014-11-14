@@ -15,6 +15,7 @@
 
 class AlunoPerfil {
   friend class Grade;
+  friend class Solucao;
   friend class Resolucao;
 public:
   AlunoPerfil(double pPeso);

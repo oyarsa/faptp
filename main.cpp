@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
   */
 
   Resolucao *resolucao = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, .5);
+  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 1);
   delete resolucao;
 
   return EXIT_SUCCESS;
