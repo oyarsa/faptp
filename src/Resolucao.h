@@ -75,8 +75,9 @@ private:
 
   int gerarGradeTipoGuloso();
 
-  Solucao* gerarGradeTipoGraspConstrucao(Solucao *solucao, double alpha);
-  Solucao* gerarGradeTipoGraspRefinamento(Solucao *solucao);
+  Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha);
+  Solucao* gerarGradeTipoGraspConstrucao(Solucao *pSolucao, double alpha);
+  Solucao* gerarGradeTipoGraspRefinamento(Solucao *pSolucao, double alpha);
   int gerarGradeTipoGrasp(double alpha);
 };
 

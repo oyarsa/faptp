@@ -106,7 +106,8 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
     }
   }
 
-  std::lower_bound(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina, DisciplinaCargaHorariaDesc());
+  //std::lower_bound(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina, DisciplinaCargaHorariaDesc());
+  disciplinasAdicionadas.push_back(pDisciplina);
 }
 
 bool Grade::insert(Disciplina* pDisciplina) {
