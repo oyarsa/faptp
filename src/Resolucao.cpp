@@ -312,6 +312,8 @@ Grade* Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha) {
   int adicionados;
   int disponivel = (SEMANA - 2) * camadasTamanho;
   
+  alunoPerfil = pGrade->alunoPerfil;
+  
   apCursadas = alunoPerfil->cursadas;
   apRestante = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
 
@@ -378,7 +380,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamento(Solucao* bestSolucao, double 
 
   bestFO = bestSolucao->getObjectiveFunction();
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < RESOLUCAO_GRASP_ITERACAO_VIZINHOS; i++) {
     currentSolucao = bestSolucao->clone();
 
     for (; apIter != apIterEnd; ++apIter) {

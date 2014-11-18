@@ -162,6 +162,8 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 int Grade::remove(Disciplina* pDisciplina) {
   int i = 0;
   int x = getFirstDisciplina(pDisciplina, matriz);
+  
+  std::cout<< "- Removeu: " << pDisciplina->id << " / Adicionou: ";
 
   problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 
