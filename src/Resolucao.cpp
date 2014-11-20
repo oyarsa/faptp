@@ -311,9 +311,9 @@ Grade* Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha) {
 
   int adicionados;
   int disponivel = (SEMANA - 2) * camadasTamanho;
-  
+
   alunoPerfil = pGrade->alunoPerfil;
-  
+
   apCursadas = alunoPerfil->cursadas;
   apRestante = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
 
@@ -330,13 +330,12 @@ Grade* Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha) {
     if (pGrade->insert(disciplina)) {
       adicionados++;
     }
-
     apRestante.erase(current);
 
     dIter = apRestante.begin();
     dIterLimit = dIter + (apRestante.size() * alpha);
   }
-  
+
   return pGrade;
 }
 
@@ -367,8 +366,8 @@ Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao, double alph
 Solucao* Resolucao::gerarGradeTipoGraspRefinamento(Solucao* bestSolucao, double alpha) {
   Solucao *currentSolucao;
 
-  std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
-  std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
+  std::map<std::string, AlunoPerfil*>::iterator apIter;
+  std::map<std::string, AlunoPerfil*>::iterator apIterEnd;
   AlunoPerfil *alunoPerfil;
 
   Grade *grade;
@@ -376,26 +375,40 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamento(Solucao* bestSolucao, double 
   Util util;
 
   int random;
+  int disciplinasSize;
+  int disciplinasRemoveMax;
+  int disciplinasRemoveRand;
   double bestFO, currentFO;
 
   bestFO = bestSolucao->getObjectiveFunction();
 
   for (int i = 0; i < RESOLUCAO_GRASP_ITERACAO_VIZINHOS; i++) {
     currentSolucao = bestSolucao->clone();
+    
+    apIter = alunoPerfis.begin();
+    apIterEnd = alunoPerfis.end();
 
     for (; apIter != apIterEnd; ++apIter) {
       alunoPerfil = alunoPerfis[apIter->first];
+      std::cout << std::endl;
 
       grade = currentSolucao->grades[alunoPerfil->id];
 
-      random = util.randomBetween(0, grade->disciplinasAdicionadas.size());
-      grade->remove(grade->disciplinasAdicionadas[random]);
+      disciplinasSize = grade->disciplinasAdicionadas.size();
+      disciplinasRemoveMax = ceil(disciplinasSize * 0.9);
+      disciplinasRemoveRand = util.randomBetween(1, disciplinasRemoveMax);
+
+      for (int j = 0; j < disciplinasRemoveRand; j++) {
+        disciplinasSize = grade->disciplinasAdicionadas.size();
+        random = util.randomBetween(0, disciplinasSize);
+        grade->remove(grade->disciplinasAdicionadas[random]);
+      }
       //gerarGradeTipoGraspConstrucao(currentSolucao, alpha);
-      gerarGradeTipoGraspConstrucao(grade, alpha);
+      grade = gerarGradeTipoGraspConstrucao(grade, alpha);
     }
 
     currentFO = currentSolucao->getObjectiveFunction();
-    std::cout << "[[V]]-->(" << bestFO << " < " << currentFO << ")" << std::endl;
+    std::cout << std::endl << "[[V" << i << "]]-->(" << bestFO << " < " << currentFO << ")" << std::endl;
     if (bestFO < currentFO) {
       bestSolucao = currentSolucao;
       bestFO = currentFO;
@@ -420,6 +433,8 @@ int Resolucao::gerarGradeTipoGrasp(double alpha) {
 
   clock_t t0;
   double diff = 0;
+
+  int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = ceil(RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR * alunoPerfis.size() * disciplinas.size());
 
   for (; sIter != sIterEnd; ++sIter) {
     solucao = *sIter;

@@ -163,7 +163,7 @@ int Grade::remove(Disciplina* pDisciplina) {
   int i = 0;
   int x = getFirstDisciplina(pDisciplina, matriz);
   
-  std::cout<< "- Removeu: " << pDisciplina->id << " / Adicionou: ";
+  std::cout<< "- Removeu: " << pDisciplina->id << std::endl;
 
   problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 

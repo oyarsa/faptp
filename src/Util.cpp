@@ -45,7 +45,9 @@ double Util::timeDiff(clock_t tf, clock_t t0) {
 
 int Util::randomBetween(int min, int max) {
   int random = 0;
-  if (max != 0) {
+  if (max == min) {
+    random = min;
+  } else if (max != 0) {
     random = (rand() % (max - min)) + min;
   }
   return random;

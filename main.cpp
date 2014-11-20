@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
   clock_t t0 = clock();
   while (util.timeDiff(clock(), t0) <= 700);
   return 0;
-  */
+   */
   /*
   std::vector<int>teste;
   teste.push_back(0);
@@ -100,8 +100,25 @@ int main(int argc, char** argv) {
   std::cout << (rand()%(5-0))+0 << std::endl;
   std::cout << (rand()%(5-0))+0 << std::endl;
   return 0;
-  */
-
+   */
+  /*
+  std::vector<int> teste;
+  teste.push_back(0);
+  teste.push_back(1);
+  teste.push_back(2);
+  teste.push_back(3);
+  teste.push_back(4);
+  teste.push_back(5);
+  std::cout << teste.size() << std::endl;
+  teste.erase(std::remove(teste.begin(), teste.end(), 2), teste.end());
+  std::cout << teste[2] << std::endl;
+  std::cout << teste.size() << std::endl;
+  teste.erase(std::remove(teste.begin(), teste.end(), 2), teste.end());
+  std::cout << teste[2] << std::endl;
+  std::cout << teste.size() << std::endl;
+  return 0;
+   */
+  
   Resolucao *resolucao = new Resolucao(3, 2, 5, TXT_SOLUCAO);
   resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 1);
   delete resolucao;
