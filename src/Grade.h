@@ -22,9 +22,11 @@ public:
 
   bool insert(Disciplina* pDisciplina);
   bool insert(Disciplina* pDisciplina, bool force);
-  int remove(Disciplina* pDisciplina);
+  Disciplina* remove(Disciplina* pDisciplina);
 
   double getObjectiveFunction();
+  
+  Grade* clone() const;
 private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;

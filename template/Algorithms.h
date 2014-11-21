@@ -69,7 +69,6 @@ struct ProfessorDisciplinaCargaHorariaDesc {
 };
 
 struct HorarioFindDisciplina {
-
   const Disciplina* disciplina;
 
   HorarioFindDisciplina(const Disciplina* pDisciplina) : disciplina(pDisciplina) {
@@ -81,6 +80,28 @@ struct HorarioFindDisciplina {
       find = pProfessorDisciplina->getDisciplina() == disciplina;
     }
     return find;
+  }
+};
+
+struct DisciplinaFindDisciplina {
+  Disciplina* disciplina;
+
+  DisciplinaFindDisciplina(Disciplina* pDisciplina) : disciplina(pDisciplina) {
+  }
+
+  bool operator()(const Disciplina* d) {
+    return disciplina == d;
+  }
+};
+
+struct DisciplinasRemoveDisciplinas {
+  std::vector<Disciplina*> disciplinas;
+
+  DisciplinasRemoveDisciplinas(std::vector<Disciplina*> pDisciplinas) : disciplinas(pDisciplinas) {
+  }
+
+  bool operator()(Disciplina* d) {
+    return std::find_if(disciplinas.begin(), disciplinas.end(), DisciplinaFindDisciplina(d)) != disciplinas.end();
   }
 };
 

@@ -159,7 +159,10 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
   return viavel;
 }
 
-int Grade::remove(Disciplina* pDisciplina) {
+Disciplina* Grade::remove(Disciplina* pDisciplina) {
+  std::vector<Disciplina*>::iterator found;
+  Disciplina* rDisciplina = NULL;
+  
   int i = 0;
   int x = getFirstDisciplina(pDisciplina, matriz);
   
@@ -175,10 +178,14 @@ int Grade::remove(Disciplina* pDisciplina) {
     i++;
   }
   if (i > 0) {
-    disciplinasAdicionadas.erase(std::remove(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina), disciplinasAdicionadas.end());
+    found = std::remove(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina);
+    if (found != disciplinasAdicionadas.end()) {
+      rDisciplina = *(found);
+    }
+    disciplinasAdicionadas.erase(found, disciplinasAdicionadas.end());
   }
 
-  return i;
+  return rDisciplina;
 }
 
 double Grade::getObjectiveFunction() {
@@ -207,4 +214,8 @@ double Grade::getObjectiveFunction() {
   }
 
   return fo;
+}
+
+Grade* Grade::clone() const {
+  return new Grade(*this);
 }

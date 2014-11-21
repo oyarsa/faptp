@@ -24,11 +24,17 @@
 
 #include "Files.h"
 
-#define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO   1
-#define RESOLUCAO_GERAR_GRADE_TIPO_GRASP    2
+#define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO          1
+#define RESOLUCAO_GERAR_GRADE_TIPO_GRASP           2
+#define RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO    3
 
 #define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR    2.285714
-#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS         100
+#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS         5
+
+#define RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS   1
+#define RESOLUCAO_GRASP_VIZINHOS_CRESCENTE    2
+
+#define RESOLUCAO_GRASP_VIZINHOS_DEFAULT    RESOLUCAO_GRASP_VIZINHOS_CRESCENTE
 
 class Resolucao {
 public:
@@ -76,9 +82,13 @@ private:
 
   int gerarGradeTipoGuloso();
 
+  Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
+  Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep);
+  int gerarGradeTipoCombinacaoConstrutiva();
   Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha);
   Solucao* gerarGradeTipoGraspConstrucao(Solucao *pSolucao, double alpha);
-  Solucao* gerarGradeTipoGraspRefinamento(Solucao *pSolucao, double alpha);
+  Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *bestSolucao, double alpha);
+  Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *bestSolucao);
   int gerarGradeTipoGrasp(double alpha);
 };
 
