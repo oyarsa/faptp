@@ -217,5 +217,14 @@ double Grade::getObjectiveFunction() {
 }
 
 Grade* Grade::clone() const {
-  return new Grade(*this);
+  Grade* g = new Grade(*this);
+  
+  g->matriz = std::vector<ProfessorDisciplina*>(matriz.begin(), matriz.end());
+  g->alocados = std::vector<std::string>(alocados.begin(), alocados.end());
+  g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
+  g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
+  
+  g->professorDisciplinaTemp = NULL;
+  
+  return g;
 }

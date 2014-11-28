@@ -302,7 +302,8 @@ int Resolucao::gerarGradeTipoGuloso() {
   }
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current) {
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current) {
+  Grade *bestGrade = pGrade->clone();
   Grade *currentGrade;
 
   double bestFO, currentFO;
@@ -310,7 +311,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vec
   bool viavel;
 
   for (int i = current; i < disciplinasRestantes.size(); i++) {
-    currentGrade = bestGrade->clone();
+    currentGrade = pGrade->clone();
 
     std::cout << "Nivel: " << (deep) << " Disciplina: " << i << std::endl;
 
@@ -341,8 +342,8 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vec
   return bestGrade;
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* bestGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep) {
-  return gerarGradeTipoCombinacaoConstrutiva(bestGrade, disciplinasRestantes, maxDeep, 0, 0);
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep) {
+  return gerarGradeTipoCombinacaoConstrutiva(pGrade, disciplinasRestantes, maxDeep, 0, 0);
 }
 
 int Resolucao::gerarGradeTipoCombinacaoConstrutiva() {
@@ -415,7 +416,7 @@ Grade* Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha) {
     apRestante.erase(current);
 
     dIter = apRestante.begin();
-    dIterLimit = dIter + (apRestante.size() * alpha);
+    dIterLimit = dIter + ceil(apRestante.size() * alpha);
   }
 
   return pGrade;
@@ -445,7 +446,8 @@ Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao, double alph
   return pSolucao;
 }
 
-Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* bestSolucao, double alpha) {
+Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao, double alpha) {
+  Solucao *bestSolucao = pSolucao->clone();
   Solucao *currentSolucao;
 
   std::map<std::string, AlunoPerfil*>::iterator apIter;
@@ -465,7 +467,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* bestSolucao
   bestFO = bestSolucao->getObjectiveFunction();
 
   for (int i = 0; i < RESOLUCAO_GRASP_ITERACAO_VIZINHOS; i++) {
-    currentSolucao = bestSolucao->clone();
+    currentSolucao = pSolucao->clone();
 
     apIter = alunoPerfis.begin();
     apIterEnd = alunoPerfis.end();
@@ -502,7 +504,8 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* bestSolucao
   return bestSolucao;
 }
 
-Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* bestSolucao) {
+Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
+  Solucao *bestSolucao = pSolucao->clone();
   Solucao *currentSolucao;
 
   std::map<std::string, AlunoPerfil*>::iterator apIter;
@@ -523,8 +526,6 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* bestSolucao
 
   double bestFO, currentFO;
 
-  bestSolucao->getObjectiveFunction();
-
   apIter = alunoPerfis.begin();
   apIterEnd = alunoPerfis.end();
 
@@ -534,9 +535,8 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* bestSolucao
     bestGrade = bestSolucao->grades[alunoPerfil->id];
 
     for (int i = 0; i < RESOLUCAO_GRASP_ITERACAO_VIZINHOS; i++) {
-      currentSolucao = bestSolucao->clone();
-      currentGrade = bestGrade->clone();
-      currentSolucao->grades[alunoPerfil->id] = currentGrade;
+      currentSolucao = pSolucao->clone();
+      currentGrade = currentSolucao->grades[alunoPerfil->id];
 
       std::cout << std::endl;
 
@@ -622,6 +622,7 @@ int Resolucao::gerarGradeTipoGrasp(double alpha) {
       if (bestFO < currentFO) {
         bestSolucao = currentSolucao;
         bestFO = currentFO;
+        diff = 0;
       }
       std::cout << "-------------------------------------------------" << std::endl;
     }
