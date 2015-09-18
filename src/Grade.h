@@ -13,6 +13,8 @@
 #include "Disciplina.h"
 #include "ProfessorDisciplina.h"
 
+using namespace std;
+
 class Grade : public Representacao {
   friend class Solucao;
   friend class Resolucao;
@@ -21,7 +23,9 @@ public:
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
-  bool insert(Disciplina* pDisciplina, bool force);
+  bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force);
+  Disciplina* remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
   Disciplina* remove(Disciplina* pDisciplina);
 
   double getObjectiveFunction();
@@ -40,8 +44,8 @@ private:
   void init();
   
   bool havePreRequisitos(Disciplina *pDisciplina);
-  bool checkCollision(Disciplina* pDisciplina, int pCamada);
-  bool isViable(Disciplina* pDisciplina, int pCamada);
+  bool checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  bool isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
   
   void add(Disciplina* pDisciplina, int pCamada);
 };

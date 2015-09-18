@@ -45,10 +45,15 @@ double Util::timeDiff(clock_t tf, clock_t t0) {
 
 int Util::randomBetween(int min, int max) {
   int random = 0;
-  if (max == min) {
+
+  if (max < min) {
     random = -1;
+    std::cerr << "The min number is biggest or equal to min";
+  } else if (max == min) {
+    random = max;
   } else if (max != 0) {
     random = (rand() % (max - min)) + min;
+//    random = (aleatorio.randomInt() % (max - min)) + min;
   }
   return random;
 }

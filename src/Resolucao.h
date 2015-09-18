@@ -28,13 +28,11 @@
 #define RESOLUCAO_GERAR_GRADE_TIPO_GRASP           2
 #define RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO    3
 
-#define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR    2.285714
-#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS         5
+#define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR_DEFAULT    2.285714
+#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEDAULT         10
 
 #define RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS   1
 #define RESOLUCAO_GRASP_VIZINHOS_CRESCENTE    2
-
-#define RESOLUCAO_GRASP_VIZINHOS_DEFAULT    RESOLUCAO_GRASP_VIZINHOS_CRESCENTE
 
 class Resolucao {
 public:
@@ -42,9 +40,14 @@ public:
   Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pSolucaoTxt);
   virtual ~Resolucao();
 
+  void start(int pTipo);
   void start(int pTipo, double x);
 
   int gerarGrade(int pTipo, double x);
+  
+  int graspVizinhanca;
+  int graspVizinhos;
+  float graspTempoConstrucao;
 private:
   int blocosTamanho;
   int camadasTamanho;
@@ -64,6 +67,7 @@ private:
   std::vector<Solucao*> solucoes;
 
   void init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+  void initGrasp();
 
   void carregarDados();
 
@@ -85,11 +89,16 @@ private:
   Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
   Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep);
   int gerarGradeTipoCombinacaoConstrutiva();
-  Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, double alpha);
-  Solucao* gerarGradeTipoGraspConstrucao(Solucao *pSolucao, double alpha);
-  Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao, double alpha);
+  
+  Solucao* gerarGradeTipoGraspConstrucao(Solucao *pSolucao, double alfa);
+
+  Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, double alfa);
+  Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, double alfa, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao, double alfa);
   Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *pSolucao);
-  int gerarGradeTipoGrasp(double alpha);
+  int gerarGradeTipoGrasp(double alfa);
+  std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante, double alfa);
+  int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante, double alfa);
 };
 
 #endif	/* RESOLUCAO_H */

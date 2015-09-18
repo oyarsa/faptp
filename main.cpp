@@ -36,6 +36,10 @@ void print3DMatrix(int pLinear, int Y, int Z) {
   std::cout << "Z[prof]: " << z << std::endl;
 }
 
+void separator() {
+  std::cout << "\n\n\n\n--------------------\n\n\n\n";
+}
+
 int main(int argc, char** argv) {
   /*
   UUID uuid;
@@ -59,7 +63,6 @@ int main(int argc, char** argv) {
   std::cout << "[" << testeInt.size()  << "]" << std::endl;
   std::cout << "[" << uuid.GenerateUuid()  << "]" << std::endl;
    */
-
   /*
   Util util;
   std::vector<std::string> pieces;
@@ -121,9 +124,33 @@ int main(int argc, char** argv) {
   return 0;
    */
 
-  Resolucao *resolucao = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  resolucao->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, .8);
-  delete resolucao;
+  Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
+  
+  resolucaoGuloso = new Resolucao(3, 2, 5, TXT_SOLUCAO);
+  std::cout << "-GULOSO-" << std::endl;
+  resolucaoGuloso->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
+  delete resolucaoGuloso;
+  
+  resolucaoGrasp = new Resolucao(3, 2, 5, TXT_SOLUCAO);
+  separator();
+  std::cout << "-GRASP-" << std::endl;
+  
+  resolucaoGrasp->graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+  resolucaoGrasp->graspVizinhos = 10;
+  resolucaoGrasp->graspTempoConstrucao = 1.8;
+  
+  resolucaoGrasp->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 0.9);
+  delete resolucaoGrasp;
+  
+    /**
+     * TODO: arrumar gerador combinatório
+     */
+//  resolucaoCombinatorio = new Resolucao(3, 2, 5, TXT_SOLUCAO);
+//  separator();
+//  std::cout << "-COMBINATORIO-" << std::endl;
+//  resolucaoCombinatorio->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, 0);
+//  delete resolucaoCombinatorio;
+
 
   return EXIT_SUCCESS;
 }

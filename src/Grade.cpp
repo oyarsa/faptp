@@ -47,7 +47,7 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
   return viavel;
 }
 
-bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
+bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
   bool colisao = false;
   int currentPositionHorario;
   int currentPositionGrade;
@@ -63,10 +63,28 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
 
       if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
 
-        professorDisciplinaTemp = currentProfessorDisciplina;
+        if (!professorDisciplinasIgnorar.empty()) {
+          
+          // Se contem currentProfessorDisciplina
+          if(std::find(professorDisciplinasIgnorar.begin(), professorDisciplinasIgnorar.end(), currentProfessorDisciplina) != professorDisciplinasIgnorar.end()) {
+            colisao =  true;
+          }
+        }
+        
+        /**
+         * Se ainda não marcou colisão
+         */
+        if (!colisao) {
+          
+          professorDisciplinaTemp = currentProfessorDisciplina;
 
-        if (matriz[currentPositionGrade] != NULL) {
-          colisao = true;
+          if (matriz[currentPositionGrade] != NULL) {
+            colisao = true;
+          }
+        }
+        
+        if (colisao) {
+          break;
         }
       }
 
@@ -76,11 +94,11 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada) {
   return (!colisao);
 }
 
-bool Grade::isViable(Disciplina* pDisciplina, int pCamada) {
+bool Grade::isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
   bool viavel = true;
 
   viavel = havePreRequisitos(pDisciplina);
-  viavel = checkCollision(pDisciplina, pCamada) && viavel;
+  viavel = checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) && viavel;
 
   return viavel;
 }
@@ -111,10 +129,16 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
 }
 
 bool Grade::insert(Disciplina* pDisciplina) {
-  return insert(pDisciplina, false);
+  std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
+
+  return insert(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, bool force) {
+bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
+  return insert(pDisciplina, professorDisciplinasIgnorar, false);
+}
+
+bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
   int camada, triDimensional[3];
   int x;
 
@@ -134,9 +158,9 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
       get3DMatrix(x, triDimensional);
       camada = triDimensional[2];
 
-      viavel = isViable(pDisciplina, camada);
+      viavel = isViable(pDisciplina, camada, professorDisciplinasIgnorar);
       if (viavel) {
-        std::cout << pDisciplina->id << "[";
+        std::cout << "----ADD: " <<pDisciplina->id << "[";
         add(pDisciplina, camada);
         std::cout << "]" << std::endl;
       }
@@ -160,18 +184,30 @@ bool Grade::insert(Disciplina* pDisciplina, bool force) {
 }
 
 Disciplina* Grade::remove(Disciplina* pDisciplina) {
+  ProfessorDisciplina *professorDisciplina;
+
+  return remove(pDisciplina, professorDisciplina);
+}
+
+Disciplina* Grade::remove(Disciplina* pDisciplina,  ProfessorDisciplina* &pProfessorDisciplina) {
   std::vector<Disciplina*>::iterator found;
   Disciplina* rDisciplina = NULL;
   
   int i = 0;
   int x = getFirstDisciplina(pDisciplina, matriz);
   
-  std::cout<< "- Removeu: " << pDisciplina->id << std::endl;
+  pProfessorDisciplina = NULL;
+  
+  std::cout<< "----REM: " << pDisciplina->id << std::endl;
 
   problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 
   while (x >= 0) {
 
+    if (pProfessorDisciplina == NULL) {
+      pProfessorDisciplina = matriz[x];
+    }
+    
     matriz[x] = NULL;
     x = getFirstDisciplina(pDisciplina, matriz);
 
@@ -219,10 +255,17 @@ double Grade::getObjectiveFunction() {
 Grade* Grade::clone() const {
   Grade* g = new Grade(*this);
   
-  g->matriz = std::vector<ProfessorDisciplina*>(matriz.begin(), matriz.end());
-  g->alocados = std::vector<std::string>(alocados.begin(), alocados.end());
-  g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
-  g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
+  //g->matriz = std::vector<ProfessorDisciplina*>(matriz.begin(), matriz.end());
+  copy(matriz.begin(), matriz.end(), g->matriz.begin());
+  
+  //g->alocados = std::vector<std::string>(alocados.begin(), alocados.end());
+  copy(alocados.begin(), alocados.end(), g->alocados.begin());
+  
+  //g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
+  copy(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), g->disciplinasAdicionadas.begin());
+  
+  //g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
+  copy(problemas.begin(), problemas.end(), g->problemas.begin());
   
   g->professorDisciplinaTemp = NULL;
   

@@ -5,8 +5,11 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 #include <time.h>
+
+#include "Aleatorio.h"
 
 class Util {
 public:
@@ -22,6 +25,8 @@ public:
   double timeDiff(clock_t tf, clock_t t0);
   
   int randomBetween(int min, int max);
+private:
+  Aleatorio aleatorio;
   
 };
 
