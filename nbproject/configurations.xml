@@ -28,6 +28,7 @@
     </logicalFolder>
     <logicalFolder name="f1" displayName="Classes" projectFiles="true">
       <logicalFolder name="f1" displayName="CPP" projectFiles="true">
+        <itemPath>src/Aleatorio.cpp</itemPath>
         <itemPath>src/AlunoPerfil.cpp</itemPath>
         <itemPath>src/Disciplina.cpp</itemPath>
         <itemPath>src/Grade.cpp</itemPath>
@@ -42,6 +43,7 @@
         <itemPath>src/Util.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="H" projectFiles="true">
+        <itemPath>src/Aleatorio.h</itemPath>
         <itemPath>src/AlunoPerfil.h</itemPath>
         <itemPath>src/Disciplina.h</itemPath>
         <itemPath>src/Grade.h</itemPath>
@@ -78,6 +80,9 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <commandLine>-std=c++11</commandLine>
+        </ccTool>
       </compileType>
       <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
       </item>
@@ -96,6 +101,10 @@
       <item path="input/[TESTE] Dados iniciais.ods" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Aleatorio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Aleatorio.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/AlunoPerfil.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -189,6 +198,10 @@
       <item path="input/[TESTE] Dados iniciais.ods" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Aleatorio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Aleatorio.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/AlunoPerfil.cpp" ex="false" tool="1" flavor2="0">
       </item>

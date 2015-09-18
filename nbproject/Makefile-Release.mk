@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/src/Aleatorio.o \
 	${OBJECTDIR}/src/AlunoPerfil.o \
 	${OBJECTDIR}/src/Disciplina.o \
 	${OBJECTDIR}/src/Grade.o \
@@ -78,6 +79,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/src/Aleatorio.o: src/Aleatorio.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Aleatorio.o src/Aleatorio.cpp
 
 ${OBJECTDIR}/src/AlunoPerfil.o: src/AlunoPerfil.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
