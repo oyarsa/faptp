@@ -21,6 +21,7 @@
       <itemPath>input/Professor.txt</itemPath>
       <itemPath>input/ProfessorDisciplina.txt</itemPath>
       <itemPath>input/Solucao.txt</itemPath>
+      <itemPath>input.json</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Arquivos de Recurso"
@@ -87,6 +88,8 @@
       <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
       </item>
       <item path="#Horario.php" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="input.json" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/AlunoPerfil.txt" ex="false" tool="3" flavor2="0">
       </item>
@@ -184,6 +187,8 @@
       <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
       </item>
       <item path="#Horario.php" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="input.json" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/AlunoPerfil.txt" ex="false" tool="3" flavor2="0">
       </item>
