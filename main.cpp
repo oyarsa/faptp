@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -16,10 +15,6 @@
 #include "src/Util.h"
 #include "src/Resolucao.h"
 
-void separator() {
-  std::cout << "\n\n\n\n--------------------\n\n\n\n";
-}
-
 int main(int argc, char** argv) {
   Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
   
@@ -29,7 +24,7 @@ int main(int argc, char** argv) {
   delete resolucaoGuloso;
   
   resolucaoGrasp = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  separator();
+  std::cout << "\n\n\n\n--------------------\n\n\n\n";
   std::cout << "-GRASP-" << std::endl;
   
   resolucaoGrasp->graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
@@ -43,11 +38,9 @@ int main(int argc, char** argv) {
      * TODO: arrumar gerador combinatório
      */
 //  resolucaoCombinatorio = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-//  separator();
 //  std::cout << "-COMBINATORIO-" << std::endl;
 //  resolucaoCombinatorio->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, 0);
 //  delete resolucaoCombinatorio;
-
 
   return EXIT_SUCCESS;
 }

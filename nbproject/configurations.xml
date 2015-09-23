@@ -26,6 +26,9 @@
     <logicalFolder name="ResourceFiles"
                    displayName="Arquivos de Recurso"
                    projectFiles="true">
+      <itemPath>src/includes/json/json-forwards.h</itemPath>
+      <itemPath>src/includes/json/json.h</itemPath>
+      <itemPath>src/includes/jsoncpp.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="f1" displayName="Classes" projectFiles="true">
       <logicalFolder name="f1" displayName="CPP" projectFiles="true">
@@ -72,6 +75,9 @@
     </logicalFolder>
     <itemPath>input/[TESTE] Dados iniciais.ods</itemPath>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>src/includes</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -160,6 +166,12 @@
       <item path="src/Util.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Util.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/json/json-forwards.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/json/json.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/jsoncpp.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="template/Algorithms.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -259,6 +271,12 @@
       <item path="src/Util.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Util.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/json/json-forwards.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/json/json.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/includes/jsoncpp.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="template/Algorithms.h" ex="false" tool="3" flavor2="0">
       </item>

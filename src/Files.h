@@ -11,6 +11,8 @@ extern "C" {
 #define TXT_ALUNO_PERFIL "input/AlunoPerfil.txt"
   
 #define TXT_SOLUCAO "input/Solucao.txt"
+    
+#define JSON_INPUT "input.json"
 
 #ifdef	__cplusplus
 }

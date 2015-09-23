@@ -4,7 +4,7 @@
             "id":"A1",
             "nome":"A1",
             "carga":2,
-            "periodo":"1",
+            "periodo":1,
             "curso":"C",
             "prerequisitos":[  
 
@@ -14,7 +14,7 @@
             "id":"B",
             "nome":"B",
             "carga":1,
-            "periodo":"1",
+            "periodo":1,
             "curso":"C",
             "prerequisitos":[  
 
@@ -24,7 +24,7 @@
             "id":"C",
             "nome":"C",
             "carga":1,
-            "periodo":"1",
+            "periodo":1,
             "curso":"C",
             "prerequisitos":[  
 
@@ -34,7 +34,7 @@
             "id":"D",
             "nome":"D",
             "carga":1,
-            "periodo":"1",
+            "periodo":1,
             "curso":"C",
             "prerequisitos":[  
 
@@ -44,7 +44,7 @@
             "id":"A2",
             "nome":"A2",
             "carga":2,
-            "periodo":"2",
+            "periodo":2,
             "curso":"C",
             "prerequisitos":[  
                 "A1"
@@ -54,7 +54,7 @@
             "id":"E",
             "nome":"E",
             "carga":2,
-            "periodo":"2",
+            "periodo":2,
             "curso":"C",
             "prerequisitos":[  
 
@@ -64,7 +64,7 @@
             "id":"F",
             "nome":"F",
             "carga":2,
-            "periodo":"3",
+            "periodo":2,
             "curso":"C",
             "prerequisitos":[  
 
@@ -206,7 +206,7 @@
                 "E"
             ],
             "cursadas":[  
-                "A2"
+                "A1"
             ]
         }
     ],
@@ -215,67 +215,67 @@
             "horario":0,
             "semana":0,
             "camada":0,
-            "disciplina":"A1"
+            "professordisciplina":"A1"
         },
         {  
             "horario":1,
             "semana":0,
             "camada":0,
-            "disciplina":"B"
+            "professordisciplina":"B"
         },
         {  
             "horario":0,
             "semana":2,
             "camada":0,
-            "disciplina":"C"
+            "professordisciplina":"C"
         },
         {  
             "horario":1,
             "semana":2,
             "camada":0,
-            "disciplina":"A1"
+            "professordisciplina":"A1"
         },
         {  
             "horario":0,
             "semana":4,
             "camada":0,
-            "disciplina":"D"
+            "professordisciplina":"D"
         },
         {  
             "horario":0,
             "semana":0,
             "camada":1,
-            "disciplina":"E"
+            "professordisciplina":"E"
         },
         {  
             "horario":1,
             "semana":0,
             "camada":1,
-            "disciplina":"A2"
+            "professordisciplina":"A2"
         },
         {  
             "horario":0,
             "semana":2,
             "camada":1,
-            "disciplina":"E"
+            "professordisciplina":"E"
         },
         {  
             "horario":1,
             "semana":2,
             "camada":1,
-            "disciplina":"F"
+            "professordisciplina":"F"
         },
         {  
             "horario":0,
             "semana":4,
             "camada":1,
-            "disciplina":"F"
+            "professordisciplina":"F"
         },
         {  
             "horario":1,
             "semana":4,
             "camada":1,
-            "disciplina":"A2"
+            "professordisciplina":"A2"
         }
     ]
 }

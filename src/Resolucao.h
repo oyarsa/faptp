@@ -21,6 +21,7 @@
 #include "Horario.h"
 
 #include "Util.h"
+#include "includes/json/json.h"
 
 #include "Files.h"
 
@@ -65,6 +66,8 @@ private:
   std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
 
   std::vector<Solucao*> solucoes;
+  
+  Json::Value jsonRoot;
 
   void init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
   void initGrasp();

@@ -48,7 +48,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/Resolucao.o \
 	${OBJECTDIR}/src/Solucao.o \
 	${OBJECTDIR}/src/UUID.o \
-	${OBJECTDIR}/src/Util.o
+	${OBJECTDIR}/src/Util.o \
+	${OBJECTDIR}/src/includes/jsoncpp.o
 
 
 # C Compiler Flags
@@ -144,6 +145,11 @@ ${OBJECTDIR}/src/Util.o: src/Util.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Util.o src/Util.cpp
+
+${OBJECTDIR}/src/includes/jsoncpp.o: src/includes/jsoncpp.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/includes
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
 
 # Subprojects
 .build-subprojects:
