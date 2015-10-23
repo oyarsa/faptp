@@ -6,6 +6,7 @@
  */
 
 #include "UUID.h"
+#include <ctime>
 
 UUID::UUID() {
 }

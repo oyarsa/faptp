@@ -19,7 +19,8 @@ class Grade : public Representacao {
   friend class Solucao;
   friend class Resolucao;
 public:
-  Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario);
+  Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
+          std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
@@ -40,6 +41,11 @@ private:
   std::vector<std::string> problemas;
   ProfessorDisciplina *professorDisciplinaTemp;
   std::vector<Disciplina*> disciplinasAdicionadas;
+  
+  std::vector<Disciplina*> disciplinasCurso;
+  std::map<std::string, int> discToIndex;
+  
+  Disciplina* getDisciplina(std::string pNomeDisc);
 
   void init();
   

@@ -41,7 +41,7 @@ void Resolucao::carregarDados() {
         carregarDadosProfessorDisciplinas();
         carregarAlunoPerfis();
     } else {
-        std::cerr << "We had a problem reading file (" << filename << ")";
+        std::cerr << "We had a problem reading file (" << filename << ")\n";
         throw 1;
     }
 }
@@ -58,25 +58,32 @@ void Resolucao::carregarDadosProfessores() {
 }
 
 void Resolucao::carregarDadosDisciplinas() {
-    const auto jsonDisciplinas = jsonRoot["disciplinas"];
+    const auto& jsonDisciplinas = jsonRoot["disciplinas"];
 
     for (auto i = 0; i < jsonDisciplinas.size(); i++) {
         const auto id = jsonDisciplinas[i]["id"].asString();
         const auto nome = jsonDisciplinas[i]["nome"].asString();
         const auto curso = jsonDisciplinas[i]["curso"].asString();
+        const auto capacidade = jsonDisciplinas[i]["capacidade"].asInt();
 
         const auto cargahoraria = jsonDisciplinas[i]["carga"].asInt();
         const auto periodo = jsonDisciplinas[i]["periodo"].asInt();
+        const auto turma = jsonDisciplinas[i]["turma"].asString();
 
         std::vector<std::string> fPreRequisitos;
 
-        Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id);
+        Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade);
 
-        const auto prerequisitos = jsonDisciplinas[i]["prerequisitos"];
+        const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
         for (auto j = 0; j < prerequisitos.size(); j++) {
             disciplina->preRequisitos.push_back(prerequisitos[j].asString());
         }
 
+        const auto& equivalentes = jsonDisciplinas[i]["equivalentes"];
+        for (auto j = 0; j < equivalentes.size(); j++) {
+            disciplina->equivalentes.push_back(equivalentes[j].asString());
+        }
+        
         disciplinas.push_back(disciplina);
     }
 
@@ -84,7 +91,7 @@ void Resolucao::carregarDadosDisciplinas() {
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas() {
-    const auto jsonProfessorDisciplinas = jsonRoot["professordisciplinas"];
+    const auto& jsonProfessorDisciplinas = jsonRoot["professordisciplinas"];
 
     for (auto i = 0; i < jsonProfessorDisciplinas.size(); i++) {
         const auto id = jsonProfessorDisciplinas[i]["id"].asString();
@@ -104,25 +111,27 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
 }
 
 void Resolucao::carregarAlunoPerfis() {
-    const auto jsonAlunoPerfis = jsonRoot["alunoperfis"];
+    const auto& jsonAlunoPerfis = jsonRoot["alunoperfis"];
 
     for (auto i = 0; i < jsonAlunoPerfis.size(); i++) {
         const auto id = jsonAlunoPerfis[i]["id"].asString();
         const auto peso = jsonAlunoPerfis[i]["peso"].asDouble();
+        const auto turma = jsonAlunoPerfis[i]["turma"].asString();
+        const auto periodo = jsonAlunoPerfis[i]["periodo"].asInt();
 
-        AlunoPerfil *alunoPerfil = new AlunoPerfil(peso, id);
+        AlunoPerfil *alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
-        const auto jsonRestantes = jsonAlunoPerfis[i]["restantes"];
+        const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
         for (auto j = 0; j < jsonRestantes.size(); j++) {
             Disciplina *disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
             alunoPerfil->addRestante(disciplina);
         }
         alunoPerfil->restante = ordenarDisciplinas(alunoPerfil->restante);
 
-        const auto jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
+        const auto& jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
         for (auto j = 0; j < jsonCursadas.size(); j++) {
             std::string cursada = jsonCursadas[j].asString();
-            alunoPerfil->cursadas.push_back(cursada);
+            alunoPerfil->addCursada(cursada);
         }
 
         alunoPerfis[id] = alunoPerfil;
@@ -245,7 +254,7 @@ int Resolucao::gerarGradeTipoGuloso() {
             std::cout << apIter->first << std::endl;
             alunoPerfil = alunoPerfis[apIter->first];
 
-            apGrade = new Grade(blocosTamanho, alunoPerfil, horario);
+            apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
 
             apRestante = alunoPerfil->restante;
             apCursadas = alunoPerfil->cursadas;
@@ -334,7 +343,8 @@ int Resolucao::gerarGradeTipoCombinacaoConstrutiva() {
 
             apRestante = alunoPerfil->restante;
 
-            apGrade = gerarGradeTipoCombinacaoConstrutiva(new Grade(blocosTamanho, alunoPerfil, horario), apRestante, apRestante.size());
+            apGrade = gerarGradeTipoCombinacaoConstrutiva(new Grade(blocosTamanho, alunoPerfil, horario,
+                                                                    disciplinas, disciplinasIndex), apRestante, apRestante.size());
 
             solucao->insertGrade(apGrade);
 
@@ -408,7 +418,7 @@ Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao, double alfa
         std::cout << apIter->first << std::endl;
         alunoPerfil = alunoPerfis[apIter->first];
 
-        apGrade = new Grade(blocosTamanho, alunoPerfil, horario);
+        apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
 
         gerarGradeTipoGraspConstrucao(apGrade, alfa);
 

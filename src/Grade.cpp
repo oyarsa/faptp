@@ -1,14 +1,24 @@
 #include "Grade.h"
+#include "Resolucao.h"
+#include <unordered_map>
 
-Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario) : Representacao(pBlocosTamanho, 1) {
+Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
+             std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
+            : Representacao(pBlocosTamanho, 1) {
   alunoPerfil = pAlunoPerfil;
   horario = pHorario;
+  disciplinasCurso = pDisciplinasCurso;
+  discToIndex = pDiscToIndex;
 
   init();
 }
 
 void Grade::init() {
   fo = 0;
+}
+
+Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
+    return disciplinasCurso[discToIndex[pNomeDisciplina]];
 }
 
 Grade::~Grade() {
@@ -28,14 +38,21 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
 
     if (disciplinasCursadas.size() > 0) {
 
-      std::vector<std::string>::iterator dcIter = disciplinasCursadas.begin();
-      std::vector<std::string>::iterator dcIterEnd = disciplinasCursadas.end();
-      std::sort(dcIter, dcIterEnd);
-
-      std::vector<std::string>::iterator foundPreRequisitos = std::search(dcIter, dcIterEnd, dprIter, dprIterEnd);
-      viavel = (foundPreRequisitos != dcIterEnd);
+//      std::vector<std::string>::iterator dcIter = disciplinasCursadas.begin();
+//      std::vector<std::string>::iterator dcIterEnd = disciplinasCursadas.end();
+//      std::sort(dcIter, dcIterEnd);
+//
+//      std::vector<std::string>::iterator foundPreRequisitos = std::search(dcIter, dcIterEnd, dprIter, dprIterEnd);
+//      viavel = (foundPreRequisitos != dcIterEnd);
       //std::set_symmetric_difference(dprIter, dcIter, dprIterEnd, dcIterEnd, std::back_inserter(preRequisitosRestantes)); //std::set_symmetric_difference();
-
+        
+        for (const auto& preRequisito : pDisciplinaPreRequisitos) {
+            const auto& equivalentes = getDisciplina(preRequisito)->equivalentes;
+            viavel = std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                                        disciplinasCursadas.begin(), disciplinasCursadas.end())
+                    != equivalentes.end();
+        }   
+        
       if (!viavel) {
         std::cout << "Nao tem os pre requisitos" << std::endl;
       }
@@ -138,7 +155,7 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
   return insert(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
+ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
   int camada, triDimensional[3];
   int x;
 
@@ -229,8 +246,13 @@ double Grade::getObjectiveFunction() {
 
   double fo = 0;
 
+  std::unordered_map<std::string, int> discAvaliada;
+  
   int triDimensional[3];
   int perfil, diaSemana;
+  
+  const auto turmaAluno = alunoPerfil->turma;
+  const auto periodoAluno = alunoPerfil->periodo;
 
   if (problemas.size() > 0) {
     fo = -1;
@@ -245,6 +267,16 @@ double Grade::getObjectiveFunction() {
 
       if (professorDisciplina != NULL) {
         fo += ((1) * (alunoPerfil->peso));
+      }
+      
+      const auto nomeDisc = professorDisciplina->disciplina->nome;
+      const auto turmaDisc = professorDisciplina->disciplina->turma;
+      const auto periodoDisc = professorDisciplina->disciplina->periodo;
+      
+      if (turmaAluno == turmaDisc && periodoAluno == periodoDisc &&
+          !discAvaliada[nomeDisc]) {
+          discAvaliada[nomeDisc] = true;
+          fo += 0.1;
       }
     }
   }

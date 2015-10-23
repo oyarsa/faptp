@@ -16,31 +16,37 @@
 #include "src/Resolucao.h"
 
 int main(int argc, char** argv) {
-  Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
-  
-  resolucaoGuloso = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  std::cout << "-GULOSO-" << std::endl;
-  resolucaoGuloso->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
-  delete resolucaoGuloso;
-  
-  resolucaoGrasp = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-  std::cout << "\n\n\n\n--------------------\n\n\n\n";
-  std::cout << "-GRASP-" << std::endl;
-  
-  resolucaoGrasp->graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
-  resolucaoGrasp->graspVizinhos = 10;
-  resolucaoGrasp->graspTempoConstrucao = 1.8;
-  
-  resolucaoGrasp->start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 0.9);
-  delete resolucaoGrasp;
-  
+   // Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
+
+    //  resolucaoGuloso = new Resolucao(3, 2, 5, TXT_SOLUCAO);
+    //  std::cout << "-GULOSO-" << std::endl;
+    //  resolucaoGuloso->start(RESOLUCAO_GERAR_GRADE_TIPO_GULOSO);
+    //  delete resolucaoGuloso;
+
+    // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
+    // 5 perfis de alunos
+    Resolucao resolucaoGrasp(3, 2, 5, TXT_SOLUCAO);
+    std::cout << "\n\n\n\n--------------------\n\n\n\n";
+    std::cout << "-GRASP-" << std::endl;
+
+    // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
+    // de vizinhos gerados como 10 por iteração, e o limite de parada como 1.8ms
+    resolucaoGrasp.graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+    resolucaoGrasp.graspVizinhos = 10;
+    resolucaoGrasp.graspTempoConstrucao = 1.8;
+
+    // Inicia a execução do algoritmo
+    resolucaoGrasp.start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 0.9);
+
     /**
      * TODO: arrumar gerador combinatório
      */
-//  resolucaoCombinatorio = new Resolucao(3, 2, 5, TXT_SOLUCAO);
-//  std::cout << "-COMBINATORIO-" << std::endl;
-//  resolucaoCombinatorio->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, 0);
-//  delete resolucaoCombinatorio;
+    
+    //  resolucaoCombinatorio = new Resolucao(3, 2, 5, TXT_SOLUCAO);
+    //  std::cout << "-COMBINATORIO-" << std::endl;
+    //  resolucaoCombinatorio->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, 0);
+    //  delete resolucaoCombinatorio;
+    
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

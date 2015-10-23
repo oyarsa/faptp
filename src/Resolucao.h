@@ -49,6 +49,7 @@ public:
   int graspVizinhanca;
   int graspVizinhos;
   float graspTempoConstrucao;
+  
 private:
   int blocosTamanho;
   int camadasTamanho;

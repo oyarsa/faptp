@@ -2,20 +2,25 @@
 
 AlunoPerfil::AlunoPerfil(double pPeso) {
   UUID uuid;
-  std::string pId;
+  std::string pId, pTurma;
+  int pPeriodo;
   
   pId = uuid.GenerateUuid();
+  pTurma = "A";
+  pPeriodo = 1;
   
-  init(pPeso, pId);
+  init(pPeso, pId, pTurma, pPeriodo);
 }
 
-AlunoPerfil::AlunoPerfil(double pPeso, std::string pId) {
-  init(pPeso, pId);
+AlunoPerfil::AlunoPerfil(double pPeso, std::string pId, std::string pTurma, int pPeriodo) {
+  init(pPeso, pId, pTurma, pPeriodo);
 }
 
-void AlunoPerfil::init(double pPeso, std::string pId) {
+void AlunoPerfil::init(double pPeso, std::string pId, std::string pTurma, int pPeriodo) {
   id = pId;
   peso = pPeso;
+  turma = pTurma;
+  periodo = pPeriodo;
 }
 
 AlunoPerfil::~AlunoPerfil() {

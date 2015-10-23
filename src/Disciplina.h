@@ -24,8 +24,8 @@ class Disciplina {
   friend class Solucao;
   friend class Resolucao;
 public:
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso);
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId);
+  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade);
+  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade);
   Disciplina(const Disciplina& orig);
   virtual ~Disciplina();
 
@@ -49,6 +49,7 @@ public:
   bool isPreRequisito(std::string pDisciplina);
 private:
   std::string id;
+  std::string turma;
 
   std::string nome;
 
@@ -57,11 +58,13 @@ private:
 
   int cargaHoraria;
   int aulasSemana;
-
+  int capacidade;
+  int alocados;
 
   std::vector<std::string> preRequisitos;
+  std::vector<std::string> equivalentes;
 
-  void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId);
+  void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade);
 };
 
 #endif	/* DISCIPLINA_H */
