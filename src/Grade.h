@@ -52,6 +52,7 @@ private:
   bool havePreRequisitos(Disciplina *pDisciplina);
   bool checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
   bool isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  bool discRepetida(Disciplina *pDisciplina);
   
   void add(Disciplina* pDisciplina, int pCamada);
 };

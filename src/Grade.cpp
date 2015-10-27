@@ -24,6 +24,17 @@ Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
 Grade::~Grade() {
 }
 
+bool Grade::discRepetida(Disciplina* pDisciplina) {
+    for (Disciplina* discAtual : disciplinasAdicionadas) {
+        const auto& equivalentes = discAtual->equivalentes;
+        if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
+                != end(equivalentes)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
     bool viavel = true;
 
@@ -112,10 +123,9 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<Pro
 }
 
 bool Grade::isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
-    bool viavel = true;
-
-    viavel = havePreRequisitos(pDisciplina);
-    viavel = checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) && viavel;
+    bool viavel = havePreRequisitos(pDisciplina) &&
+            checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
+            !discRepetida(pDisciplina);
 
     return viavel;
 }
