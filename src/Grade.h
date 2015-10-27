@@ -45,6 +45,7 @@ private:
   std::vector<Disciplina*> disciplinasCurso;
   std::map<std::string, int> discToIndex;
   
+  //! Recebe um nome e retorna um ponteiro para uma disciplina
   Disciplina* getDisciplina(std::string pNomeDisc);
 
   void init();
@@ -52,6 +53,8 @@ private:
   bool havePreRequisitos(Disciplina *pDisciplina);
   bool checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
   bool isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  //! Verifica se a disciplina sendo considerada não está na lista de equivalências
+  //! de outra que já foi inserida
   bool discRepetida(Disciplina *pDisciplina);
   
   void add(Disciplina* pDisciplina, int pCamada);

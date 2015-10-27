@@ -83,6 +83,7 @@ void Resolucao::carregarDadosDisciplinas() {
         for (auto j = 0; j < equivalentes.size(); j++) {
             disciplina->equivalentes.push_back(equivalentes[j].asString());
         }
+        disciplina->equivalentes.push_back(nome);
         
         disciplinas.push_back(disciplina);
     }

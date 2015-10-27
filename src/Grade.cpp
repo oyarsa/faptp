@@ -25,6 +25,9 @@ Grade::~Grade() {
 }
 
 bool Grade::discRepetida(Disciplina* pDisciplina) {
+    // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplinas
+    // se encontra em suas listas de equivalências. Se sim, ela é uma disciplina
+    // repetida e não pode ser inserida
     for (Disciplina* discAtual : disciplinasAdicionadas) {
         const auto& equivalentes = discAtual->equivalentes;
         if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
@@ -57,11 +60,19 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
             //      viavel = (foundPreRequisitos != dcIterEnd);
             //std::set_symmetric_difference(dprIter, dcIter, dprIterEnd, dcIterEnd, std::back_inserter(preRequisitosRestantes)); //std::set_symmetric_difference();
 
+            // Percorre a lista de disciplinas que são pre-requisitos da atual
+            // e procura alguma disciplina equivalente deste pre-requisito
+            // na lista de cursadas do aluno
             for (const auto& preRequisito : pDisciplinaPreRequisitos) {
                 const auto& equivalentes = getDisciplina(preRequisito)->equivalentes;
-                viavel = std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                auto possuiPreReq = std::find_first_of(equivalentes.begin(), equivalentes.end(),
                         disciplinasCursadas.begin(), disciplinasCursadas.end())
                         != equivalentes.end();
+
+                if (!possuiPreReq) {
+                    viavel = false;
+                    break;
+                }
             }
 
             if (!viavel) {
@@ -278,7 +289,8 @@ double Grade::getObjectiveFunction() {
             if (professorDisciplina != NULL) {
                 fo += ((1) * (alunoPerfil->peso));
 
-
+                // Se a turma do aluno for a mesma da disciplina e o periodo do aluno
+                // for o mesmo da disciplina, ela cumpre uma preferência do aluno
                 const auto nomeDisc = professorDisciplina->disciplina->nome;
                 const auto turmaDisc = professorDisciplina->disciplina->turma;
                 const auto periodoDisc = professorDisciplina->disciplina->periodo;
