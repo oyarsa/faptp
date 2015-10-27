@@ -9,12 +9,6 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
     horario = pHorario;
     disciplinasCurso = pDisciplinasCurso;
     discToIndex = pDiscToIndex;
-
-    init();
-}
-
-void Grade::init() {
-    fo = 0;
 }
 
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {

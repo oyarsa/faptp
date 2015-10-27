@@ -36,7 +36,6 @@ private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;
   
-  int fo;
   std::vector<ProfessorDisciplina*> professorDisciplinas;
   std::vector<std::string> problemas;
   ProfessorDisciplina *professorDisciplinaTemp;
