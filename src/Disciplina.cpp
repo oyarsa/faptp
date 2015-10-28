@@ -25,6 +25,8 @@ void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::s
 
   aulasSemana = std::ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
 
+  alocados = 0;
+  ofertada = true;
   setNome(pNome);
 }
 

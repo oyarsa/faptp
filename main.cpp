@@ -3,11 +3,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <ctime>
 #include <string>
 #include <sstream>
 #include <vector>
 
 #include "template/Algorithms.h"
+
+#include "src/includes/parametros.h"
 
 #include "src/Disciplina.h"
 #include "src/Professor.h"
@@ -16,7 +19,9 @@
 #include "src/Resolucao.h"
 
 int main(int argc, char** argv) {
-   // Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
+    verbose = false;
+
+    // Resolucao *resolucaoGuloso, *resolucaoGrasp, *resolucaoCombinatorio;
 
     //  resolucaoGuloso = new Resolucao(3, 2, 5, TXT_SOLUCAO);
     //  std::cout << "-GULOSO-" << std::endl;
@@ -25,9 +30,14 @@ int main(int argc, char** argv) {
 
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
+    
+    auto inicio = clock();
+    
     Resolucao resolucaoGrasp(3, 2, 5, TXT_SOLUCAO);
-    std::cout << "\n\n\n\n--------------------\n\n\n\n";
-    std::cout << "-GRASP-" << std::endl;
+    if (verbose) {
+        std::cout << "\n\n\n\n--------------------\n\n\n\n";
+        std::cout << "-GRASP-" << std::endl;
+    }
 
     // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
     // de vizinhos gerados como 10 por iteração, e o limite de parada como 1.8ms
@@ -41,12 +51,13 @@ int main(int argc, char** argv) {
     /**
      * TODO: arrumar gerador combinatório
      */
-    
+
     //  resolucaoCombinatorio = new Resolucao(3, 2, 5, TXT_SOLUCAO);
     //  std::cout << "-COMBINATORIO-" << std::endl;
     //  resolucaoCombinatorio->start(RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO, 0);
     //  delete resolucaoCombinatorio;
     
-
-    return EXIT_SUCCESS;
+    auto fim = clock();
+    
+    std::cout << "Tempo: " << fim - inicio << "\n";
 }

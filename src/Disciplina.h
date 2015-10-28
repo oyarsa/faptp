@@ -60,6 +60,7 @@ private:
   int aulasSemana;
   int capacidade;
   int alocados;
+  bool ofertada;
 
   std::vector<std::string> preRequisitos;
   std::vector<std::string> equivalentes;
