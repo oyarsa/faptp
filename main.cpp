@@ -42,8 +42,10 @@ int main(int argc, char** argv) {
     // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
     // de vizinhos gerados como 10 por iteração, e o limite de parada como 1.8ms
     resolucaoGrasp.graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
-    resolucaoGrasp.graspVizinhos = 10;
-    resolucaoGrasp.graspTempoConstrucao = 1.8;
+    
+    
+    resolucaoGrasp.graspVizinhos = 4;
+    resolucaoGrasp.graspTempoConstrucao = 0.8;
 
     // Inicia a execução do algoritmo
     resolucaoGrasp.start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 0.9);

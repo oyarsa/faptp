@@ -607,7 +607,7 @@ int Resolucao::gerarGradeTipoGrasp(double alfa) {
     clock_t t0;
     double diff = 0;
 
-    int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = ceil(graspTempoConstrucao * alunoPerfis.size() * disciplinas.size());
+    int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = ceil(graspTempoConstrucao * alunoPerfis.size());
 
     for (int i = 1; sIter != sIterEnd; ++sIter, i++) {
 

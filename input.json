@@ -237,43 +237,44 @@
 			"semana" : 4
 		}
 	],
-	 "professordisciplinas":[  
-        {  
-            "id":"A1",
-            "professor":"P1",
-            "disciplina":"A1"
-        },
-        {  
-            "id":"A2",
-            "professor":"P1",
-            "disciplina":"A2"
-        },
-        {  
-            "id":"B",
-            "professor":"P2",
-            "disciplina":"B"
-        },
-        {  
-            "id":"E",
-            "professor":"P2",
-            "disciplina":"E"
-        },
-        {  
-            "id":"F",
-            "professor":"P2",
-            "disciplina":"F"
-        },
-        {  
-            "id":"C",
-            "professor":"P3",
-            "disciplina":"C"
-        },
-        {  
-            "id":"D",
-            "professor":"P3",
-            "disciplina":"D"
-        }
-    ],
+	"professordisciplinas" : 
+	[
+		{
+			"disciplina" : "A1",
+			"id" : "A1",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "B",
+			"id" : "B",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "C",
+			"id" : "C",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "D",
+			"id" : "D",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "A2",
+			"id" : "A2",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "E",
+			"id" : "E",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "F",
+			"id" : "F",
+			"professor" : "P1"
+		}
+	],
 	"professores" : 
 	[
 		{
