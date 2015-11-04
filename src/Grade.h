@@ -19,7 +19,8 @@ class Grade : public Representacao {
   friend class Solucao;
   friend class Resolucao;
 public:
-  Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario);
+  Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
+          std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
@@ -35,17 +36,25 @@ private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;
   
-  int fo;
   std::vector<ProfessorDisciplina*> professorDisciplinas;
   std::vector<std::string> problemas;
   ProfessorDisciplina *professorDisciplinaTemp;
   std::vector<Disciplina*> disciplinasAdicionadas;
+  
+  std::vector<Disciplina*> disciplinasCurso;
+  std::map<std::string, int> discToIndex;
+  
+  //! Recebe um nome e retorna um ponteiro para uma disciplina
+  Disciplina* getDisciplina(std::string pNomeDisc);
 
   void init();
   
   bool havePreRequisitos(Disciplina *pDisciplina);
   bool checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
   bool isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  //! Verifica se a disciplina sendo considerada não está na lista de equivalências
+  //! de outra que já foi inserida
+  bool discRepetida(Disciplina *pDisciplina);
   
   void add(Disciplina* pDisciplina, int pCamada);
 };

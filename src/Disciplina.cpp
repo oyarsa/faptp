@@ -1,32 +1,33 @@
-#include <math.h>
+#include <cmath>
 
 #include "Disciplina.h"
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso) {
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade) {
   UUID uuid;
   std::string pId;
 
   pId = uuid.GenerateUuid();
 
-  init(pNome, pCargaHoraria, pPeriodo, pCurso, pId);
+  init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade);
 }
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId) {
-  init(pNome, pCargaHoraria, pPeriodo, pCurso, pId);
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade) {
+  init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade);
 }
 
-void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId) {
+void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade) {
   id = pId;
   cargaHoraria = pCargaHoraria;
   periodo = pPeriodo;
   curso = pCurso;
+  turma = pTurma;
+  capacidade = pCapacidade;
 
-  aulasSemana = ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
+  aulasSemana = std::ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
 
+  alocados = 0;
+  ofertada = true;
   setNome(pNome);
-}
-
-Disciplina::Disciplina(const Disciplina& orig) {
 }
 
 Disciplina::~Disciplina() {

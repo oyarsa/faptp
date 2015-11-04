@@ -221,7 +221,7 @@ namespace Json {
 #elif defined(__ANDROID__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
-#define snprintf std::snprintf
+//#define snprintf std::snprintf
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
@@ -4084,7 +4084,7 @@ bool Value::isMember(const CppTL::ConstString& key) const {
 #elif defined(__ANDROID__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
-#define snprintf std::snprintf
+//#define snprintf std::snprintf
 #endif
 
 #if defined(__BORLANDC__)  

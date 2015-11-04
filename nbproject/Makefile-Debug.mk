@@ -21,8 +21,8 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-MacOSX
-CND_DLIB_EXT=dylib
+CND_PLATFORM=MinGW-Windows
+CND_DLIB_EXT=dll
 CND_CONF=Debug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -49,7 +49,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/Solucao.o \
 	${OBJECTDIR}/src/UUID.o \
 	${OBJECTDIR}/src/Util.o \
-	${OBJECTDIR}/src/includes/jsoncpp.o
+	${OBJECTDIR}/src/includes/jsoncpp.o \
+	${OBJECTDIR}/src/includes/parametros.o
 
 
 # C Compiler Flags
@@ -70,9 +71,9 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp ${OBJECTFILES} ${LDLIBSOPTIONS}
 
@@ -151,13 +152,18 @@ ${OBJECTDIR}/src/includes/jsoncpp.o: src/includes/jsoncpp.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
 
+${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/includes
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/parametros.o src/includes/parametros.cpp
+
 # Subprojects
 .build-subprojects:
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
 
 # Subprojects
 .clean-subprojects:
