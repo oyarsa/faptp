@@ -7,15 +7,9 @@
 #include <vector>
 
 #include "Semana.h"
+#include "Professor.h"
 
 #include "UUID.h"
-
-#define DISCIPLINA_ID             0
-#define DISCIPLINA_NOME           1
-#define DISCIPLINA_CARGA_HORARIA  2
-#define DISCIPLINA_PERIODO        3
-#define DISCIPLINA_CURSO          4
-#define DISCIPLINA_PRE_REQUISITO  5
 
 class Disciplina {
   friend class Representacao;
@@ -47,6 +41,8 @@ public:
 
   void addPreRequisito(std::string pDisciplina);
   bool isPreRequisito(std::string pDisciplina);
+  
+  void addProfessorCapacitado(Professor *professor);
 private:
   std::string id;
   std::string turma;
@@ -64,6 +60,8 @@ private:
 
   std::vector<std::string> preRequisitos;
   std::vector<std::string> equivalentes;
+
+  std::vector<Professor*> professoresCapacitados;
 
   void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade);
 };

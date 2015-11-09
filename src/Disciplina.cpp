@@ -80,3 +80,7 @@ void Disciplina::addPreRequisito(std::string pDisciplina) {
 bool Disciplina::isPreRequisito(std::string pDisciplina) {
   return std::find(preRequisitos.begin(), preRequisitos.end(), pDisciplina) != preRequisitos.end();
 }
+
+void Disciplina::addProfessorCapacitado(Professor *professor) {
+    professoresCapacitados.push_back(professor);
+}

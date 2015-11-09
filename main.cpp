@@ -31,24 +31,26 @@ int main(int argc, char** argv) {
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
     
-    auto inicio = clock();
-    
-    Resolucao resolucaoGrasp(3, 2, 5, TXT_SOLUCAO);
+    Resolucao resolucaoGrasp(3, 2, 5);
     if (verbose) {
         std::cout << "\n\n\n\n--------------------\n\n\n\n";
         std::cout << "-GRASP-" << std::endl;
     }
 
+    auto inicio = clock();
+    
     // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
-    // de vizinhos gerados como 10 por iteração, e o limite de parada como 1.8ms
-    resolucaoGrasp.graspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+    // de vizinhos gerados como 4 por iteração, e o limite de parada como 0.8ms
+    resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
     
+    resolucaoGrasp.gradeGraspVizinhos = 4;
+    resolucaoGrasp.gradeGraspTempoConstrucao = .8;
     
-    resolucaoGrasp.graspVizinhos = 4;
-    resolucaoGrasp.graspTempoConstrucao = 0.8;
+    resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
+    resolucaoGrasp.gradeAlfa = .9;
 
     // Inicia a execução do algoritmo
-    resolucaoGrasp.start(RESOLUCAO_GERAR_GRADE_TIPO_GRASP, 0.9);
+    resolucaoGrasp.start();
 
     /**
      * TODO: arrumar gerador combinatório

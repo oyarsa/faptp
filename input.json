@@ -168,6 +168,78 @@
 			"turma" : "A"
 		}
 	],
+	"professores" : 
+	[
+		{
+			"competencias" : 
+			[
+				"A1",
+				"A2"
+			],
+			"diasdisponiveis" : [],
+			"id" : "P1",
+			"nome" : "P1"
+		},
+		{
+			"competencias" : 
+			[
+				"B",
+				"E",
+				"F"
+			],
+			"diasdisponiveis" : [],
+			"id" : "P2",
+			"nome" : "P2"
+		},
+		{
+			"competencias" : 
+			[
+				"C",
+				"D"
+			],
+			"diasdisponiveis" : [],
+			"id" : "P3",
+			"nome" : "P3"
+		}
+	],
+	"professordisciplinas" : 
+	[
+		{
+			"disciplina" : "A1",
+			"id" : "A1",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "B",
+			"id" : "B",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "C",
+			"id" : "C",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "D",
+			"id" : "D",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "A2",
+			"id" : "A2",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "E",
+			"id" : "E",
+			"professor" : "P1"
+		},
+		{
+			"disciplina" : "F",
+			"id" : "F",
+			"professor" : "P1"
+		}
+	],
 	"horario" : 
 	[
 		{
@@ -235,78 +307,6 @@
 			"horario" : 1,
 			"professordisciplina" : "A2",
 			"semana" : 4
-		}
-	],
-	"professordisciplinas" : 
-	[
-		{
-			"disciplina" : "A1",
-			"id" : "A1",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "B",
-			"id" : "B",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "C",
-			"id" : "C",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "D",
-			"id" : "D",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "A2",
-			"id" : "A2",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "E",
-			"id" : "E",
-			"professor" : "P1"
-		},
-		{
-			"disciplina" : "F",
-			"id" : "F",
-			"professor" : "P1"
-		}
-	],
-	"professores" : 
-	[
-		{
-			"competencias" : 
-			[
-				"A1",
-				"A2"
-			],
-			"diasdisponiveis" : [],
-			"id" : "P1",
-			"nome" : "P1"
-		},
-		{
-			"competencias" : 
-			[
-				"B",
-				"E",
-				"F"
-			],
-			"diasdisponiveis" : [],
-			"id" : "P2",
-			"nome" : "P2"
-		},
-		{
-			"competencias" : 
-			[
-				"C",
-				"D"
-			],
-			"diasdisponiveis" : [],
-			"id" : "P3",
-			"nome" : "P3"
 		}
 	]
 }

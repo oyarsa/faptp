@@ -7,9 +7,6 @@
 
 #include "UUID.h"
 
-#define PROFESSOR_ID             0
-#define PROFESSOR_NOME           1
-
 class Professor {
   friend class Representacao;
   friend class Grade;

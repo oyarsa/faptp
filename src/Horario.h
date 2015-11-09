@@ -3,11 +3,6 @@
 
 #include "Representacao.h"
 
-#define HORARIO_BLOCO                   0
-#define HORARIO_DIA                     1
-#define HORARIO_CAMADA                  2
-#define HORARIO_PROFESSOR_DISCIPLINA    3
-
 class Horario : public Representacao {
   friend class Resolucao;
   friend class Grade;

@@ -8,11 +8,6 @@
 
 #include "UUID.h"
 
-#define PROFESSOR_DISCIPLINA_ID           0
-#define PROFESSOR_DISCIPLINA_PROFESSOR    1
-#define PROFESSOR_DISCIPLINA_DISCIPLINA   2
-#define PROFESSOR_DISCIPLINA_PESO         3
-
 class ProfessorDisciplina {
   friend class Representacao;
   friend class Grade;

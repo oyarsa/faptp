@@ -37,5 +37,5 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
 }
 
 double Horario::getObjectiveFunction() {
-
+    return 0;
 }
