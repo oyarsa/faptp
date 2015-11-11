@@ -15,6 +15,11 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
     int position = getPosition(pDia, pBloco, pCamada);
     bool professorAlocado = false;
 
+    /**
+     * TODO: criar método para verificar as restrições da alocação de uma 
+     * disciplina no horário
+     */
+    
     if (verbose)
         std::cout << "(" << position << ")" << std::endl;
     if (alocados[position] == "" || force) {

@@ -220,7 +220,7 @@ void Resolucao::atualizarDisciplinasIndex() {
     }
 }
 
-void Resolucao::gerarHorarioAGPopulacaoInicial() {
+std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     std::vector<Solucao*> solucoesAG;
     Aleatorio aleatorio;
     int randInt;
@@ -233,13 +233,11 @@ void Resolucao::gerarHorarioAGPopulacaoInicial() {
          */
         int i = 0;
 
-        /**
-         * TODO: creditos utilizados pelo profesor. Sempre somar a disciplina 
-         * vinculada, pois terá de dar todas as aulas
-         */
         std::map<std::string, int> creditosUtilizadosProfessor;
         Disciplina *disciplinaAleatoria;
+        Professor *professorSelecionado;
         std::string dId;
+        std::string pId;
         std::string pdId;
         bool inserted;
         for (const auto& par : periodoXdisciplina) {
@@ -270,9 +268,21 @@ void Resolucao::gerarHorarioAGPopulacaoInicial() {
 
                 // Se a disciplina ainda não tem professor alocado
                 if (disciplinaXprofessorDisciplina.count(dId) == 0) {
-                    randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
 
-                    pdId = disciplinaAleatoria->professoresCapacitados[randInt]->getId() + dId;
+                    do {
+                        randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
+
+                        professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
+                        pId = professorSelecionado->getId();
+
+                        if (creditosUtilizadosProfessor.count(pId) == 0) {
+                            creditosUtilizadosProfessor[pId] = 0;
+                        }
+                    } while (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+
+                    creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
+
+                    pdId = pId + dId;
                     if (professorDisciplinas.count(pdId) == 0) {
                         professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[randInt], disciplinaAleatoria, pdId);
                     }
@@ -313,9 +323,11 @@ void Resolucao::gerarHorarioAGPopulacaoInicial() {
             i++;
         }
 
-        gerarGradeTipoGrasp(solucaoLocal);
+        gerarGradeTipoGrasp(solucaoLocal, false);
         solucoesAG.push_back(solucaoLocal);
     }
+
+    return solucoesAG;
 }
 
 int Resolucao::gerarGrade() {
@@ -700,12 +712,11 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
 }
 
 int Resolucao::gerarGradeTipoGrasp() {
-    return gerarGradeTipoGrasp(NULL);
+    return gerarGradeTipoGrasp(solucao, true);
 }
 
-int Resolucao::gerarGradeTipoGrasp(Solucao *pSolucao) {
+int Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
     Solucao *currentSolucao;
-    Solucao *bestSolucao;
 
     double bestFO, currentFO;
 
@@ -716,15 +727,10 @@ int Resolucao::gerarGradeTipoGrasp(Solucao *pSolucao) {
 
     int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = ceil(gradeGraspTempoConstrucao * alunoPerfis.size());
 
+    bestFO = 0;
+
     if (verbose)
         std::cout << "HORARIO (Solucao) :" << std::endl;
-
-    if (pSolucao == NULL) {
-        pSolucao = solucao;
-    }
-    
-    bestSolucao = pSolucao->clone();
-    bestFO = 0;
 
     while (diff <= RESOLUCAO_GRASP_TEMPO_CONSTRUCAO) {
         currentSolucao = pSolucao->clone();
@@ -752,7 +758,7 @@ int Resolucao::gerarGradeTipoGrasp(Solucao *pSolucao) {
 
         currentFO = currentSolucao->getObjectiveFunction();
         if (bestFO < currentFO) {
-            bestSolucao = currentSolucao->clone();
+            pSolucao = currentSolucao->clone();
             bestFO = currentFO;
             diff = 0;
 
@@ -764,10 +770,10 @@ int Resolucao::gerarGradeTipoGrasp(Solucao *pSolucao) {
     }
 
     if (verbose)
-        std::cout << "BEST FIT: " << bestSolucao->getObjectiveFunction() << std::endl;
+        std::cout << "BEST FIT: " << bestFO << std::endl;
 
-    if (!verbose) {
-        const auto& grades = bestSolucao->grades;
+    if (printResult) {
+        const auto& grades = pSolucao->grades;
         for (const auto& par : grades) {
             const auto gradeAtual = par.second;
             std::cout << gradeAtual->alunoPerfil->id << ":\n";
@@ -778,7 +784,7 @@ int Resolucao::gerarGradeTipoGrasp(Solucao *pSolucao) {
             }
             std::cout << " " << gradeAtual->getObjectiveFunction() << "\n";
         }
-        std::cout << "\nFO da solucao: " << bestSolucao->getObjectiveFunction() << std::endl;
+        std::cout << "\nFO da solucao: " << bestFO << std::endl;
     }
 }
 

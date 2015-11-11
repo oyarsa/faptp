@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     Resolucao resolucaoGrasp(3, 2, 5);
 
     // Parâmetro de população inicial
-    resolucaoGrasp.horarioPopulacaoInicial = 500;
+    resolucaoGrasp.horarioPopulacaoInicial = 250;
 
     // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
     // de vizinhos gerados como 4 por iteração, e o limite de parada como 0.8ms
@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
 
     auto inicioHorario = clock();
     
+    std::cout << "Montando horarios..." << std::endl;
     resolucaoGrasp.gerarHorarioAGPopulacaoInicial();
     
     auto fimHorario = clock();

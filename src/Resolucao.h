@@ -43,7 +43,7 @@ public:
     void start();
     void start(bool input);
 
-    void gerarHorarioAGPopulacaoInicial();
+    std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
 
     int gerarGrade();
 
@@ -113,7 +113,7 @@ private:
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *pSolucao);
     int gerarGradeTipoGrasp();
-    int gerarGradeTipoGrasp(Solucao *pSolucao);
+    int gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult);
     std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
     int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante);
 };
