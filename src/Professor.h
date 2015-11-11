@@ -23,6 +23,8 @@ public:
   std::string getNome();
   void setNome(std::string pNome);
 
+  void setCreditoMaximo(int pCreditoMaximo);
+  
   void setDiaDisponivel(unsigned int dia);
   void unsetDiaDisponivel(unsigned int dia);
   bool isDiaDisponivel(unsigned int dia);
@@ -33,6 +35,7 @@ private:
   std::string id;
 
   std::string nome;
+  int creditoMaximo;
 
   bool diasDisponiveis[7];
   

@@ -38,6 +38,7 @@ public:
   void setCargaHoraria(int pCargaHoraria);
 
   int getAulasSemana();
+  int getCreditos();
 
   void addPreRequisito(std::string pDisciplina);
   bool isPreRequisito(std::string pDisciplina);

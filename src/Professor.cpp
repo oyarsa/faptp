@@ -37,6 +37,10 @@ bool Professor::isDiaValido(unsigned int dia) {
   return (dia < 7);
 }
 
+void Professor::setCreditoMaximo(int pCreditoMaximo) {
+    creditoMaximo = pCreditoMaximo;
+}
+
 void Professor::setDiaDisponivel(unsigned int dia, bool value) {
   if (isDiaValido(dia)) {
     diasDisponiveis[dia] = value;
