@@ -228,9 +228,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     while (solucoesAG.size() != horarioPopulacaoInicial) {
         Solucao *solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 
-        /**
-         * DOING
-         */
         int i = 0;
 
         std::map<std::string, int> creditosUtilizadosProfessor;
@@ -240,6 +237,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
         std::string pId;
         std::string pdId;
         bool inserted;
+        bool professorPossuiCreditos;
         for (const auto& par : periodoXdisciplina) {
 
             std::vector<Disciplina*> disciplinas = par.second;
@@ -278,7 +276,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                         if (creditosUtilizadosProfessor.count(pId) == 0) {
                             creditosUtilizadosProfessor[pId] = 0;
                         }
-                    } while (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+                        
+                        professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+                    } while (professorPossuiCreditos && solucaoLocal->horario->colisaoProfessorAlocado(dia, bloco, i, pId));
 
                     creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
