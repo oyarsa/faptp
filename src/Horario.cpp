@@ -7,18 +7,20 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
-bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, int pCamada, std::string professorId) {
+bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;
 
-    for (int i = pCamada; i < camadasTamanho; i++) {
+    for (int i = 0; i < camadasTamanho; i++) {
 
         positionCamada = getPosition(pDia, pBloco, i);
         if (matriz[positionCamada] != NULL && matriz[positionCamada]->professor->getId() == professorId) {
 
-            std::cout << "\nColisao[" << professorId << " || " 
-                    << alocados[positionCamada] << "](" << positionCamada 
-                    << "): " << i << " " << pDia << " " << pBloco 
-                    << std::endl;
+            if (verbose) {
+                std::cout << "\nColisao[" << professorId << " || "
+                        << alocados[positionCamada] << "](" << positionCamada
+                        << "): " << i << " " << pDia << " " << pBloco
+                        << std::endl;
+            }
             return true;
         }
     }
@@ -34,17 +36,12 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
     int position = getPosition(pDia, pBloco, pCamada);
     bool professorAlocado = false;
 
-    /**
-     * TODO: criar método para verificar as restrições da alocação de uma 
-     * disciplina no horário
-     */
-
     if (verbose)
         std::cout << "(" << position << ")" << std::endl;
 
     if (alocados[position] == "" || force) {
 
-        professorAlocado = colisaoProfessorAlocado(pDia, pBloco, pCamada, 
+        professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
                 pProfessorDisciplina->professor->getId());
 
         if (!professorAlocado || force) {

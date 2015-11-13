@@ -43,16 +43,24 @@ public:
     void start();
     void start(bool input);
 
+    Solucao* gerarHorarioAG();
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
+    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao);
 
     int gerarGrade();
 
     /*
      Parâmetros da execução da solução
      */
-    // Horário população
+    // Horário população inicial
     int horarioPopulacaoInicial;
+    int horarioProfessorColisaoMax;
     double horarioTaxaMutacao;
+    
+    // Horário torneio
+    double horarioTorneioPares;
+    double horarioTorneioPopulacao;
 
     // Grade tipo de construção
     int gradeTipoConstrucao;
@@ -83,7 +91,7 @@ private:
     Json::Value jsonRoot;
 
     void init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
-    void initGrasp();
+    void initDefault();
 
     void carregarDados();
 

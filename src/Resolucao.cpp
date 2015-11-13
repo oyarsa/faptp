@@ -12,10 +12,12 @@ void Resolucao::init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
 
     carregarDados();
 
-    initGrasp();
+    initDefault();
 }
 
-void Resolucao::initGrasp() {
+void Resolucao::initDefault() {
+    horarioProfessorColisaoMax = 2;
+    
     gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
     gradeGraspVizinhos = RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEDAULT;
 
@@ -220,6 +222,18 @@ void Resolucao::atualizarDisciplinasIndex() {
     }
 }
 
+Solucao* Resolucao::gerarHorarioAG() {
+    Solucao *solucaoAG;
+    std::vector<Solucao*> populacaoInicial = gerarHorarioAGPopulacaoInicial();
+    int iMax = (populacaoInicial.size() * horarioTorneioPopulacao) * horarioTorneioPares;
+
+    for (int i = 0; i < iMax; i++) {
+        std::vector<Solucao*> parVencedor = gerarHorarioAGTorneioPar(populacaoInicial);
+    }
+
+    return solucaoAG;
+}
+
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     std::vector<Solucao*> solucoesAG;
     Aleatorio aleatorio;
@@ -231,6 +245,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
         int i = 0;
 
         std::map<std::string, int> creditosUtilizadosProfessor;
+        std::map<std::string, int> colisaoProfessor;
         Disciplina *disciplinaAleatoria;
         Professor *professorSelecionado;
         std::string dId;
@@ -245,9 +260,14 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
             std::map<std::string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
             int dia = 0, bloco = 0;
 
+            colisaoProfessor.clear();
+
             while (disciplinas.size() != 0) {
                 randInt = 0;
 
+                /**
+                 * TODO: implementar aleatoriedade uniforme
+                 */
                 switch (0) {
                     case 0:
                         randInt = aleatorio.randomInt() % disciplinas.size();
@@ -276,9 +296,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                         if (creditosUtilizadosProfessor.count(pId) == 0) {
                             creditosUtilizadosProfessor[pId] = 0;
                         }
-                        
+
                         professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
-                    } while (professorPossuiCreditos && solucaoLocal->horario->colisaoProfessorAlocado(dia, bloco, i, pId));
+                    } while (professorPossuiCreditos);
 
                     creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
@@ -287,9 +307,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                         professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[randInt], disciplinaAleatoria, pdId);
                     }
 
-                    /**
-                     * TODO: antes de alocar,  verificar disponibilidade
-                     */
                     disciplinaXprofessorDisciplina[dId] = professorDisciplinas[pdId];
                 }
 
@@ -304,6 +321,23 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                             bloco++;
                             creditosUtilizadosDisciplina[dId]++;
                         }
+                    }
+                } else {
+                    if (colisaoProfessor.count(dId) == 0) {
+                        colisaoProfessor[dId] = 0;
+                    }
+
+                    colisaoProfessor[dId]++;
+
+                    if (colisaoProfessor[dId] == horarioProfessorColisaoMax) {
+
+                        if (bloco % 2 == 1) {
+                            bloco += 1;
+                        } else {
+                            bloco += 2;
+                        }
+                        
+                        colisaoProfessor[dId] = 0;
                     }
                 }
 
@@ -328,6 +362,41 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     }
 
     return solucoesAG;
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao) {
+    std::vector<Solucao*> torneioPar;
+
+    torneioPar.push_back(gerarHorarioAGTorneio(solucoesPopulacao));
+    torneioPar.push_back(gerarHorarioAGTorneio(solucoesPopulacao));
+
+    return torneioPar;
+}
+
+Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) {
+    std::vector<Solucao*> torneioCandidatos;
+    Solucao *vencedor;
+    double vencedorFO = 0;
+    double randomFO;
+    Aleatorio aleatorio;
+    int randInt;
+    
+    int populacaoTorneioMax = horarioTorneioPopulacao * solucoesPopulacao.size();
+
+    while (torneioCandidatos.size() <= populacaoTorneioMax && solucoesPopulacao.size() != 0) {
+        randInt = aleatorio.randomInt() % solucoesPopulacao.size();
+
+        randomFO = solucoesPopulacao[randInt]->getObjectiveFunction();
+        if (vencedorFO < randomFO) {
+            vencedor = solucoesPopulacao[randInt];
+            vencedorFO = randomFO;
+        }
+
+        // Remove elemento sorteado
+        solucoesPopulacao.erase(std::remove(solucoesPopulacao.begin(), solucoesPopulacao.end(), solucoesPopulacao[randInt]), solucoesPopulacao.end());
+    }
+
+    return vencedor;
 }
 
 int Resolucao::gerarGrade() {

@@ -10,7 +10,7 @@ public:
     Horario(int pBlocosTamanho, int pCamadasTamanho);
     virtual ~Horario();
 
-    bool colisaoProfessorAlocado(int pDia, int pBloco, int pCamada, std::string professorId);
+    bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
     
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
