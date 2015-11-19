@@ -1,5 +1,5 @@
 #ifndef REPRESENTACAO_H
-#define	REPRESENTACAO_H
+#define REPRESENTACAO_H
 
 #include <algorithm>
 #include <cmath>
@@ -13,42 +13,43 @@
 #include "Util.h"
 
 class Representacao {
-  friend class Resolucao;
+    friend class Resolucao;
 public:
-  Representacao(int pBlocosTamanho, int pCamadasTamanho);
-  virtual ~Representacao();
+    Representacao(int pBlocosTamanho, int pCamadasTamanho);
+    virtual ~Representacao();
 
-  ProfessorDisciplina* at(int pDia, int pBloco, int pCamada);
-  ProfessorDisciplina* at(int position);
+    int getPosition(int pDia, int pBloco, int pCamada);
 
-  virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-  virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+    ProfessorDisciplina* at(int pDia, int pBloco, int pCamada);
+    ProfessorDisciplina* at(int position);
 
-  void get3DMatrix(int pLinear, int* triDimensional);
+    virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
+    virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
-  std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
+    void get3DMatrix(int pLinear, int* triDimensional);
 
-  int getFirstDisciplina(Disciplina* pDisciplina);
-  int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
-  
-  int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
+    std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
 
-  virtual double getObjectiveFunction() = 0;
+    int getFirstDisciplina(Disciplina* pDisciplina);
+    int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
+
+    int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
+
+    virtual double getObjectiveFunction() = 0;
 protected:
-  int blocosTamanho;
-  int camadasTamanho;
+    int blocosTamanho;
+    int camadasTamanho;
 
-  int size;
+    int size;
 
-  std::vector<std::string> blocos;
-  std::vector<std::string> camadas;
+    std::vector<std::string> blocos;
+    std::vector<std::string> camadas;
 
-  std::vector<ProfessorDisciplina*> matriz;
-  std::vector<std::string> alocados;
+    std::vector<ProfessorDisciplina*> matriz;
+    std::vector<std::string> alocados;
 
-  void initMatriz();
-  int getPosition(int pDia, int pBloco, int pCamada);
+    void initMatriz();
 };
 
-#endif	/* REPRESENTACAO_H */
+#endif /* REPRESENTACAO_H */
 

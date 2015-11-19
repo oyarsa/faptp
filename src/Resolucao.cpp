@@ -17,7 +17,9 @@ void Resolucao::init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
 
 void Resolucao::initDefault() {
     horarioProfessorColisaoMax = 2;
-    
+    horarioCruzamentoFilhos = 2;
+    horarioCruzamentoTentativasMax = 1;
+
     gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
     gradeGraspVizinhos = RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEDAULT;
 
@@ -224,35 +226,61 @@ void Resolucao::atualizarDisciplinasIndex() {
 
 Solucao* Resolucao::gerarHorarioAG() {
     Solucao *solucaoAG;
-    std::vector<Solucao*> populacaoInicial = gerarHorarioAGPopulacaoInicial();
-    int iMax = (populacaoInicial.size() * horarioTorneioPopulacao) * horarioTorneioPares;
+    std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
+
+    std::vector<Solucao*> parVencedor;
+    std::vector<Solucao*> filhos;
+
+    int iMax = (populacao.size() * horarioTorneioPopulacao) * horarioTorneioPares;
 
     for (int i = 0; i < iMax; i++) {
-        std::vector<Solucao*> parVencedor = gerarHorarioAGTorneioPar(populacaoInicial);
+        parVencedor = gerarHorarioAGTorneioPar(populacao);
+
+        filhos = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
+        populacao.insert(populacao.end(), filhos.begin(), filhos.end());
+        filhos = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+        populacao.insert(populacao.end(), filhos.begin(), filhos.end());
+
+        gerarHorarioAGSobrevivenciaElitismo(populacao);
     }
+    
+    /**
+     * TODO: mutação
+     */
+
+    gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
+    solucaoAG = populacao[0];
 
     return solucaoAG;
 }
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     std::vector<Solucao*> solucoesAG;
+
     Aleatorio aleatorio;
+
+    Disciplina *disciplinaAleatoria;
+    Professor *professorSelecionado;
+
+    std::string dId;
+    std::string pId;
+    std::string pdId;
+
     int randInt;
+
+    bool inserted;
+    bool professorPossuiCreditos;
+
+    std::map<std::string, int> creditosUtilizadosProfessor;
+    std::map<std::string, int> colisaoProfessor;
 
     while (solucoesAG.size() != horarioPopulacaoInicial) {
         Solucao *solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
-
         int i = 0;
 
-        std::map<std::string, int> creditosUtilizadosProfessor;
-        std::map<std::string, int> colisaoProfessor;
-        Disciplina *disciplinaAleatoria;
-        Professor *professorSelecionado;
-        std::string dId;
-        std::string pId;
-        std::string pdId;
-        bool inserted;
-        bool professorPossuiCreditos;
+        creditosUtilizadosProfessor.clear();
+        colisaoProfessor.clear();
+
         for (const auto& par : periodoXdisciplina) {
 
             std::vector<Disciplina*> disciplinas = par.second;
@@ -336,7 +364,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                         } else {
                             bloco += 2;
                         }
-                        
+
                         colisaoProfessor[dId] = 0;
                     }
                 }
@@ -380,7 +408,7 @@ Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulaca
     double randomFO;
     Aleatorio aleatorio;
     int randInt;
-    
+
     int populacaoTorneioMax = horarioTorneioPopulacao * solucoesPopulacao.size();
 
     while (torneioCandidatos.size() <= populacaoTorneioMax && solucoesPopulacao.size() != 0) {
@@ -397,6 +425,148 @@ Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulaca
     }
 
     return vencedor;
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2) {
+    std::vector<Solucao*> filhos;
+    std::vector<ProfessorDisciplina*> matrizBackup;
+
+    int camadasMax = horarioCruzamentoCamadas * camadasTamanho;
+    int numFilhos = 0;
+
+    int camadaPeriodo, diaSemana, blocoHorario;
+    int posicao, posicaoX;
+    bool success;
+
+    ProfessorDisciplina *e;
+    ProfessorDisciplina *g;
+
+    Aleatorio aleatorio;
+
+    Solucao *filho;
+
+    do {
+
+        filho = solucaoPai1->clone();
+
+        for (int i = 0; i < camadasMax; i++) {
+
+            camadaPeriodo = aleatorio.randomInt() % camadasTamanho;
+
+            for (int j = 0, tentativas = 0; j < horarioCruzamentoDias;) {
+                success = false;
+
+                // De segunda a sábado
+                diaSemana = aleatorio.randomInt() % 6;
+                blocoHorario = aleatorio.randomInt() % blocosTamanho;
+
+                posicao = filho->horario->getPosition(diaSemana, blocoHorario, camadaPeriodo);
+
+                e = solucaoPai2->horario->at(posicao);
+                g = filho->horario->at(posicao);
+
+                // Backup
+                matrizBackup = filho->horario->matriz;
+
+                if (e == g) {
+                    // nada a fazer
+                    success = true;
+                } else if (e == NULL) {
+                    // Remove G
+                    posicaoX = filho->horario->getPosition(diaSemana, blocoHorario, camadaPeriodo);
+                    filho->horario->matriz[posicaoX] = NULL;
+
+                    success = gerarHorarioAGCruzamentoAleatorioReparo(filho, diaSemana, blocoHorario, camadaPeriodo);
+                    if (!success) {
+                        filho->horario->matriz = matrizBackup;
+                    }
+                } else if (g == NULL) {
+                    // Recupera primeira ocorrencia da disciplina E
+                    posicaoX = filho->horario->getFirstDisciplina(e->disciplina);
+                    // Se o professor da primeira ocorrencia for o mesmo professor da disciplina E
+                    if (filho->horario->matriz[posicaoX]->professor == e->professor) {
+                        // Remove primeira ocorrencia de E
+                        filho->horario->matriz[posicaoX] = NULL;
+
+                        success = filho->horario->insert(diaSemana, blocoHorario, camadaPeriodo, e);
+                        if (!success) {
+                            filho->horario->matriz = matrizBackup;
+                        }
+                    }
+                } else {
+                    // Recupera primeira ocorrencia da disciplina E
+                    posicaoX = filho->horario->getFirstDisciplina(e->disciplina);
+                    // Se o professor da primeira ocorrencia for o mesmo professor da disciplina E
+                    if (filho->horario->matriz[posicaoX]->professor == e->professor) {
+
+                        // Remove primeira ocorrencia de E
+                        filho->horario->matriz[posicaoX] = NULL;
+
+                        // insere E
+                        success = filho->horario->insert(diaSemana, blocoHorario, camadaPeriodo, e);
+                        if (!success) {
+                            success = gerarHorarioAGCruzamentoAleatorioReparo(filho, diaSemana, blocoHorario, camadaPeriodo);
+                            if (!success) {
+                                filho->horario->matriz = matrizBackup;
+                            }
+                        }
+                    }
+                }
+
+                if (success || tentativas >= horarioCruzamentoTentativasMax) {
+                    j++;
+                    tentativas = 0;
+                }
+            }
+        }
+        filhos.push_back(filho);
+        numFilhos++;
+    } while (numFilhos <= horarioCruzamentoFilhos);
+
+
+    return filhos;
+}
+
+bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG) {
+    bool success = false;
+    ProfessorDisciplina *g = solucaoFilho->horario->at(diaG, blocoG, camadaG);
+    
+    for (int blocoReparo = 0; blocoReparo < blocosTamanho; blocoReparo++) {
+        if (solucaoFilho->horario->at(diaG, blocoReparo, camadaG) == NULL) {
+            success = solucaoFilho->horario->insert(diaG, blocoReparo, camadaG, g);
+            if (success) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG) {
+    if (gerarHorarioAGCruzamentoAleatorioReparoBloco(solucaoFilho, diaG, blocoG, camadaG)) {
+        return true;
+    }
+    
+    for (int diaReparo = 0; diaReparo < 6; diaReparo++) {
+        if (diaReparo == diaG) {
+            continue;
+        }
+        
+        if (gerarHorarioAGCruzamentoAleatorioReparoBloco(solucaoFilho, diaReparo, blocoG, camadaG)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao) {
+    gerarHorarioAGSobrevivenciaElitismo(populacao, horarioPopulacaoInicial);
+}
+void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) {
+    std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
+    populacao.resize(populacaoMax);
 }
 
 int Resolucao::gerarGrade() {

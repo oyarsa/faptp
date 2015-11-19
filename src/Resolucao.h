@@ -44,9 +44,6 @@ public:
     void start(bool input);
 
     Solucao* gerarHorarioAG();
-    std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
-    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
-    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao);
 
     int gerarGrade();
 
@@ -57,10 +54,16 @@ public:
     int horarioPopulacaoInicial;
     int horarioProfessorColisaoMax;
     double horarioTaxaMutacao;
-    
+
     // Horário torneio
     double horarioTorneioPares;
     double horarioTorneioPopulacao;
+    
+    // Horário cruzamento
+    int horarioCruzamentoFilhos;
+    int horarioCruzamentoDias;
+    double horarioCruzamentoCamadas;
+    int horarioCruzamentoTentativasMax;
 
     // Grade tipo de construção
     int gradeTipoConstrucao;
@@ -107,6 +110,15 @@ private:
     std::vector<Disciplina*> ordenarDisciplinas();
     std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
     void atualizarDisciplinasIndex();
+
+    std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
+    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao);
+    std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2);
+    bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
+    bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
+    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
+    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
 
     int gerarGradeTipoGuloso();
 
