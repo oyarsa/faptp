@@ -28,6 +28,11 @@ double Solucao::getObjectiveFunction() {
   
   Grade *grade;
 
+  /**
+   * TODO: armazenar função objetivo de forma a ser reatualizada somente quando
+   * tiver alguma alteração
+   */
+  
   double fo = 0;
 
   for (; gIter != gIterEnd; ++gIter) {
