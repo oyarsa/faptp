@@ -49,6 +49,9 @@ void Resolucao::carregarDados() {
 void Resolucao::carregarDadosProfessores() {
     const auto jsonProfessores = jsonRoot["professores"];
 
+    /**
+     * TODO: dias disponíveis dos professores [impacta no AG]
+     */
     for (auto i = 0; i < jsonProfessores.size(); i++) {
         const auto id = jsonProfessores[i]["id"].asString();
         const auto nome = jsonProfessores[i]["nome"].asString();
