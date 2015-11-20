@@ -44,8 +44,9 @@ int main(int argc, char** argv) {
 
     auto inicioHorario = clock();
     
-    std::cout << "Montando horarios..." << std::endl;
+    std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
     resolucaoGrasp.gerarHorarioAG();
+    resolucaoGrasp.showResult();
     
     auto fimHorario = clock();
     std::cout << "Tempo do horario: " << (fimHorario - inicioHorario) << std::endl << std::endl;
@@ -53,6 +54,7 @@ int main(int argc, char** argv) {
     auto inicio = clock();
 
     // Inicia a execução do algoritmo
+    std::cout << "\nMontando grades [File + Grasp]..." << std::endl;
     resolucaoGrasp.start();
 
     auto fim = clock();
