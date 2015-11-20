@@ -46,6 +46,8 @@ public:
     Solucao* gerarHorarioAG();
 
     int gerarGrade();
+    
+    void showResult();
 
     /*
      Parâmetros da execução da solução
@@ -136,6 +138,8 @@ private:
     int gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult);
     std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
     int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante);
+    
+    void showResult(Solucao *pSolucao);
 };
 
 #endif /* RESOLUCAO_H */

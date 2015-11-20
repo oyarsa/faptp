@@ -39,7 +39,6 @@ void Resolucao::carregarDados() {
 
         carregarDadosDisciplinas();
         carregarDadosProfessores();
-        carregarDadosProfessorDisciplinas();
         carregarAlunoPerfis();
     } else {
         std::cerr << "We had a problem reading file (" << filename << ")\n";
@@ -175,6 +174,8 @@ void Resolucao::start(bool input) {
 void Resolucao::carregarSolucao() {
     const auto& jsonHorario = jsonRoot["horario"];
 
+    carregarDadosProfessorDisciplinas();
+
     Solucao *solucaoLeitura = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
     int bloco, dia, camada;
 
@@ -243,13 +244,15 @@ Solucao* Resolucao::gerarHorarioAG() {
 
         gerarHorarioAGSobrevivenciaElitismo(populacao);
     }
-    
+
     /**
      * TODO: mutação
      */
 
     gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
     solucaoAG = populacao[0];
+
+    solucao = solucaoAG;
 
     return solucaoAG;
 }
@@ -530,7 +533,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solu
 bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG) {
     bool success = false;
     ProfessorDisciplina *g = solucaoFilho->horario->at(diaG, blocoG, camadaG);
-    
+
     for (int blocoReparo = 0; blocoReparo < blocosTamanho; blocoReparo++) {
         if (solucaoFilho->horario->at(diaG, blocoReparo, camadaG) == NULL) {
             success = solucaoFilho->horario->insert(diaG, blocoReparo, camadaG, g);
@@ -539,7 +542,7 @@ bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFi
             }
         }
     }
-    
+
     return false;
 }
 
@@ -547,23 +550,24 @@ bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, 
     if (gerarHorarioAGCruzamentoAleatorioReparoBloco(solucaoFilho, diaG, blocoG, camadaG)) {
         return true;
     }
-    
+
     for (int diaReparo = 0; diaReparo < 6; diaReparo++) {
         if (diaReparo == diaG) {
             continue;
         }
-        
+
         if (gerarHorarioAGCruzamentoAleatorioReparoBloco(solucaoFilho, diaReparo, blocoG, camadaG)) {
             return true;
         }
     }
-    
+
     return false;
 }
 
 void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao) {
     gerarHorarioAGSobrevivenciaElitismo(populacao, horarioPopulacaoInicial);
 }
+
 void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) {
     std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
     populacao.resize(populacaoMax);
@@ -1012,18 +1016,7 @@ int Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         std::cout << "BEST FIT: " << bestFO << std::endl;
 
     if (printResult) {
-        const auto& grades = pSolucao->grades;
-        for (const auto& par : grades) {
-            const auto gradeAtual = par.second;
-            std::cout << gradeAtual->alunoPerfil->id << ":\n";
-            const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
-            for (const auto disc : discEscolhidas) {
-
-                std::cout << disc->nome << " ";
-            }
-            std::cout << " " << gradeAtual->getObjectiveFunction() << "\n";
-        }
-        std::cout << "\nFO da solucao: " << bestFO << std::endl;
+        showResult(pSolucao);
     }
 }
 
@@ -1071,4 +1064,23 @@ int Resolucao::getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) {
     }
 
     return distancia;
+}
+
+void Resolucao::showResult() {
+    showResult(solucao);
+}
+
+void Resolucao::showResult(Solucao* pSolucao) {
+    const auto& grades = pSolucao->grades;
+    for (const auto& par : grades) {
+        const auto gradeAtual = par.second;
+        std::cout << gradeAtual->alunoPerfil->id << ":\n";
+        const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
+        for (const auto disc : discEscolhidas) {
+
+            std::cout << disc->nome << " ";
+        }
+        std::cout << " " << gradeAtual->getObjectiveFunction() << "\n";
+    }
+    std::cout << "\nFO da solucao: " << pSolucao->getObjectiveFunction() << std::endl;
 }
