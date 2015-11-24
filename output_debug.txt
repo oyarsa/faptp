@@ -1,0 +1,34 @@
+
+Montando horarios [AG + Grasp]...
+GRADE:
+B A1  2
+GRADE_PARCIAL:
+E A2  2
+NOVO:
+A1 B F E C D  6.2
+PASSOU:
+F A2 E  3
+PAU:
+F E A1  3.1
+
+FO da solucao: 16.3
+Tempo do horario: 4348849
+
+
+Montando grades [File + Grasp]...
+GRADE:
+A1 B  3
+GRADE_PARCIAL:
+A2  1
+NOVO:
+A1 B D C  5.1
+PASSOU:
+A2  1
+PAU:
+A1  2
+
+FO da solucao: 12.1
+Tempo: 11308
+
+RUN FINISHED; exit value 0; real time: 4s; user: 80ms; system: 4s
+
