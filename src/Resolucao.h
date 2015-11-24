@@ -45,7 +45,7 @@ public:
 
     Solucao* gerarHorarioAG();
 
-    int gerarGrade();
+    double gerarGrade();
     
     void showResult();
 
@@ -85,7 +85,7 @@ private:
     std::map<std::string, int> disciplinasIndex;
     std::vector<Disciplina*> disciplinas;
 
-    std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
+    std::map< std::string, std::vector<Disciplina*> > periodoXdisciplina;
 
     std::map<std::string, AlunoPerfil*> alunoPerfis;
 
@@ -122,11 +122,11 @@ private:
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
 
-    int gerarGradeTipoGuloso();
+    double gerarGradeTipoGuloso();
 
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep);
-    int gerarGradeTipoCombinacaoConstrutiva();
+    double gerarGradeTipoCombinacaoConstrutiva();
 
     Solucao* gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
 
@@ -134,8 +134,8 @@ private:
     Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *pSolucao);
-    int gerarGradeTipoGrasp();
-    int gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult);
+    double gerarGradeTipoGrasp();
+    double gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult);
     std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
     int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante);
     

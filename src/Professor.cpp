@@ -41,23 +41,23 @@ void Professor::setCreditoMaximo(int pCreditoMaximo) {
     creditoMaximo = pCreditoMaximo;
 }
 
-void Professor::setDiaDisponivel(unsigned int dia, bool value) {
+void Professor::setDiaDisponivel(unsigned int dia, int bloco, bool value) {
   if (isDiaValido(dia)) {
-    diasDisponiveis[dia] = value;
+    diasDisponiveis[dia][bloco] = value;
   }
 }
 
-void Professor::setDiaDisponivel(unsigned int dia) {
-  setDiaDisponivel(dia, true);
+void Professor::setDiaDisponivel(unsigned int dia, int bloco) {
+  setDiaDisponivel(dia, bloco, true);
 }
 
-void Professor::unsetDiaDisponivel(unsigned int dia) {
-  setDiaDisponivel(dia, false);
+void Professor::unsetDiaDisponivel(unsigned int dia, int bloco) {
+  setDiaDisponivel(dia, bloco, false);
 }
 
-bool Professor::isDiaDisponivel(unsigned int dia) {
+bool Professor::isDiaDisponivel(unsigned int dia, int bloco) {
   if (isDiaValido(dia)) {
-    return diasDisponiveis[dia];
+    return diasDisponiveis[dia][bloco];
   }
 
   return false;
