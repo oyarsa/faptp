@@ -62,13 +62,13 @@ void Resolucao::carregarDadosProfessores() {
         if (jsonProfessores[i].isMember("disponibilidade") == 1) {
             const auto disponibilidade = jsonProfessores[i]["disponibilidade"];
             for (int i = 0; i < disponibilidade.size(); i++) {
-                
+
                 for (int j = 0; j < disponibilidade[i].size(); j++) {
                     professores[id]->diasDisponiveis[i][j] = (disponibilidade[i][j] > 0);
                 }
             }
         }
-        
+
         const auto& competencias = jsonProfessores[i]["competencias"];
         for (int j = 0; j < competencias.size(); j++) {
 
@@ -240,24 +240,28 @@ Solucao* Resolucao::gerarHorarioAG() {
     std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
 
     std::vector<Solucao*> parVencedor;
-    std::vector<Solucao*> filhos;
+    std::vector<Solucao*> filhos1;
+    std::vector<Solucao*> filhos2;
+    std::vector<Solucao*> geneX;
 
     int iMax = (populacao.size() * horarioTorneioPopulacao) * horarioTorneioPares;
 
     for (int i = 0; i < iMax; i++) {
         parVencedor = gerarHorarioAGTorneioPar(populacao);
 
-        filhos = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
-        populacao.insert(populacao.end(), filhos.begin(), filhos.end());
-        filhos = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
-        populacao.insert(populacao.end(), filhos.begin(), filhos.end());
+        filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
+        filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+
+        // Adiciona o segund ogrupo de filhos no primeiro vetor
+        filhos1.insert(filhos1.end(), filhos2.begin(), filhos2.end());
+
+        geneX = gerarHorarioAGMutacao(filhos1);
+
+        populacao.insert(populacao.end(), filhos1.begin(), filhos1.end());
+        populacao.insert(populacao.end(), geneX.begin(), geneX.end());
 
         gerarHorarioAGSobrevivenciaElitismo(populacao);
     }
-
-    /**
-     * TODO: mutação
-     */
 
     gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
     solucaoAG = populacao[0];
@@ -286,6 +290,12 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
 
     std::map<std::string, int> creditosUtilizadosProfessor;
     std::map<std::string, int> colisaoProfessor;
+
+    /**
+     * TODO: ordenar os professores com menos blocos disponíveis para dar aula
+     * Priorizar esses professores para que eles tenham as aulas montadas
+     * antes dos outros professores
+     */
 
     while (solucoesAG.size() != horarioPopulacaoInicial) {
         Solucao *solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
@@ -581,6 +591,72 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &popul
 void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) {
     std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
     populacao.resize(populacaoMax);
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> filhos) {
+    std::vector<Solucao*> geneX;
+    Solucao *solucaoTemp;
+
+    Aleatorio aleatorio;
+    double porcentagem;
+
+    // Mutação dos filhos
+    for (int j = 0; j < filhos.size(); j++) {
+        porcentagem = ((aleatorio.randomInt() % 100) / 100);
+
+        if (porcentagem <= horarioMutacaoProbabilidade) {
+            solucaoTemp = gerarHorarioAGMutacao(filhos[j]);
+
+            if (solucaoTemp != NULL) {
+                geneX.push_back(solucaoTemp);
+            }
+        }
+    }
+
+    return geneX;
+}
+
+Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
+    Aleatorio aleatorio;
+    bool success = false;
+
+    int camadaX;
+    int diaX1, diaX2;
+    int blocoX1, blocoX2;
+    int x1, x2;
+
+    ProfessorDisciplina *pdX1, *pdX2;
+    std::vector<ProfessorDisciplina*> backup;
+
+    for (int i = 0; i < horarioMutacaoTentativas; i++) {
+        camadaX = aleatorio.randomInt() % camadasTamanho;
+
+        diaX1 = aleatorio.randomInt() % 6;
+        diaX2 = aleatorio.randomInt() % 6;
+
+        blocoX1 = aleatorio.randomInt() % blocosTamanho;
+        blocoX2 = aleatorio.randomInt() % blocosTamanho;
+
+        x1 = pSolucao->horario->getPosition(diaX1, blocoX1, camadaX);
+        x2 = pSolucao->horario->getPosition(diaX2, blocoX2, camadaX);
+
+        backup = pSolucao->horario->matriz;
+
+        pdX1 = pSolucao->horario->at(x1);
+        pdX2 = pSolucao->horario->at(x2);
+
+        if (pdX1 == pdX2) {
+
+        } else if (pdX1 == NULL) {
+
+        } else if (pdX2 == NULL) {
+
+        } else {
+
+        }
+    }
+
+    return success ? pSolucao : NULL;
 }
 
 double Resolucao::gerarGrade() {
