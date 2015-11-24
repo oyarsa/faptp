@@ -40,10 +40,8 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
         std::cout << "(" << position << ")" << std::endl;
 
     if (alocados[position] == "" || force) {
-
         professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
                 pProfessorDisciplina->professor->getId());
-
         if (!professorAlocado || force) {
             return Representacao::insert(pDia, pBloco, pCamada, pProfessorDisciplina, force);
         }

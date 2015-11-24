@@ -86,5 +86,14 @@ bool Disciplina::isPreRequisito(std::string pDisciplina) {
 }
 
 void Disciplina::addProfessorCapacitado(Professor *professor) {
-    professoresCapacitados.push_back(professor);
+    professoresCapacitados.insert(
+            std::lower_bound(
+                std::begin(professoresCapacitados),
+                std::end(professoresCapacitados), 
+                professor, 
+                [](Professor *a, Professor *b) {
+                    return a->getNumDisponibilidade() < b->getNumDisponibilidade();
+                })
+            , professor
+            );
 }

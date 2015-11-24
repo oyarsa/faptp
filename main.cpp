@@ -20,6 +20,7 @@
 
 int main(int argc, char** argv) {
     verbose = false;
+    experimento = false;
 
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
@@ -49,21 +50,26 @@ int main(int argc, char** argv) {
 
     auto inicioHorario = clock();
 
-    std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
+    if (!experimento)
+        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
     resolucaoGrasp.gerarHorarioAG();
-    resolucaoGrasp.showResult();
+    if (!experimento)
+        resolucaoGrasp.showResult();
 
     auto fimHorario = clock();
     double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
-    std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+    if (!experimento)
+        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
     auto inicio = clock();
 
     // Inicia a execução do algoritmo
-    std::cout << "\nMontando grades [File + Grasp]..." << std::endl;
+    if (!experimento)
+        std::cout << "\nMontando grades [File + Grasp]..." << std::endl;
     resolucaoGrasp.start();
 
     auto fim = clock();
     double diff2 = ((float) (fim - inicio)) / (100.0 * 100.0 * 100.0);
-    std::cout << "Tempo: " << (diff2) << "s" << std::endl;
+    if (!experimento)
+        std::cout << "Tempo: " << (diff2) << "s" << std::endl;
 }

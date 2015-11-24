@@ -1,4 +1,5 @@
 #include "Util.h"
+#include "includes/parametros.h"
 
 Util::Util() {
   srand(time(NULL));
@@ -48,7 +49,8 @@ int Util::randomBetween(int min, int max) {
 
   if (max < min) {
     random = -1;
-    std::cerr << "The min number is biggest or equal to min";
+    if (verbose)
+        std::cerr << "The min number is biggest or equal to min";
   } else if (max == min) {
     random = max;
   } else if (max != 0) {
