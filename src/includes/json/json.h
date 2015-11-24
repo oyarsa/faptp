@@ -396,8 +396,8 @@ namespace Json {
     class JSON_API Exception : public std::exception {
     public:
         Exception(std::string const& msg);
-        ~Exception() throw () override;
-        char const* what() const throw () override;
+        ~Exception() throw ();
+        char const* what() const throw ();
     protected:
         std::string const msg_;
     };
@@ -1574,9 +1574,9 @@ namespace Json {
         Json::Value settings_;
 
         CharReaderBuilder();
-        ~CharReaderBuilder() override;
+        ~CharReaderBuilder();
 
-        CharReader* newCharReader() const override;
+        CharReader* newCharReader() const;
 
         /** \return true if 'settings' are legal and consistent;
          *   otherwise, indicate bad settings via 'invalid'.
@@ -1770,12 +1770,12 @@ namespace Json {
         Json::Value settings_;
 
         StreamWriterBuilder();
-        ~StreamWriterBuilder() override;
+        ~StreamWriterBuilder();
 
         /**
          * \throw std::exception if something goes wrong (e.g. invalid settings)
          */
-        StreamWriter* newStreamWriter() const override;
+        StreamWriter* newStreamWriter() const;
 
         /** \return true if 'settings' are legal and consistent;
          *   otherwise, indicate bad settings via 'invalid'.
@@ -1816,7 +1816,7 @@ namespace Json {
     public:
         FastWriter();
 
-        ~FastWriter() override {
+        ~FastWriter() {
         }
 
         void enableYAMLCompatibility();
@@ -1831,7 +1831,7 @@ namespace Json {
         void omitEndingLineFeed();
 
     public: // overridden from Writer
-        std::string write(const Value& root) override;
+        std::string write(const Value& root);
 
     private:
         void writeValue(const Value& value);
@@ -1870,7 +1870,7 @@ namespace Json {
     public:
         StyledWriter();
 
-        ~StyledWriter() override {
+        ~StyledWriter() {
         }
 
     public: // overridden from Writer
@@ -1878,7 +1878,7 @@ namespace Json {
          * \param root Value to serialize.
          * \return String containing the JSON document that represents the root value.
          */
-        std::string write(const Value& root) override;
+        std::string write(const Value& root);
 
     private:
         void writeValue(const Value& value);

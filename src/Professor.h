@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstring>
+#include <vector>
 #include <map>
 
 #include "UUID.h"
@@ -25,9 +26,9 @@ public:
 
   void setCreditoMaximo(int pCreditoMaximo);
   
-  void setDiaDisponivel(unsigned int dia);
-  void unsetDiaDisponivel(unsigned int dia);
-  bool isDiaDisponivel(unsigned int dia);
+  void setDiaDisponivel(unsigned int dia, int bloco);
+  void unsetDiaDisponivel(unsigned int dia, int bloco);
+  bool isDiaDisponivel(unsigned int dia, int bloco);
 
   void addCompetencia(std::string pDisciplina, double pPeso);
   bool haveCompetencia(std::string pDisciplina);
@@ -37,14 +38,14 @@ private:
   std::string nome;
   int creditoMaximo;
 
-  bool diasDisponiveis[7];
+  std::vector< std::vector<bool> > diasDisponiveis;
   
   std::map<std::string, double> competencias;
 
   void init(std::string pNome, std::string pId);
 
   bool isDiaValido(unsigned int dia);
-  void setDiaDisponivel(unsigned int dia, bool value);
+  void setDiaDisponivel(unsigned int dia, int bloco, bool value);
 };
 
 #endif	/* PROFESSOR_H */

@@ -1,7 +1,6 @@
 #include "Aleatorio.h"
 
-Aleatorio::Aleatorio()
-: dist {
+Aleatorio::Aleatorio() : dist {
   0, MAX_RANDOM
 },
 seed{static_cast<TipoSeed> (
