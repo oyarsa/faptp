@@ -25,7 +25,7 @@ void Resolucao::initDefault() {
 }
 
 void Resolucao::carregarDados() {
-    std::string filename = JSON_INPUT;
+    std::string filename = arquivoEntrada;
     std::ifstream myfile(filename);
 
     if (myfile.is_open()) {
