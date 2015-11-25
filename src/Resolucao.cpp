@@ -1,17 +1,13 @@
 #include "includes/parametros.h"
 #include "Resolucao.h"
 
-Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
-    init(pBlocosTamanho, pCamadasTamanho, pPerfisTamanho);
-}
-
-void Resolucao::init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
-    blocosTamanho = pBlocosTamanho;
-    camadasTamanho = pCamadasTamanho;
-    perfisTamanho = pPerfisTamanho;
-
+Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pArquivoEntrada) 
+    : blocosTamanho(pBlocosTamanho)
+    , camadasTamanho(pCamadasTamanho)
+    , perfisTamanho(pPerfisTamanho)
+    , arquivoEntrada(pArquivoEntrada)
+{
     carregarDados();
-
     initDefault();
 }
 
@@ -173,14 +169,14 @@ Resolucao::~Resolucao() {
 
 }
 
-void Resolucao::start() {
-    start(true);
+double Resolucao::start() {
+    return start(true);
 }
 
-void Resolucao::start(bool input) {
+double Resolucao::start(bool input) {
     if (input) {
         carregarSolucao();
-        gerarGrade();
+        return gerarGrade();
     }
 }
 
@@ -1058,7 +1054,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
 }
 
 double Resolucao::gerarGradeTipoGrasp() {
-    return gerarGradeTipoGrasp(solucao, true);
+    return gerarGradeTipoGrasp(solucao, !experimento);
 }
 
 double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {

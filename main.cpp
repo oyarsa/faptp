@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <chrono>
 
 #include "template/Algorithms.h"
 
@@ -18,10 +19,36 @@
 #include "src/Util.h"
 #include "src/Resolucao.h"
 
-int main(int argc, char** argv) {
-    verbose = false;
-    experimento = false;
+void comArgumentos(int argc, char** argv) {
+    experimento = true;
+    
+    int numVizinhos;
+    double tempoConstr, alfaGrasp;
+    
+    std::ifstream arquivoConf(argv[1]);
+    std::string arquivoEntrada = argv[2];
 
+    arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
+    
+    Resolucao resolucaoGrasp(3, 2, 5, arquivoEntrada);
+    
+    resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+
+    resolucaoGrasp.gradeGraspVizinhos = numVizinhos;
+    resolucaoGrasp.gradeGraspTempoConstrucao = tempoConstr;
+
+    resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
+    resolucaoGrasp.gradeAlfa = alfaGrasp;
+
+    auto inicioTempo = std::chrono::steady_clock::now();
+    auto fo = resolucaoGrasp.start();
+    auto fimTempo = std::chrono::steady_clock::now();
+    
+    std::cout << fo << " " << std::chrono::duration_cast<chrono::milliseconds>
+                (fimTempo - inicioTempo).count() << "\n";
+}
+
+void semArgumentos() {
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
     Resolucao resolucaoGrasp(3, 2, 5);
@@ -50,16 +77,16 @@ int main(int argc, char** argv) {
 
     auto inicioHorario = clock();
 
-    if (!experimento)
-        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
-    resolucaoGrasp.gerarHorarioAG();
-    if (!experimento)
-        resolucaoGrasp.showResult();
-
-    auto fimHorario = clock();
-    double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
-    if (!experimento)
-        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+    //    if (!experimento)
+    //        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
+    //    resolucaoGrasp.gerarHorarioAG();
+    //    if (!experimento)
+    //        resolucaoGrasp.showResult();
+    //
+    //    auto fimHorario = clock();
+    //    double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
+    //    if (!experimento)
+    //        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
     auto inicio = clock();
 
@@ -72,4 +99,15 @@ int main(int argc, char** argv) {
     double diff2 = ((float) (fim - inicio)) / (100.0 * 100.0 * 100.0);
     if (!experimento)
         std::cout << "Tempo: " << (diff2) << "s" << std::endl;
+}
+
+int main(int argc, char** argv) {
+    verbose = false;
+    experimento = false;
+
+    if (argc == 3) {
+        comArgumentos(argc, argv);
+    } else {
+        semArgumentos();
+    }
 }
