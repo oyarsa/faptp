@@ -18,8 +18,8 @@ class Disciplina {
   friend class Solucao;
   friend class Resolucao;
 public:
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade);
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade);
+  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
+  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
   Disciplina(const Disciplina& orig);
   virtual ~Disciplina();
 
@@ -51,6 +51,7 @@ private:
   std::string nome;
 
   int periodo;
+  int periodoMinimo;
   std::string curso;
 
   int cargaHoraria;
@@ -60,11 +61,12 @@ private:
   bool ofertada;
 
   std::vector<std::string> preRequisitos;
+  std::vector<std::string> coRequisitos;
   std::vector<std::string> equivalentes;
 
   std::vector<Professor*> professoresCapacitados;
 
-  void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade);
+  void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
 };
 
 #endif	/* DISCIPLINA_H */

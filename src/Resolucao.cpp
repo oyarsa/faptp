@@ -25,11 +25,9 @@ void Resolucao::initDefault() {
 }
 
 void Resolucao::carregarDados() {
-    std::string filename = arquivoEntrada;
-    std::ifstream myfile(filename);
+    std::ifstream myfile(arquivoEntrada);
 
     if (myfile.is_open()) {
-
         myfile >> jsonRoot;
         myfile.close();
 
@@ -37,7 +35,7 @@ void Resolucao::carregarDados() {
         carregarDadosProfessores();
         carregarAlunoPerfis();
     } else {
-        std::cerr << "We had a problem reading file (" << filename << ")\n";
+        std::cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
         throw 1;
     }
 }
@@ -95,8 +93,14 @@ void Resolucao::carregarDadosDisciplinas() {
         const auto cargahoraria = jsonDisciplinas[i]["carga"].asInt();
         const auto periodo = jsonDisciplinas[i]["periodo"].asInt();
         const auto turma = jsonDisciplinas[i]["turma"].asString();
+        const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asInt();
 
-        Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade);
+        Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
+        
+        const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
+        for (auto j = 0; j < corequisitos.size(); j++) {
+            disciplina->coRequisitos.push_back(corequisitos[j].asString());
+        }
 
         const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
         for (auto j = 0; j < prerequisitos.size(); j++) {
@@ -159,6 +163,18 @@ void Resolucao::carregarAlunoPerfis() {
         for (auto j = 0; j < jsonCursadas.size(); j++) {
             std::string cursada = jsonCursadas[j].asString();
             alunoPerfil->addCursada(cursada);
+        }
+
+        std::vector<Disciplina*> aprovadas;
+        
+        std::set_difference(disciplinas.begin(), disciplinas.end(),
+                alunoPerfil->restante.begin(), alunoPerfil->restante.end(),
+                std::inserter(aprovadas, aprovadas.begin()));
+        
+        auto& aprovadasNomes = alunoPerfil->aprovadas;
+        
+        for (const auto& aprovada : aprovadas) {
+            aprovadasNomes.push_back(aprovada->nome);
         }
 
         alunoPerfis[id] = alunoPerfil;
