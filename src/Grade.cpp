@@ -19,11 +19,11 @@ Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
 Grade::~Grade() {
 }
 
-bool Grade::hasPeriodoMinimo(const Disciplina* pDisciplina) {
+bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) {
     return alunoPerfil->periodo >= pDisciplina->periodoMinimo;
 }
 
-bool Grade::discRepetida(const Disciplina *pDisciplina) {
+bool Grade::discRepetida(const Disciplina* const pDisciplina) {
     // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplina
     // se encontra em suas listas de equivalências. Se sim, ela é uma disciplina
     // repetida e não pode ser inserida
@@ -47,7 +47,7 @@ bool Grade::discRepetida(const Disciplina *pDisciplina) {
     return false;
 }
 
-bool Grade::hasCoRequisitos(const Disciplina* pDisciplina) {
+bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina) {
     bool viavel = true;
 
     const auto& pDisciplinaCoRequisitos = pDisciplina->coRequisitos;
@@ -58,9 +58,13 @@ bool Grade::hasCoRequisitos(const Disciplina* pDisciplina) {
         if (disciplinasCursadas.size() > 0) {
             for (const auto& coRequisito : pDisciplinaCoRequisitos) {
                 const auto& equivalentes = getDisciplina(coRequisito)->equivalentes;
-                auto possuiPreReq = std::find_first_of(equivalentes.begin(), equivalentes.end(),
-                        disciplinasCursadas.begin(), disciplinasCursadas.end())
-                        != equivalentes.end();
+                auto possuiPreReq = (std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                        disciplinasCursadas.begin(), disciplinasCursadas.end()) != equivalentes.end())
+                        || (std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                        disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(),
+                        [](const std::string& a, const Disciplina* const b) {
+                            return a == b->nome;
+                        }) != equivalentes.end());
 
                 if (!possuiPreReq) {
                     viavel = false;
@@ -80,17 +84,13 @@ bool Grade::hasCoRequisitos(const Disciplina* pDisciplina) {
     return viavel;
 }
 
-bool Grade::havePreRequisitos(const Disciplina *pDisciplina) {
+bool Grade::havePreRequisitos(const Disciplina* const pDisciplina) {
     bool viavel = true;
 
-    std::vector<std::string> pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
+    const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
 
     if (pDisciplinaPreRequisitos.size() > 0) {
-        std::vector<std::string>& disciplinasAprovadas = alunoPerfil->aprovadas;
-
-        std::vector<std::string>::iterator dprIter = pDisciplinaPreRequisitos.begin();
-        std::vector<std::string>::iterator dprIterEnd = pDisciplinaPreRequisitos.end();
-        std::sort(dprIter, dprIterEnd);
+        const auto& disciplinasAprovadas = alunoPerfil->aprovadas;
 
         if (disciplinasAprovadas.size() > 0) {
             // Percorre a lista de disciplinas que são pre-requisitos da atual
@@ -119,7 +119,7 @@ bool Grade::havePreRequisitos(const Disciplina *pDisciplina) {
     return viavel;
 }
 
-bool Grade::checkCollision(const Disciplina* pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool colisao = false;
     int currentPositionHorario;
     int currentPositionGrade;
@@ -164,7 +164,7 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, const int pCamada, con
     return (!colisao);
 }
 
-bool Grade::isViable(const Disciplina* pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool viavel = havePreRequisitos(pDisciplina) &&
             checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
             !discRepetida(pDisciplina) &&
