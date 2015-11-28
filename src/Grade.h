@@ -49,12 +49,14 @@ private:
 
   void init();
   
-  bool havePreRequisitos(Disciplina *pDisciplina);
-  bool checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
-  bool isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  bool havePreRequisitos(const Disciplina* const pDisciplina);
+  bool hasPeriodoMinimo(const Disciplina* const pDisciplina);
+  bool hasCoRequisitos(const Disciplina* const pDisciplina);
+  bool checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+  bool isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
   //! Verifica se a disciplina sendo considerada não está na lista de equivalências
   //! de outra que já foi inserida
-  bool discRepetida(Disciplina *pDisciplina);
+  bool discRepetida(const Disciplina* const pDisciplina);
   
   void add(Disciplina* pDisciplina, int pCamada);
 };

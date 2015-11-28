@@ -38,6 +38,7 @@ private:
   double peso;
   
   std::vector<std::string> cursadas;
+  std::vector<std::string> aprovadas;
   std::vector<Disciplina*> restante;
   
   void init(double pPeso, std::string pId, std::string pTurma, int pPeriodo);

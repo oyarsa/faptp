@@ -19,11 +19,15 @@ Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
 Grade::~Grade() {
 }
 
-bool Grade::discRepetida(Disciplina* pDisciplina) {
+bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) {
+    return alunoPerfil->periodo >= pDisciplina->periodoMinimo;
+}
+
+bool Grade::discRepetida(const Disciplina* const pDisciplina) {
     // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplina
     // se encontra em suas listas de equivalências. Se sim, ela é uma disciplina
     // repetida e não pode ser inserida
-    for (const auto discAtual : disciplinasAdicionadas) {
+    for (const auto& discAtual : disciplinasAdicionadas) {
         const auto& equivalentes = discAtual->equivalentes;
         if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
@@ -33,7 +37,7 @@ bool Grade::discRepetida(Disciplina* pDisciplina) {
     // Percorre as disciplinas cursadas do aluno e verifica se o nome de pDisciplina
     // é equivalente a alguma. Se sim, ela é uma disciplina repetida e não pode
     // ser inserida
-    for (auto discAtual : alunoPerfil->cursadas) {
+    for (const auto& discAtual : alunoPerfil->cursadas) {
         const auto& equivalentes = getDisciplina(discAtual)->equivalentes;
         if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
@@ -43,35 +47,59 @@ bool Grade::discRepetida(Disciplina* pDisciplina) {
     return false;
 }
 
-bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
+bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina) {
     bool viavel = true;
 
-    std::vector<std::string> pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
+    const auto& pDisciplinaCoRequisitos = pDisciplina->coRequisitos;
 
-    if (pDisciplinaPreRequisitos.size() > 0) {
-        std::vector<std::string> disciplinasCursadas = alunoPerfil->cursadas;
-
-        std::vector<std::string>::iterator dprIter = pDisciplinaPreRequisitos.begin();
-        std::vector<std::string>::iterator dprIterEnd = pDisciplinaPreRequisitos.end();
-        std::sort(dprIter, dprIterEnd);
+    if (pDisciplinaCoRequisitos.size() > 0) {
+        const auto& disciplinasCursadas = alunoPerfil->cursadas;
 
         if (disciplinasCursadas.size() > 0) {
+            for (const auto& coRequisito : pDisciplinaCoRequisitos) {
+                const auto& equivalentes = getDisciplina(coRequisito)->equivalentes;
+                auto possuiPreReq = (std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                        disciplinasCursadas.begin(), disciplinasCursadas.end()) != equivalentes.end())
+                        || (std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                        disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(),
+                        [](const std::string& a, const Disciplina* const b) {
+                            return a == b->nome;
+                        }) != equivalentes.end());
 
-            //      std::vector<std::string>::iterator dcIter = disciplinasCursadas.begin();
-            //      std::vector<std::string>::iterator dcIterEnd = disciplinasCursadas.end();
-            //      std::sort(dcIter, dcIterEnd);
-            //
-            //      std::vector<std::string>::iterator foundPreRequisitos = std::search(dcIter, dcIterEnd, dprIter, dprIterEnd);
-            //      viavel = (foundPreRequisitos != dcIterEnd);
-            //std::set_symmetric_difference(dprIter, dcIter, dprIterEnd, dcIterEnd, std::back_inserter(preRequisitosRestantes)); //std::set_symmetric_difference();
+                if (!possuiPreReq) {
+                    viavel = false;
+                    break;
+                }
+            }
+        }
+    } else {
+        viavel = false;
+    }
 
+    if (!viavel) {
+        if (verbose)
+            std::cout << "Nao tem os pre requisitos" << std::endl;
+    }
+
+    return viavel;
+}
+
+bool Grade::havePreRequisitos(const Disciplina* const pDisciplina) {
+    bool viavel = true;
+
+    const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
+
+    if (pDisciplinaPreRequisitos.size() > 0) {
+        const auto& disciplinasAprovadas = alunoPerfil->aprovadas;
+
+        if (disciplinasAprovadas.size() > 0) {
             // Percorre a lista de disciplinas que são pre-requisitos da atual
             // e procura alguma disciplina equivalente deste pre-requisito
             // na lista de cursadas do aluno
             for (const auto& preRequisito : pDisciplinaPreRequisitos) {
                 const auto& equivalentes = getDisciplina(preRequisito)->equivalentes;
                 auto possuiPreReq = std::find_first_of(equivalentes.begin(), equivalentes.end(),
-                        disciplinasCursadas.begin(), disciplinasCursadas.end())
+                        disciplinasAprovadas.begin(), disciplinasAprovadas.end())
                         != equivalentes.end();
 
                 if (!possuiPreReq) {
@@ -80,19 +108,18 @@ bool Grade::havePreRequisitos(Disciplina *pDisciplina) {
                 }
             }
 
-            if (!viavel) {
-                if (verbose)
-                    std::cout << "Nao tem os pre requisitos" << std::endl;
-            }
         } else {
             viavel = false;
         }
     }
 
+    if (!viavel && verbose) {
+        std::cout << "Nao tem os pre requisitos" << std::endl;
+    }
     return viavel;
 }
 
-bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
+bool Grade::checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool colisao = false;
     int currentPositionHorario;
     int currentPositionGrade;
@@ -116,9 +143,7 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<Pro
                     }
                 }
 
-                /**
-                 * Se ainda não marcou colisão
-                 */
+                // Se ainda não marcou colisão
                 if (!colisao) {
 
                     professorDisciplinaTemp = currentProfessorDisciplina;
@@ -139,7 +164,7 @@ bool Grade::checkCollision(Disciplina* pDisciplina, int pCamada, std::vector<Pro
     return (!colisao);
 }
 
-bool Grade::isViable(Disciplina* pDisciplina, int pCamada, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
+bool Grade::isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool viavel = havePreRequisitos(pDisciplina) &&
             checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
             !discRepetida(pDisciplina) &&

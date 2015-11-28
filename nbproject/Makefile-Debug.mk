@@ -21,8 +21,8 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-MacOSX
-CND_DLIB_EXT=dylib
+CND_PLATFORM=MinGW-Windows
+CND_DLIB_EXT=dll
 CND_CONF=Debug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -71,91 +71,91 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/src/Aleatorio.o: src/Aleatorio.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Aleatorio.o src/Aleatorio.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Aleatorio.o src/Aleatorio.cpp
 
 ${OBJECTDIR}/src/AlunoPerfil.o: src/AlunoPerfil.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/AlunoPerfil.o src/AlunoPerfil.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/AlunoPerfil.o src/AlunoPerfil.cpp
 
 ${OBJECTDIR}/src/Disciplina.o: src/Disciplina.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Disciplina.o src/Disciplina.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Disciplina.o src/Disciplina.cpp
 
 ${OBJECTDIR}/src/Grade.o: src/Grade.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Grade.o src/Grade.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Grade.o src/Grade.cpp
 
 ${OBJECTDIR}/src/Horario.o: src/Horario.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Horario.o src/Horario.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Horario.o src/Horario.cpp
 
 ${OBJECTDIR}/src/PTP.o: src/PTP.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/PTP.o src/PTP.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/PTP.o src/PTP.cpp
 
 ${OBJECTDIR}/src/Professor.o: src/Professor.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Professor.o src/Professor.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Professor.o src/Professor.cpp
 
 ${OBJECTDIR}/src/ProfessorDisciplina.o: src/ProfessorDisciplina.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ProfessorDisciplina.o src/ProfessorDisciplina.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ProfessorDisciplina.o src/ProfessorDisciplina.cpp
 
 ${OBJECTDIR}/src/Representacao.o: src/Representacao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Representacao.o src/Representacao.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Representacao.o src/Representacao.cpp
 
 ${OBJECTDIR}/src/Resolucao.o: src/Resolucao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Resolucao.o src/Resolucao.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Resolucao.o src/Resolucao.cpp
 
 ${OBJECTDIR}/src/Solucao.o: src/Solucao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Solucao.o src/Solucao.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Solucao.o src/Solucao.cpp
 
 ${OBJECTDIR}/src/UUID.o: src/UUID.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/UUID.o src/UUID.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/UUID.o src/UUID.cpp
 
 ${OBJECTDIR}/src/Util.o: src/Util.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Util.o src/Util.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Util.o src/Util.cpp
 
 ${OBJECTDIR}/src/includes/jsoncpp.o: src/includes/jsoncpp.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/includes
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
 
 ${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/includes
 	${RM} "$@.d"
-	$(COMPILE.cc) -O3 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/parametros.o src/includes/parametros.cpp
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/parametros.o src/includes/parametros.cpp
 
 # Subprojects
 .build-subprojects:
@@ -163,7 +163,7 @@ ${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
 
 # Subprojects
 .clean-subprojects:
