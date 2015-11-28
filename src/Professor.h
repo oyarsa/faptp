@@ -22,6 +22,8 @@ public:
   std::string getId();
 
   std::string getNome();
+  
+  int getNumDisponibilidade() const;
   void setNome(std::string pNome);
 
   void setCreditoMaximo(int pCreditoMaximo);
@@ -38,7 +40,8 @@ private:
   std::string nome;
   int creditoMaximo;
 
-  std::vector< std::vector<bool> > diasDisponiveis;
+  std::vector<std::vector<bool>> diasDisponiveis;
+  int numDisponibilidade;
   
   std::map<std::string, double> competencias;
 

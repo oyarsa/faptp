@@ -91,6 +91,7 @@
       <compileType>
         <ccTool>
           <developmentMode>6</developmentMode>
+          <standard>8</standard>
           <commandLine>-std=c++11</commandLine>
         </ccTool>
       </compileType>
@@ -195,6 +196,7 @@
         </cTool>
         <ccTool>
           <developmentMode>6</developmentMode>
+          <standard>8</standard>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>

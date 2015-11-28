@@ -37,11 +37,11 @@
 
 class Resolucao {
 public:
-    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string arquivoEntrada="input.json");
     virtual ~Resolucao();
 
-    void start();
-    void start(bool input);
+    double start();
+    double start(bool input);
 
     Solucao* gerarHorarioAG();
 
@@ -82,7 +82,8 @@ private:
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
-
+    std::string arquivoEntrada;
+    
     std::map<std::string, Professor*> professores;
 
     std::map<std::string, int> disciplinasIndex;
@@ -98,7 +99,6 @@ private:
 
     Json::Value jsonRoot;
 
-    void init(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
     void initDefault();
 
     void carregarDados();

@@ -9,6 +9,7 @@
 #define	PARAMETROS_H
 
 extern bool verbose;
+extern bool experimento;
 
 #endif	/* PARAMETROS_H */
 
