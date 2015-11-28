@@ -49,6 +49,8 @@ void comArgumentos(int argc, char** argv) {
 }
 
 void semArgumentos() {
+    experimento = false;
+    
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
     Resolucao resolucaoGrasp(3, 2, 5);
@@ -77,16 +79,16 @@ void semArgumentos() {
 
     auto inicioHorario = clock();
 
-    //    if (!experimento)
-    //        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
-    //    resolucaoGrasp.gerarHorarioAG();
-    //    if (!experimento)
-    //        resolucaoGrasp.showResult();
-    //
-    //    auto fimHorario = clock();
-    //    double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
-    //    if (!experimento)
-    //        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+        if (!experimento)
+            std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
+        resolucaoGrasp.gerarHorarioAG();
+        if (!experimento)
+            resolucaoGrasp.showResult();
+    
+        auto fimHorario = clock();
+        double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
+        if (!experimento)
+            std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
     auto inicio = clock();
 
