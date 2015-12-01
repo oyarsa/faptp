@@ -90,7 +90,6 @@
       </toolsSet>
       <compileType>
         <ccTool>
-          <developmentMode>6</developmentMode>
           <standard>8</standard>
           <commandLine>-std=c++11</commandLine>
         </ccTool>
