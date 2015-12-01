@@ -49,8 +49,7 @@ int Util::randomBetween(int min, int max) {
 
   if (max < min) {
     random = -1;
-    if (verbose)
-        std::cerr << "The min number is biggest or equal to min";
+    std::cerr << "The min number is biggest or equal to min";
   } else if (max == min) {
     random = max;
   } else if (max != 0) {

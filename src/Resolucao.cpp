@@ -1,12 +1,11 @@
 #include "includes/parametros.h"
 #include "Resolucao.h"
 
-Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pArquivoEntrada) 
-    : blocosTamanho(pBlocosTamanho)
-    , camadasTamanho(pCamadasTamanho)
-    , perfisTamanho(pPerfisTamanho)
-    , arquivoEntrada(pArquivoEntrada)
-{
+Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pArquivoEntrada)
+: blocosTamanho(pBlocosTamanho)
+, camadasTamanho(pCamadasTamanho)
+, perfisTamanho(pPerfisTamanho)
+, arquivoEntrada(pArquivoEntrada) {
     carregarDados();
     initDefault();
 }
@@ -96,7 +95,7 @@ void Resolucao::carregarDadosDisciplinas() {
         const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asInt();
 
         Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
-        
+
         const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
         for (auto j = 0; j < corequisitos.size(); j++) {
             disciplina->coRequisitos.push_back(corequisitos[j].asString());
@@ -166,13 +165,13 @@ void Resolucao::carregarAlunoPerfis() {
         }
 
         std::vector<Disciplina*> aprovadas;
-        
+
         std::set_difference(disciplinas.begin(), disciplinas.end(),
                 alunoPerfil->restante.begin(), alunoPerfil->restante.end(),
                 std::inserter(aprovadas, aprovadas.begin()));
-        
+
         auto& aprovadasNomes = alunoPerfil->aprovadas;
-        
+
         for (const auto& aprovada : aprovadas) {
             aprovadasNomes.push_back(aprovada->nome);
         }
@@ -194,6 +193,10 @@ double Resolucao::start(bool input) {
         carregarSolucao();
         return gerarGrade();
     }
+
+    double fo = (gerarHorarioAG())->getObjectiveFunction();
+    showResult();
+    return fo;
 }
 
 void Resolucao::carregarSolucao() {
@@ -352,26 +355,25 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
 
                 // Se a disciplina ainda não tem professor alocado
                 if (disciplinaXprofessorDisciplina.count(dId) == 0) {
-//                    randInt = -1;
-//
-//                    do {
-//                        randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
-//
-//                        professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
-//                        pId = professorSelecionado->getId();
-//
-//                        if (creditosUtilizadosProfessor.count(pId) == 0) {
-//                            creditosUtilizadosProfessor[pId] = 0;
-//                        }
-//                        professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
-//                    } while (professorPossuiCreditos);
-                    
-                    int profNum = 0;
-                    
+
+                    /*do {
+                        randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
+
+                        professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
+                        pId = professorSelecionado->getId();
+
+                        if (creditosUtilizadosProfessor.count(pId) == 0) {
+                            creditosUtilizadosProfessor[pId] = 0;
+                        }
+                        professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+                    } while (professorPossuiCreditos);*/
+
+                    int profNum = 0;//randInt;
+
                     for (; profNum < disciplinaAleatoria->professoresCapacitados.size(); profNum++) {
                         const auto& professor = disciplinaAleatoria->professoresCapacitados[profNum];
                         pId = professor->getId();
-                        
+
                         if (creditosUtilizadosProfessor.count(pId) == 0) {
                             creditosUtilizadosProfessor[pId] = 0;
                         }
@@ -382,9 +384,10 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                             continue;
                         } else break;
                     }
-                    
+
                     creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
+                    pdId = pId + dId;
                     if (professorDisciplinas.count(pdId) == 0) {
                         professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[profNum], disciplinaAleatoria, pdId);
                     }
