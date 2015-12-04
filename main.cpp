@@ -63,7 +63,7 @@ void semArgumentos() {
     resolucaoGrasp.horarioTorneioPares = 0.2;
 
     // 25% dos filhos sofrerão mutação
-    resolucaoGrasp.horarioMutacaoProbabilidade = .25;
+    resolucaoGrasp.horarioMutacaoProbabilidade = 0;
     // Tentativa de mutar 3 genes
     resolucaoGrasp.horarioMutacaoTentativas = 3;
 
