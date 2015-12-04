@@ -628,7 +628,7 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &popul
 }
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> filhos) {
-    std::vector<Solucao*> geneX;
+    std::vector<Solucao*> genesX;
     Solucao *solucaoTemp;
 
     Aleatorio aleatorio;
@@ -642,12 +642,12 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
             solucaoTemp = gerarHorarioAGMutacao(filhos[j]);
 
             if (solucaoTemp != NULL) {
-                geneX.push_back(solucaoTemp);
+                genesX.push_back(solucaoTemp);
             }
         }
     }
 
-    return geneX;
+    return genesX;
 }
 
 Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
@@ -680,13 +680,25 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
         pdX2 = pSolucao->horario->at(x2);
 
         if (pdX1 == pdX2) {
-
+            // Nada a fazer
         } else if (pdX1 == NULL) {
-
+            if (pSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)) {
+                pSolucao->horario->matriz[x2] = NULL;
+                success = true;
+            }
         } else if (pdX2 == NULL) {
-
+            if (pSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+                pSolucao->horario->matriz[x1] = NULL;
+                success = true;
+            }
         } else {
-
+            pSolucao->horario->matriz[x1] = NULL;
+            pSolucao->horario->matriz[x2] = NULL;
+            
+            if (pSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)
+                    && pSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+                success = true;
+            }
         }
     }
 
