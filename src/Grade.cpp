@@ -17,6 +17,7 @@ Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
 }
 
 Grade::~Grade() {
+    
 }
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) {
