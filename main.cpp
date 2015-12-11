@@ -21,17 +21,17 @@
 
 void comArgumentos(int argc, char** argv) {
     experimento = true;
-    
+
     int numVizinhos;
     double tempoConstr, alfaGrasp;
-    
+
     std::ifstream arquivoConf(argv[1]);
     std::string arquivoEntrada = argv[2];
 
     arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
-    
+
     Resolucao resolucaoGrasp(3, 2, 5, arquivoEntrada);
-    
+
     resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
 
     resolucaoGrasp.gradeGraspVizinhos = numVizinhos;
@@ -43,14 +43,14 @@ void comArgumentos(int argc, char** argv) {
     auto inicioTempo = std::chrono::steady_clock::now();
     auto fo = resolucaoGrasp.start();
     auto fimTempo = std::chrono::steady_clock::now();
-    
+
     std::cout << fo << " " << std::chrono::duration_cast<chrono::milliseconds>
-                (fimTempo - inicioTempo).count() << "\n";
+            (fimTempo - inicioTempo).count() << "\n";
 }
 
 void semArgumentos() {
     experimento = false;
-    
+
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
     Resolucao resolucaoGrasp(3, 2, 5);
@@ -79,15 +79,15 @@ void semArgumentos() {
 
     auto inicioHorario = clock();
 
-        if (!experimento)
-            std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
-    
-        resolucaoGrasp.start(false);
-    
-        auto fimHorario = clock();
-        double diff1 = ((float) (fimHorario - inicioHorario)) / (100.0 * 100.0 * 100.0);
-        if (!experimento)
-            std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+    if (!experimento)
+        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
+
+   // resolucaoGrasp.start(false);
+
+    auto fimHorario = clock();
+    double diff1 = ((float) (fimHorario - inicioHorario) * 1000) / CLOCKS_PER_SEC;
+    if (!experimento)
+        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
     auto inicio = clock();
 
@@ -97,14 +97,13 @@ void semArgumentos() {
     resolucaoGrasp.start();
 
     auto fim = clock();
-    double diff2 = ((float) (fim - inicio)) / (100.0 * 100.0 * 100.0);
+    double diff2 = ((float) (fim - inicio) * 1000) / CLOCKS_PER_SEC;
     if (!experimento)
         std::cout << "Tempo: " << (diff2) << "s" << std::endl;
 }
 
 int main(int argc, char** argv) {
-    verbose = false;
-    experimento = false;
+    verbose = true;
 
     if (argc == 3) {
         comArgumentos(argc, argv);

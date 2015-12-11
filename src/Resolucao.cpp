@@ -195,7 +195,8 @@ double Resolucao::start(bool input) {
     }
 
     double fo = (gerarHorarioAG())->getObjectiveFunction();
-    showResult();
+    if (!verbose)
+        showResult();
     return fo;
 }
 
@@ -368,7 +369,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                         professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
                     } while (professorPossuiCreditos);*/
 
-                    int profNum = 0;//randInt;
+                    int profNum = 0; //randInt;
 
                     for (; profNum < disciplinaAleatoria->professoresCapacitados.size(); profNum++) {
                         const auto& professor = disciplinaAleatoria->professoresCapacitados[profNum];
@@ -980,18 +981,22 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
 
             grade = gerarGradeTipoGraspConstrucao(grade, professorDisciplinasIgnorar);
         }
-
         currentFO = currentSolucao->getObjectiveFunction();
         if (verbose)
             std::cout << std::endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
         if (bestFO < currentFO) {
-
+            puts("HWY");
+            delete bestSolucao;
             bestSolucao = currentSolucao;
             bestFO = currentFO;
 
             if (verbose)
                 std::cout << "------NGH new best: " << bestFO << std::endl;
             i = 0;
+        } else {
+            puts("hey");
+            delete currentSolucao;
+            puts("ho");
         }
     }
 
@@ -1059,12 +1064,15 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
             if (verbose)
                 std::cout << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
             if (bestFO < currentFO) {
+                delete bestSolucao;
                 bestSolucao = currentSolucao;
                 bestFO = currentFO;
 
                 if (verbose)
                     std::cout << "------NGH new best: " << bestFO << std::endl;
                 i = 0;
+            } else {
+                delete currentSolucao;
             }
         }
     }
@@ -1097,7 +1105,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         currentSolucao = pSolucao->clone();
 
         t0 = clock();
-
+        puts("oi");
         gerarGradeTipoGraspConstrucao(currentSolucao);
 
         if (verbose)
@@ -1111,7 +1119,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
                 gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
                 break;
         }
-
+        puts("tchau");
         if (verbose)
             std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
 
