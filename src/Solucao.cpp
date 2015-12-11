@@ -15,24 +15,7 @@ void Solucao::init() {
 }
 
 Solucao::~Solucao() {
-    puts("entrou dtoRRr");
-    if (horario) {
-        puts("vai horario");
-        delete horario;
-        puts("ue");
-        horario = nullptr;
-    }
-    puts("saiu horario");
-    int i = 0;
-    for (auto& par : grades) {
-        if (par.second) {
-            printf("dtor %d\n", i++);
-            delete par.second;
-            par.second = nullptr;
-            printf("saiu dtori\n");
-        }
-    }
-    puts("saiu dtor");
+
 }
 
 void Solucao::insertGrade(Grade* grade) {

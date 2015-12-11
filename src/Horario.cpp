@@ -5,7 +5,6 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 }
 
 Horario::~Horario() {
-    puts("entrou horario");
 }
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {

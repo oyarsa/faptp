@@ -997,7 +997,6 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
         if (verbose)
             std::cout << std::endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
         if (bestFO < currentFO) {
-            puts("HWY");
             delete bestSolucao;
             bestSolucao = currentSolucao;
             bestFO = currentFO;
@@ -1006,9 +1005,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
                 std::cout << "------NGH new best: " << bestFO << std::endl;
             i = 0;
         } else {
-            puts("hey");
             delete currentSolucao;
-            puts("ho");
         }
     }
 
@@ -1117,7 +1114,6 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         currentSolucao = pSolucao->clone();
 
         t0 = clock();
-        puts("oi");
         gerarGradeTipoGraspConstrucao(currentSolucao);
 
         if (verbose)
@@ -1131,7 +1127,6 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
                 gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
                 break;
         }
-        puts("tchau");
         if (verbose)
             std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
 
