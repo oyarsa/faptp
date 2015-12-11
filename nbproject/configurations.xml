@@ -90,8 +90,10 @@
       </toolsSet>
       <compileType>
         <ccTool>
+          <developmentMode>6</developmentMode>
           <standard>8</standard>
           <commandLine>-std=c++11</commandLine>
+          <warningLevel>3</warningLevel>
         </ccTool>
       </compileType>
       <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
