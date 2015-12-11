@@ -4,7 +4,7 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;
     perfisTamanho = pPerfisTamanho;
-
+    id = Aleatorio().randomInt();
     init();
 }
 
@@ -15,7 +15,7 @@ void Solucao::init() {
 }
 
 Solucao::~Solucao() {
-
+    delete horario;
 }
 
 void Solucao::insertGrade(Grade* grade) {
@@ -39,6 +39,8 @@ Solucao* Solucao::clone() const {
     for (; gIter != gIterEnd; ++gIter) {
         s->grades[gIter->first] = gIter->second->clone();
     }
+    
+    s->horario = horario->clone();
 
     return s;
 }

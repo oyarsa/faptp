@@ -1081,7 +1081,8 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
                     std::cout << "------NGH new best: " << bestFO << std::endl;
                 i = 0;
             } else {
-                delete currentSolucao;
+                if (currentSolucao->id != bestSolucao->id)
+                    delete currentSolucao;
             }
         }
     }

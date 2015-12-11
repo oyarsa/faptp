@@ -7,6 +7,31 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
+/*
+ int blocosTamanho;
+    int camadasTamanho;
+
+    int size;
+
+    std::vector<std::string> blocos;
+    std::vector<std::string> camadas;
+
+    std::vector<ProfessorDisciplina*> matriz;
+    std::vector<std::string> alocados;
+ */
+
+Horario* Horario::clone() {
+    Horario* h = new Horario(blocosTamanho, camadasTamanho);
+    
+    h->blocos = blocos;
+    h->camadas = camadas;
+    h->matriz = matriz;
+    h->alocados = alocados;
+    
+    return h;
+}
+
+
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;
 

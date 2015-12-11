@@ -9,6 +9,8 @@ class Horario : public Representacao {
 public:
     Horario(int pBlocosTamanho, int pCamadasTamanho);
     virtual ~Horario();
+    
+    Horario* clone();
 
     bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
     

@@ -25,7 +25,8 @@ public:
 private:
     Horario *horario;
     std::map<std::string, Grade*> grades;
-
+    
+    int id;
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
