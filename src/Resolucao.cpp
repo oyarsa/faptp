@@ -10,6 +10,28 @@ Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
     initDefault();
 }
 
+Resolucao::~Resolucao() {
+    delete solucao;
+    
+    while (!disciplinas.empty()) {
+        delete disciplinas.back();
+        disciplinas.pop_back();
+    }
+    
+    for (auto& par : professores) {
+        delete par.second;
+    }
+    
+    for (auto& par : alunoPerfis) {
+        delete par.second;
+    }
+    
+    for (auto& par : professorDisciplinas) {
+        delete par.second;
+    }
+    
+}
+
 void Resolucao::initDefault() {
     horarioProfessorColisaoMax = 2;
     horarioCruzamentoFilhos = 2;
@@ -178,10 +200,6 @@ void Resolucao::carregarAlunoPerfis() {
 
         alunoPerfis[id] = alunoPerfil;
     }
-}
-
-Resolucao::~Resolucao() {
-
 }
 
 double Resolucao::start() {
@@ -695,7 +713,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
         } else {
             pSolucao->horario->matriz[x1] = NULL;
             pSolucao->horario->matriz[x2] = NULL;
-            
+
             if (pSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)
                     && pSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
                 success = true;
@@ -1096,7 +1114,8 @@ double Resolucao::gerarGradeTipoGrasp() {
 
 double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
     Solucao *currentSolucao;
-
+    Solucao *temp;
+    
     double bestFO, currentFO;
 
     Util util;
@@ -1120,14 +1139,17 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         if (verbose)
             std::cout << "----FIT: " << currentSolucao->getObjectiveFunction() << std::endl;
 
+        temp = currentSolucao;
         switch (gradeGraspVizinhanca) {
             case RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS:
-                gerarGradeTipoGraspRefinamentoAleatorio(currentSolucao);
+                currentSolucao = gerarGradeTipoGraspRefinamentoAleatorio(currentSolucao);
                 break;
             case RESOLUCAO_GRASP_VIZINHOS_CRESCENTE:
-                gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
+                currentSolucao = gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
                 break;
         }
+        delete temp;
+        
         if (verbose)
             std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
 
@@ -1135,12 +1157,15 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
 
         currentFO = currentSolucao->getObjectiveFunction();
         if (bestFO < currentFO) {
-            pSolucao = currentSolucao->clone();
+            delete pSolucao;
+            pSolucao = currentSolucao;
             bestFO = currentFO;
             diff = 0;
 
             if (verbose)
                 std::cout << "----NGH is the new best (gerarGradeTipoGrasp)" << std::endl;
+        } else {
+            delete currentSolucao;
         }
         if (verbose)
             std::cout << "-------------------------------------------------" << std::endl;
@@ -1149,7 +1174,8 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
     if (printResult) {
         showResult(pSolucao);
     }
-
+    
+    solucao = pSolucao;
     return pSolucao->getObjectiveFunction();
 }
 

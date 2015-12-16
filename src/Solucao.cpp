@@ -16,6 +16,10 @@ void Solucao::init() {
 
 Solucao::~Solucao() {
     delete horario;
+    
+    for (auto& par : grades) {
+        delete par.second;
+    }
 }
 
 void Solucao::insertGrade(Grade* grade) {
@@ -33,11 +37,8 @@ double Solucao::getObjectiveFunction() {
 Solucao* Solucao::clone() const {
     Solucao* s = new Solucao(*this);
 
-    std::map<std::string, Grade*>::iterator gIter = s->grades.begin();
-    std::map<std::string, Grade*>::iterator gIterEnd = s->grades.end();
-
-    for (; gIter != gIterEnd; ++gIter) {
-        s->grades[gIter->first] = gIter->second->clone();
+    for (auto& gIter : grades) {
+        s->grades[gIter.first] = new Grade(*(gIter.second));
     }
     
     s->horario = horario->clone();

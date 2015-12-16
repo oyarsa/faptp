@@ -4,20 +4,22 @@
 #include <unordered_map>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
-        std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
-: Representacao(pBlocosTamanho, 1) {
-    alunoPerfil = pAlunoPerfil;
-    horario = pHorario;
-    disciplinasCurso = pDisciplinasCurso;
-    discToIndex = pDiscToIndex;
-}
+        const std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
+    : Representacao(pBlocosTamanho, 1) 
+    , disciplinasCurso(pDisciplinasCurso)
+    , discToIndex(pDiscToIndex)
+    , alunoPerfil(pAlunoPerfil)
+    , horario(pHorario)
+    , professorDisciplinaTemp(nullptr)
+{}
 
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
     return disciplinasCurso[discToIndex[pNomeDisciplina]];
 }
 
 Grade::~Grade() {
-    
+    professorDisciplinaTemp = nullptr;
+
 }
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) {
@@ -345,6 +347,18 @@ double Grade::getObjectiveFunction() {
     return fo;
 }
 
+Grade::Grade(const Grade& outro) 
+    : Representacao(outro) 
+    , alunoPerfil(outro.alunoPerfil)
+    , horario(outro.horario)
+    , professorDisciplinas(outro.professorDisciplinas)
+    , problemas(outro.problemas)
+    , professorDisciplinaTemp(nullptr)
+    , disciplinasAdicionadas(outro.disciplinasAdicionadas)
+    , disciplinasCurso(outro.disciplinasCurso)
+    , discToIndex(outro.discToIndex)
+{}
+
 Grade* Grade::clone() const {
     Grade* g = new Grade(*this);
 
@@ -356,11 +370,11 @@ Grade* Grade::clone() const {
 
     //g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
     copy(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), g->disciplinasAdicionadas.begin());
-
+    
     //g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
     copy(problemas.begin(), problemas.end(), g->problemas.begin());
 
-    g->professorDisciplinaTemp = NULL;
+    g->professorDisciplinaTemp = nullptr;
 
     return g;
 }

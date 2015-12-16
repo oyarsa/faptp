@@ -20,7 +20,8 @@ class Grade : public Representacao {
   friend class Resolucao;
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
-          std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
+          const std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
+  Grade(const Grade& outro);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
@@ -41,8 +42,8 @@ private:
   ProfessorDisciplina *professorDisciplinaTemp;
   std::vector<Disciplina*> disciplinasAdicionadas;
   
-  std::vector<Disciplina*> disciplinasCurso;
-  std::map<std::string, int> discToIndex;
+  const std::vector<Disciplina*>& disciplinasCurso;
+  std::map<std::string, int>& discToIndex;
   
   //! Recebe um nome e retorna um ponteiro para uma disciplina
   Disciplina* getDisciplina(std::string pNomeDisc);

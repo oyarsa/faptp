@@ -16,6 +16,7 @@ class Representacao {
     friend class Resolucao;
 public:
     Representacao(int pBlocosTamanho, int pCamadasTamanho);
+    Representacao(const Representacao& outro);
     virtual ~Representacao();
 
     int getPosition(int pDia, int pBloco, int pCamada);

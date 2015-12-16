@@ -82,7 +82,7 @@ void semArgumentos() {
     if (!experimento)
         std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
 
-   // resolucaoGrasp.start(false);
+    resolucaoGrasp.start(false);
 
     auto fimHorario = clock();
     double diff1 = ((double) (fimHorario - inicioHorario) * 1000) / CLOCKS_PER_SEC;
