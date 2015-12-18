@@ -5,8 +5,24 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 }
 
 Horario::~Horario() {
-    puts("entrou horario");
 }
+
+Horario::Horario(const Horario& outro) 
+    : Representacao(outro) 
+{}
+
+/*
+ int blocosTamanho;
+    int camadasTamanho;
+
+    int size;
+
+    std::vector<std::string> blocos;
+    std::vector<std::string> camadas;
+
+    std::vector<ProfessorDisciplina*> matriz;
+    std::vector<std::string> alocados;
+ */
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;

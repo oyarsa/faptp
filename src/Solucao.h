@@ -11,13 +11,12 @@ class Solucao {
     friend class Resolucao;
 public:
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+    Solucao(const Solucao& outro);
     virtual ~Solucao();
 
     void insertGrade(Grade* grade);
 
     double getObjectiveFunction();
-
-    Solucao* clone() const;
 
     bool operator<( Solucao *&s2) {
         return (getObjectiveFunction() < s2->getObjectiveFunction());
@@ -25,7 +24,8 @@ public:
 private:
     Horario *horario;
     std::map<std::string, Grade*> grades;
-
+    
+    int id;
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;

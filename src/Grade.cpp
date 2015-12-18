@@ -4,12 +4,13 @@
 #include <unordered_map>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
-        std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
-: Representacao(pBlocosTamanho, 1) {
-    alunoPerfil = pAlunoPerfil;
-    horario = pHorario;
-    disciplinasCurso = pDisciplinasCurso;
-    discToIndex = pDiscToIndex;
+        const std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
+: Representacao(pBlocosTamanho, 1)
+, disciplinasCurso(pDisciplinasCurso)
+, discToIndex(pDiscToIndex)
+, alunoPerfil(pAlunoPerfil)
+, horario(pHorario)
+, professorDisciplinaTemp(nullptr) {
 }
 
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
@@ -17,14 +18,15 @@ Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
 }
 
 Grade::~Grade() {
-    
+    professorDisciplinaTemp = nullptr;
+
 }
 
-bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) {
+bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) {
     return alunoPerfil->periodo >= pDisciplina->periodoMinimo;
 }
 
-bool Grade::discRepetida(const Disciplina* const pDisciplina) {
+bool Grade::discRepetida(const Disciplina * const pDisciplina) {
     // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplina
     // se encontra em suas listas de equivalências. Se sim, ela é uma disciplina
     // repetida e não pode ser inserida
@@ -48,7 +50,7 @@ bool Grade::discRepetida(const Disciplina* const pDisciplina) {
     return false;
 }
 
-bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina) {
+bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
     bool viavel = true;
 
     const auto& pDisciplinaCoRequisitos = pDisciplina->coRequisitos;
@@ -63,7 +65,7 @@ bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina) {
                         disciplinasCursadas.begin(), disciplinasCursadas.end()) != equivalentes.end())
                         || (std::find_first_of(equivalentes.begin(), equivalentes.end(),
                         disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(),
-                        [](const std::string& a, const Disciplina* const b) {
+                        [](const std::string& a, const Disciplina * const b) {
                             return a == b->nome;
                         }) != equivalentes.end());
 
@@ -85,7 +87,7 @@ bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina) {
     return viavel;
 }
 
-bool Grade::havePreRequisitos(const Disciplina* const pDisciplina) {
+bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
     bool viavel = true;
 
     const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
@@ -120,7 +122,7 @@ bool Grade::havePreRequisitos(const Disciplina* const pDisciplina) {
     return viavel;
 }
 
-bool Grade::checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool colisao = false;
     int currentPositionHorario;
     int currentPositionGrade;
@@ -165,7 +167,7 @@ bool Grade::checkCollision(const Disciplina* const pDisciplina, const int pCamad
     return (!colisao);
 }
 
-bool Grade::isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool viavel = havePreRequisitos(pDisciplina) &&
             checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
             !discRepetida(pDisciplina) &&
@@ -345,22 +347,14 @@ double Grade::getObjectiveFunction() {
     return fo;
 }
 
-Grade* Grade::clone() const {
-    Grade* g = new Grade(*this);
-
-    //g->matriz = std::vector<ProfessorDisciplina*>(matriz.begin(), matriz.end());
-    copy(matriz.begin(), matriz.end(), g->matriz.begin());
-
-    //g->alocados = std::vector<std::string>(alocados.begin(), alocados.end());
-    copy(alocados.begin(), alocados.end(), g->alocados.begin());
-
-    //g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
-    copy(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), g->disciplinasAdicionadas.begin());
-
-    //g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
-    copy(problemas.begin(), problemas.end(), g->problemas.begin());
-
-    g->professorDisciplinaTemp = NULL;
-
-    return g;
+Grade::Grade(const Grade& outro)
+: Representacao(outro)
+, alunoPerfil(outro.alunoPerfil)
+, horario(outro.horario)
+, professorDisciplinas(outro.professorDisciplinas)
+, problemas(outro.problemas)
+, professorDisciplinaTemp(nullptr)
+, disciplinasAdicionadas(outro.disciplinasAdicionadas)
+, disciplinasCurso(outro.disciplinasCurso)
+, discToIndex(outro.discToIndex) {
 }
