@@ -7,6 +7,10 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
+Horario::Horario(const Horario& outro) 
+    : Representacao(outro) 
+{}
+
 /*
  int blocosTamanho;
     int camadasTamanho;

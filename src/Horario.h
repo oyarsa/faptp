@@ -8,6 +8,7 @@ class Horario : public Representacao {
     friend class Grade;
 public:
     Horario(int pBlocosTamanho, int pCamadasTamanho);
+    Horario(const Horario& outro);
     virtual ~Horario();
     
     Horario* clone();

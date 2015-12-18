@@ -11,6 +11,7 @@ class Solucao {
     friend class Resolucao;
 public:
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+    Solucao(const Solucao& outro);
     virtual ~Solucao();
 
     void insertGrade(Grade* grade);

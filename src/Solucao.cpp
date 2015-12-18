@@ -8,6 +8,20 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
     init();
 }
 
+Solucao::Solucao(const Solucao& outro) 
+    : horario(outro.horario)
+    , id(Aleatorio().randomInt())
+    , blocosTamanho(outro.blocosTamanho)
+    , camadasTamanho(outro.camadasTamanho)
+    , perfisTamanho(outro.perfisTamanho)
+    , gradesLength(outro.gradesLength)
+{
+    for (const auto& par : outro.grades) {
+        grades[par.first] = new Grade(*(par.second));
+    }
+}
+
+
 void Solucao::init() {
     horario = new Horario(blocosTamanho, camadasTamanho);
 
@@ -38,10 +52,11 @@ Solucao* Solucao::clone() const {
     Solucao* s = new Solucao(*this);
 
     for (auto& gIter : grades) {
-        s->grades[gIter.first] = new Grade(*(gIter.second));
+        s->grades[gIter.first] = gIter.second->clone();
     }
     
     s->horario = horario->clone();
+    s->id = Aleatorio().randomInt();
 
     return s;
 }

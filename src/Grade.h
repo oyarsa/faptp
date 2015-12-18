@@ -32,7 +32,7 @@ public:
 
   double getObjectiveFunction();
   
-  Grade* clone() const;
+  Grade* clone();
 private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;

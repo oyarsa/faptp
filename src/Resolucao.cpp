@@ -930,7 +930,7 @@ Grade* Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<Profe
     return pGrade;
 }
 
-Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao) {
+void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao) {
     Horario *horario;
     Grade *apGrade;
 
@@ -953,7 +953,6 @@ Solucao* Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao) {
         pSolucao->insertGrade(apGrade);
     }
 
-    return pSolucao;
 }
 
 Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
@@ -1099,8 +1098,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
                     std::cout << "------NGH new best: " << bestFO << std::endl;
                 i = 0;
             } else {
-                if (currentSolucao->id != bestSolucao->id)
-                    delete currentSolucao;
+                delete currentSolucao;
             }
         }
     }
@@ -1131,7 +1129,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         std::cout << "HORARIO (Solucao) :" << std::endl;
 
     while (diff <= RESOLUCAO_GRASP_TEMPO_CONSTRUCAO) {
-        currentSolucao = pSolucao->clone();
+        currentSolucao = new Solucao(*pSolucao);
 
         t0 = clock();
         gerarGradeTipoGraspConstrucao(currentSolucao);
@@ -1140,14 +1138,16 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
             std::cout << "----FIT: " << currentSolucao->getObjectiveFunction() << std::endl;
 
         temp = currentSolucao;
+
         switch (gradeGraspVizinhanca) {
             case RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS:
-                currentSolucao = gerarGradeTipoGraspRefinamentoAleatorio(currentSolucao);
+                currentSolucao = gerarGradeTipoGraspRefinamentoAleatorio(temp);
                 break;
             case RESOLUCAO_GRASP_VIZINHOS_CRESCENTE:
-                currentSolucao = gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
+                currentSolucao = gerarGradeTipoGraspRefinamentoCrescente(temp);
                 break;
         }
+        
         delete temp;
         
         if (verbose)
