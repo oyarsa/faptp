@@ -358,29 +358,3 @@ Grade::Grade(const Grade& outro)
 , disciplinasCurso(outro.disciplinasCurso)
 , discToIndex(outro.discToIndex) {
 }
-
-Grade* Grade::clone() {
-    Grade* g = new Grade(blocosTamanho, alunoPerfil, horario,
-            disciplinasCurso, discToIndex);
-   // Grade* g = new Grade(*this);
-
-    //g->matriz = std::vector<ProfessorDisciplina*>(matriz.begin(), matriz.end());
-    //copy(matriz.begin(), matriz.end(), g->matriz.begin());
-    g->matriz = matriz;
-    
-    //g->alocados = std::vector<std::string>(alocados.begin(), alocados.end());
-    //copy(alocados.begin(), alocados.end(), g->alocados.begin());
-    g->alocados = alocados;
-
-    //g->disciplinasAdicionadas = std::vector<Disciplina*>(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end());
-    //copy(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), g->disciplinasAdicionadas.begin());
-    g->disciplinasAdicionadas = disciplinasAdicionadas;
-
-    //g->problemas = std::vector<std::string>(problemas.begin(), problemas.end());
-    //copy(problemas.begin(), problemas.end(), g->problemas.begin());
-    g->problemas = problemas;
-
-    g->professorDisciplinaTemp = nullptr;
-
-    return g;
-}

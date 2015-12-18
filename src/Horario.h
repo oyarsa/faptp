@@ -11,8 +11,6 @@ public:
     Horario(const Horario& outro);
     virtual ~Horario();
     
-    Horario* clone();
-
     bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
     
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);

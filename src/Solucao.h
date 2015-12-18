@@ -18,8 +18,6 @@ public:
 
     double getObjectiveFunction();
 
-    Solucao* clone() const;
-
     bool operator<( Solucao *&s2) {
         return (getObjectiveFunction() < s2->getObjectiveFunction());
     }

@@ -135,8 +135,8 @@ private:
 
     void gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
 
-    Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade);
-    Grade* gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+    void gerarGradeTipoGraspConstrucao(Grade* pGrade);
+    void gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *pSolucao);
     double gerarGradeTipoGrasp();

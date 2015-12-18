@@ -24,18 +24,6 @@ Horario::Horario(const Horario& outro)
     std::vector<std::string> alocados;
  */
 
-Horario* Horario::clone() {
-    Horario* h = new Horario(blocosTamanho, camadasTamanho);
-    
-    h->blocos = blocos;
-    h->camadas = camadas;
-    h->matriz = matriz;
-    h->alocados = alocados;
-    
-    return h;
-}
-
-
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;
 

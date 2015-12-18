@@ -9,7 +9,7 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
 }
 
 Solucao::Solucao(const Solucao& outro) 
-    : horario(outro.horario)
+    : horario(new Horario(*(outro.horario)))
     , id(Aleatorio().randomInt())
     , blocosTamanho(outro.blocosTamanho)
     , camadasTamanho(outro.camadasTamanho)
@@ -37,7 +37,11 @@ Solucao::~Solucao() {
 }
 
 void Solucao::insertGrade(Grade* grade) {
-    grades[grade->alunoPerfil->id] = grade;
+    auto& alvoInsercao = grades[grade->alunoPerfil->id];
+    if (alvoInsercao) {
+        delete alvoInsercao;
+    }
+    alvoInsercao = grade;
     gradesLength++;
 }
 
@@ -46,17 +50,4 @@ double Solucao::getObjectiveFunction() {
             [](const double& acc, const std::pair<std::string, Grade*>& par) {
                 return acc + par.second->getObjectiveFunction();
             });
-}
-
-Solucao* Solucao::clone() const {
-    Solucao* s = new Solucao(*this);
-
-    for (auto& gIter : grades) {
-        s->grades[gIter.first] = gIter.second->clone();
-    }
-    
-    s->horario = horario->clone();
-    s->id = Aleatorio().randomInt();
-
-    return s;
 }
