@@ -12,15 +12,14 @@ class Solucao {
 public:
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
     Solucao(const Solucao& outro);
+    Solucao& operator=(const Solucao& outro);
     virtual ~Solucao();
 
     void insertGrade(Grade* grade);
 
     double getObjectiveFunction();
 
-    bool operator<( Solucao *&s2) {
-        return (getObjectiveFunction() < s2->getObjectiveFunction());
-    }
+    bool operator<( Solucao *&s2);
 private:
     Horario *horario;
     std::map<std::string, Grade*> grades;

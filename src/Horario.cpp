@@ -9,20 +9,12 @@ Horario::~Horario() {
 
 Horario::Horario(const Horario& outro) 
     : Representacao(outro) 
-{}
+{
+}
 
-/*
- int blocosTamanho;
-    int camadasTamanho;
-
-    int size;
-
-    std::vector<std::string> blocos;
-    std::vector<std::string> camadas;
-
-    std::vector<ProfessorDisciplina*> matriz;
-    std::vector<std::string> alocados;
- */
+Horario& Horario::operator=(const Horario& outro) {
+    Representacao::operator=(outro);
+}
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;

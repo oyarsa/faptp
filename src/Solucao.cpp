@@ -21,6 +21,19 @@ Solucao::Solucao(const Solucao& outro)
     }
 }
 
+Solucao& Solucao::operator=(const Solucao& outro) {
+    horario = new Horario(*(outro.horario));
+    id = Aleatorio().randomInt();
+    blocosTamanho = outro.blocosTamanho;
+    camadasTamanho = outro.camadasTamanho;
+    perfisTamanho = outro.perfisTamanho;
+    gradesLength = outro.gradesLength;
+    
+    for (const auto& par : outro.grades) {
+        grades[par.first] = new Grade(*(par.second));
+    }
+}
+
 
 void Solucao::init() {
     horario = new Horario(blocosTamanho, camadasTamanho);

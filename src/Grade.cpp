@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
-        const std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
+        std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
 : Representacao(pBlocosTamanho, 1)
 , disciplinasCurso(pDisciplinasCurso)
 , discToIndex(pDiscToIndex)
@@ -357,4 +357,17 @@ Grade::Grade(const Grade& outro)
 , disciplinasAdicionadas(outro.disciplinasAdicionadas)
 , disciplinasCurso(outro.disciplinasCurso)
 , discToIndex(outro.discToIndex) {
+}
+
+Grade& Grade::operator=(const Grade& outro) {
+    Representacao::operator=(outro);
+    alunoPerfil = outro.alunoPerfil;
+    horario = outro.horario;
+    professorDisciplinas = outro.professorDisciplinas;
+    problemas = outro.problemas;
+    professorDisciplinaTemp = nullptr;
+    disciplinasCurso = outro.disciplinasCurso;
+    discToIndex = outro.discToIndex;
+    
+    return *this;
 }

@@ -9,6 +9,7 @@ class Horario : public Representacao {
 public:
     Horario(int pBlocosTamanho, int pCamadasTamanho);
     Horario(const Horario& outro);
+    Horario& operator=(const Horario& outro);
     virtual ~Horario();
     
     bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
