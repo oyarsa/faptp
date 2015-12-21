@@ -21,6 +21,8 @@ class Grade : public Representacao {
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
           std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
+  Grade(const Grade& outro);
+  Grade& operator=(const Grade& outro);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
@@ -31,7 +33,6 @@ public:
 
   double getObjectiveFunction();
   
-  Grade* clone() const;
 private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;
@@ -41,14 +42,12 @@ private:
   ProfessorDisciplina *professorDisciplinaTemp;
   std::vector<Disciplina*> disciplinasAdicionadas;
   
-  std::vector<Disciplina*> disciplinasCurso;
-  std::map<std::string, int> discToIndex;
+  std::vector<Disciplina*>& disciplinasCurso;
+  std::map<std::string, int>& discToIndex;
   
   //! Recebe um nome e retorna um ponteiro para uma disciplina
   Disciplina* getDisciplina(std::string pNomeDisc);
 
-  void init();
-  
   bool havePreRequisitos(const Disciplina* const pDisciplina);
   bool hasPeriodoMinimo(const Disciplina* const pDisciplina);
   bool hasCoRequisitos(const Disciplina* const pDisciplina);

@@ -7,6 +7,30 @@ Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
     initMatriz();
 }
 
+Representacao::Representacao(const Representacao& outro)
+    : blocosTamanho(outro.blocosTamanho)
+    , camadasTamanho(outro.camadasTamanho)
+    , size(outro.size)
+    , blocos(outro.blocos)
+    , camadas(outro.camadas)
+    , matriz(outro.matriz)
+    , alocados(outro.alocados)
+{
+}
+
+Representacao& Representacao::operator=(const Representacao& outro) {
+    blocosTamanho = outro.blocosTamanho;
+    camadasTamanho = outro.camadasTamanho;
+    size = outro.size;
+    blocos = outro.blocos;
+    camadas = outro.camadas;
+    matriz = outro.matriz;
+    alocados = outro.alocados;
+    
+    return *this;
+}
+
+
 Representacao::~Representacao() {
 }
 

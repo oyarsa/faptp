@@ -7,6 +7,15 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBloco
 Horario::~Horario() {
 }
 
+Horario::Horario(const Horario& outro) 
+    : Representacao(outro) 
+{
+}
+
+Horario& Horario::operator=(const Horario& outro) {
+    Representacao::operator=(outro);
+}
+
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
     int positionCamada;
 
