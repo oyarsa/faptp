@@ -56,7 +56,7 @@ void semArgumentos() {
     Resolucao resolucaoGrasp(3, 2, 5);
 
     // Parâmetro de inicialização do AG
-    resolucaoGrasp.horarioPopulacaoInicial = 250;
+    resolucaoGrasp.horarioPopulacaoInicial = 20;
     resolucaoGrasp.horarioTorneioPopulacao = 0.08;
 
     // Irá gerar x pares de vencedores
@@ -82,7 +82,7 @@ void semArgumentos() {
     if (!experimento)
         std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
 
-    //resolucaoGrasp.start(false);
+    resolucaoGrasp.start(false);
 
     auto fimHorario = clock();
     double diff1 = ((double) (fimHorario - inicioHorario) * 1000) / CLOCKS_PER_SEC;
