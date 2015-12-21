@@ -675,6 +675,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
 }
 
 Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
+    Solucao* currentSolucao = new Solucao(*pSolucao);
     Aleatorio aleatorio;
     bool success = false;
 
@@ -695,38 +696,43 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
         blocoX1 = aleatorio.randomInt() % blocosTamanho;
         blocoX2 = aleatorio.randomInt() % blocosTamanho;
 
-        x1 = pSolucao->horario->getPosition(diaX1, blocoX1, camadaX);
-        x2 = pSolucao->horario->getPosition(diaX2, blocoX2, camadaX);
+        x1 = currentSolucao->horario->getPosition(diaX1, blocoX1, camadaX);
+        x2 = currentSolucao->horario->getPosition(diaX2, blocoX2, camadaX);
 
-        backup = pSolucao->horario->matriz;
+        backup = currentSolucao->horario->matriz;
 
-        pdX1 = pSolucao->horario->at(x1);
-        pdX2 = pSolucao->horario->at(x2);
+        pdX1 = currentSolucao->horario->at(x1);
+        pdX2 = currentSolucao->horario->at(x2);
 
         if (pdX1 == pdX2) {
             // Nada a fazer
         } else if (pdX1 == NULL) {
-            if (pSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)) {
-                pSolucao->horario->matriz[x2] = NULL;
+            if (currentSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)) {
+                currentSolucao->horario->matriz[x2] = NULL;
                 success = true;
             }
         } else if (pdX2 == NULL) {
-            if (pSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
-                pSolucao->horario->matriz[x1] = NULL;
+            if (currentSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+                currentSolucao->horario->matriz[x1] = NULL;
                 success = true;
             }
         } else {
-            pSolucao->horario->matriz[x1] = NULL;
-            pSolucao->horario->matriz[x2] = NULL;
+            currentSolucao->horario->matriz[x1] = NULL;
+            currentSolucao->horario->matriz[x2] = NULL;
 
-            if (pSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)
-                    && pSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+            if (currentSolucao->horario->insert(diaX1, blocoX1, camadaX, pdX2)
+                    && currentSolucao->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
                 success = true;
             }
         }
     }
-
-    return success ? pSolucao : NULL;
+    
+    if (success) {
+        return currentSolucao;
+    } else {
+        delete currentSolucao;
+        return nullptr;
+    }
 }
 
 double Resolucao::gerarGrade() {
