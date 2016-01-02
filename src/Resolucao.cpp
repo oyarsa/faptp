@@ -12,24 +12,24 @@ Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
 
 Resolucao::~Resolucao() {
     delete solucao;
-    
+
     while (!disciplinas.empty()) {
         delete disciplinas.back();
         disciplinas.pop_back();
     }
-    
+
     for (auto& par : professores) {
         delete par.second;
     }
-    
+
     for (auto& par : alunoPerfis) {
         delete par.second;
     }
-    
+
     for (auto& par : professorDisciplinas) {
         delete par.second;
     }
-    
+
 }
 
 void Resolucao::initDefault() {
@@ -213,8 +213,7 @@ double Resolucao::start(bool input) {
     }
 
     double fo = (gerarHorarioAG())->getObjectiveFunction();
-    if (!verbose)
-        showResult();
+
     return fo;
 }
 
@@ -643,11 +642,11 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &popul
 
 void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) {
     std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
-    
+
     for (auto i = populacaoMax; i < populacao.size(); i++) {
         delete populacao[i];
     }
-    
+
     populacao.resize(populacaoMax);
 }
 
@@ -726,7 +725,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
             }
         }
     }
-    
+
     if (success) {
         return currentSolucao;
     } else {
@@ -1023,7 +1022,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
         currentFO = currentSolucao->getObjectiveFunction();
         if (verbose)
             std::cout << std::endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
-        
+
         if (bestFO < currentFO) {
             delete bestSolucao;
             bestSolucao = currentSolucao;
@@ -1124,7 +1123,7 @@ double Resolucao::gerarGradeTipoGrasp() {
 double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
     Solucao *currentSolucao;
     Solucao *temp;
-    
+
     double bestFO, currentFO;
 
     Util util;
@@ -1160,7 +1159,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
         }
         if (temp->id != currentSolucao->id)
             delete temp;
-        
+
         if (verbose)
             std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
 
@@ -1185,7 +1184,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao, bool printResult) {
     if (printResult) {
         showResult(pSolucao);
     }
-    
+
     solucao = pSolucao;
     return pSolucao->getObjectiveFunction();
 }
@@ -1253,4 +1252,8 @@ void Resolucao::showResult(Solucao* pSolucao) {
         std::cout << " " << gradeAtual->getObjectiveFunction() << "\n";
     }
     std::cout << "\nFO da solucao: " << pSolucao->getObjectiveFunction() << std::endl;
+}
+
+Solucao* Resolucao::getSolucao() {
+    return solucao;
 }

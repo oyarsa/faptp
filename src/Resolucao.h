@@ -48,6 +48,8 @@ public:
     double gerarGrade();
     
     void showResult();
+    
+    Solucao* getSolucao();
 
     /*
      Parâmetros da execução da solução
