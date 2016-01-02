@@ -19,6 +19,8 @@
 #include "src/Util.h"
 #include "src/Resolucao.h"
 
+#include "src/Output.h"
+
 void comArgumentos(int argc, char** argv) {
     experimento = true;
 
@@ -49,6 +51,8 @@ void comArgumentos(int argc, char** argv) {
 }
 
 void semArgumentos() {
+    Output o;
+    
     experimento = false;
 
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
@@ -56,7 +60,7 @@ void semArgumentos() {
     Resolucao resolucaoGrasp(3, 2, 5);
 
     // Parâmetro de inicialização do AG
-    resolucaoGrasp.horarioPopulacaoInicial = 20;
+    resolucaoGrasp.horarioPopulacaoInicial = 250;
     resolucaoGrasp.horarioTorneioPopulacao = 0.08;
 
     // Irá gerar x pares de vencedores
@@ -77,29 +81,18 @@ void semArgumentos() {
     resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
     resolucaoGrasp.gradeAlfa = .9;
 
+    std::cout << "Montando horarios [AG + Grasp]..." << std::endl;
+
     auto inicioHorario = clock();
-
-    if (!experimento)
-        std::cout << "\nMontando horarios [AG + Grasp]..." << std::endl;
-
     resolucaoGrasp.start(false);
-
     auto fimHorario = clock();
-    double diff1 = ((double) (fimHorario - inicioHorario) * 1000) / CLOCKS_PER_SEC;
-    if (!experimento)
-        std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
-    auto inicio = clock();
+    double diff1 = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
+    std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
-    // Inicia a execução do algoritmo
-    if (!experimento)
-        std::cout << "\nMontando grades [File + Grasp]..." << std::endl;
-    resolucaoGrasp.start();
-
-    auto fim = clock();
-    double diff2 = ((float) (fim - inicio) * 1000) / CLOCKS_PER_SEC;
-    if (!experimento)
-        std::cout << "Tempo: " << (diff2) << "s" << std::endl;
+    std::cout << "Resultado:" << std::endl;
+    resolucaoGrasp.showResult();
+    o.write(resolucaoGrasp.getSolucao());
 }
 
 int main(int argc, char** argv) {
