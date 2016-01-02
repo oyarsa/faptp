@@ -9,6 +9,7 @@
 
 class Solucao {
     friend class Resolucao;
+    friend class Output;
 public:
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
     Solucao(const Solucao& outro);
