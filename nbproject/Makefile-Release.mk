@@ -14,15 +14,15 @@ GREP=grep
 NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
-CC=gcc
-CCC=g++
-CXX=g++
+CC=gcc-5
+CCC=g++-5
+CXX=g++-5
 FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=MinGW-Windows
-CND_DLIB_EXT=dll
+CND_PLATFORM=GNU-Linux
+CND_DLIB_EXT=so
 CND_CONF=Release
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/Disciplina.o \
 	${OBJECTDIR}/src/Grade.o \
 	${OBJECTDIR}/src/Horario.o \
+	${OBJECTDIR}/src/Output.o \
 	${OBJECTDIR}/src/PTP.o \
 	${OBJECTDIR}/src/Professor.o \
 	${OBJECTDIR}/src/ProfessorDisciplina.o \
@@ -71,9 +72,9 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp ${OBJECTFILES} ${LDLIBSOPTIONS}
 
@@ -106,6 +107,11 @@ ${OBJECTDIR}/src/Horario.o: src/Horario.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Horario.o src/Horario.cpp
+
+${OBJECTDIR}/src/Output.o: src/Output.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -O3 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Output.o src/Output.cpp
 
 ${OBJECTDIR}/src/PTP.o: src/PTP.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
@@ -163,7 +169,7 @@ ${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
 
 # Subprojects
 .clean-subprojects:

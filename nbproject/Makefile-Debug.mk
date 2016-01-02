@@ -14,15 +14,15 @@ GREP=grep
 NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
-CC=gcc
-CCC=g++
-CXX=g++
+CC=gcc-5
+CCC=g++-5
+CXX=g++-5
 FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=MinGW-Windows
-CND_DLIB_EXT=dll
+CND_PLATFORM=GNU-Linux
+CND_DLIB_EXT=so
 CND_CONF=Debug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/Disciplina.o \
 	${OBJECTDIR}/src/Grade.o \
 	${OBJECTDIR}/src/Horario.o \
+	${OBJECTDIR}/src/Output.o \
 	${OBJECTDIR}/src/PTP.o \
 	${OBJECTDIR}/src/Professor.o \
 	${OBJECTDIR}/src/ProfessorDisciplina.o \
@@ -57,8 +58,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-std=c++11
-CXXFLAGS=-std=c++11
+CCFLAGS=-Ofast
+CXXFLAGS=-Ofast
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -71,91 +72,96 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/src/Aleatorio.o: src/Aleatorio.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Aleatorio.o src/Aleatorio.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Aleatorio.o src/Aleatorio.cpp
 
 ${OBJECTDIR}/src/AlunoPerfil.o: src/AlunoPerfil.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/AlunoPerfil.o src/AlunoPerfil.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/AlunoPerfil.o src/AlunoPerfil.cpp
 
 ${OBJECTDIR}/src/Disciplina.o: src/Disciplina.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Disciplina.o src/Disciplina.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Disciplina.o src/Disciplina.cpp
 
 ${OBJECTDIR}/src/Grade.o: src/Grade.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Grade.o src/Grade.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Grade.o src/Grade.cpp
 
 ${OBJECTDIR}/src/Horario.o: src/Horario.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Horario.o src/Horario.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Horario.o src/Horario.cpp
+
+${OBJECTDIR}/src/Output.o: src/Output.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Output.o src/Output.cpp
 
 ${OBJECTDIR}/src/PTP.o: src/PTP.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/PTP.o src/PTP.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/PTP.o src/PTP.cpp
 
 ${OBJECTDIR}/src/Professor.o: src/Professor.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Professor.o src/Professor.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Professor.o src/Professor.cpp
 
 ${OBJECTDIR}/src/ProfessorDisciplina.o: src/ProfessorDisciplina.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ProfessorDisciplina.o src/ProfessorDisciplina.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ProfessorDisciplina.o src/ProfessorDisciplina.cpp
 
 ${OBJECTDIR}/src/Representacao.o: src/Representacao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Representacao.o src/Representacao.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Representacao.o src/Representacao.cpp
 
 ${OBJECTDIR}/src/Resolucao.o: src/Resolucao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Resolucao.o src/Resolucao.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Resolucao.o src/Resolucao.cpp
 
 ${OBJECTDIR}/src/Solucao.o: src/Solucao.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Solucao.o src/Solucao.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Solucao.o src/Solucao.cpp
 
 ${OBJECTDIR}/src/UUID.o: src/UUID.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/UUID.o src/UUID.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/UUID.o src/UUID.cpp
 
 ${OBJECTDIR}/src/Util.o: src/Util.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Util.o src/Util.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Util.o src/Util.cpp
 
 ${OBJECTDIR}/src/includes/jsoncpp.o: src/includes/jsoncpp.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/includes
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/jsoncpp.o src/includes/jsoncpp.cpp
 
 ${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/includes
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/parametros.o src/includes/parametros.cpp
+	$(COMPILE.cc) -Werror -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/includes/parametros.o src/includes/parametros.cpp
 
 # Subprojects
 .build-subprojects:
@@ -163,7 +169,7 @@ ${OBJECTDIR}/src/includes/parametros.o: src/includes/parametros.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp.exe
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/faptp
 
 # Subprojects
 .clean-subprojects:

@@ -39,6 +39,7 @@
         <itemPath>src/Disciplina.cpp</itemPath>
         <itemPath>src/Grade.cpp</itemPath>
         <itemPath>src/Horario.cpp</itemPath>
+        <itemPath>src/Output.cpp</itemPath>
         <itemPath>src/PTP.cpp</itemPath>
         <itemPath>src/Professor.cpp</itemPath>
         <itemPath>src/ProfessorDisciplina.cpp</itemPath>
@@ -54,6 +55,7 @@
         <itemPath>src/Disciplina.h</itemPath>
         <itemPath>src/Grade.h</itemPath>
         <itemPath>src/Horario.h</itemPath>
+        <itemPath>src/Output.h</itemPath>
         <itemPath>src/PTP.h</itemPath>
         <itemPath>src/Professor.h</itemPath>
         <itemPath>src/ProfessorDisciplina.h</itemPath>
@@ -84,14 +86,15 @@
   <confs>
     <conf name="Debug" type="1">
       <toolsSet>
-        <compilerSet>MinGW|MinGW</compilerSet>
+        <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <ccTool>
+          <developmentMode>0</developmentMode>
           <standard>8</standard>
-          <commandLine>-std=c++11</commandLine>
+          <commandLine>-Ofast</commandLine>
           <warningLevel>3</warningLevel>
         </ccTool>
       </compileType>
@@ -136,6 +139,10 @@
       <item path="src/Horario.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Horario.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Output.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Output.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/PTP.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -246,6 +253,10 @@
       <item path="src/Horario.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Horario.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Output.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Output.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/PTP.cpp" ex="false" tool="1" flavor2="0">
       </item>
