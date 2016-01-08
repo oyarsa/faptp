@@ -57,7 +57,7 @@ void semArgumentos() {
 
     // Inicializa um objeto resolução com blocos tamanho 3, 2 camadas e 
     // 5 perfis de alunos
-    Resolucao resolucaoGrasp(3, 2, 5);
+    Resolucao resolucaoGrasp(4, 8, 1413);
 
     // Parâmetro de inicialização do AG
     resolucaoGrasp.horarioPopulacaoInicial = 250;

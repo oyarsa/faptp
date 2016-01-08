@@ -92,9 +92,7 @@
       </toolsSet>
       <compileType>
         <ccTool>
-          <developmentMode>0</developmentMode>
           <standard>8</standard>
-          <commandLine>-Ofast</commandLine>
           <warningLevel>3</warningLevel>
         </ccTool>
       </compileType>
