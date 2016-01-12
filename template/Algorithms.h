@@ -78,6 +78,8 @@ struct HorarioFindDisciplina {
         bool find = false;
         if (pProfessorDisciplina != NULL) {
             find = pProfessorDisciplina->getDisciplina() == disciplina;
+        } else if (disciplina == NULL) {
+            find = (pProfessorDisciplina == NULL);
         }
         return find;
     }

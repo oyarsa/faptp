@@ -18,8 +18,8 @@ class Disciplina {
   friend class Solucao;
   friend class Resolucao;
 public:
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
-  Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
+  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
+  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
   Disciplina(const Disciplina& orig);
   virtual ~Disciplina();
 
@@ -28,8 +28,8 @@ public:
   std::string getNome();
   void setNome(std::string pNome);
 
-  int getPeriodo();
-  void setPeriodo(int pPeriodo);
+  std::string getPeriodo();
+  void setPeriodo(std::string pPeriodo);
 
   std::string getCurso();
   void setCurso(std::string pCurso);
@@ -50,8 +50,8 @@ private:
 
   std::string nome;
 
-  int periodo;
-  int periodoMinimo;
+  std::string periodo;
+  std::string periodoMinimo;
   std::string curso;
 
   int cargaHoraria;
@@ -66,7 +66,7 @@ private:
 
   std::vector<Professor*> professoresCapacitados;
 
-  void init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo);
+  void init(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
 };
 
 #endif	/* DISCIPLINA_H */

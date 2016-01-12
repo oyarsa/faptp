@@ -2,7 +2,7 @@
 
 #include "Disciplina.h"
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, int pPeriodoMinimo) {
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
     UUID uuid;
     std::string pId;
 
@@ -11,11 +11,11 @@ Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::
     init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade, pPeriodoMinimo);
 }
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo) {
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
     init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade, pPeriodoMinimo);
 }
 
-void Disciplina::init(std::string pNome, int pCargaHoraria, int pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, int pPeriodoMinimo) {
+void Disciplina::init(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
     id = pId;
     cargaHoraria = pCargaHoraria;
     periodo = pPeriodo;
@@ -46,11 +46,11 @@ void Disciplina::setNome(std::string pNome) {
     nome = pNome;
 }
 
-int Disciplina::getPeriodo() {
+std::string Disciplina::getPeriodo() {
     return periodo;
 }
 
-void Disciplina::setPeriodo(int pPeriodo) {
+void Disciplina::setPeriodo(std::string pPeriodo) {
     periodo = pPeriodo;
 }
 

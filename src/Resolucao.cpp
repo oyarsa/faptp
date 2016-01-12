@@ -112,9 +112,10 @@ void Resolucao::carregarDadosDisciplinas() {
         const auto capacidade = jsonDisciplinas[i]["capacidade"].asInt();
 
         const auto cargahoraria = jsonDisciplinas[i]["carga"].asInt();
-        const auto periodo = jsonDisciplinas[i]["periodo"].asInt();
         const auto turma = jsonDisciplinas[i]["turma"].asString();
-        const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asInt();
+
+        const auto periodo = jsonDisciplinas[i]["periodo"].asString();
+        const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asString();
 
         Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
 
@@ -136,7 +137,7 @@ void Resolucao::carregarDadosDisciplinas() {
 
         disciplinas.push_back(disciplina);
 
-        periodoXdisciplina[curso + std::to_string(periodo)].push_back(disciplina);
+        periodoXdisciplina[curso + periodo].push_back(disciplina);
     }
 
     disciplinas = ordenarDisciplinas();
@@ -169,7 +170,7 @@ void Resolucao::carregarAlunoPerfis() {
         const auto id = jsonAlunoPerfis[i]["id"].asString();
         const auto peso = jsonAlunoPerfis[i]["peso"].asDouble();
         const auto turma = jsonAlunoPerfis[i]["turma"].asString();
-        const auto periodo = jsonAlunoPerfis[i]["periodo"].asInt();
+        const auto periodo = jsonAlunoPerfis[i]["periodo"].asString();
 
         AlunoPerfil *alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
@@ -347,6 +348,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
             std::map<std::string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
             int dia = 0, bloco = 0;
 
+            bool finding = false;
+
             colisaoProfessor.clear();
 
             while (disciplinas.size() != 0) {
@@ -374,7 +377,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                 // Se a disciplina ainda não tem professor alocado
                 if (disciplinaXprofessorDisciplina.count(dId) == 0) {
 
-                    /*do {
+                    do {
                         randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
 
                         professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
@@ -384,11 +387,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                             creditosUtilizadosProfessor[pId] = 0;
                         }
                         professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
-                    } while (professorPossuiCreditos);*/
+                    } while (professorPossuiCreditos);
 
-                    int profNum = 0; //randInt;
+                    int profNum = randInt;//0;
 
-                    for (; profNum < disciplinaAleatoria->professoresCapacitados.size(); profNum++) {
+                    /*for (; profNum < disciplinaAleatoria->professoresCapacitados.size(); profNum++) {
                         const auto& professor = disciplinaAleatoria->professoresCapacitados[profNum];
                         pId = professor->getId();
 
@@ -401,7 +404,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                                 + disciplinaAleatoria->getCreditos())) {
                             continue;
                         } else break;
-                    }
+                    }*/
 
                     creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
@@ -411,6 +414,16 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                     }
 
                     disciplinaXprofessorDisciplina[dId] = professorDisciplinas[pdId];
+                }
+
+                if (dia > 6) {
+                    finding = true;
+                }
+
+                if (finding) {
+                    int position = solucaoLocal->horario->getFirstDisciplina(NULL, i);
+                    int positions[3];
+                    solucaoLocal->horario->get3DMatrix(position, positions);
                 }
 
                 inserted = solucaoLocal->horario->insert(dia, bloco, i, disciplinaXprofessorDisciplina[dId]);

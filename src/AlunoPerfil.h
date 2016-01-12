@@ -19,7 +19,7 @@ class AlunoPerfil {
   friend class Resolucao;
 public:
   AlunoPerfil(double pPeso);
-  AlunoPerfil(double pPeso, std::string pId, std::string pTurma, int pPeriodo);
+  AlunoPerfil(double pPeso, std::string pId, std::string pTurma, std::string pPeriodo);
   virtual ~AlunoPerfil();
   
   double getPeso();
@@ -33,7 +33,7 @@ public:
 private:
   std::string id;
   std::string turma;
-  int periodo;
+  std::string periodo;
   
   double peso;
   
@@ -41,7 +41,7 @@ private:
   std::vector<std::string> aprovadas;
   std::vector<Disciplina*> restante;
   
-  void init(double pPeso, std::string pId, std::string pTurma, int pPeriodo);
+  void init(double pPeso, std::string pId, std::string pTurma, std::string pPeriodo);
 };
 
 #endif	/* ALUNOPERFIL_H */

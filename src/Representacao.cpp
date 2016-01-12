@@ -86,6 +86,10 @@ int Representacao::getFirstDisciplina(Disciplina* pDisciplina) {
     return getFirstDisciplina(pDisciplina, matriz);
 }
 
+int Representacao::getFirstDisciplina(Disciplina* pDisciplina, int camada) {
+    return getFirstDisciplina(pDisciplina, matriz);
+}
+
 int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
     int x;
     std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
