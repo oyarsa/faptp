@@ -408,7 +408,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
 
                     creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
-                    pdId = pId + dId;
+                    pdId = "pr" + pId + "di" + dId;
                     if (professorDisciplinas.count(pdId) == 0) {
                         professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[profNum], disciplinaAleatoria, pdId);
                     }
