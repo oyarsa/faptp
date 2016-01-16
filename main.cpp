@@ -60,16 +60,16 @@ void semArgumentos() {
     Resolucao resolucaoGrasp(4, 50, 1413);
 
     // Parâmetro de inicialização do AG
-    resolucaoGrasp.horarioPopulacaoInicial = 250;
-    resolucaoGrasp.horarioTorneioPopulacao = 0.08;
+    resolucaoGrasp.horarioPopulacaoInicial = 200;
+    resolucaoGrasp.horarioTorneioPopulacao = 0.05;
 
     // Irá gerar x pares de vencedores
-    resolucaoGrasp.horarioTorneioPares = 0.2;
+    resolucaoGrasp.horarioTorneioPares = 0.1;
 
     // 25% dos filhos sofrerão mutação
     resolucaoGrasp.horarioMutacaoProbabilidade = 0;
     // Tentativa de mutar 3 genes
-    resolucaoGrasp.horarioMutacaoTentativas = 3;
+    resolucaoGrasp.horarioMutacaoTentativas = 2;
 
     // Escolhe o algoritmo de geração de vizinhos como aleatórios, e o número
     // de vizinhos gerados como 4 por iteração, e o limite de parada como 0.8ms

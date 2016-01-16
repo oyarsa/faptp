@@ -91,7 +91,11 @@
       </toolsSet>
       <compileType>
         <ccTool>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <architecture>2</architecture>
           <standard>8</standard>
+          <commandlineTool>g++</commandlineTool>
           <warningLevel>3</warningLevel>
         </ccTool>
       </compileType>
