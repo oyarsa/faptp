@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define SEMANA    7
+#define SEMANA    5
 
 #define SEGUNDA   0
 #define TERCA     1

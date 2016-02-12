@@ -14,12 +14,15 @@ int Util::getPosition(int y, int x, int z, int Y, int Z) {
 
 void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
   int x, y, z;
-  int tamanho = (X * Y * Z);
+  int tamanho = ((X * Y) * Z);
 
-  x = ((pLinear % tamanho) / Y);
+  // Dia
+  x = ((pLinear % tamanho) / Y) % X;
+  // Bloco
   y = ((pLinear % tamanho) % Y);
-  z = pLinear / tamanho;
-
+  // Camada
+  z = pLinear / (X * Y);
+  
   triDimensional[0] = y;
   triDimensional[1] = x;
   triDimensional[2] = z;

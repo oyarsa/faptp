@@ -344,7 +344,7 @@ double Grade::getObjectiveFunction() {
         }
     }
 
-    return fo;
+    return (int)fo;
 }
 
 Grade::Grade(const Grade& outro)

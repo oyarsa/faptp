@@ -8,14 +8,13 @@ Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
 }
 
 Representacao::Representacao(const Representacao& outro)
-    : blocosTamanho(outro.blocosTamanho)
-    , camadasTamanho(outro.camadasTamanho)
-    , size(outro.size)
-    , blocos(outro.blocos)
-    , camadas(outro.camadas)
-    , matriz(outro.matriz)
-    , alocados(outro.alocados)
-{
+: blocosTamanho(outro.blocosTamanho)
+, camadasTamanho(outro.camadasTamanho)
+, size(outro.size)
+, blocos(outro.blocos)
+, camadas(outro.camadas)
+, matriz(outro.matriz)
+, alocados(outro.alocados) {
 }
 
 Representacao& Representacao::operator=(const Representacao& outro) {
@@ -26,10 +25,9 @@ Representacao& Representacao::operator=(const Representacao& outro) {
     camadas = outro.camadas;
     matriz = outro.matriz;
     alocados = outro.alocados;
-    
+
     return *this;
 }
-
 
 Representacao::~Representacao() {
 }
@@ -86,10 +84,6 @@ int Representacao::getFirstDisciplina(Disciplina* pDisciplina) {
     return getFirstDisciplina(pDisciplina, matriz);
 }
 
-int Representacao::getFirstDisciplina(Disciplina* pDisciplina, int camada) {
-    return getFirstDisciplina(pDisciplina, matriz);
-}
-
 int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
     int x;
     std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
@@ -99,6 +93,35 @@ int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<Profe
     x = getPositionDisciplina(mIter, mIterEnd, xIter);
 
     return x;
+}
+
+std::vector<int> Representacao::getAllEmpty(int camada) {
+    int position = 0;
+    std::vector<int> empties;
+
+    for (int d = 0; d < SEMANA; d++) {
+        for (int b = 0; b < blocosTamanho; b++) {
+            position = getPosition(d, b, camada);
+            if (matriz[position] == NULL) {
+                empties.push_back(position);
+            }
+        }
+    }
+
+    return empties;
+}
+
+void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada) {
+    int position = -1;
+
+    for (int d = 0; d < SEMANA; d++) {
+        for (int b = 0; b < blocosTamanho; b++) {
+            position = getPosition(d, b, camada);
+            if (matriz[position] == pProfessorDisciplina) {
+                matriz[position] = NULL;
+            }
+        }
+    }
 }
 
 int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound) {

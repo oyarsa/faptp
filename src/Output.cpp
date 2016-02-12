@@ -27,26 +27,42 @@ std::string Output::getDir() {
 }
 
 void Output::write(Solucao *pSolucao) {
-    std::string dir = getDir();
-    std::string command = "mkdir -p " + dir;
+    write(pSolucao, getDir());
+}
+
+void Output::write(Solucao *pSolucao, std::string savePath) {
+    std::string command = "mkdir -p " + savePath;
 
     // Criando o diretório de saída
     int result = system(command.c_str());
 
     std::ostringstream saida{};
-    const std::string diasDaSemana[] = {"Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"};
+    const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"};
 
     saida << std::nounitbuf;
     saida << "<!DOCTYPE html>\n"
-            << "<html align='center' id='nome'>\n"
-            << "<style type=\"text/css\"></style>"
+            << "<html>\n"
+            << "<head>\n"
+            << "<style type=\"text/css\">\n"
+            << "  table {\n"
+            << "    width: 100%;\n"
+            << "    border-collapse: collapse;\n"
+            << "    margin: 10px 0 15px 0px;\n"
+            << "  }\n"
+            << "  table, td, th {\n"
+            << "    border: 1px solid black;\n"
+            << "  }\n"
+            << "</style>\n"
+            << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+            << "</head>\n"
             << "<body>\n";
 
+    saida << "<hr /> <h3>Horario</h3>\n";
     for (int i = 0; i < pSolucao->camadasTamanho; i++) {
-        saida << "<table align='center' class='horarios'>\n";
-        
+        saida << "<table align='center' class='horario'>\n";
+
         saida << "<tr>";
-        for (int j = 0; j < 7; j++) {
+        for (int j = 0; j < SEMANA; j++) {
             saida << "<th>" << diasDaSemana[j] << "</th>";
         }
         saida << "</tr>";
@@ -54,7 +70,7 @@ void Output::write(Solucao *pSolucao) {
 
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
-            for (int k = 0; k < 7; k++) {
+            for (int k = 0; k < SEMANA; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
                 std::string pds = "-";
                 if (pd != NULL) {
@@ -64,13 +80,57 @@ void Output::write(Solucao *pSolucao) {
             }
             saida << "</tr>";
         }
-        saida << "<table align='center' class='horarios'>\n";
+        saida << "</table>\n";
+    }
+
+    saida << "<hr /> <h3>Grades</h3>\n";
+    for (const auto& par : pSolucao->grades) {
+        const auto gradeAtual = par.second;
+        
+        double fo = gradeAtual->getObjectiveFunction();
+        
+        if (fo == 0) {
+            continue;
+        }
+
+        saida << "<table align='center' class='grade'>\n";
+
+        saida << "<tr><th colspan=\"" << SEMANA << "\">" << gradeAtual->alunoPerfil->id << " (" << fo << ")</th></tr>\n";
+
+        saida << "<tr>";
+        for (int j = 0; j < SEMANA; j++) {
+            saida << "<th>" << diasDaSemana[j] << "</th>";
+        }
+        saida << "</tr>";
+
+
+        for (int j = 0; j < pSolucao->blocosTamanho; j++) {
+            saida << "<tr>";
+            for (int k = 0; k < SEMANA; k++) {
+                auto pd = gradeAtual->at(k, j, 0);
+                std::string pds = "-";
+                if (pd != NULL) {
+                    pds = pd->getDisciplina()->getNome();
+                }
+                saida << "<td>" << pds << "</td>";
+            }
+            saida << "</tr>";
+        }
+
+        /*
+        const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
+        for (const auto disc : discEscolhidas) {
+            std::cout << disc->nome << "; ";
+        }
+        */
+
+        saida << "</table>\n";
     }
 
     saida << "</body>\n"
             << "</html>\n";
 
-    std::ofstream arquivoSaida(dir + "/horario.html");
+    std::ofstream arquivoSaida(savePath + "/horario.html");
     arquivoSaida << std::nounitbuf << saida.str() << std::endl;
     arquivoSaida.close();
 }

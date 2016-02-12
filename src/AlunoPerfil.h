@@ -17,6 +17,7 @@ class AlunoPerfil {
   friend class Grade;
   friend class Solucao;
   friend class Resolucao;
+  friend class Output;
 public:
   AlunoPerfil(double pPeso);
   AlunoPerfil(double pPeso, std::string pId, std::string pTurma, std::string pPeriodo);
