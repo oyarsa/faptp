@@ -60,7 +60,7 @@ void Solucao::insertGrade(Grade* grade) {
 
 //change
 double Solucao::getObjectiveFunction() {
-    return (int) std::accumulate(begin(grades), end(grades), 0.0,
+    return std::accumulate(begin(grades), end(grades), 0.0,
             [](const double& acc, const std::pair<std::string, Grade*>& par) {
                 return acc + par.second->getObjectiveFunction();
             });
