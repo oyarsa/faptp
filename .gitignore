@@ -8,5 +8,6 @@ nb-configuration.xml
 .nb-gradle/
 testes/
 experimento/
+<<<<<<< HEAD
 teste/
 *.DS_Store

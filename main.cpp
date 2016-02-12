@@ -196,7 +196,5 @@ int main(int argc, char** argv)
 		//calibracao(0);
 		semArgumentos();
 	}
-
-	fagoc::Modelo_solver m();
 }
 

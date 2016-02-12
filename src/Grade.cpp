@@ -27,7 +27,8 @@ Grade::~Grade() {
 
 }
 
-bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) {
+bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
+{
     return alunoPerfil->periodo >= pDisciplina->periodoMinimo;
 }
 
@@ -151,7 +152,7 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
                     }
                 }
 
-                // Se ainda não marcou colisão
+                // Se ainda nï¿½o marcou colisï¿½o
                 if (!colisao) {
 
                     professorDisciplinaTemp = currentProfessorDisciplina;

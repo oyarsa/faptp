@@ -4,13 +4,6 @@ project(faPTP)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade/modelo-grade)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
-# include_directories(SYSTEM ${CPLEX_INCLUDE_DIRS})
-
-# add_definitions(-DIL_STD)
-# string (REPLACE "/D_DEBUG" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-# if (WIN32)
-#     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
-# endif()
 
 set(FAPTP_FILES
     src/Aleatorio.cpp

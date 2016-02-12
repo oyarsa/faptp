@@ -48,7 +48,7 @@ private:
   Disciplina* getDisciplina(std::string pNomeDisc);
 
   bool havePreRequisitos(const Disciplina* const pDisciplina);
-  bool hasPeriodoMinimo(const Disciplina* const pDisciplina);
+  bool hasPeriodoMinimo(const Disciplina* const pDisciplina) const;
   bool hasCoRequisitos(const Disciplina* const pDisciplina);
   bool checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
   bool isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
