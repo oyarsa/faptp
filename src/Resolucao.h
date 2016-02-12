@@ -2,31 +2,16 @@
 #define RESOLUCAO_H
 
 #include <iostream>
-#include <algorithm>
-#include <fstream>
-#include <string>
-#include <cstring>
 #include <map>
 #include <vector>
-
-#include <time.h>
-
-#include "../template/Algorithms.h"
 
 #include "Professor.h"
 #include "Disciplina.h"
 #include "ProfessorDisciplina.h"
 #include "AlunoPerfil.h"
 #include "Solucao.h"
-#include "Horario.h"
-
-#include "Util.h"
-
-#include "includes/parametros.h"
 
 #include "includes/json/json.h"
-
-#include "Files.h"
 
 #define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO          1
 #define RESOLUCAO_GERAR_GRADE_TIPO_GRASP           2
@@ -40,7 +25,7 @@
 
 class Resolucao {
 public:
-    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string arquivoEntrada = "input.json");
+    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, string arquivoEntrada = "res/input.json");
     virtual ~Resolucao();
 
     double start();
@@ -89,18 +74,18 @@ private:
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
-    std::string arquivoEntrada;
+    string arquivoEntrada;
 
-    std::map<std::string, Professor*> professores;
+    map<string, Professor*> professores;
 
-    std::map<std::string, int> disciplinasIndex;
-    std::vector<Disciplina*> disciplinas;
+    map<string, int> disciplinasIndex;
+    vector<Disciplina*> disciplinas;
 
-    std::map< std::string, std::vector<Disciplina*> > periodoXdisciplina;
+    map< string, vector<Disciplina*> > periodoXdisciplina;
 
-    std::map<std::string, AlunoPerfil*> alunoPerfis;
+    map<string, AlunoPerfil*> alunoPerfis;
 
-    std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    map<string, ProfessorDisciplina*> professorDisciplinas;
 
     Solucao* solucao;
 
@@ -119,34 +104,34 @@ private:
 
     void carregarSolucao();
 
-    std::vector<Disciplina*> ordenarDisciplinas();
-    std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
+    vector<Disciplina*> ordenarDisciplinas();
+    vector<Disciplina*> ordenarDisciplinas(vector<Disciplina*> pDisciplina);
     void atualizarDisciplinasIndex();
 
-    std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
-    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
-    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao);
-    Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao);
-    std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2);
+    vector<Solucao*> gerarHorarioAGPopulacaoInicial();
+    vector<Solucao*> gerarHorarioAGTorneioPar(vector<Solucao*> solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio(vector<Solucao*> solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio2(vector<Solucao*> solucoesPopulacao);
+    vector<Solucao*> gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2);
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
-    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
-    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
-    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);
+    void gerarHorarioAGSobrevivenciaElitismo(vector<Solucao*> &populacao);
+    void gerarHorarioAGSobrevivenciaElitismo(vector<Solucao*> &populacao, int populacaoMax);
+    vector<Solucao*> gerarHorarioAGMutacao(vector<Solucao*> filhos);
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
     double gerarGrade(Solucao *&pSolucao);
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, vector<Disciplina*> disciplinasRestantes, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Grade* pGrade);
-    void gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+    void gerarGradeTipoGraspConstrucao(Grade* pGrade, vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao *pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao *pSolucao);
     double gerarGradeTipoGrasp();
@@ -154,8 +139,8 @@ private:
 
     double gerarGradeTipoGraspClear(Solucao *&pSolucao);
 
-    std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
-    int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante);
+    vector<Disciplina*>::iterator getLimiteIntervaloGrasp(vector<Disciplina*> pApRestante);
+    int getIntervaloAlfaGrasp(vector<Disciplina*> pApRestante) const;
 
     void showResult(Solucao *pSolucao);
 };

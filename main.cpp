@@ -11,7 +11,7 @@
 
 #include "template/Algorithms.h"
 
-#include "src/includes/parametros.h"
+#include "src/parametros.h"
 
 #include "src/Disciplina.h"
 #include "src/Professor.h"
@@ -27,8 +27,8 @@ void comArgumentos(int argc, char** argv) {
     int numVizinhos;
     double tempoConstr, alfaGrasp;
 
-    std::ifstream arquivoConf(argv[1]);
-    std::string arquivoEntrada = argv[2];
+    ifstream arquivoConf(argv[1]);
+    string arquivoEntrada = argv[2];
 
     arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
 
@@ -42,11 +42,11 @@ void comArgumentos(int argc, char** argv) {
     resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
     resolucaoGrasp.gradeAlfa = alfaGrasp;
 
-    auto inicioTempo = std::chrono::steady_clock::now();
+    auto inicioTempo = chrono::steady_clock::now();
     auto fo = resolucaoGrasp.start();
-    auto fimTempo = std::chrono::steady_clock::now();
+    auto fimTempo = chrono::steady_clock::now();
 
-    std::cout << fo << " " << std::chrono::duration_cast<chrono::milliseconds>
+    cout << fo << " " << chrono::duration_cast<chrono::milliseconds>
             (fimTempo - inicioTempo).count() << "\n";
 }
 
@@ -116,21 +116,21 @@ void calibracao(int tipo) {
             double alfa = (double) params[j][4] / 100;
             resolucaoGrasp.gradeAlfa = alfa;
 
-            std::cout << "Inicio: Execucao " << (i + 1) << " da configuracao " << p << std::endl;
+            cout << "Inicio: Execucao " << (i + 1) << " da configuracao " << p << endl;
 
             auto inicioHorario = clock();
             resolucaoGrasp.start(false);
             auto fimHorario = clock();
 
             fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
-            std::cout << "FO da solucao: " << fo << std::endl;
+            cout << "FO da solucao: " << fo << endl;
 
             double diff = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
-            std::cout << "Tempo do horario: " << (diff) << "s" << std::endl << std::endl;
+            cout << "Tempo do horario: " << (diff) << "s" << endl << endl;
 
-            std::ostringstream s;
+            ostringstream s;
             s << "experimento/p" << j << "e" << i << "fo" << fo;
-            std::string savePath = s.str();
+            string savePath = s.str();
             o.write(resolucaoGrasp.getSolucao(), savePath);
         }
     }
@@ -163,22 +163,22 @@ void semArgumentos() {
 
     resolucaoGrasp.gradeAlfa = .9;
 
-    std::cout << "Montando horarios [AG + Grasp]..." << std::endl;
+    cout << "Montando horarios [AG + Grasp]..." << endl;
 
     auto inicioHorario = clock();
     resolucaoGrasp.start(false);
     auto fimHorario = clock();
 
     double diff1 = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
-    std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+    cout << "Tempo do horario: " << (diff1) << "s" << endl << endl;
 
     double fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
-    std::cout << "Resultado:" << fo << std::endl;
+    cout << "Resultado:" << fo << endl;
     //resolucaoGrasp.showResult();
 
-    std::ostringstream s;
+    ostringstream s;
     s << "teste/fo" << fo;
-    std::string savePath = s.str();
+    string savePath = s.str();
     o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 

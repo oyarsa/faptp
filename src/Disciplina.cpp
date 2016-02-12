@@ -84,14 +84,14 @@ void Disciplina::addPreRequisito(std::string pDisciplina) {
 }
 
 bool Disciplina::isPreRequisito(std::string pDisciplina) {
-    return std::find(preRequisitos.begin(), preRequisitos.end(), pDisciplina) != preRequisitos.end();
+    return find(preRequisitos.begin(), preRequisitos.end(), pDisciplina) != preRequisitos.end();
 }
 
 void Disciplina::addProfessorCapacitado(Professor *professor) {
     professoresCapacitados.insert(
             std::lower_bound(
-                std::begin(professoresCapacitados),
-                std::end(professoresCapacitados), 
+                begin(professoresCapacitados),
+                end(professoresCapacitados), 
                 professor, 
                 [](Professor *a, Professor *b) {
                     return a->getNumDisponibilidade() < b->getNumDisponibilidade();

@@ -73,5 +73,5 @@ void Professor::addCompetencia(std::string pDisciplina, double pPeso) {
 }
 
 bool Professor::haveCompetencia(std::string pDisciplina) {
-  return competencias.count(pDisciplina);
+  return competencias.count(pDisciplina) > 0;
 }

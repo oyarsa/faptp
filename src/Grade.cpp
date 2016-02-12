@@ -1,10 +1,10 @@
-#include "includes/parametros.h"
+#include "parametros.h"
 #include "Grade.h"
 #include "Resolucao.h"
 #include <unordered_map>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
-        std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex)
+        vector<Disciplina*>& pDisciplinasCurso, map<string, int>& pDiscToIndex)
 : Representacao(pBlocosTamanho, 1)
 , disciplinasCurso(pDisciplinasCurso)
 , discToIndex(pDiscToIndex)
@@ -13,7 +13,7 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 , professorDisciplinaTemp(nullptr) {
 }
 
-Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
+Disciplina* Grade::getDisciplina(string pNomeDisciplina) {
     return disciplinasCurso[discToIndex[pNomeDisciplina]];
 }
 
@@ -32,7 +32,7 @@ bool Grade::discRepetida(const Disciplina * const pDisciplina) {
     // repetida e não pode ser inserida
     for (const auto& discAtual : disciplinasAdicionadas) {
         const auto& equivalentes = discAtual->equivalentes;
-        if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
+        if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
             return true;
         }
@@ -42,7 +42,7 @@ bool Grade::discRepetida(const Disciplina * const pDisciplina) {
     // ser inserida
     for (const auto& discAtual : alunoPerfil->cursadas) {
         const auto& equivalentes = getDisciplina(discAtual)->equivalentes;
-        if (std::find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
+        if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
             return true;
         }
@@ -61,11 +61,11 @@ bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
         if (disciplinasCursadas.size() > 0) {
             for (const auto& coRequisito : pDisciplinaCoRequisitos) {
                 const auto& equivalentes = getDisciplina(coRequisito)->equivalentes;
-                auto possuiPreReq = (std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                auto possuiPreReq = (find_first_of(equivalentes.begin(), equivalentes.end(),
                         disciplinasCursadas.begin(), disciplinasCursadas.end()) != equivalentes.end())
                         || (std::find_first_of(equivalentes.begin(), equivalentes.end(),
                         disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(),
-                        [](const std::string& a, const Disciplina * const b) {
+                        [](const string& a, const Disciplina * const b) {
                             return a == b->nome;
                         }) != equivalentes.end());
 
@@ -81,7 +81,7 @@ bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
 
     if (!viavel) {
         if (verbose)
-            std::cout << "Nao tem os pre requisitos" << std::endl;
+            cout << "Nao tem os pre requisitos" << endl;
     }
 
     return viavel;
@@ -101,7 +101,7 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
             // na lista de cursadas do aluno
             for (const auto& preRequisito : pDisciplinaPreRequisitos) {
                 const auto& equivalentes = getDisciplina(preRequisito)->equivalentes;
-                auto possuiPreReq = std::find_first_of(equivalentes.begin(), equivalentes.end(),
+                auto possuiPreReq = find_first_of(equivalentes.begin(), equivalentes.end(),
                         disciplinasAprovadas.begin(), disciplinasAprovadas.end())
                         != equivalentes.end();
 
@@ -117,12 +117,12 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
     }
 
     if (!viavel && verbose) {
-        std::cout << "Nao tem os pre requisitos" << std::endl;
+        cout << "Nao tem os pre requisitos" << endl;
     }
     return viavel;
 }
 
-bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCamada, const vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool colisao = false;
     int currentPositionHorario;
     int currentPositionGrade;
@@ -141,7 +141,7 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
                 if (!professorDisciplinasIgnorar.empty()) {
 
                     // Se contem currentProfessorDisciplina
-                    if (std::find(professorDisciplinasIgnorar.begin(), professorDisciplinasIgnorar.end(), currentProfessorDisciplina) != professorDisciplinasIgnorar.end()) {
+                    if (find(professorDisciplinasIgnorar.begin(), professorDisciplinasIgnorar.end(), currentProfessorDisciplina) != professorDisciplinasIgnorar.end()) {
                         colisao = true;
                     }
                 }
@@ -167,7 +167,7 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
     return (!colisao);
 }
 
-bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
     bool viavel = havePreRequisitos(pDisciplina) &&
             checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
             !discRepetida(pDisciplina) &&
@@ -191,7 +191,7 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
 
             if (currentProfessorDisciplina != NULL && currentProfessorDisciplina->disciplina == pDisciplina) {
                 if (verbose)
-                    std::cout << currentPositionHorario << ", ";
+                    cout << currentPositionHorario << ", ";
 
                 matriz[currentPositionGrade] = currentProfessorDisciplina;
             }
@@ -204,27 +204,27 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
 }
 
 bool Grade::insert(Disciplina* pDisciplina) {
-    std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
+    vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
 
     return insert(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
+bool Grade::insert(Disciplina* pDisciplina, vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
     return insert(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
+bool Grade::insert(Disciplina* pDisciplina, vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
     int camada, triDimensional[3];
     int x;
 
-    std::vector<ProfessorDisciplina*>::iterator pdIter = horario->matriz.begin();
-    std::vector<ProfessorDisciplina*>::iterator pdIterEnd = horario->matriz.end();
-    std::vector<ProfessorDisciplina*>::iterator pdIterFound = horario->matriz.begin();
+    vector<ProfessorDisciplina*>::iterator pdIter = horario->matriz.begin();
+    vector<ProfessorDisciplina*>::iterator pdIterEnd = horario->matriz.end();
+    vector<ProfessorDisciplina*>::iterator pdIterFound = horario->matriz.begin();
 
     bool viavel = false;
     bool first = true;
 
-    if (std::find(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina) == disciplinasAdicionadas.end()) {
+    if (find(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina) == disciplinasAdicionadas.end()) {
         while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
             x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
 
@@ -236,10 +236,10 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
             viavel = isViable(pDisciplina, camada, professorDisciplinasIgnorar);
             if (viavel) {
                 if (verbose)
-                    std::cout << "----ADD: " << pDisciplina->id << "[";
+                    cout << "----ADD: " << pDisciplina->id << "[";
                 add(pDisciplina, camada);
                 if (verbose)
-                    std::cout << "]" << std::endl;
+                    cout << "]" << endl;
             }
             if (viavel || force) {
                 if (professorDisciplinaTemp != NULL) {
@@ -267,7 +267,7 @@ Disciplina* Grade::remove(Disciplina* pDisciplina) {
 }
 
 Disciplina* Grade::remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina) {
-    std::vector<Disciplina*>::iterator found;
+    vector<Disciplina*>::iterator found;
     Disciplina* rDisciplina = NULL;
 
     int i = 0;
@@ -276,7 +276,7 @@ Disciplina* Grade::remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfes
     pProfessorDisciplina = NULL;
 
     if (verbose)
-        std::cout << "----REM: " << pDisciplina->id << std::endl;
+        cout << "----REM: " << pDisciplina->id << endl;
 
     problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 
@@ -307,7 +307,7 @@ double Grade::getObjectiveFunction() {
 
     double fo = 0;
 
-    std::unordered_map<std::string, int> discAvaliada;
+    unordered_map<string, int> discAvaliada;
 
     int triDimensional[3];
     int perfil, diaSemana;

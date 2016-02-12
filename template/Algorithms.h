@@ -103,7 +103,7 @@ struct DisciplinasRemoveDisciplinas {
     }
 
     bool operator()(Disciplina* d) {
-        return std::find_if(disciplinas.begin(), disciplinas.end(), DisciplinaFindDisciplina(d)) != disciplinas.end();
+        return find_if(disciplinas.begin(), disciplinas.end(), DisciplinaFindDisciplina(d)) != disciplinas.end();
     }
 };
 

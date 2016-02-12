@@ -21,14 +21,14 @@ class Grade : public Representacao {
   friend class Output;
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
-          std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
+          vector<Disciplina*>& pDisciplinasCurso, map<string, int>& pDiscToIndex);
   Grade(const Grade& outro);
   Grade& operator=(const Grade& outro);
   virtual ~Grade();
 
   bool insert(Disciplina* pDisciplina);
-  bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
-  bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force);
+  bool insert(Disciplina* pDisciplina, vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+  bool insert(Disciplina* pDisciplina, vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force);
   Disciplina* remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
   Disciplina* remove(Disciplina* pDisciplina);
 
@@ -38,22 +38,22 @@ private:
   AlunoPerfil *alunoPerfil;
   Horario *horario;
   
-  std::vector<ProfessorDisciplina*> professorDisciplinas;
-  std::vector<std::string> problemas;
+  vector<ProfessorDisciplina*> professorDisciplinas;
+  vector<string> problemas;
   ProfessorDisciplina *professorDisciplinaTemp;
-  std::vector<Disciplina*> disciplinasAdicionadas;
+  vector<Disciplina*> disciplinasAdicionadas;
   
-  std::vector<Disciplina*>& disciplinasCurso;
-  std::map<std::string, int>& discToIndex;
+  vector<Disciplina*>& disciplinasCurso;
+  map<string, int>& discToIndex;
   
   //! Recebe um nome e retorna um ponteiro para uma disciplina
-  Disciplina* getDisciplina(std::string pNomeDisc);
+  Disciplina* getDisciplina(string pNomeDisc);
 
   bool havePreRequisitos(const Disciplina* const pDisciplina);
   bool hasPeriodoMinimo(const Disciplina* const pDisciplina);
   bool hasCoRequisitos(const Disciplina* const pDisciplina);
-  bool checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
-  bool isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+  bool checkCollision(const Disciplina* const pDisciplina, const int pCamada, const vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+  bool isViable(const Disciplina* const pDisciplina, const int pCamada, const vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
   //! Verifica se a disciplina sendo considerada não está na lista de equivalências
   //! de outra que já foi inserida
   bool discRepetida(const Disciplina* const pDisciplina);

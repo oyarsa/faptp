@@ -1,6 +1,10 @@
+#include <fstream>
+#include <numeric>
+
+#include "parametros.h"
 #include "Resolucao.h"
 
-Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pArquivoEntrada)
+Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, string pArquivoEntrada)
 : blocosTamanho(pBlocosTamanho)
 , camadasTamanho(pCamadasTamanho)
 , perfisTamanho(pPerfisTamanho)
@@ -45,7 +49,7 @@ void Resolucao::initDefault() {
 }
 
 void Resolucao::carregarDados() {
-    std::ifstream myfile(arquivoEntrada);
+    ifstream myfile(arquivoEntrada);
 
     if (myfile.is_open()) {
         myfile >> jsonRoot;
@@ -55,7 +59,7 @@ void Resolucao::carregarDados() {
         carregarDadosProfessores();
         carregarAlunoPerfis();
     } else {
-        std::cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
+        cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
         throw 1;
     }
 }
@@ -63,9 +67,9 @@ void Resolucao::carregarDados() {
 void Resolucao::carregarDadosProfessores() {
     const auto& jsonProfessores = jsonRoot["professores"];
 
-    for (int i = 0; i < jsonProfessores.size(); i++) {
-        std::string id = jsonProfessores[i]["id"].asString();
-        std::string nome = jsonProfessores[i]["nome"].asString();
+    for (size_t i = 0; i < jsonProfessores.size(); i++) {
+        string id = jsonProfessores[i]["id"].asString();
+        string nome = jsonProfessores[i]["nome"].asString();
 
         professores[id] = new Professor(nome, id);
         auto& diasDisponiveis = professores[id]->diasDisponiveis;
@@ -78,23 +82,23 @@ void Resolucao::carregarDadosProfessores() {
         if (jsonProfessores[i].isMember("disponibilidade") == 1) {
             const auto& disponibilidade = jsonProfessores[i]["disponibilidade"];
             diasDisponiveis.resize(disponibilidade.size());
-            for (int i = 0; i < disponibilidade.size(); i++) {
+            for (size_t i = 0; i < disponibilidade.size(); i++) {
                 diasDisponiveis[i].resize(disponibilidade[i].size());
-                for (int j = 0; j < disponibilidade[i].size(); j++) {
+                for (size_t j = 0; j < disponibilidade[i].size(); j++) {
                     diasDisponiveis[i][j] = disponibilidade[i][j].asBool();
                 }
 
-                numDisp += std::accumulate(begin(diasDisponiveis[i]), end(diasDisponiveis[i]), 0);
+                numDisp += accumulate(begin(diasDisponiveis[i]), end(diasDisponiveis[i]), 0);
             }
         }
 
         const auto& competencias = jsonProfessores[i]["competencias"];
-        for (int j = 0; j < competencias.size(); j++) {
+        for (size_t j = 0; j < competencias.size(); j++) {
 
-            std::vector<Disciplina*>::iterator it;
-            std::string disciplinaId = competencias[j].asString();
+            vector<Disciplina*>::iterator it;
+            string disciplinaId = competencias[j].asString();
 
-            it = std::find_if(disciplinas.begin(), disciplinas.end(),
+            it = find_if(disciplinas.begin(), disciplinas.end(),
                     DisciplinaFindDisciplinaId(disciplinaId));
             (*it)->addProfessorCapacitado(professores[id]);
         }
@@ -104,7 +108,7 @@ void Resolucao::carregarDadosProfessores() {
 void Resolucao::carregarDadosDisciplinas() {
     const auto& jsonDisciplinas = jsonRoot["disciplinas"];
 
-    for (auto i = 0; i < jsonDisciplinas.size(); i++) {
+    for (size_t i = 0; i < jsonDisciplinas.size(); i++) {
         const auto id = jsonDisciplinas[i]["id"].asString();
         const auto nome = jsonDisciplinas[i]["nome"].asString();
         const auto curso = jsonDisciplinas[i]["curso"].asString();
@@ -119,17 +123,17 @@ void Resolucao::carregarDadosDisciplinas() {
         Disciplina *disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
 
         const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
-        for (auto j = 0; j < corequisitos.size(); j++) {
+        for (size_t j = 0; j < corequisitos.size(); j++) {
             disciplina->coRequisitos.push_back(corequisitos[j].asString());
         }
 
         const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
-        for (auto j = 0; j < prerequisitos.size(); j++) {
+        for (size_t j = 0; j < prerequisitos.size(); j++) {
             disciplina->preRequisitos.push_back(prerequisitos[j].asString());
         }
 
         const auto& equivalentes = jsonDisciplinas[i]["equivalentes"];
-        for (auto j = 0; j < equivalentes.size(); j++) {
+        for (size_t j = 0; j < equivalentes.size(); j++) {
             disciplina->equivalentes.push_back(equivalentes[j].asString());
         }
         disciplina->equivalentes.push_back(nome);
@@ -145,7 +149,7 @@ void Resolucao::carregarDadosDisciplinas() {
 void Resolucao::carregarDadosProfessorDisciplinas() {
     const auto& jsonProfessorDisciplinas = jsonRoot["professordisciplinas"];
 
-    for (auto i = 0; i < jsonProfessorDisciplinas.size(); i++) {
+    for (size_t i = 0; i < jsonProfessorDisciplinas.size(); i++) {
         const auto id = jsonProfessorDisciplinas[i]["id"].asString();
         const auto professor = jsonProfessorDisciplinas[i]["professor"].asString();
         const auto disciplina = jsonProfessorDisciplinas[i]["disciplina"].asString();
@@ -165,7 +169,7 @@ void Resolucao::carregarDadosProfessorDisciplinas() {
 void Resolucao::carregarAlunoPerfis() {
     const auto& jsonAlunoPerfis = jsonRoot["alunoperfis"];
 
-    for (auto i = 0; i < jsonAlunoPerfis.size(); i++) {
+    for (size_t i = 0; i < jsonAlunoPerfis.size(); i++) {
         const auto id = jsonAlunoPerfis[i]["id"].asString();
         const auto peso = jsonAlunoPerfis[i]["peso"].asDouble();
         const auto turma = jsonAlunoPerfis[i]["turma"].asString();
@@ -174,23 +178,23 @@ void Resolucao::carregarAlunoPerfis() {
         AlunoPerfil *alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
         const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
-        for (auto j = 0; j < jsonRestantes.size(); j++) {
+        for (size_t j = 0; j < jsonRestantes.size(); j++) {
             Disciplina *disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
             alunoPerfil->addRestante(disciplina);
         }
         alunoPerfil->restante = ordenarDisciplinas(alunoPerfil->restante);
 
         const auto& jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
-        for (auto j = 0; j < jsonCursadas.size(); j++) {
-            std::string cursada = jsonCursadas[j].asString();
+        for (size_t j = 0; j < jsonCursadas.size(); j++) {
+            string cursada = jsonCursadas[j].asString();
             alunoPerfil->addCursada(cursada);
         }
 
-        std::vector<Disciplina*> aprovadas;
+        vector<Disciplina*> aprovadas;
 
-        std::set_difference(disciplinas.begin(), disciplinas.end(),
+        set_difference(disciplinas.begin(), disciplinas.end(),
                 alunoPerfil->restante.begin(), alunoPerfil->restante.end(),
-                std::inserter(aprovadas, aprovadas.begin()));
+                inserter(aprovadas, aprovadas.begin()));
 
         auto& aprovadasNomes = alunoPerfil->aprovadas;
 
@@ -225,23 +229,23 @@ void Resolucao::carregarSolucao() {
     Solucao *solucaoLeitura = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
     int bloco, dia, camada;
 
-    for (auto i = 0; i < jsonHorario.size(); i++) {
+    for (size_t i = 0; i < jsonHorario.size(); i++) {
         bloco = jsonHorario[i]["horario"].asInt();
         dia = jsonHorario[i]["semana"].asInt();
         camada = jsonHorario[i]["camada"].asInt();
 
         ProfessorDisciplina *professorDisciplina = professorDisciplinas[jsonHorario[i]["professordisciplina"].asString()];
         if (verbose)
-            std::cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - PDSP:" << professorDisciplina->disciplina->nome << "  - P:";
+            cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - PDSP:" << professorDisciplina->disciplina->nome << "  - P:";
         solucaoLeitura->horario->insert(dia, bloco, camada, professorDisciplina);
     }
 
     if (verbose)
-        std::cout << "-----------------------------------------" << std::endl;
+        cout << "-----------------------------------------" << endl;
     solucao = solucaoLeitura;
 }
 
-std::vector<Disciplina*> Resolucao::ordenarDisciplinas() {
+vector<Disciplina*> Resolucao::ordenarDisciplinas() {
     disciplinas = ordenarDisciplinas(disciplinas);
 
     atualizarDisciplinasIndex();
@@ -249,11 +253,11 @@ std::vector<Disciplina*> Resolucao::ordenarDisciplinas() {
     return disciplinas;
 }
 
-std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas) {
-    std::vector<Disciplina*>::iterator dIter = pDisciplinas.begin();
-    std::vector<Disciplina*>::iterator dIterEnd = pDisciplinas.end();
+vector<Disciplina*> Resolucao::ordenarDisciplinas(vector<Disciplina*> pDisciplinas) {
+    vector<Disciplina*>::iterator dIter = pDisciplinas.begin();
+    vector<Disciplina*>::iterator dIterEnd = pDisciplinas.end();
 
-    std::sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
+    sort(dIter, dIterEnd, DisciplinaCargaHorariaDesc());
 
     return pDisciplinas;
 }
@@ -261,8 +265,8 @@ std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> 
 void Resolucao::atualizarDisciplinasIndex() {
     Disciplina *disciplina;
 
-    std::vector<Disciplina*>::iterator dIter = disciplinas.begin();
-    std::vector<Disciplina*>::iterator dIterEnd = disciplinas.end();
+    vector<Disciplina*>::iterator dIter = disciplinas.begin();
+    vector<Disciplina*>::iterator dIterEnd = disciplinas.end();
 
     disciplinasIndex.clear();
     for (int i = 0; dIter != dIterEnd; ++dIter, i++) {
@@ -273,17 +277,17 @@ void Resolucao::atualizarDisciplinasIndex() {
 
 Solucao* Resolucao::gerarHorarioAG() {
     Solucao *solucaoAG;
-    std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
+    vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
 
-    std::vector<Solucao*> parVencedor;
-    std::vector<Solucao*> filhos1;
-    std::vector<Solucao*> filhos2;
-    std::vector<Solucao*> geneX;
+    vector<Solucao*> parVencedor;
+    vector<Solucao*> filhos1;
+    vector<Solucao*> filhos2;
+    vector<Solucao*> geneX;
 
     int iMax = horarioIteracao; //(populacao.size() * horarioTorneioPopulacao) * horarioTorneioPares;
 
     for (int i = 0; i < iMax; i++) {
-        std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
+        sort(populacao.begin(), populacao.end(), greater<Solucao*>());
 
         parVencedor = gerarHorarioAGTorneioPar(populacao);
 
@@ -301,7 +305,7 @@ Solucao* Resolucao::gerarHorarioAG() {
         gerarHorarioAGSobrevivenciaElitismo(populacao);
     }
 
-    std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
+    sort(populacao.begin(), populacao.end(), greater<Solucao*>());
     gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
     solucaoAG = populacao[0];
 
@@ -310,25 +314,25 @@ Solucao* Resolucao::gerarHorarioAG() {
     return solucaoAG;
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
-    std::vector<Solucao*> solucoesAG;
+vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
+    vector<Solucao*> solucoesAG;
 
     Aleatorio aleatorio;
 
     Disciplina *disciplinaAleatoria;
     Professor *professorSelecionado;
 
-    std::string dId;
-    std::string pId;
-    std::string pdId;
+    string dId;
+    string pId;
+    string pdId;
 
     int randInt;
     int NN = 0;
     bool inserted;
     bool professorPossuiCreditos;
 
-    std::map<std::string, int> creditosUtilizadosProfessor;
-    std::map<std::string, int> colisaoProfessor;
+    map<string, int> creditosUtilizadosProfessor;
+    map<string, int> colisaoProfessor;
 
     /**
      * TODO: ordenar os professores com menos blocos disponíveis para dar aula
@@ -345,14 +349,14 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
 
         for (const auto& par : periodoXdisciplina) {
 
-            std::vector<Disciplina*> disciplinas = par.second;
-            std::map<std::string, int> creditosUtilizadosDisciplina;
-            std::map<std::string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
+            vector<Disciplina*> disciplinas = par.second;
+            map<string, int> creditosUtilizadosDisciplina;
+            map<string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
             int dia = 0, bloco = 0;
 
             bool finding = false;
 
-            std::map<std::string, int> infactiveis;
+            map<string, int> infactiveis;
 
             colisaoProfessor.clear();
 
@@ -425,10 +429,10 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                 }
 
                 if (finding) {
-                    std::vector<int> empties = solucaoLocal->horario->getAllEmpty(i);
+                    vector<int> empties = solucaoLocal->horario->getAllEmpty(i);
                     int positions[3];
 
-                    for (std::vector<int>::iterator it = empties.begin(); it != empties.end(); ++it) {
+                    for (vector<int>::iterator it = empties.begin(); it != empties.end(); ++it) {
 
                         solucaoLocal->horario->get3DMatrix((*it), positions);
 
@@ -453,7 +457,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
 
                         solucaoLocal->horario->clearDisciplina(disciplinaXprofessorDisciplina[dId], i);
 
-                        disciplinas.erase(std::find_if(disciplinas.begin()
+                        disciplinas.erase(find_if(disciplinas.begin()
                                 , disciplinas.end()
                                 , DisciplinaFindDisciplina(disciplinaAleatoria)));
 
@@ -502,7 +506,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                 //std::cout << "\n" << disciplinaAleatoria->getCreditos() << " == " << creditosUtilizadosDisciplina[dId] << std::endl;
                 if (disciplinaAleatoria->getCreditos() == creditosUtilizadosDisciplina[dId]) {
 
-                    disciplinas.erase(std::find_if(disciplinas.begin()
+                    disciplinas.erase(find_if(disciplinas.begin()
                             , disciplinas.end()
                             , DisciplinaFindDisciplina(disciplinaAleatoria)));
                 }
@@ -519,8 +523,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     return solucoesAG;
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao) {
-    std::vector<Solucao*> torneioPar;
+vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(vector<Solucao*> solucoesPopulacao) {
+    vector<Solucao*> torneioPar;
 
     torneioPar.push_back(gerarHorarioAGTorneio2(solucoesPopulacao));
     torneioPar.push_back(gerarHorarioAGTorneio2(solucoesPopulacao));
@@ -528,8 +532,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> 
     return torneioPar;
 }
 
-Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) {
-    std::vector<Solucao*> torneioCandidatos;
+Solucao* Resolucao::gerarHorarioAGTorneio(vector<Solucao*> solucoesPopulacao) {
+    vector<Solucao*> torneioCandidatos;
     Solucao *vencedor;
     double vencedorFO = 0;
     double randomFO;
@@ -548,13 +552,13 @@ Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulaca
         }
 
         // Remove elemento sorteado
-        solucoesPopulacao.erase(std::remove(solucoesPopulacao.begin(), solucoesPopulacao.end(), solucoesPopulacao[randInt]), solucoesPopulacao.end());
+        solucoesPopulacao.erase(remove(solucoesPopulacao.begin(), solucoesPopulacao.end(), solucoesPopulacao[randInt]), solucoesPopulacao.end());
     }
 
     return vencedor;
 }
 
-Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao) {
+Solucao* Resolucao::gerarHorarioAGTorneio2(vector<Solucao*> solucoesPopulacao) {
 
     Aleatorio aleatorio;
     Util util;
@@ -566,9 +570,9 @@ Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulac
     return (solucoesPopulacao[primeiro]->getObjectiveFunction() > solucoesPopulacao[segundo]->getObjectiveFunction()) ? solucoesPopulacao[primeiro] : solucoesPopulacao[segundo];
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2) {
-    std::vector<Solucao*> filhos;
-    std::vector<ProfessorDisciplina*> matrizBackup;
+vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2) {
+    vector<Solucao*> filhos;
+    vector<ProfessorDisciplina*> matrizBackup;
 
     int camadasMax = horarioCruzamentoCamadas * camadasTamanho;
     int numFilhos = 0;
@@ -701,29 +705,29 @@ bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, 
     return false;
 }
 
-void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao) {
+void Resolucao::gerarHorarioAGSobrevivenciaElitismo(vector<Solucao*> &populacao) {
     gerarHorarioAGSobrevivenciaElitismo(populacao, horarioPopulacaoInicial);
 }
 
-void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) {
+void Resolucao::gerarHorarioAGSobrevivenciaElitismo(vector<Solucao*> &populacao, int populacaoMax) {
     //std::sort(populacao.begin(), populacao.end(), greater<Solucao*>());
 
-    for (auto i = populacaoMax; i < populacao.size(); i++) {
+    for (size_t i = populacaoMax; i < populacao.size(); i++) {
         delete populacao[i];
     }
 
     populacao.resize(populacaoMax);
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> filhos) {
-    std::vector<Solucao*> genesX;
+vector<Solucao*> Resolucao::gerarHorarioAGMutacao(vector<Solucao*> filhos) {
+    vector<Solucao*> genesX;
     Solucao *solucaoTemp;
 
     Aleatorio aleatorio;
     double porcentagem;
 
     // Mutação dos filhos
-    for (int j = 0; j < filhos.size(); j++) {
+    for (size_t j = 0; j < filhos.size(); j++) {
         porcentagem = ((aleatorio.randomInt() % 100) / 100);
 
         if (porcentagem <= horarioMutacaoProbabilidade) {
@@ -750,7 +754,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
     int x1, x2;
 
     ProfessorDisciplina *pdX1, *pdX2;
-    std::vector<ProfessorDisciplina*> backup;
+    vector<ProfessorDisciplina*> backup;
 
     for (int i = 0; i < horarioMutacaoTentativas; i++) {
         camadaX = aleatorio.randomInt() % camadasTamanho;
@@ -833,21 +837,21 @@ double Resolucao::gerarGradeTipoGuloso(Solucao *&pSolucao) {
     Horario *horario;
     Grade *apGrade;
 
-    std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
-    std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
+    map<string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
+    map<string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
     AlunoPerfil *alunoPerfil;
 
-    std::vector<Disciplina*>::iterator dIter;
-    std::vector<Disciplina*>::iterator dIterEnd;
+    vector<Disciplina*>::iterator dIter;
+    vector<Disciplina*>::iterator dIterEnd;
     Disciplina *disciplina;
-    std::vector<Disciplina*> apRestante;
-    std::vector<std::string> apCursadas;
+    vector<Disciplina*> apRestante;
+    vector<string> apCursadas;
 
     horario = pSolucao->horario;
 
     for (; apIter != apIterEnd; ++apIter) {
         if (verbose)
-            std::cout << apIter->first << std::endl;
+            cout << apIter->first << endl;
         alunoPerfil = alunoPerfis[apIter->first];
 
         apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
@@ -870,7 +874,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao *&pSolucao) {
     return pSolucao->getObjectiveFunction();
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current) {
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current) {
     Grade *bestGrade = new Grade(*pGrade);
     Grade *currentGrade;
 
@@ -878,11 +882,11 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector
 
     bool viavel;
 
-    for (int i = current; i < disciplinasRestantes.size(); i++) {
+    for (size_t i = current; i < disciplinasRestantes.size(); i++) {
         currentGrade = new Grade(*pGrade);
 
         if (verbose)
-            std::cout << "Nivel: " << (deep) << " Disciplina: " << i << " (" << disciplinasRestantes[i]->id << ")" << std::endl;
+            cout << "Nivel: " << (deep) << " Disciplina: " << i << " (" << disciplinasRestantes[i]->id << ")" << endl;
 
         viavel = currentGrade->insert(disciplinasRestantes[i]);
         if (viavel) {
@@ -902,7 +906,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector
             }
         } else {
             if (verbose)
-                std::cout << "[inviavel]" << std::endl;
+                cout << "[inviavel]" << endl;
         }
     }
     if (deep == 0) {
@@ -912,7 +916,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector
     return bestGrade;
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep) {
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, vector<Disciplina*> disciplinasRestantes, int maxDeep) {
 
     return gerarGradeTipoCombinacaoConstrutiva(pGrade, disciplinasRestantes, maxDeep, 0, 0);
 }
@@ -922,17 +926,17 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao) {
     Horario *horario;
     Grade *apGrade;
 
-    std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
-    std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
+    map<string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
+    map<string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
     AlunoPerfil *alunoPerfil;
 
-    std::vector<Disciplina*> apRestante;
+    vector<Disciplina*> apRestante;
 
     horario = pSolucao->horario;
 
     for (; apIter != apIterEnd; ++apIter) {
         if (verbose)
-            std::cout << "[" << apIter->first << "]" << std::endl;
+            cout << "[" << apIter->first << "]" << endl;
         alunoPerfil = alunoPerfis[apIter->first];
 
         apRestante = alunoPerfil->restante;
@@ -957,19 +961,19 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao) {
 }
 
 void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade) {
-    std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
+    vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
 
     gerarGradeTipoGraspConstrucao(pGrade, professorDisciplinasIgnorar);
 }
 
-void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
+void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {
     AlunoPerfil *alunoPerfil;
 
-    std::vector<std::string> apCursadas;
-    std::vector<Disciplina*> apRestante;
-    std::vector<Disciplina*>::iterator dIterStart;
-    std::vector<Disciplina*>::iterator dIterEnd;
-    std::vector<Disciplina*>::iterator current;
+    vector<string> apCursadas;
+    vector<Disciplina*> apRestante;
+    vector<Disciplina*>::iterator dIterStart;
+    vector<Disciplina*>::iterator dIterEnd;
+    vector<Disciplina*>::iterator current;
     Disciplina *disciplina;
 
     Util util;
@@ -983,7 +987,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<Profess
     alunoPerfil = pGrade->alunoPerfil;
 
     apCursadas = alunoPerfil->cursadas;
-    apRestante = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
+    apRestante = vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
 
     dIterStart = apRestante.begin();
     dIterEnd = apRestante.end();
@@ -1011,8 +1015,8 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao) {
     Horario *horario;
     Grade *apGrade;
 
-    std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
-    std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
+    map<string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
+    map<string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
     AlunoPerfil *alunoPerfil;
 
     horario = pSolucao->horario;
@@ -1020,7 +1024,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao) {
     for (; apIter != apIterEnd; ++apIter) {
 
         if (verbose)
-            std::cout << apIter->first << std::endl;
+            cout << apIter->first << endl;
         alunoPerfil = alunoPerfis[apIter->first];
 
         apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
@@ -1036,13 +1040,13 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
     Solucao *bestSolucao = new Solucao(*pSolucao);
     Solucao *currentSolucao;
 
-    std::map<std::string, AlunoPerfil*>::iterator apIter;
-    std::map<std::string, AlunoPerfil*>::iterator apIterEnd;
+    map<string, AlunoPerfil*>::iterator apIter;
+    map<string, AlunoPerfil*>::iterator apIterEnd;
     AlunoPerfil *alunoPerfil;
 
     Grade *grade;
 
-    std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
+    vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
 
     Util util;
 
@@ -1061,7 +1065,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
         apIterEnd = alunoPerfis.end();
 
         if (verbose)
-            std::cout << "------NGH" << i << std::endl;
+            cout << "------NGH" << i << endl;
 
         for (; apIter != apIterEnd; ++apIter) {
             alunoPerfil = alunoPerfis[apIter->first];
@@ -1089,7 +1093,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
         }
         currentFO = currentSolucao->getObjectiveFunction();
         if (verbose)
-            std::cout << std::endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
+            cout << endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << endl;
 
         if (bestFO < currentFO) {
             delete bestSolucao;
@@ -1097,7 +1101,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
             bestFO = currentFO;
 
             if (verbose)
-                std::cout << "------NGH new best: " << bestFO << std::endl;
+                cout << "------NGH new best: " << bestFO << endl;
             i = 0;
         } else {
             delete currentSolucao;
@@ -1111,15 +1115,15 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
     Solucao *bestSolucao = new Solucao(*pSolucao);
     Solucao *currentSolucao;
 
-    std::map<std::string, AlunoPerfil*>::iterator apIter;
-    std::map<std::string, AlunoPerfil*>::iterator apIterEnd;
+    map<string, AlunoPerfil*>::iterator apIter;
+    map<string, AlunoPerfil*>::iterator apIterEnd;
     AlunoPerfil *alunoPerfil;
 
     Disciplina* disciplinaRemovida;
-    std::vector<Disciplina*> disciplinasRemovidas;
-    std::vector<Disciplina*> disciplinasRestantes;
-    std::vector<Disciplina*>::iterator drIter;
-    std::vector<Disciplina*>::iterator drIterEnd;
+    vector<Disciplina*> disciplinasRemovidas;
+    vector<Disciplina*> disciplinasRestantes;
+    vector<Disciplina*>::iterator drIter;
+    vector<Disciplina*>::iterator drIterEnd;
 
     Grade *bestGrade, *currentGrade;
 
@@ -1142,10 +1146,10 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
             currentGrade = currentSolucao->grades[alunoPerfil->id];
 
             if (verbose)
-                std::cout << std::endl << "------NGH" << i << std::endl;
+                cout << endl << "------NGH" << i << endl;
 
             disciplinasRemovidas.clear();
-            disciplinasRestantes = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
+            disciplinasRestantes = vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
 
             for (int j = 0; j < (i + 1); j++) {
                 random = util.randomBetween(0, currentGrade->disciplinasAdicionadas.size());
@@ -1158,22 +1162,22 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao) {
                 }
             }
 
-            disciplinasRestantes.erase(std::remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(disciplinasRemovidas)), disciplinasRestantes.end());
-            disciplinasRestantes.erase(std::remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(currentGrade->disciplinasAdicionadas)), disciplinasRestantes.end());
+            disciplinasRestantes.erase(remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(disciplinasRemovidas)), disciplinasRestantes.end());
+            disciplinasRestantes.erase(remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(currentGrade->disciplinasAdicionadas)), disciplinasRestantes.end());
 
             gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, i);
 
             bestFO = bestGrade->getObjectiveFunction();
             currentFO = currentGrade->getObjectiveFunction();
             if (verbose)
-                std::cout << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
+                cout << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << endl;
             if (bestFO < currentFO) {
                 delete bestSolucao;
                 bestSolucao = currentSolucao;
                 bestFO = currentFO;
 
                 if (verbose)
-                    std::cout << "------NGH new best: " << bestFO << std::endl;
+                    cout << "------NGH new best: " << bestFO << endl;
                 i = 0;
             } else {
                 delete currentSolucao;
@@ -1205,7 +1209,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
     bestFO = 0;
 
     if (verbose)
-        std::cout << "HORARIO (Solucao) :" << std::endl;
+        cout << "HORARIO (Solucao) :" << endl;
 
     int iteracoes = 0;
     while (diff <= RESOLUCAO_GRASP_TEMPO_CONSTRUCAO) {
@@ -1215,7 +1219,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
         gerarGradeTipoGraspConstrucao(currentSolucao);
 
         if (verbose)
-            std::cout << "----FIT: " << currentSolucao->getObjectiveFunction() << std::endl;
+            cout << "----FIT: " << currentSolucao->getObjectiveFunction() << endl;
 
         temp = currentSolucao;
 
@@ -1231,7 +1235,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
             delete temp;
 
         if (verbose)
-            std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
+            cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << endl;
 
         diff += util.timeDiff(clock(), t0);
 
@@ -1243,12 +1247,12 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
             diff = 0;
 
             if (verbose)
-                std::cout << "----NGH is the new best (gerarGradeTipoGrasp)" << std::endl;
+                cout << "----NGH is the new best (gerarGradeTipoGrasp)" << endl;
         } else {
             delete currentSolucao;
         }
         if (verbose)
-            std::cout << "-------------------------------------------------" << std::endl;
+            cout << "-------------------------------------------------" << endl;
 
         iteracoes++;
     }
@@ -1265,10 +1269,10 @@ double Resolucao::gerarGradeTipoGraspClear(Solucao *&pSolucao) {
     return gerarGrade(pSolucao);
 }
 
-std::vector<Disciplina*>::iterator Resolucao::getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante) {
-    std::vector<Disciplina*>::iterator dIter = pApRestante.begin();
-    std::vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
-    std::vector<Disciplina*>::iterator dIterLimit = dIter;
+vector<Disciplina*>::iterator Resolucao::getLimiteIntervaloGrasp(vector<Disciplina*> pApRestante) {
+    vector<Disciplina*>::iterator dIter = pApRestante.begin();
+    vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
+    vector<Disciplina*>::iterator dIterLimit = dIter;
 
     int bestFIT = (*dIter)->cargaHoraria;
     int worstFIT = (pApRestante.back())->cargaHoraria;
@@ -1288,9 +1292,9 @@ std::vector<Disciplina*>::iterator Resolucao::getLimiteIntervaloGrasp(std::vecto
     return dIterLimit;
 }
 
-int Resolucao::getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) {
-    std::vector<Disciplina*>::iterator dIter = pApRestante.begin();
-    std::vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
+int Resolucao::getIntervaloAlfaGrasp(vector<Disciplina*> pApRestante) const {
+    vector<Disciplina*>::iterator dIter = pApRestante.begin();
+    vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
 
     int distancia = 0;
 
@@ -1319,15 +1323,15 @@ void Resolucao::showResult(Solucao* pSolucao) {
     const auto& grades = pSolucao->grades;
     for (const auto& par : grades) {
         const auto gradeAtual = par.second;
-        std::cout << gradeAtual->alunoPerfil->id << ":\n";
+        cout << gradeAtual->alunoPerfil->id << ":\n";
         const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
         for (const auto disc : discEscolhidas) {
 
-            std::cout << disc->nome << " ";
+            cout << disc->nome << " ";
         }
-        std::cout << " " << gradeAtual->getObjectiveFunction() << "\n";
+        cout << " " << gradeAtual->getObjectiveFunction() << "\n";
     }
-    std::cout << "\nFO da solucao: " << pSolucao->getObjectiveFunction() << std::endl;
+    cout << "\nFO da solucao: " << pSolucao->getObjectiveFunction() << endl;
 }
 
 Solucao* Resolucao::getSolucao() {

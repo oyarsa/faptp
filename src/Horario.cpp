@@ -1,4 +1,4 @@
-#include "includes/parametros.h"
+#include "parametros.h"
 #include "Horario.h"
 
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho) {
@@ -14,6 +14,8 @@ Horario::Horario(const Horario& outro)
 
 Horario& Horario::operator=(const Horario& outro) {
     Representacao::operator=(outro);
+
+	return *this;
 }
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {

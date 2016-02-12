@@ -23,7 +23,7 @@ public:
     bool operator<( Solucao *&s2);
 private:
     Horario *horario;
-    std::map<std::string, Grade*> grades;
+    map<string, Grade*> grades;
     
     int id;
     int blocosTamanho;

@@ -302,7 +302,7 @@ namespace Json {
         // Since std::string is reference-counted, this at least does not
         // create an extra copy.
         std::string doc;
-        std::getline(sin, doc, (char) EOF);
+        getline(sin, doc, (char) EOF);
         return parse(doc, root, collectComments);
     }
 
@@ -1032,12 +1032,12 @@ namespace Json {
     }
 
     std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
-        std::vector<Reader::StructuredError> allErrors;
+        std::vector<StructuredError> allErrors;
         for (Errors::const_iterator itError = errors_.begin();
                 itError != errors_.end();
                 ++itError) {
             const ErrorInfo& error = *itError;
-            Reader::StructuredError structured;
+            StructuredError structured;
             structured.offset_start = error.token_.start_ - begin_;
             structured.offset_limit = error.token_.end_ - begin_;
             structured.message = error.message_;
@@ -2047,12 +2047,12 @@ namespace Json {
     }
 
     std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
-        std::vector<OurReader::StructuredError> allErrors;
+        std::vector<StructuredError> allErrors;
         for (Errors::const_iterator itError = errors_.begin();
                 itError != errors_.end();
                 ++itError) {
             const ErrorInfo& error = *itError;
-            OurReader::StructuredError structured;
+            StructuredError structured;
             structured.offset_start = error.token_.start_ - begin_;
             structured.offset_limit = error.token_.end_ - begin_;
             structured.message = error.message_;
@@ -2159,10 +2159,10 @@ namespace Json {
         valid_keys->insert("allowSpecialFloats");
     }
 
-    bool CharReaderBuilder::validate(Json::Value* invalid) const {
-        Json::Value my_invalid;
+    bool CharReaderBuilder::validate(Value* invalid) const {
+        Value my_invalid;
         if (!invalid) invalid = &my_invalid; // so we do not need to test for NULL
-        Json::Value& inv = *invalid;
+        Value& inv = *invalid;
         std::set<std::string> valid_keys;
         getValidReaderKeys(&valid_keys);
         Value::Members keys = settings_.getMemberNames();
@@ -2181,7 +2181,7 @@ namespace Json {
     }
     // static
 
-    void CharReaderBuilder::strictMode(Json::Value* settings) {
+    void CharReaderBuilder::strictMode(Value* settings) {
         //! [CharReaderBuilderStrictMode]
         (*settings)["allowComments"] = false;
         (*settings)["strictRoot"] = true;
@@ -2195,7 +2195,7 @@ namespace Json {
     }
     // static
 
-    void CharReaderBuilder::setDefaults(Json::Value* settings) {
+    void CharReaderBuilder::setDefaults(Value* settings) {
         //! [CharReaderBuilderDefaults]
         (*settings)["collectComments"] = true;
         (*settings)["allowComments"] = true;
@@ -3635,7 +3635,7 @@ bool Value::isMember(const CppTL::ConstString& key) const {
                 type_ == nullValue || type_ == objectValue,
                 "in Json::Value::getMemberNames(), value must be objectValue");
         if (type_ == nullValue)
-            return Value::Members();
+            return Members();
         Members members;
         members.reserve(value_.map_->size());
         ObjectValues::const_iterator it = value_.map_->begin();
@@ -5221,10 +5221,10 @@ namespace Json {
         valid_keys->insert("useSpecialFloats");
     }
 
-    bool StreamWriterBuilder::validate(Json::Value* invalid) const {
-        Json::Value my_invalid;
+    bool StreamWriterBuilder::validate(Value* invalid) const {
+        Value my_invalid;
         if (!invalid) invalid = &my_invalid; // so we do not need to test for NULL
-        Json::Value& inv = *invalid;
+        Value& inv = *invalid;
         std::set<std::string> valid_keys;
         getValidWriterKeys(&valid_keys);
         Value::Members keys = settings_.getMemberNames();
@@ -5243,7 +5243,7 @@ namespace Json {
     }
     // static
 
-    void StreamWriterBuilder::setDefaults(Json::Value* settings) {
+    void StreamWriterBuilder::setDefaults(Value* settings) {
         //! [StreamWriterBuilderDefaults]
         (*settings)["commentStyle"] = "All";
         (*settings)["indentation"] = "\t";

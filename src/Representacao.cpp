@@ -75,7 +75,7 @@ void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
 }
 
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {
-    std::vector<ProfessorDisciplina*>::iterator xIter = std::find_if(iter, iterEnd, HorarioFindDisciplina(pDisciplina));
+    std::vector<ProfessorDisciplina*>::iterator xIter = find_if(iter, iterEnd, HorarioFindDisciplina(pDisciplina));
 
     return xIter;
 }

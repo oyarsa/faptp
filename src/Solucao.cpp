@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include "Solucao.h"
 
 Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
@@ -32,6 +34,8 @@ Solucao& Solucao::operator=(const Solucao& outro) {
     for (const auto& par : outro.grades) {
         grades[par.first] = new Grade(*(par.second));
     }
+
+	return *this;
 }
 
 
@@ -61,7 +65,7 @@ void Solucao::insertGrade(Grade* grade) {
 //change
 double Solucao::getObjectiveFunction() {
     return std::accumulate(begin(grades), end(grades), 0.0,
-            [](const double& acc, const std::pair<std::string, Grade*>& par) {
+            [](const double& acc, const pair<string, Grade*>& par) {
                 return acc + par.second->getObjectiveFunction();
             });
 }
