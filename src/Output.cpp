@@ -5,23 +5,19 @@
  * Created on January 1, 2016, 8:20 PM
  */
 
+#include <sstream>
+#include <fstream>
+
 #include "Output.h"
+#include "Semana.h"
+#include <ctime>
 
-Output::Output() {
-}
-
-Output::Output(const Output& orig) {
-}
-
-Output::~Output() {
-}
-
-string Output::getDir() {
+std::string Output::getDir() const {
     time_t current_time = time(NULL);
-    string c_time_string = ctime(&current_time);
-    c_time_string.erase(remove(c_time_string.begin(), c_time_string.end(), ' '), c_time_string.end());
-    c_time_string.erase(remove(c_time_string.begin(), c_time_string.end(), '\n'), c_time_string.end());
-    string dir = "output/" + c_time_string;
+    std::string time_str = ctime(&current_time);
+    time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());
+    time_str.erase(remove(time_str.begin(), time_str.end(), '\n'), time_str.end());
+    std::string dir = "output/" + time_str;
 
     return dir;
 }
@@ -30,16 +26,20 @@ void Output::write(Solucao *pSolucao) {
     write(pSolucao, getDir());
 }
 
-void Output::write(Solucao *pSolucao, string savePath) {
-    string command = "mkdir -p " + savePath;
+void Output::write(Solucao *pSolucao, std::string savePath) {
+    // Criando o diretï¿½rio de saï¿½da
+#if defined(_WIN32)
+    auto command = "mkdir " + savePath;
+#else
+	auto command = "mkdir -p" + savePath;
+#endif
+    system(command.c_str());
 
-    // Criando o diretório de saída
-    int result = system(command.c_str());
+    std::stringstream saida{};
+    const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta", 
+								   "Sexta", "Sabado", "Domingo"};
 
-    ostringstream saida{};
-    const string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"};
-
-    saida << nounitbuf;
+    saida << std::nounitbuf;
     saida << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "<head>\n"
@@ -72,7 +72,7 @@ void Output::write(Solucao *pSolucao, string savePath) {
             saida << "<tr>";
             for (int k = 0; k < SEMANA; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
-                string pds = "-";
+                std::string pds = "-";
                 if (pd != NULL) {
                     pds = pd->getDisciplina()->getNome();
                 }
@@ -108,7 +108,7 @@ void Output::write(Solucao *pSolucao, string savePath) {
             saida << "<tr>";
             for (int k = 0; k < SEMANA; k++) {
                 auto pd = gradeAtual->at(k, j, 0);
-                string pds = "-";
+                std::string pds = "-";
                 if (pd != NULL) {
                     pds = pd->getDisciplina()->getNome();
                 }
@@ -130,8 +130,8 @@ void Output::write(Solucao *pSolucao, string savePath) {
     saida << "</body>\n"
             << "</html>\n";
 
-    ofstream arquivoSaida(savePath + "/horario.html");
-    arquivoSaida << nounitbuf << saida.str() << endl;
+	std::ofstream arquivoSaida(savePath + "/horario.html");
+    arquivoSaida << std::nounitbuf << saida.str() << std::endl;
     arquivoSaida.close();
 }
 

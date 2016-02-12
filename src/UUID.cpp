@@ -8,15 +8,6 @@
 #include "UUID.h"
 #include <ctime>
 
-UUID::UUID() {
-}
-
-UUID::UUID(const UUID& orig) {
-}
-
-UUID::~UUID() {
-}
-
 std::string UUID::GenerateUuid() {
 
   std::string uuid_code;

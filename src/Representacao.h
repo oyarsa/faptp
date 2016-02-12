@@ -1,16 +1,9 @@
 #ifndef REPRESENTACAO_H
 #define REPRESENTACAO_H
 
-#include <algorithm>
-#include <cmath>
 #include <string>
 #include <vector>
-
-#include "../template/Algorithms.h"
-#include "Semana.h"
-
 #include "ProfessorDisciplina.h"
-#include "Util.h"
 
 class Representacao {
     friend class Resolucao;

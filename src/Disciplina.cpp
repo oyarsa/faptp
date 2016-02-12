@@ -1,4 +1,4 @@
-#include <cmath>
+#include <algorithm>
 
 #include "Disciplina.h"
 

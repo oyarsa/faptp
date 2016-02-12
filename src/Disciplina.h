@@ -2,14 +2,9 @@
 #define	DISCIPLINA_H
 
 #include <string>
-#include <cstring>
-#include <algorithm>
 #include <vector>
 
-#include "Semana.h"
 #include "Professor.h"
-
-#include "UUID.h"
 
 class Disciplina {
   friend class Representacao;

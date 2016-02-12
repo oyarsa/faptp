@@ -6,8 +6,6 @@
 #include "Professor.h"
 #include "Disciplina.h"
 
-#include "UUID.h"
-
 class ProfessorDisciplina {
   friend class Representacao;
   friend class Grade;
