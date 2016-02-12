@@ -1,5 +1,13 @@
 #include "Representacao.h"
 
+#include <algorithm>
+#include <cmath>
+
+#include "../template/Algorithms.h"
+#include "Semana.h"
+
+#include "Util.h"
+
 Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;

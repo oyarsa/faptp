@@ -1,6 +1,6 @@
 #include "Professor.h"
 
-Professor::Professor(std::string pNome) : numDisponibilidade(), creditoMaximo() {
+Professor::Professor(std::string pNome) : creditoMaximo(), numDisponibilidade() {
   UUID uuid;
   std::string pId;
 
@@ -9,7 +9,7 @@ Professor::Professor(std::string pNome) : numDisponibilidade(), creditoMaximo() 
   init(pNome, pId);
 }
 
-Professor::Professor(std::string pNome, std::string pId) : numDisponibilidade(), creditoMaximo() {
+Professor::Professor(std::string pNome, std::string pId) : creditoMaximo(), numDisponibilidade() {
   init(pNome, pId);
 }
 

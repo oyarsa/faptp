@@ -16,10 +16,7 @@
 
 class UUID {
 public:
-  UUID();
-  UUID(const UUID& orig);
-  virtual ~UUID();
-  
+  UUID() = default;
   std::string GenerateUuid();
 };
 

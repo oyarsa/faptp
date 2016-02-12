@@ -1,6 +1,7 @@
 #include <numeric>
 
 #include "Solucao.h"
+#include "Aleatorio.h"
 
 Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
     blocosTamanho = pBlocosTamanho;
@@ -65,7 +66,7 @@ void Solucao::insertGrade(Grade* grade) {
 //change
 double Solucao::getObjectiveFunction() {
     return std::accumulate(begin(grades), end(grades), 0.0,
-            [](const double& acc, const pair<string, Grade*>& par) {
+            [](const double& acc, const std::pair<std::string, Grade*>& par) {
                 return acc + par.second->getObjectiveFunction();
             });
 }

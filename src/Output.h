@@ -9,21 +9,17 @@
 #define OUTPUT_H
 
 #include <string>
-#include <fstream>
-#include <sstream>
 
 #include "Solucao.h"
 
 class Output {
 public:
-    Output();
-    Output(const Output& orig);
-    virtual ~Output();
+    Output() = default;
     
     void write(Solucao *solucao);
-    void write(Solucao *solucao, string savePath);
+    void write(Solucao *solucao, std::string savePath);
 private:
-    string getDir();
+    std::string getDir() const;
 };
 
 #endif /* OUTPUT_H */
