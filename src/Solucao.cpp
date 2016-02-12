@@ -7,13 +7,13 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;
     perfisTamanho = pPerfisTamanho;
-    id = Aleatorio().randomInt();
+    id = aleatorio::randomInt();
     init();
 }
 
 Solucao::Solucao(const Solucao& outro) 
     : horario(new Horario(*(outro.horario)))
-    , id(Aleatorio().randomInt())
+    , id(aleatorio::randomInt())
     , blocosTamanho(outro.blocosTamanho)
     , camadasTamanho(outro.camadasTamanho)
     , perfisTamanho(outro.perfisTamanho)
@@ -26,7 +26,7 @@ Solucao::Solucao(const Solucao& outro)
 
 Solucao& Solucao::operator=(const Solucao& outro) {
     horario = new Horario(*(outro.horario));
-    id = Aleatorio().randomInt();
+    id = aleatorio::randomInt();
     blocosTamanho = outro.blocosTamanho;
     camadasTamanho = outro.camadasTamanho;
     perfisTamanho = outro.perfisTamanho;

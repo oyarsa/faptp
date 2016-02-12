@@ -8,7 +8,7 @@
 
 #include "Util.h"
 
-Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
+Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) : util() {
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;
 
@@ -22,7 +22,8 @@ Representacao::Representacao(const Representacao& outro)
 , blocos(outro.blocos)
 , camadas(outro.camadas)
 , matriz(outro.matriz)
-, alocados(outro.alocados) {
+, alocados(outro.alocados)
+, util() {
 }
 
 Representacao& Representacao::operator=(const Representacao& outro) {
@@ -77,8 +78,6 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
 }
 
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
-    Util util;
-
     util.get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
 }
 

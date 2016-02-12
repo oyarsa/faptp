@@ -57,7 +57,7 @@ int Util::randomBetween(int min, int max) {
     random = max;
   } else if (max != 0) {
 //    random = (rand() % (max - min)) + min;
-    random = (aleatorio.randomInt() % (max - min)) + min;
+    random = (aleatorio::randomInt() % (max - min)) + min;
   }
   return random;
 }

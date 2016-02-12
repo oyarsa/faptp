@@ -10,6 +10,7 @@
 #include "ProfessorDisciplina.h"
 #include "AlunoPerfil.h"
 #include "Solucao.h"
+#include "Util.h"
 
 #include "includes/json/json.h"
 
@@ -90,6 +91,8 @@ private:
     Solucao* solucao;
 
     Json::Value jsonRoot;
+
+	Util util;
 
     void initDefault();
 

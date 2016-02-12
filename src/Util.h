@@ -23,7 +23,6 @@ public:
   
   int randomBetween(int min, int max);
 private:
-  Aleatorio aleatorio;
   
 };
 

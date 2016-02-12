@@ -325,8 +325,6 @@ Solucao* Resolucao::gerarHorarioAG() {
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
     std::vector<Solucao*> solucoesAG;
 
-    Aleatorio aleatorio;
-
     Disciplina *disciplinaAleatoria;
     Professor *professorSelecionado;
 
@@ -375,7 +373,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                  */
                 switch (0) {
                     case 0:
-                        randInt = aleatorio.randomInt() % disciplinas.size();
+                        randInt = aleatorio::randomInt() % disciplinas.size();
                         break;
                     case 1:
                         break;
@@ -393,7 +391,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial() {
                 if (disciplinaXprofessorDisciplina.count(dId) == 0) {
 
                     do {
-                        randInt = aleatorio.randomInt() % disciplinaAleatoria->professoresCapacitados.size();
+                        randInt = aleatorio::randomInt() % disciplinaAleatoria->professoresCapacitados.size();
 
                         professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
                         pId = professorSelecionado->getId();
@@ -544,13 +542,12 @@ Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulaca
     Solucao *vencedor;
     double vencedorFO = 0;
     double randomFO;
-    Aleatorio aleatorio;
     int randInt;
 
     int populacaoTorneioMax = horarioTorneioPopulacao * solucoesPopulacao.size();
 
     while (torneioCandidatos.size() <= populacaoTorneioMax && solucoesPopulacao.size() != 0) {
-        randInt = aleatorio.randomInt() % solucoesPopulacao.size();
+        randInt = aleatorio::randomInt() % solucoesPopulacao.size();
 
         randomFO = solucoesPopulacao[randInt]->getObjectiveFunction();
         if (vencedorFO < randomFO) {
@@ -567,7 +564,6 @@ Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulaca
 
 Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao) {
 
-    Aleatorio aleatorio;
     Util util;
     int primeiro, segundo;
 
@@ -591,8 +587,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solu
     ProfessorDisciplina *e;
     ProfessorDisciplina *g;
 
-    Aleatorio aleatorio;
-
     Solucao *filho;
 
     do {
@@ -601,14 +595,14 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solu
 
         for (int i = 0; i < camadasMax; i++) {
 
-            camadaPeriodo = aleatorio.randomInt() % camadasTamanho;
+            camadaPeriodo = aleatorio::randomInt() % camadasTamanho;
 
             for (int j = 0, tentativas = 0; j < horarioCruzamentoDias;) {
                 success = false;
 
                 // De segunda a s�bado
-                diaSemana = aleatorio.randomInt() % 6;
-                blocoHorario = aleatorio.randomInt() % blocosTamanho;
+                diaSemana = aleatorio::randomInt() % 6;
+                blocoHorario = aleatorio::randomInt() % blocosTamanho;
 
                 posicao = filho->horario->getPosition(diaSemana, blocoHorario, camadaPeriodo);
 
@@ -730,12 +724,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
     std::vector<Solucao*> genesX;
     Solucao *solucaoTemp;
 
-    Aleatorio aleatorio;
     double porcentagem;
 
     // Muta��o dos filhos
     for (size_t j = 0; j < filhos.size(); j++) {
-        porcentagem = ((aleatorio.randomInt() % 100) / 100);
+        porcentagem = ((aleatorio::randomInt() % 100) / 100);
 
         if (porcentagem <= horarioMutacaoProbabilidade) {
             solucaoTemp = gerarHorarioAGMutacao(filhos[j]);
@@ -752,7 +745,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
 
 Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
     Solucao* currentSolucao = new Solucao(*pSolucao);
-    Aleatorio aleatorio;
     bool success = false;
 
     int camadaX;
@@ -764,13 +756,13 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao) {
     std::vector<ProfessorDisciplina*> backup;
 
     for (int i = 0; i < horarioMutacaoTentativas; i++) {
-        camadaX = aleatorio.randomInt() % camadasTamanho;
+        camadaX = aleatorio::randomInt() % camadasTamanho;
 
-        diaX1 = aleatorio.randomInt() % (SEMANA);
-        diaX2 = aleatorio.randomInt() % (SEMANA);
+        diaX1 = aleatorio::randomInt() % (SEMANA);
+        diaX2 = aleatorio::randomInt() % (SEMANA);
 
-        blocoX1 = aleatorio.randomInt() % blocosTamanho;
-        blocoX2 = aleatorio.randomInt() % blocosTamanho;
+        blocoX1 = aleatorio::randomInt() % blocosTamanho;
+        blocoX2 = aleatorio::randomInt() % blocosTamanho;
 
         x1 = currentSolucao->horario->getPosition(diaX1, blocoX1, camadaX);
         x2 = currentSolucao->horario->getPosition(diaX2, blocoX2, camadaX);
@@ -1053,8 +1045,6 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
 
     std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
 
-    Util util;
-
     int random;
     int disciplinasSize;
     int disciplinasRemoveMax;
@@ -1209,7 +1199,8 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
     double diff = 0;
 
 //    int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = ceil(gradeGraspTempoConstrucao * alunoPerfis.size());
-    int const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = gradeGraspTempoConstrucao;
+    double const RESOLUCAO_GRASP_TEMPO_CONSTRUCAO = gradeGraspTempoConstrucao;
+	//printf("c: %f\n", RESOLUCAO_GRASP_TEMPO_CONSTRUCAO);
 
     bestFO = 0;
 

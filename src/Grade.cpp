@@ -14,7 +14,8 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 , professorDisciplinaTemp(nullptr)
 , disciplinasAdicionadas()
 , disciplinasCurso(pDisciplinasCurso)
-, discToIndex(pDiscToIndex) {
+, discToIndex(pDiscToIndex)
+, fo() {
 }
 
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
@@ -150,7 +151,7 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
                     }
                 }
 
-                // Se ainda nï¿½o marcou colisï¿½o
+                // Se ainda não marcou colisão
                 if (!colisao) {
 
                     professorDisciplinaTemp = currentProfessorDisciplina;
@@ -309,7 +310,9 @@ Disciplina* Grade::remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfes
 double Grade::getObjectiveFunction() {
     ProfessorDisciplina *professorDisciplina;
 
-    double fo = 0;
+	if (fo) {
+		return fo;
+	}
 
     std::unordered_map<std::string, int> discAvaliada;
 
@@ -356,7 +359,8 @@ Grade::Grade(const Grade& outro)
 , professorDisciplinaTemp(nullptr)
 , disciplinasAdicionadas(outro.disciplinasAdicionadas)
 , disciplinasCurso(outro.disciplinasCurso)
-, discToIndex(outro.discToIndex) {
+, discToIndex(outro.discToIndex)
+, fo(outro.fo) {
 }
 
 Grade& Grade::operator=(const Grade& outro) {
@@ -368,6 +372,7 @@ Grade& Grade::operator=(const Grade& outro) {
     professorDisciplinaTemp = nullptr;
     disciplinasCurso = outro.disciplinasCurso;
     discToIndex = outro.discToIndex;
+	fo = outro.fo;
     
     return *this;
 }

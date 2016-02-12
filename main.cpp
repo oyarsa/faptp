@@ -6,16 +6,17 @@
 #include <sstream>
 #include <chrono>
 
+#include <modelo_solver.h>
+
 #include "template/Algorithms.h"
-
 #include "src/parametros.h"
-
 #include "src/Disciplina.h"
 #include "src/Professor.h"
 #include "src/Horario.h"
 #include "src/Resolucao.h"
-
 #include "src/Output.h"
+
+std::string input_file = "input_old.json";
 
 void comArgumentos(char** argv)
 {
@@ -46,6 +47,7 @@ void comArgumentos(char** argv)
 	std::cout << fo << " " << std::chrono::duration_cast<std::chrono::milliseconds>
 			(fimTempo - inicioTempo).count() << "\n";
 }
+
 
 void calibracao(int tipo)
 {
@@ -140,27 +142,23 @@ void semArgumentos()
 
 	experimento = false;
 
-	Resolucao resolucaoGrasp(4, (50 - 15), 1413);
+	Resolucao resolucaoGrasp(4, (50 - 15), 1413, input_file);
+	int params[] = {100, 20, 5, 6, 30};
 
-	resolucaoGrasp.horarioPopulacaoInicial = 1;
-
-
-	resolucaoGrasp.horarioIteracao = 0;
+	resolucaoGrasp.horarioPopulacaoInicial = params[0];
+	resolucaoGrasp.horarioIteracao = 100;
 	resolucaoGrasp.horarioTorneioPares = 0;
 	resolucaoGrasp.horarioTorneioPopulacao = 1;
-
-	resolucaoGrasp.horarioMutacaoProbabilidade = 0;
+	auto mutacao = params[1] / 100.0;
+	resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 	resolucaoGrasp.horarioMutacaoTentativas = 2;
-
 	resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
-	resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GULOSO;
-
 	resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
-
-	resolucaoGrasp.gradeGraspVizinhos = 2;
-	resolucaoGrasp.gradeGraspTempoConstrucao = .2;
-
-	resolucaoGrasp.gradeAlfa = .9;
+	auto tempo = params[2] / 1000.0;
+	resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
+	resolucaoGrasp.gradeGraspVizinhos = params[3];
+	auto alfa = params[4] / 100.0;
+	resolucaoGrasp.gradeAlfa = alfa;
 
 	std::cout << "Montando horarios [AG + Grasp]..." << std::endl;
 
@@ -168,12 +166,12 @@ void semArgumentos()
 	resolucaoGrasp.start(false);
 	auto fimHorario = clock();
 
-	double diff1 = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
+	auto diff1 = (fimHorario - inicioHorario) / 1000.0 * 1000.0;
 	std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
 
-	double fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
+	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "Resultado:" << fo << std::endl;
-	resolucaoGrasp.showResult();
+	//resolucaoGrasp.showResult();
 
 #if defined(_WIN32)
 	std::string folder = "teste\\";
@@ -182,7 +180,7 @@ void semArgumentos()
 #endif
 	std::stringstream s;
 	s << folder + "fo" << fo;
-	std::string savePath = s.str();
+	auto savePath = s.str();
 	o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 
@@ -198,5 +196,7 @@ int main(int argc, char** argv)
 		//calibracao(0);
 		semArgumentos();
 	}
+
+	fagoc::Modelo_solver m();
 }
 

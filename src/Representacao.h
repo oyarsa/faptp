@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "ProfessorDisciplina.h"
+#include "Util.h"
 
 class Representacao {
     friend class Resolucao;
@@ -45,6 +46,8 @@ protected:
 
     std::vector< ProfessorDisciplina* > matriz;
     std::vector<std::string> alocados;
+
+	Util util;
 
     void initMatriz();
 };

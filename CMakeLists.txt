@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 2.8)
 
 project(faPTP)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade/modelo-grade)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
+# include_directories(SYSTEM ${CPLEX_INCLUDE_DIRS})
+
+# add_definitions(-DIL_STD)
+# string (REPLACE "/D_DEBUG" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+# if (WIN32)
+#     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
+# endif()
+
 set(FAPTP_FILES
     src/Aleatorio.cpp
     src/Aleatorio.h
@@ -36,13 +46,13 @@ set(FAPTP_FILES
     template/Algorithms.h
     )
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${CMAKE_CXX_FLAGS_DEBUG}")
   set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   add_definitions("-stdlib=libstdc++")
   set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${CMAKE_CXX_FLAGS_DEBUG}")
@@ -50,3 +60,4 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 add_executable(faptp ${FAPTP_FILES} main.cpp)
+target_link_libraries(faptp modelo-grade-lib)

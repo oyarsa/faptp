@@ -27,7 +27,7 @@ public:
   Disciplina* remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
   Disciplina* remove(Disciplina* pDisciplina);
 
-  double getObjectiveFunction();
+  double getObjectiveFunction() override;
   
 private:
   AlunoPerfil *alunoPerfil;
@@ -41,6 +41,9 @@ private:
   std::vector<Disciplina*>& disciplinasCurso;
   std::map<std::string, int>& discToIndex;
   
+  //! Guarda a função objetiva dessa grade, vale 0 se ainda não foi definida
+  double fo;
+
   //! Recebe um nome e retorna um ponteiro para uma disciplina
   Disciplina* getDisciplina(std::string pNomeDisc);
 
@@ -52,7 +55,6 @@ private:
   //! Verifica se a disciplina sendo considerada não está na lista de equivalências
   //! de outra que já foi inserida
   bool discRepetida(const Disciplina* const pDisciplina);
-  
   void add(Disciplina* pDisciplina, int pCamada);
 };
 
