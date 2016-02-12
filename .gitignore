@@ -7,4 +7,5 @@ nbactions.xml
 nb-configuration.xml
 .nb-gradle/
 testes/
+experimento/
 *.DS_Store

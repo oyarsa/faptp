@@ -17,6 +17,7 @@ class Disciplina {
   friend class Horario;
   friend class Solucao;
   friend class Resolucao;
+  friend class Output;
 public:
   Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
   Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);

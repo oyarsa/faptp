@@ -24,7 +24,8 @@ void Disciplina::init(std::string pNome, int pCargaHoraria, std::string pPeriodo
     turma = pTurma;
     capacidade = pCapacidade;
 
-    aulasSemana = std::ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
+    //aulasSemana = std::ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
+    aulasSemana = cargaHoraria;
 
     alocados = 0;
     ofertada = true;

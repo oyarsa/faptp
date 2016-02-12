@@ -33,8 +33,10 @@ public:
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
 
     int getFirstDisciplina(Disciplina* pDisciplina);
-    int getFirstDisciplina(Disciplina* pDisciplina, int camada);
     int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
+
+    std::vector<int> getAllEmpty(int camada);
+    void clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada);
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
@@ -48,7 +50,7 @@ protected:
     std::vector<std::string> blocos;
     std::vector<std::string> camadas;
 
-    std::vector<ProfessorDisciplina*> matriz;
+    std::vector< ProfessorDisciplina* > matriz;
     std::vector<std::string> alocados;
 
     void initMatriz();

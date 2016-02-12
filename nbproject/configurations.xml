@@ -16,7 +16,6 @@
       <itemPath>src/includes/parametros.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="f2" displayName="Arquivos de Entrada" projectFiles="true">
-      <itemPath>#Dados.sql</itemPath>
       <itemPath>input/AlunoPerfil.txt</itemPath>
       <itemPath>input/Disciplina.txt</itemPath>
       <itemPath>input/Professor.txt</itemPath>
@@ -99,8 +98,6 @@
           <warningLevel>3</warningLevel>
         </ccTool>
       </compileType>
-      <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="input.json" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/AlunoPerfil.txt" ex="false" tool="3" flavor2="0">
@@ -211,8 +208,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="#Dados.sql" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="input.json" ex="false" tool="3" flavor2="0">
       </item>
       <item path="input/AlunoPerfil.txt" ex="false" tool="3" flavor2="0">

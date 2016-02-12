@@ -18,6 +18,7 @@ using namespace std;
 class Grade : public Representacao {
   friend class Solucao;
   friend class Resolucao;
+  friend class Output;
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
           std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);

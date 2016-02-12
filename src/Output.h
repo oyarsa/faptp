@@ -21,6 +21,7 @@ public:
     virtual ~Output();
     
     void write(Solucao *solucao);
+    void write(Solucao *solucao, std::string savePath);
 private:
     std::string getDir();
 };
