@@ -2,7 +2,6 @@
 #include <sstream>
 
 Util::Util() {
-  srand(time(NULL));
 }
 
 Util::~Util() {

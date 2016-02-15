@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
-#include <sstream>
 #include <chrono>
 
 #include <modelo_solver.h>
@@ -128,9 +127,8 @@ void calibracao(int tipo)
 			double diff = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
 			std::cout << "Tempo do horario: " << (diff) << "s" << std::endl << std::endl;
 
-			std::stringstream s;
-			s << "experimento/p" << j << "e" << i << "fo" << fo;
-			std::string savePath = s.str();
+			auto savePath = "experimento/p" + std::to_string(j) + std::to_string(i)
+				+ "fo" + std::to_string(fo);
 			o.write(resolucaoGrasp.getSolucao(), savePath);
 		}
 	}
@@ -166,21 +164,19 @@ void semArgumentos()
 	resolucaoGrasp.start(false);
 	auto fimHorario = clock();
 
-	auto diff1 = (fimHorario - inicioHorario) / 1000.0 * 1000.0;
-	std::cout << "Tempo do horario: " << (diff1) << "s" << std::endl << std::endl;
+	auto diff1 = (fimHorario - inicioHorario) / (1000.0 * 1000.0);
+	std::cout << "Tempo do horario: " << diff1 << "s" << std::endl << std::endl;
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "Resultado:" << fo << std::endl;
 	//resolucaoGrasp.showResult();
 
 #if defined(_WIN32)
-	std::string folder = "teste\\";
+	std::string folder{"teste\\"};
 #else
-	std::string folder = "teste/";
+	std::string folder{"teste/"};
 #endif
-	std::stringstream s;
-	s << folder + "fo" << fo;
-	auto savePath = s.str();
+	auto savePath = folder + "fo" + std::to_string(fo);
 	o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 

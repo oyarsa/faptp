@@ -537,14 +537,15 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> 
     return torneioPar;
 }
 
-Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) {
+Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const
+{
     std::vector<Solucao*> torneioCandidatos;
     Solucao *vencedor;
     double vencedorFO = 0;
     double randomFO;
     int randInt;
 
-    int populacaoTorneioMax = horarioTorneioPopulacao * solucoesPopulacao.size();
+	auto populacaoTorneioMax = size_t(horarioTorneioPopulacao) * solucoesPopulacao.size();
 
     while (torneioCandidatos.size() <= populacaoTorneioMax && solucoesPopulacao.size() != 0) {
         randInt = aleatorio::randomInt() % solucoesPopulacao.size();
@@ -577,7 +578,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solu
     std::vector<Solucao*> filhos;
     std::vector<ProfessorDisciplina*> matrizBackup;
 
-    int camadasMax = horarioCruzamentoCamadas * camadasTamanho;
+    auto camadasMax = int(horarioCruzamentoCamadas * camadasTamanho);
     int numFilhos = 0;
 
     int camadaPeriodo, diaSemana, blocoHorario;
@@ -1068,7 +1069,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao) {
             grade = currentSolucao->grades[alunoPerfil->id];
 
             disciplinasSize = grade->disciplinasAdicionadas.size();
-            disciplinasRemoveMax = ceil(disciplinasSize * 1);
+            disciplinasRemoveMax = int(ceil(disciplinasSize * 1));
             disciplinasRemoveRand = util.randomBetween(1, disciplinasRemoveMax);
 
             for (int j = 0; j < disciplinasRemoveRand; j++) {
@@ -1274,7 +1275,7 @@ std::vector<Disciplina*>::iterator Resolucao::getLimiteIntervaloGrasp(std::vecto
     int worstFIT = (pApRestante.back())->cargaHoraria;
 
     int currentFIT = 0;
-    int acceptFIT = bestFIT - ceil((1 - gradeAlfa) * (bestFIT - worstFIT));
+    auto acceptFIT = bestFIT - int(ceil((1 - gradeAlfa) * (bestFIT - worstFIT)));
 
     for (; dIter != dIterEnd; ++dIter) {
         currentFIT = (*dIter)->cargaHoraria;
@@ -1298,7 +1299,7 @@ int Resolucao::getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) const
     int worstFIT = (pApRestante.back())->cargaHoraria;
 
     int currentFIT = 0;
-    int acceptFIT = bestFIT - ceil((1 - gradeAlfa) * (bestFIT - worstFIT));
+    auto acceptFIT = bestFIT - int(ceil((1 - gradeAlfa) * (bestFIT - worstFIT)));
 
     for (; dIter != dIterEnd; ++dIter) {
         currentFIT = (*dIter)->cargaHoraria;

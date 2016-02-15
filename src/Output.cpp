@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   Output.cpp
  * Author: pedromazala
- * 
+ *
  * Created on January 1, 2016, 8:20 PM
  */
 
@@ -29,14 +29,14 @@ void Output::write(Solucao *pSolucao) {
 void Output::write(Solucao *pSolucao, std::string savePath) {
     // Criando o diret�rio de sa�da
 #if defined(_WIN32)
-    auto command = "mkdir " + savePath;
+    std::string command {"mkdir " + savePath + " 2> NUL"};
 #else
-	auto command = "mkdir -p" + savePath;
+	std::string command {"mkdir -p" + savePath + " > /dev/null 2>&1"};
 #endif
     system(command.c_str());
 
     std::stringstream saida{};
-    const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta", 
+    const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta",
 								   "Sexta", "Sabado", "Domingo"};
 
     saida << std::nounitbuf;
@@ -86,9 +86,9 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
     saida << "<hr /> <h3>Grades</h3>\n";
     for (const auto& par : pSolucao->grades) {
         const auto gradeAtual = par.second;
-        
+
         double fo = gradeAtual->getObjectiveFunction();
-        
+
         if (fo == 0) {
             continue;
         }
