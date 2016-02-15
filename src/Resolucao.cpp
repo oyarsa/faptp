@@ -1,17 +1,22 @@
 #include <fstream>
 #include <numeric>
 
+#include <modelo-grade/arquivos.h>
+
 #include "parametros.h"
 #include "Resolucao.h"
 #include "../template/Algorithms.h"
 #include "Util.h"
 #include "Semana.h"
 
-Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string pArquivoEntrada)
-: blocosTamanho(pBlocosTamanho)
+Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, int pTipoConstrucao, std::string pArquivoEntrada)
+: gradeTipoConstrucao(pTipoConstrucao)
+, blocosTamanho(pBlocosTamanho)
 , camadasTamanho(pCamadasTamanho)
 , perfisTamanho(pPerfisTamanho)
-, arquivoEntrada(pArquivoEntrada) {
+, arquivoEntrada(pArquivoEntrada)
+, curso(nullptr)
+, alunos() {
     carregarDados();
     initDefault();
 }
@@ -44,7 +49,7 @@ void Resolucao::initDefault() {
     horarioCruzamentoTentativasMax = 1;
 
     gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
-    gradeGraspVizinhos = RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEDAULT;
+    gradeGraspVizinhos = RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEFAULT;
 
     gradeGraspTempoConstrucao = RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR_DEFAULT;
 
@@ -66,6 +71,12 @@ void Resolucao::carregarDados() {
         carregarDadosDisciplinas();
         carregarDadosProfessores();
         carregarAlunoPerfis();
+
+		if (gradeTipoConstrucao == RESOLUCAO_GERAR_GRADE_TIPO_MODELO) {
+			auto p = fagoc::ler_json(folder + arquivoEntrada);
+			curso.reset(new fagoc::Curso(std::move(p.first)));
+			alunos = move(p.second);
+		}
     } else {
         std::cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
         throw 1;
@@ -811,22 +822,16 @@ double Resolucao::gerarGrade() {
 double Resolucao::gerarGrade(Solucao *&pSolucao) {
     switch (gradeTipoConstrucao) {
         case RESOLUCAO_GERAR_GRADE_TIPO_GULOSO:
-
             return gerarGradeTipoGuloso(pSolucao);
 
-            break;
-
         case RESOLUCAO_GERAR_GRADE_TIPO_GRASP:
-
             return gerarGradeTipoGrasp(pSolucao);
 
-            break;
-
         case RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO:
-
             return gerarGradeTipoCombinacaoConstrutiva(pSolucao);
 
-            break;
+		case RESOLUCAO_GERAR_GRADE_TIPO_MODELO:
+			return gerarGradeTipoModelo(pSolucao);
     }
 
     return 0;
@@ -1333,4 +1338,30 @@ void Resolucao::showResult(Solucao* pSolucao) {
 
 Solucao* Resolucao::getSolucao() {
     return solucao;
+}
+
+double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao) const
+{
+	return 0.0;
+}
+
+std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) 
+{
+	auto matriz = pSolucao->horario->matriz;
+	auto numDisciplinas = disciplinas.size();
+	auto numHorarios = SEMANA * blocosTamanho;
+	std::vector<std::vector<char>> horario(numDisciplinas, std::vector<char>(numHorarios, 0));
+	int posicoes[3];
+
+	for (size_t i = 0; i < matriz.size(); i++) {
+		auto discIndex = disciplinasIndex[matriz[i]->disciplina->id];
+		pSolucao->horario->get3DMatrix(i, posicoes);
+		auto dia = posicoes[0];
+		auto bloco = posicoes[1];
+		auto posicao = (dia * blocosTamanho) + bloco;
+
+
+	}
+
+	return horario;
 }

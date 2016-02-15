@@ -1,9 +1,13 @@
 #ifndef RESOLUCAO_H
 #define RESOLUCAO_H
 
-#include <iostream>
 #include <map>
 #include <vector>
+#include <memory>
+
+#include <modelo-grade/aluno.h>
+#include <modelo-grade/curso.h>
+#include "includes/json/json.h"
 
 #include "Professor.h"
 #include "Disciplina.h"
@@ -12,21 +16,20 @@
 #include "Solucao.h"
 #include "Util.h"
 
-#include "includes/json/json.h"
-
 #define RESOLUCAO_GERAR_GRADE_TIPO_GULOSO          1
 #define RESOLUCAO_GERAR_GRADE_TIPO_GRASP           2
 #define RESOLUCAO_GERAR_GRADE_TIPO_COMBINATORIO    3
+#define RESOLUCAO_GERAR_GRADE_TIPO_MODELO          4
 
 #define RESOLUCAO_GRASP_TEMPO_CONSTRUCAO_FATOR_DEFAULT    .5
-#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEDAULT         5
+#define RESOLUCAO_GRASP_ITERACAO_VIZINHOS_DEFAULT         5
 
 #define RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS   1
 #define RESOLUCAO_GRASP_VIZINHOS_CRESCENTE    2
 
 class Resolucao {
 public:
-    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, std::string arquivoEntrada = "input.json");
+    Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, int pTipoConstrucao, std::string arquivoEntrada = "input.json");
     virtual ~Resolucao();
 
     double start();
@@ -76,23 +79,17 @@ private:
     int camadasTamanho;
     int perfisTamanho;
     std::string arquivoEntrada;
-
     std::map<std::string, Professor*> professores;
-
     std::map<std::string, int> disciplinasIndex;
     std::vector<Disciplina*> disciplinas;
-
     std::map< std::string, std::vector<Disciplina*> > periodoXdisciplina;
-
     std::map<std::string, AlunoPerfil*> alunoPerfis;
-
     std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
-
     Solucao* solucao;
-
     Json::Value jsonRoot;
-
 	Util util;
+	std::unique_ptr<fagoc::Curso> curso;
+	std::vector<fagoc::Aluno> alunos;
 
     void initDefault();
 
@@ -141,6 +138,9 @@ private:
     double gerarGradeTipoGrasp(Solucao *&pSolucao);
 
     double gerarGradeTipoGraspClear(Solucao *&pSolucao);
+
+	double gerarGradeTipoModelo(Solucao *pSolucao) const;
+	std::vector<std::vector<char>> converteHorario(Solucao *pSolucao);
 
     std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
     int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) const;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(faPTP)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade/modelo-grade)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
 
 set(FAPTP_FILES

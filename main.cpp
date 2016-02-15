@@ -5,7 +5,7 @@
 #include <ctime>
 #include <chrono>
 
-#include <modelo_solver.h>
+#include <modelo-grade/modelo_solver.h>
 
 #include "template/Algorithms.h"
 #include "src/parametros.h"
@@ -29,14 +29,13 @@ void comArgumentos(char** argv)
 
 	arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
 
-	Resolucao resolucaoGrasp(3, 2, 5, arquivoEntrada);
+	Resolucao resolucaoGrasp(3, 2, 5, RESOLUCAO_GERAR_GRADE_TIPO_GRASP, arquivoEntrada);
 
 	resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
 
 	resolucaoGrasp.gradeGraspVizinhos = numVizinhos;
 	resolucaoGrasp.gradeGraspTempoConstrucao = tempoConstr;
 
-	resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
 	resolucaoGrasp.gradeAlfa = alfaGrasp;
 
 	auto inicioTempo = std::chrono::steady_clock::now();
@@ -92,7 +91,7 @@ void calibracao(int tipo)
 		for (int i = 0; i < 10; i++) {
 
 			//Resolucao resolucaoGrasp(4, (50 - 15), 1413);
-			Resolucao resolucaoGrasp(2, 2, 5);
+			Resolucao resolucaoGrasp(2, 2, 5, RESOLUCAO_GERAR_GRADE_TIPO_GRASP);
 
 			resolucaoGrasp.horarioPopulacaoInicial = params[j][0];
 
@@ -103,9 +102,6 @@ void calibracao(int tipo)
 			double mutacao = (double) params[j][1] / 100;
 			resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 			resolucaoGrasp.horarioMutacaoTentativas = 2;
-
-			resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
-			//resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GULOSO;
 
 			resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
 
@@ -140,7 +136,7 @@ void semArgumentos()
 
 	experimento = false;
 
-	Resolucao resolucaoGrasp(4, (50 - 15), 1413, input_file);
+	Resolucao resolucaoGrasp(4, (50 - 15), 1413, RESOLUCAO_GERAR_GRADE_TIPO_GRASP, input_file);
 	int params[] = {100, 20, 5, 6, 30};
 
 	resolucaoGrasp.horarioPopulacaoInicial = params[0];
@@ -150,7 +146,6 @@ void semArgumentos()
 	auto mutacao = params[1] / 100.0;
 	resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 	resolucaoGrasp.horarioMutacaoTentativas = 2;
-	resolucaoGrasp.gradeTipoConstrucao = RESOLUCAO_GERAR_GRADE_TIPO_GRASP;
 	resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
 	auto tempo = params[2] / 1000.0;
 	resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
