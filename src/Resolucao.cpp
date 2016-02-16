@@ -1350,18 +1350,18 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao)
 	auto matriz = pSolucao->horario->matriz;
 	auto numDisciplinas = disciplinas.size();
 	auto numHorarios = SEMANA * blocosTamanho;
-	std::vector<std::vector<char>> horario(numDisciplinas, std::vector<char>(numHorarios, 0));
+	std::vector<std::vector<char>> horarioBin(numDisciplinas, std::vector<char>(numHorarios, 0));
 	int posicoes[3];
 
 	for (size_t i = 0; i < matriz.size(); i++) {
-		auto discIndex = disciplinasIndex[matriz[i]->disciplina->id];
+		auto discIndex = curso->nome_to_indice()[matriz[i]->disciplina->id];
 		pSolucao->horario->get3DMatrix(i, posicoes);
 		auto dia = posicoes[0];
 		auto bloco = posicoes[1];
 		auto posicao = (dia * blocosTamanho) + bloco;
 
-
+		horarioBin[discIndex][posicao] = 1;
 	}
 
-	return horario;
+	return horarioBin;
 }
