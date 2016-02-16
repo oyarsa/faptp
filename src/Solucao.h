@@ -1,8 +1,7 @@
 #ifndef SOLUCAO_H
 #define SOLUCAO_H
 
-#include <string>
-#include <map>
+#include <unordered_map>
 
 #include "Horario.h"
 #include "Grade.h"
@@ -23,7 +22,7 @@ public:
     bool operator<( Solucao *&s2);
 private:
     Horario *horario;
-    std::map<std::string, Grade*> grades;
+    std::unordered_map<std::string, Grade*> grades;
     
     int id;
     int blocosTamanho;

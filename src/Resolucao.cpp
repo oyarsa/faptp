@@ -2,6 +2,7 @@
 #include <numeric>
 
 #include <modelo-grade/arquivos.h>
+#include <modelo-grade/modelo_solver.h>
 
 #include "parametros.h"
 #include "Resolucao.h"
@@ -675,7 +676,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao *solu
                 }
             }
         }
-        gerarGradeTipoGraspClear(filho);
+		gerarGradeTipoGraspClear(filho);
         filhos.push_back(filho);
         numFilhos++;
     } while (numFilhos <= horarioCruzamentoFilhos);
@@ -1265,8 +1266,10 @@ double Resolucao::gerarGradeTipoGrasp(Solucao *&pSolucao) {
 }
 
 double Resolucao::gerarGradeTipoGraspClear(Solucao *&pSolucao) {
-    pSolucao->grades.clear();
-    pSolucao->gradesLength = 0;
+	if (gradeTipoConstrucao != RESOLUCAO_GERAR_GRADE_TIPO_MODELO) {
+		pSolucao->grades.clear();
+		pSolucao->gradesLength = 0;
+	}
     
     return gerarGrade(pSolucao);
 }
@@ -1340,9 +1343,28 @@ Solucao* Resolucao::getSolucao() {
     return solucao;
 }
 
-double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao) const
+double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao) 
 {
-	return 0.0;
+	auto horarioBin = converteHorario(pSolucao);
+	auto total = 0.0;
+	for (const auto& aluno : alunos) {
+		auto currGrade = pSolucao->grades[aluno.nome()];
+		fagoc::Modelo_solver solver(*curso, aluno, horarioBin);
+
+		solver.solve();
+		auto solucao = solver.solucao();
+		currGrade->fo = solucao->funcao_objetivo;
+		total += currGrade->fo;
+
+		auto& adicionadas = currGrade->disciplinasAdicionadas;
+		adicionadas.clear();
+		for (const auto& disciplina : solucao->nomes_disciplinas) {
+			auto index = disciplinasIndex[disciplina];
+			adicionadas.push_back(disciplinas[index]);
+		}
+	}
+
+	return total;
 }
 
 std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) 
@@ -1354,13 +1376,13 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao)
 	int posicoes[3];
 
 	for (size_t i = 0; i < matriz.size(); i++) {
-		auto discIndex = curso->nome_to_indice()[matriz[i]->disciplina->id];
+		auto index = curso->nome_to_indice()[matriz[i]->disciplina->id];
 		pSolucao->horario->get3DMatrix(i, posicoes);
 		auto dia = posicoes[0];
 		auto bloco = posicoes[1];
 		auto posicao = (dia * blocosTamanho) + bloco;
 
-		horarioBin[discIndex][posicao] = 1;
+		horarioBin[index][posicao] = 1;
 	}
 
 	return horarioBin;

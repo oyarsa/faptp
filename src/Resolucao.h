@@ -139,7 +139,7 @@ private:
 
     double gerarGradeTipoGraspClear(Solucao *&pSolucao);
 
-	double gerarGradeTipoModelo(Solucao *pSolucao) const;
+	double gerarGradeTipoModelo(Solucao *pSolucao);
 	std::vector<std::vector<char>> converteHorario(Solucao *pSolucao);
 
     std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);

@@ -137,7 +137,7 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp(4, (50 - 15), 1413, RESOLUCAO_GERAR_GRADE_TIPO_GRASP, input_file);
-	int params[] = {100, 20, 5, 6, 30};
+	int params[] = {100, 20, 50, 6, 30};
 
 	resolucaoGrasp.horarioPopulacaoInicial = params[0];
 	resolucaoGrasp.horarioIteracao = 100;
@@ -164,7 +164,7 @@ void semArgumentos()
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "Resultado:" << fo << std::endl;
-	//resolucaoGrasp.showResult();
+	resolucaoGrasp.showResult();
 
 #if defined(_WIN32)
 	std::string folder{"teste\\"};
@@ -172,7 +172,7 @@ void semArgumentos()
 	std::string folder{"teste/"};
 #endif
 	auto savePath = folder + "fo" + std::to_string(fo);
-	o.write(resolucaoGrasp.getSolucao(), savePath);
+	//o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 
 int main(int argc, char** argv)

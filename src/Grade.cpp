@@ -15,7 +15,7 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 , disciplinasAdicionadas()
 , disciplinasCurso(pDisciplinasCurso)
 , discToIndex(pDiscToIndex)
-, fo() {
+, fo(-1) {
 }
 
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina) {
@@ -311,7 +311,7 @@ Disciplina* Grade::remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfes
 double Grade::getObjectiveFunction() {
     ProfessorDisciplina *professorDisciplina;
 
-	if (fo) {
+	if (fo != -1) {
 		return fo;
 	}
 
@@ -335,12 +335,12 @@ double Grade::getObjectiveFunction() {
 
                 // Se a turma do aluno for a mesma da disciplina e o periodo do aluno
                 // for o mesmo da disciplina, ela cumpre uma prefer�ncia do aluno
-                const auto nomeDisc = professorDisciplina->disciplina->nome;
-                const auto turmaDisc = professorDisciplina->disciplina->turma;
-                const auto periodoDisc = professorDisciplina->disciplina->periodo;
+                const auto& nomeDisc = professorDisciplina->disciplina->nome;
+                const auto& turmaDisc = professorDisciplina->disciplina->turma;
+                const auto& periodoDisc = professorDisciplina->disciplina->periodo;
 
-                if (turmaAluno == turmaDisc && periodoAluno == periodoDisc &&
-                        !discAvaliada[nomeDisc]) {
+                if (turmaAluno == turmaDisc && periodoAluno == periodoDisc 
+                    && !discAvaliada[nomeDisc]) {
                     discAvaliada[nomeDisc] = true;
                     fo += 0.1;
                 }
@@ -348,6 +348,7 @@ double Grade::getObjectiveFunction() {
         }
     }
 
+	std::cout << "Fo de " << alunoPerfil->id << ": " << fo << "\n";
     return fo;
 }
 
