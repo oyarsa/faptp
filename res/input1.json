@@ -103,8 +103,7 @@
                     "id": "A1",
                     "nome": "A1",
                     "periodo": 1,
-                    "turma": "B",
-                    "periodominimo" : 1
+                    "turma": "B"
                 },
                 {
                     "capacidade": 10,
@@ -113,8 +112,7 @@
                     "id": "B",
                     "nome": "B",
                     "periodo": 1,
-                    "turma": "A",
-                    "periodominimo" : 1
+                    "turma": "A"
                 },
                 {
                     "capacidade": 10,
@@ -123,8 +121,7 @@
                     "id": "C",
                     "nome": "C",
                     "periodo": 1,
-                    "turma": "B",
-                    "periodominimo" : 1
+                    "turma": "B"
                 },
                 {
                     "capacidade": 10,
@@ -133,8 +130,7 @@
                     "id": "D",
                     "nome": "D",
                     "periodo": 1,
-                    "turma": "B",
-                    "periodominimo" : 1
+                    "turma": "B"
                 },
                 {
                     "capacidade": 10,
@@ -147,18 +143,20 @@
                             [
                                 "A1"
                             ],
-                    "turma": "B",
-                    "periodominimo" : 2
+                    "turma": "B"
                 },
                 {
                     "capacidade": 10,
                     "carga": 2,
                     "curso": "C",
+                    "equivalentes":
+                            [
+                                "F"
+                            ],
                     "id": "E",
                     "nome": "E",
                     "periodo": 1,
-                    "turma": "A",
-                    "periodominimo" : 1
+                    "turma": "A"
                 },
                 {
                     "capacidade": 10,
@@ -167,8 +165,7 @@
                     "id": "F",
                     "nome": "F",
                     "periodo": 2,
-                    "turma": "A",
-                    "periodominimo" : 2
+                    "turma": "A"
                 }
             ],
     "professores":
@@ -262,68 +259,68 @@
                 {
                     "camada": 0,
                     "horario": 0,
+                    "professordisciplina": "A1",
+                    "semana": 0
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
                     "professordisciplina": "E",
                     "semana": 0
                 },
                 {
                     "camada": 0,
                     "horario": 1,
-                    "professordisciplina": "E",
-                    "semana": 0
-                },
-                {
-                    "camada": 0,
-                    "horario": 2,
-                    "professordisciplina": "C",
-                    "semana": 0
-                },
-                {
-                    "camada": 0,
-                    "horario": 3,
                     "professordisciplina": "B",
                     "semana": 0
                 },
                 {
+                    "camada": 1,
+                    "horario": 1,
+                    "professordisciplina": "A2",
+                    "semana": 0
+                },
+                {
                     "camada": 0,
                     "horario": 0,
-                    "professordisciplina": "A1",
-                    "semana": 1
+                    "professordisciplina": "C",
+                    "semana": 2
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "E",
+                    "semana": 2
                 },
                 {
                     "camada": 0,
                     "horario": 1,
                     "professordisciplina": "A1",
-                    "semana": 1
+                    "semana": 2
+                },
+                {
+                    "camada": 1,
+                    "horario": 1,
+                    "professordisciplina": "F",
+                    "semana": 2
                 },
                 {
                     "camada": 0,
-                    "horario": 2,
+                    "horario": 0,
                     "professordisciplina": "D",
-                    "semana": 1
-                },
-                {
-                    "camada": 1,
-                    "horario": 2,
-                    "professordisciplina": "A2",
-                    "semana": 0
-                },
-                {
-                    "camada": 1,
-                    "horario": 3,
-                    "professordisciplina": "A2",
-                    "semana": 0
+                    "semana": 4
                 },
                 {
                     "camada": 1,
                     "horario": 0,
                     "professordisciplina": "F",
-                    "semana": 1
+                    "semana": 4
                 },
                 {
                     "camada": 1,
                     "horario": 1,
-                    "professordisciplina": "F",
-                    "semana": 1
+                    "professordisciplina": "A2",
+                    "semana": 4
                 }
             ]
 }

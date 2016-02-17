@@ -348,7 +348,6 @@ double Grade::getObjectiveFunction() {
         }
     }
 
-	std::cout << "Fo de " << alunoPerfil->id << ": " << fo << "\n";
     return fo;
 }
 

@@ -1,10 +1,8 @@
 #ifndef SORTTEMPLATE_H
 #define SORTTEMPLATE_H
 
-#include <functional>
-#include <string>
-
-#include "../src/ProfessorDisciplina.h"
+#include "ProfessorDisciplina.h"
+#include "Solucao.h"
 
 template<typename T, typename M, template<typename> class C = std::less>
 struct member_comparer : std::binary_function<T, T, bool> {
@@ -117,6 +115,14 @@ struct DisciplinaFindDisciplinaId {
     }
 
     const std::string key_;
+};
+
+struct SolucaoComparaMaior
+{
+	bool operator()(Solucao* lhs, Solucao* rhs) const
+	{
+		return lhs->getObjectiveFunction() > rhs->getObjectiveFunction();
+	}
 };
 
 #endif /* SORTTEMPLATE_H */

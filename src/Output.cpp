@@ -27,7 +27,7 @@ void Output::write(Solucao *pSolucao) {
 }
 
 void Output::write(Solucao *pSolucao, std::string savePath) {
-    // Criando o diret�rio de sa�da
+    // Criando o diret�rio de saida
 #if defined(_WIN32)
     std::string command {"mkdir " + savePath + " 2> NUL"};
 #else

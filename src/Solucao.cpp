@@ -58,9 +58,10 @@ void Solucao::insertGrade(Grade* grade) {
     auto& alvoInsercao = grades[grade->alunoPerfil->id];
     if (alvoInsercao) {
         delete alvoInsercao;
+    } else {
+		gradesLength++;
     }
     alvoInsercao = grade;
-    gradesLength++;
 }
 
 //change

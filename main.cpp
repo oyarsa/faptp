@@ -3,19 +3,15 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <string>
 #include <chrono>
 
 #include <modelo-grade/modelo_solver.h>
+#include <modelo-grade/arquivos.h>
 
-#include "template/Algorithms.h"
 #include "src/parametros.h"
-#include "src/Disciplina.h"
-#include "src/Professor.h"
-#include "src/Horario.h"
 #include "src/Resolucao.h"
 #include "src/Output.h"
-
-std::string input_file = "input_old.json";
 
 void comArgumentos(char** argv)
 {
@@ -29,9 +25,9 @@ void comArgumentos(char** argv)
 
 	arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
 
-	Resolucao resolucaoGrasp(3, 2, 5, RESOLUCAO_GERAR_GRADE_TIPO_GRASP, arquivoEntrada);
+	Resolucao resolucaoGrasp(3, 2, 5, Configuracao::TipoGrade::GRASP, arquivoEntrada);
 
-	resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+	resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
 
 	resolucaoGrasp.gradeGraspVizinhos = numVizinhos;
 	resolucaoGrasp.gradeGraspTempoConstrucao = tempoConstr;
@@ -91,7 +87,7 @@ void calibracao(int tipo)
 		for (int i = 0; i < 10; i++) {
 
 			//Resolucao resolucaoGrasp(4, (50 - 15), 1413);
-			Resolucao resolucaoGrasp(2, 2, 5, RESOLUCAO_GERAR_GRADE_TIPO_GRASP);
+			Resolucao resolucaoGrasp(2, 2, 5, Configuracao::TipoGrade::GRASP);
 
 			resolucaoGrasp.horarioPopulacaoInicial = params[j][0];
 
@@ -103,7 +99,7 @@ void calibracao(int tipo)
 			resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 			resolucaoGrasp.horarioMutacaoTentativas = 2;
 
-			resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+			resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
 
 			double tempo = (double) params[j][2] / 100;
 			resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
@@ -136,34 +132,41 @@ void semArgumentos()
 
 	experimento = false;
 
-	Resolucao resolucaoGrasp(4, (50 - 15), 1413, RESOLUCAO_GERAR_GRADE_TIPO_GRASP, input_file);
-	int params[] = {100, 20, 50, 6, 30};
+	auto file = "input.json";
+	Resolucao resolucaoGrasp(4, (50 - 15), 1413, Configuracao::TipoGrade::MODELO, file);
+	int params[] = {
+		100,   // População Inicial
+		20,  // Probabilidade de Mutação
+		1,   // Tempo do GRASP
+		2,   // Vizinhos do GRASP
+		30   // Alfa do GRASP
+	};
 
 	resolucaoGrasp.horarioPopulacaoInicial = params[0];
-	resolucaoGrasp.horarioIteracao = 100;
+	resolucaoGrasp.horarioIteracao = 10;
 	resolucaoGrasp.horarioTorneioPares = 0;
 	resolucaoGrasp.horarioTorneioPopulacao = 1;
 	auto mutacao = params[1] / 100.0;
 	resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 	resolucaoGrasp.horarioMutacaoTentativas = 2;
-	resolucaoGrasp.gradeGraspVizinhanca = RESOLUCAO_GRASP_VIZINHOS_ALEATORIOS;
+	resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
 	auto tempo = params[2] / 1000.0;
 	resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
 	resolucaoGrasp.gradeGraspVizinhos = params[3];
 	auto alfa = params[4] / 100.0;
 	resolucaoGrasp.gradeAlfa = alfa;
 
-	std::cout << "Montando horarios [AG + Grasp]..." << std::endl;
+	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
-	auto inicioHorario = clock();
+	auto inicio= std::chrono::steady_clock::now();
 	resolucaoGrasp.start(false);
-	auto fimHorario = clock();
+	auto fim = std::chrono::steady_clock::now();
 
-	auto diff1 = (fimHorario - inicioHorario) / (1000.0 * 1000.0);
-	std::cout << "Tempo do horario: " << diff1 << "s" << std::endl << std::endl;
+	std::cout << "Tempo do horario: " << std::chrono::duration_cast<std::chrono::milliseconds>
+		(fim - inicio).count() << "ms\n\n";
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
-	std::cout << "Resultado:" << fo << std::endl;
+	std::cout << "\nResultado:" << fo << std::endl;
 	resolucaoGrasp.showResult();
 
 #if defined(_WIN32)
@@ -172,7 +175,7 @@ void semArgumentos()
 	std::string folder{"teste/"};
 #endif
 	auto savePath = folder + "fo" + std::to_string(fo);
-	//o.write(resolucaoGrasp.getSolucao(), savePath);
+	o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 
 int main(int argc, char** argv)

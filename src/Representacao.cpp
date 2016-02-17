@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "../template/Algorithms.h"
+#include "Algorithms.h"
 #include "Semana.h"
 
 #include "Util.h"
