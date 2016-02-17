@@ -12,6 +12,7 @@
 #include "src/parametros.h"
 #include "src/Resolucao.h"
 #include "src/Output.h"
+#include "src/Configuracao.h"
 
 void comArgumentos(char** argv)
 {
@@ -133,7 +134,6 @@ void semArgumentos()
 	experimento = false;
 
 	auto file = "input.json";
-	Resolucao resolucaoGrasp(4, (50 - 15), 1413, Configuracao::TipoGrade::MODELO, file);
 	int params[] = {
 		100,   // População Inicial
 		20,  // Probabilidade de Mutação
@@ -141,20 +141,18 @@ void semArgumentos()
 		2,   // Vizinhos do GRASP
 		30   // Alfa do GRASP
 	};
-
-	resolucaoGrasp.horarioPopulacaoInicial = params[0];
-	resolucaoGrasp.horarioIteracao = 10;
-	resolucaoGrasp.horarioTorneioPares = 0;
-	resolucaoGrasp.horarioTorneioPopulacao = 1;
-	auto mutacao = params[1] / 100.0;
-	resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
-	resolucaoGrasp.horarioMutacaoTentativas = 2;
-	resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
-	auto tempo = params[2] / 1000.0;
-	resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
-	resolucaoGrasp.gradeGraspVizinhos = params[3];
-	auto alfa = params[4] / 100.0;
-	resolucaoGrasp.gradeAlfa = alfa;
+	Resolucao resolucaoGrasp = Configuracao()
+		.arquivoEntrada("input.json")
+		.populacaoInicial(params[0])
+		.mutacaoProbabilidade(params[1])
+		.graspTempoConstrucao(params[2])
+		.graspNumVizinhos(params[3])
+		.graspAlfa(params[4])
+		.numIteracoes(10)
+		.numTorneioPares(0)
+		.numTorneioPopulacao(1)
+		.tentativasMutacao(2)
+		.graspVizinhanca(Configuracao::TipoVizinhos::ALEATORIOS);
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 

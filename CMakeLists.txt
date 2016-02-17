@@ -37,6 +37,7 @@ set(FAPTP_FILES
     src/parametros.h
     src/includes/jsoncpp.cpp
     src/Algorithms.h
+    src/Configuracao.h
     )
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
