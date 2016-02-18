@@ -104,7 +104,8 @@
                     "nome": "A1",
                     "periodo": 1,
                     "turma": "B",
-                    "periodominimo" : 1
+                    "periodominimo" : 1,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -114,7 +115,8 @@
                     "nome": "B",
                     "periodo": 1,
                     "turma": "A",
-                    "periodominimo" : 1
+                    "periodominimo" : 1,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -124,7 +126,8 @@
                     "nome": "C",
                     "periodo": 1,
                     "turma": "B",
-                    "periodominimo" : 1
+                    "periodominimo" : 1,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -134,7 +137,8 @@
                     "nome": "D",
                     "periodo": 1,
                     "turma": "B",
-                    "periodominimo" : 1
+                    "periodominimo" : 1,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -148,7 +152,8 @@
                                 "A1"
                             ],
                     "turma": "B",
-                    "periodominimo" : 2
+                    "periodominimo" : 2,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -158,7 +163,8 @@
                     "nome": "E",
                     "periodo": 1,
                     "turma": "A",
-                    "periodominimo" : 1
+                    "periodominimo" : 1,
+                    "ofertada": true
                 },
                 {
                     "capacidade": 10,
@@ -168,7 +174,8 @@
                     "nome": "F",
                     "periodo": 2,
                     "turma": "A",
-                    "periodominimo" : 2
+                    "periodominimo" : 2,
+                    "ofertada": true
                 }
             ],
     "professores":

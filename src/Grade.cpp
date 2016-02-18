@@ -174,13 +174,11 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
 }
 
 bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
-    bool viavel = havePreRequisitos(pDisciplina) &&
+    return havePreRequisitos(pDisciplina) &&
 		checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
 		!discRepetida(pDisciplina) &&
 		hasPeriodoMinimo(pDisciplina) &&
 		pDisciplina->ofertada;
-
-    return viavel;
 }
 
 void Grade::add(Disciplina* pDisciplina, int pCamada) {

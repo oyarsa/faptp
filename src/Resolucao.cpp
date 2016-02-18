@@ -245,10 +245,19 @@ void Resolucao::carregarAlunoPerfis()
 		}
 
 		std::vector<Disciplina*> aprovadas;
-
-		set_difference(disciplinas.begin(), disciplinas.end(),
+		const auto& restantes = alunoPerfil->restante;
+	/*	set_difference(disciplinas.begin(), disciplinas.end(),
 		               alunoPerfil->restante.begin(), alunoPerfil->restante.end(),
 		               inserter(aprovadas, aprovadas.begin()), DisciplinaCargaHorariaDesc());
+*/
+		std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
+							[&restantes](Disciplina* d)
+		{
+			return find_if(begin(restantes), end(restantes), [&d](Disciplina* x)
+			{
+				return x->id == d->id;
+			}) != end(restantes);
+		});
 
 		auto& aprovadasNomes = alunoPerfil->aprovadas;
 
