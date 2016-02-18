@@ -6,15 +6,15 @@ class Configuracao
 public:
 	enum class TipoGrade
 	{
-		GULOSO,
-		GRASP,
-		COMBINATORIO,
-		MODELO
+		guloso,
+		grasp,
+		combinatorio,
+		modelo
 	};
 	enum class TipoVizinhos
 	{
-		ALEATORIOS,
-		CRESCENTE
+		aleatorios,
+		crescente
 	};
 	Configuracao() = default;
 	Configuracao& arquivoEntrada(const std::string& filename);
@@ -38,14 +38,14 @@ private:
 	int blocoTam_ = 4;
 	int camadaTam_ = 35;
 	int perfilTam_ = 1413;
-	TipoGrade tipoConstr_ = TipoGrade::GRASP;
+	TipoGrade tipoConstr_ = TipoGrade::grasp;
 	int popInicial_ = 10;
 	int numIter_ = 100;
 	int numTorneioPares_ = 0;
 	int numTorneioPop_ = 1;
 	double mutProb_ = 0.2;
 	int mutTentativas_ = 2;
-	TipoVizinhos tipoVizinhanca_ = TipoVizinhos::ALEATORIOS;
+	TipoVizinhos tipoVizinhanca_ = TipoVizinhos::aleatorios;
 	double graspTempo_ = 0.001;
 	int numVizinhos_ = 2;
 	double graspAlfa_ = 0.3;
@@ -107,7 +107,7 @@ inline Configuracao& Configuracao::numTorneioPopulacao(int n)
 
 inline Configuracao& Configuracao::mutacaoProbabilidade(int p)
 {
-	mutProb_ = p;
+	mutProb_ = p / 100;
 	return *this;
 }
 
@@ -125,7 +125,7 @@ inline Configuracao& Configuracao::graspVizinhanca(TipoVizinhos tipo)
 
 inline Configuracao& Configuracao::graspTempoConstrucao(int tempo)
 {
-	graspTempo_ = tempo;
+	graspTempo_ = tempo / 1000;
 	return *this;
 }
 
@@ -137,6 +137,6 @@ inline Configuracao& Configuracao::graspNumVizinhos(int n)
 
 inline Configuracao& Configuracao::graspAlfa(int alfa)
 {
-	graspAlfa_ = alfa;
+	graspAlfa_ = alfa / 100;
 	return *this;
 }

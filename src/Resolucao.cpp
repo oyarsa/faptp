@@ -103,7 +103,7 @@ void Resolucao::carregarDados()
 		carregarDadosProfessores();
 		carregarAlunoPerfis();
 
-		if (gradeTipoConstrucao == Configuracao::TipoGrade::MODELO) {
+		if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
 			auto p = fagoc::ler_json(folder + arquivoEntrada);
 			curso.reset(new fagoc::Curso(std::move(p.first)));
 			alunos = move(p.second);
@@ -882,16 +882,16 @@ double Resolucao::gerarGrade()
 double Resolucao::gerarGrade(Solucao*& pSolucao)
 {
 	switch (gradeTipoConstrucao) {
-	case Configuracao::TipoGrade::GULOSO:
+	case Configuracao::TipoGrade::guloso:
 		return gerarGradeTipoGuloso(pSolucao);
 
-	case Configuracao::TipoGrade::GRASP:
+	case Configuracao::TipoGrade::grasp:
 		return gerarGradeTipoGrasp(pSolucao);
 
-	case Configuracao::TipoGrade::COMBINATORIO:
+	case Configuracao::TipoGrade::combinatorio:
 		return gerarGradeTipoCombinacaoConstrutiva(pSolucao);
 
-	case Configuracao::TipoGrade::MODELO:
+	case Configuracao::TipoGrade::modelo:
 		return gerarGradeTipoModelo(pSolucao);
 	}
 
@@ -1293,10 +1293,10 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 		temp = currentSolucao;
 
 		switch (gradeGraspVizinhanca) {
-		case Configuracao::TipoVizinhos::ALEATORIOS:
+		case Configuracao::TipoVizinhos::aleatorios:
 			currentSolucao = gerarGradeTipoGraspRefinamentoAleatorio(currentSolucao);
 			break;
-		case Configuracao::TipoVizinhos::CRESCENTE:
+		case Configuracao::TipoVizinhos::crescente:
 			currentSolucao = gerarGradeTipoGraspRefinamentoCrescente(currentSolucao);
 			break;
 		}

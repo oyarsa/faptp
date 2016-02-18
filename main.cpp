@@ -26,9 +26,9 @@ void comArgumentos(char** argv)
 
 	arquivoConf >> numVizinhos >> tempoConstr >> alfaGrasp;
 
-	Resolucao resolucaoGrasp(3, 2, 5, Configuracao::TipoGrade::GRASP, arquivoEntrada);
+	Resolucao resolucaoGrasp(3, 2, 5, Configuracao::TipoGrade::grasp, arquivoEntrada);
 
-	resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
+	resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::aleatorios;
 
 	resolucaoGrasp.gradeGraspVizinhos = numVizinhos;
 	resolucaoGrasp.gradeGraspTempoConstrucao = tempoConstr;
@@ -88,7 +88,7 @@ void calibracao(int tipo)
 		for (int i = 0; i < 10; i++) {
 
 			//Resolucao resolucaoGrasp(4, (50 - 15), 1413);
-			Resolucao resolucaoGrasp(2, 2, 5, Configuracao::TipoGrade::GRASP);
+			Resolucao resolucaoGrasp(2, 2, 5, Configuracao::TipoGrade::grasp);
 
 			resolucaoGrasp.horarioPopulacaoInicial = params[j][0];
 
@@ -100,7 +100,7 @@ void calibracao(int tipo)
 			resolucaoGrasp.horarioMutacaoProbabilidade = mutacao;
 			resolucaoGrasp.horarioMutacaoTentativas = 2;
 
-			resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::ALEATORIOS;
+			resolucaoGrasp.gradeGraspVizinhanca = Configuracao::TipoVizinhos::aleatorios;
 
 			double tempo = (double) params[j][2] / 100;
 			resolucaoGrasp.gradeGraspTempoConstrucao = tempo;
@@ -133,7 +133,6 @@ void semArgumentos()
 
 	experimento = false;
 
-	auto file = "input.json";
 	int params[] = {
 		100,   // População Inicial
 		20,  // Probabilidade de Mutação
@@ -152,7 +151,8 @@ void semArgumentos()
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
-		.graspVizinhanca(Configuracao::TipoVizinhos::ALEATORIOS);
+		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+		.tipoConstrucao(Configuracao::TipoGrade::modelo);
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
