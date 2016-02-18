@@ -134,7 +134,7 @@ void semArgumentos()
 	experimento = false;
 
 	int params[] = {
-		100,   // População Inicial
+		100,  // População Inicial
 		20,  // Probabilidade de Mutação
 		1,   // Tempo do GRASP
 		2,   // Vizinhos do GRASP
@@ -152,7 +152,7 @@ void semArgumentos()
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::modelo);
+		.tipoConstrucao(Configuracao::TipoGrade::grasp);
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
