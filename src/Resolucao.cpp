@@ -118,7 +118,7 @@ void Resolucao::carregarDadosProfessores()
 {
 	const auto& jsonProfessores = jsonRoot["professores"];
 
-	for (size_t i = 0; i < jsonProfessores.size(); i++) {
+	for (auto i = 0u; i < jsonProfessores.size(); i++) {
 		std::string id = jsonProfessores[i]["id"].asString();
 		std::string nome = jsonProfessores[i]["nome"].asString();
 
@@ -133,9 +133,9 @@ void Resolucao::carregarDadosProfessores()
 		if (jsonProfessores[i].isMember("disponibilidade") == 1) {
 			const auto& disponibilidade = jsonProfessores[i]["disponibilidade"];
 			diasDisponiveis.resize(disponibilidade.size());
-			for (size_t i = 0; i < disponibilidade.size(); i++) {
+			for (auto i = 0u; i < disponibilidade.size(); i++) {
 				diasDisponiveis[i].resize(disponibilidade[i].size());
-				for (size_t j = 0; j < disponibilidade[i].size(); j++) {
+				for (auto j = 0u; j < disponibilidade[i].size(); j++) {
 					diasDisponiveis[i][j] = disponibilidade[i][j].asBool();
 				}
 
@@ -144,7 +144,7 @@ void Resolucao::carregarDadosProfessores()
 		}
 
 		const auto& competencias = jsonProfessores[i]["competencias"];
-		for (size_t j = 0; j < competencias.size(); j++) {
+		for (auto j = 0u; j < competencias.size(); j++) {
 
 			std::vector<Disciplina*>::iterator it;
 			std::string disciplinaId = competencias[j].asString();
@@ -160,7 +160,7 @@ void Resolucao::carregarDadosDisciplinas()
 {
 	const auto& jsonDisciplinas = jsonRoot["disciplinas"];
 
-	for (size_t i = 0; i < jsonDisciplinas.size(); i++) {
+	for (auto i = 0u; i < jsonDisciplinas.size(); i++) {
 		const auto id = jsonDisciplinas[i]["id"].asString();
 		const auto nome = jsonDisciplinas[i]["nome"].asString();
 		const auto curso = jsonDisciplinas[i]["curso"].asString();
@@ -175,17 +175,17 @@ void Resolucao::carregarDadosDisciplinas()
 		Disciplina* disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
 
 		const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
-		for (size_t j = 0; j < corequisitos.size(); j++) {
+		for (auto j = 0u; j < corequisitos.size(); j++) {
 			disciplina->coRequisitos.push_back(corequisitos[j].asString());
 		}
 
 		const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
-		for (size_t j = 0; j < prerequisitos.size(); j++) {
+		for (auto j = 0u; j < prerequisitos.size(); j++) {
 			disciplina->preRequisitos.push_back(prerequisitos[j].asString());
 		}
 
 		const auto& equivalentes = jsonDisciplinas[i]["equivalentes"];
-		for (size_t j = 0; j < equivalentes.size(); j++) {
+		for (auto j = 0u; j < equivalentes.size(); j++) {
 			disciplina->equivalentes.push_back(equivalentes[j].asString());
 		}
 		disciplina->equivalentes.push_back(nome);
@@ -202,7 +202,7 @@ void Resolucao::carregarDadosProfessorDisciplinas()
 {
 	const auto& jsonProfessorDisciplinas = jsonRoot["professordisciplinas"];
 
-	for (size_t i = 0; i < jsonProfessorDisciplinas.size(); i++) {
+	for (auto i = 0u; i < jsonProfessorDisciplinas.size(); i++) {
 		const auto id = jsonProfessorDisciplinas[i]["id"].asString();
 		const auto professor = jsonProfessorDisciplinas[i]["professor"].asString();
 		const auto disciplina = jsonProfessorDisciplinas[i]["disciplina"].asString();
@@ -223,7 +223,7 @@ void Resolucao::carregarAlunoPerfis()
 {
 	const auto& jsonAlunoPerfis = jsonRoot["alunoperfis"];
 
-	for (size_t i = 0; i < jsonAlunoPerfis.size(); i++) {
+	for (auto i = 0u; i < jsonAlunoPerfis.size(); i++) {
 		const auto id = jsonAlunoPerfis[i]["id"].asString();
 		const auto peso = jsonAlunoPerfis[i]["peso"].asDouble();
 		const auto turma = jsonAlunoPerfis[i]["turma"].asString();
@@ -232,14 +232,14 @@ void Resolucao::carregarAlunoPerfis()
 		AlunoPerfil* alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
 		const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
-		for (size_t j = 0; j < jsonRestantes.size(); j++) {
+		for (auto j = 0u; j < jsonRestantes.size(); j++) {
 			Disciplina* disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
 			alunoPerfil->addRestante(disciplina);
 		}
 		alunoPerfil->restante = ordenarDisciplinas(alunoPerfil->restante);
 
 		const auto& jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
-		for (size_t j = 0; j < jsonCursadas.size(); j++) {
+		for (auto j = 0u; j < jsonCursadas.size(); j++) {
 			std::string cursada = jsonCursadas[j].asString();
 			alunoPerfil->addCursada(cursada);
 		}
@@ -293,7 +293,7 @@ void Resolucao::carregarSolucao()
 	Solucao* solucaoLeitura = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 	int bloco, dia, camada;
 
-	for (size_t i = 0; i < jsonHorario.size(); i++) {
+	for (auto i = 0u; i < jsonHorario.size(); i++) {
 		bloco = jsonHorario[i]["horario"].asInt();
 		dia = jsonHorario[i]["semana"].asInt();
 		camada = jsonHorario[i]["camada"].asInt();
@@ -806,7 +806,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
 	double porcentagem;
 
 	// Muta��o dos filhos
-	for (size_t j = 0; j < filhos.size(); j++) {
+	for (auto j = 0u; j < filhos.size(); j++) {
 		porcentagem = ((aleatorio::randomInt() % 100) / 100);
 
 		if (porcentagem <= horarioMutacaoProbabilidade) {
@@ -1457,7 +1457,7 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao)
 	std::vector<std::vector<char>> horarioBin(numHorarios, std::vector<char>(numDisciplinas, 0));
 	int posicoes[3];
 
-	for (size_t i = 0; i < matriz.size(); i++) {
+	for (auto i = 0u; i < matriz.size(); i++) {
 		if (!matriz[i]) {
 			continue;
 		}

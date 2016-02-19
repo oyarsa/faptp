@@ -140,7 +140,7 @@ void semArgumentos()
 		2,   // Vizinhos do GRASP
 		30   // Alfa do GRASP
 	};
-	Resolucao resolucaoGrasp = Configuracao()
+	Resolucao resolucaoGrasp {Configuracao()
 		.arquivoEntrada("input.json")
 		.populacaoInicial(params[0])
 		.mutacaoProbabilidade(params[1])
@@ -152,7 +152,7 @@ void semArgumentos()
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::grasp);
+		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
