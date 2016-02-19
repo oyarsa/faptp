@@ -251,10 +251,8 @@ void Resolucao::carregarAlunoPerfis()
 		               inserter(aprovadas, aprovadas.begin()), DisciplinaCargaHorariaDesc());
 */
 		std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
-							[&restantes](Disciplina* d)
-		{
-			return find_if(begin(restantes), end(restantes), [&d](Disciplina* x)
-			{
+							[&restantes](Disciplina* d) {
+			return find_if(begin(restantes), end(restantes), [&d](Disciplina* x) {
 				return x->id == d->id;
 			}) != end(restantes);
 		});

@@ -5,13 +5,14 @@
  * Created on 22 de Setembro de 2014, 11:10
  */
 
-#include "UUID.h"
 #include <ctime>
+
+#include "UUID.h"
 
 std::string UUID::GenerateUuid() {
 
   std::string uuid_code;
-  char *guidStr = ((char*) malloc(UUID_LENGTH * sizeof(char)));
+  char *guidStr = new char[UUID_LENGTH];
   char *pGuidStr = guidStr;
   int i;
 

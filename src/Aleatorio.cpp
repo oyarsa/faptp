@@ -11,6 +11,9 @@ class Aleatorio
 	using TipoRelogio = std::chrono::high_resolution_clock;
 public:
 	Aleatorio();
+	Aleatorio& operator=(const Aleatorio&) = delete;
+	Aleatorio(const Aleatorio&) = delete;
+
 	//! \brief Gera um numero aleatorio de 0 a 32767 a partir de uma distribuicao uniforme
 	//! \return Int na faixa 0 <= x <= 32767
 	int randomInt();

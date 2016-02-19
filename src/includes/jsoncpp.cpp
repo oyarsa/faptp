@@ -69,8 +69,9 @@ license you like.
 // //////////////////////////////////////////////////////////////////////
 
 
-
-
+#ifdef _MSC_VER
+#pragma warning(disable:4702)
+#endif
 
 
 #include "json/json.h"
@@ -5146,5 +5147,7 @@ std::ostream& operator<<(std::ostream& sout, Value const& root) {
 
 
 
-
+#ifdef _MSC_VER
+#pragma warning(default:4702)
+#endif
 
