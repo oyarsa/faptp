@@ -44,7 +44,7 @@ void comArgumentos(char** argv)
 }
 
 
-void calibracao(int tipo)
+void calibracao()
 {
 	Output o;
 
@@ -183,9 +183,8 @@ int main(int argc, char** argv)
 	if (argc == 3) {
 		comArgumentos(argv);
 	} else if (argc == 2) {
-		calibracao(atoi(argv[1]));
+		calibracao();
 	} else {
-		//calibracao(0);
 		semArgumentos();
 	}
 }

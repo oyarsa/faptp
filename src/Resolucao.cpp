@@ -402,7 +402,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 	std::string pdId;
 
 	int randInt;
-	bool inserted;
+	bool inserted = false;
 	bool professorPossuiCreditos;
 
 	std::map<std::string, int> creditosUtilizadosProfessor;
@@ -414,7 +414,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 	 * antes dos outros professores
 	 */
 
-	while (solucoesAG.size() != horarioPopulacaoInicial) {
+	while (static_cast<int>(solucoesAG.size()) != horarioPopulacaoInicial) {
 		Solucao* solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 		int i = 0;
 
@@ -611,7 +611,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> 
 Solucao* Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const
 {
 	std::vector<Solucao*> torneioCandidatos;
-	Solucao* vencedor;
+	Solucao* vencedor = nullptr;
 	double vencedorFO = 0;
 	double randomFO;
 	int randInt;

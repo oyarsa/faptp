@@ -107,14 +107,13 @@ struct DisciplinasRemoveDisciplinas {
 
 struct DisciplinaFindDisciplinaId {
 
-    DisciplinaFindDisciplinaId(std::string key) : key_(key) {
-    }
+    DisciplinaFindDisciplinaId(const std::string& key) : key_(key) {}
 
     bool operator()(const Disciplina* d) const {
         return key_ == d->getId();
     }
 
-    const std::string key_;
+    std::string key_;
 };
 
 struct SolucaoComparaMaior

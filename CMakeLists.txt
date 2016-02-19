@@ -53,5 +53,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
+if (MSVC)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /Za")
+endif()
+
 add_executable(faptp ${FAPTP_FILES} main.cpp)
 target_link_libraries(faptp modelo-grade-lib)
