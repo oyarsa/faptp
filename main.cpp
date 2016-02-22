@@ -134,8 +134,8 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
-		.arquivoEntrada("input_fagoc.json")
-		.populacaoInicial(10)
+		.arquivoEntrada("input.json")
+		.populacaoInicial(100)
 		.mutacaoProbabilidade(20) // %
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)

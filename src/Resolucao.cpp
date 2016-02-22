@@ -383,6 +383,21 @@ Solucao* Resolucao::gerarHorarioAG()
 	gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
 	solucaoAG = populacao[0];
 
+	// Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
+	// o que causa problemas com a escrita do html. Aqui as disciplinas são
+	// inseridas na matriz. É necessário copiar as adicionadas e depois resetá-las
+	// para a inserção funcionar.
+	if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
+		for (auto& par : solucaoAG->grades) {
+			auto& grade = *par.second;
+			std::vector<Disciplina*> disc_add_copy{};
+			std::swap(disc_add_copy, grade.disciplinasAdicionadas);
+			for (auto& disc : disc_add_copy) {
+				grade.insert(disc, {}, true);
+			}
+		}
+	}
+
 	solucao = solucaoAG;
 
 	return solucaoAG;
@@ -1436,9 +1451,8 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 
 		auto& adicionadas = novaGrade->disciplinasAdicionadas;
 		adicionadas.clear();
-		for (const auto& disciplina : solucao.nomes_disciplinas) {
-			auto index = disciplinasIndex[disciplina];
-			adicionadas.push_back(disciplinas[index]);
+		for (const auto& disc : solucao.nomes_disciplinas) {
+			adicionadas.push_back(disciplinas[disciplinasIndex[disc]]);
 		}
 
 		pSolucao->insertGrade(novaGrade);
@@ -1447,9 +1461,9 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 	return total;
 }
 
-std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao)
+std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) const
 {
-	auto matriz = pSolucao->horario->matriz;
+	const auto& matriz = pSolucao->horario->matriz;
 	auto numDisciplinas = disciplinas.size();
 	auto numHorarios = SEMANA * blocosTamanho;
 	std::vector<std::vector<char>> horarioBin(numHorarios, std::vector<char>(numDisciplinas, 0));

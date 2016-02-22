@@ -258,7 +258,7 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
             }
 
             first = false;
-            pdIterFound++;
+	        ++pdIterFound;
         }
     }
 
