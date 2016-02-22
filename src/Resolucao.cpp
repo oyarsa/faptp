@@ -1430,13 +1430,13 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 		fagoc::Modelo_solver solver(*curso, aluno, horarioBin);
 
 		solver.solve();
-		auto solucao = solver.solucao();
-		novaGrade->fo = solucao->funcao_objetivo;
+		const auto& solucao = solver.solucao();
+		novaGrade->fo = solucao.funcao_objetivo;
 		total += novaGrade->fo;
 
 		auto& adicionadas = novaGrade->disciplinasAdicionadas;
 		adicionadas.clear();
-		for (const auto& disciplina : solucao->nomes_disciplinas) {
+		for (const auto& disciplina : solucao.nomes_disciplinas) {
 			auto index = disciplinasIndex[disciplina];
 			adicionadas.push_back(disciplinas[index]);
 		}

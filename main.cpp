@@ -133,26 +133,19 @@ void semArgumentos()
 
 	experimento = false;
 
-	int params[] = {
-		100,  // População Inicial
-		20,  // Probabilidade de Mutação
-		1,   // Tempo do GRASP
-		2,   // Vizinhos do GRASP
-		30   // Alfa do GRASP
-	};
 	Resolucao resolucaoGrasp {Configuracao()
-		.arquivoEntrada("input.json")
-		.populacaoInicial(params[0])
-		.mutacaoProbabilidade(params[1])
-		.graspTempoConstrucao(params[2])
-		.graspNumVizinhos(params[3])
-		.graspAlfa(params[4])
+		.arquivoEntrada("input_fagoc.json")
+		.populacaoInicial(10)
+		.mutacaoProbabilidade(20) // %
+		.graspTempoConstrucao(1) // ms
+		.graspNumVizinhos(2)
+		.graspAlfa(30) // %
 		.numIteracoes(10)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
+		.tipoConstrucao(Configuracao::TipoGrade::modelo)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
