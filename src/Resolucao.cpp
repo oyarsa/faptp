@@ -15,6 +15,8 @@ Resolucao::Resolucao(const Configuracao& c)
 	: horarioPopulacaoInicial(c.popInicial_)
 	  , horarioTorneioPares(c.numTorneioPares_)
 	  , horarioTorneioPopulacao(c.numTorneioPop_)
+	  , horarioCruzamentoPorcentagem(c.porcentCruz_)
+	  , horarioTipoCruzamento(c.tipoCruz_)
 	  , horarioIteracao(c.numIter_)
 	  , horarioMutacaoProbabilidade(c.mutProb_)
 	  , horarioMutacaoTentativas(c.mutTentativas_)
@@ -340,13 +342,33 @@ void Resolucao::atualizarDisciplinasIndex()
 	}
 }
 
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor)
+{
+	switch (horarioTipoCruzamento) {
+	case Configuracao::TipoCruzamento::construtivo_reparo:
+	{
+		std::vector<Solucao*> filhos;
+		auto filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
+		auto filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+		return filhos;
+	}
+
+	case Configuracao::TipoCruzamento::simples:
+		return gerarHorarioAGCruzamentoAleatorio2(parVencedor[0], parVencedor[1]);
+	}
+
+	return {};
+}
+
 Solucao* Resolucao::gerarHorarioAG()
 {
 	Solucao* solucaoAG;
 	std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
 
 	std::vector<Solucao*> parVencedor;
-	std::vector<Solucao*> filhos1;
+	std::vector<Solucao*> filhos;
 	std::vector<Solucao*> filhos2;
 	std::vector<Solucao*> geneX;
 
@@ -356,26 +378,34 @@ Solucao* Resolucao::gerarHorarioAG()
 		std::cout << "i: " << i << "\n";
 
 		//sort(populacao.begin(), populacao.end(), std::greater<Solucao*>());
+		auto numCruz = std::max(1, static_cast<int>(horarioPopulacaoInicial 
+													* horarioCruzamentoPorcentagem));
 
-		parVencedor = gerarHorarioAGTorneioPar(populacao);
+		for (auto j = 0; j < numCruz; j++) {
 
-		filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
-		filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+			parVencedor = gerarHorarioAGTorneioPar(populacao);
 
-		//populacao.insert(populacao.end(), filhos1.begin(), filhos1.end());
-		Util::insert_sorted(populacao, begin(filhos1), end(filhos1),
-		                    SolucaoComparaMaior());
-		// Adiciona o segundo grupo de filhos no primeiro vetor
-		//filhos1.insert(filhos1.end(), filhos2.begin(), filhos2.end());
-		Util::insert_sorted(populacao, begin(filhos2), end(filhos2),
-		                    SolucaoComparaMaior());
+			//filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
+			//filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+			//filhos = gerarHorarioAGCruzamentoAleatorio2(parVencedor[0], parVencedor[1]);
+			filhos = gerarHorarioAGCruzamento(parVencedor);
 
-		geneX = gerarHorarioAGMutacao(filhos1);
 
-		//populacao.insert(populacao.end(), geneX.begin(), geneX.end());
-		Util::insert_sorted(populacao, begin(geneX), end(geneX),
-		                    SolucaoComparaMaior());
+			//populacao.insert(populacao.end(), filhos1.begin(), filhos1.end());
+			Util::insert_sorted(populacao, begin(filhos), end(filhos),
+								SolucaoComparaMaior());
+			// Adiciona o segundo grupo de filhos no primeiro vetor
+			//filhos1.insert(filhos1.end(), filhos2.begin(), filhos2.end());
+			//Util::insert_sorted(populacao, begin(filhos2), end(filhos2),
+								//SolucaoComparaMaior());
 
+			geneX = gerarHorarioAGMutacao(filhos);
+
+			//populacao.insert(populacao.end(), geneX.begin(), geneX.end());
+			Util::insert_sorted(populacao, begin(geneX), end(geneX),
+								SolucaoComparaMaior());
+
+		}
 		gerarHorarioAGSobrevivenciaElitismo(populacao);
 	}
 
@@ -757,6 +787,55 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao* solu
 
 
 	return filhos;
+}
+
+void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const
+{
+	// Se o cruzamento falhar, filho continua o mesmo de antes
+	auto fallback = new Solucao(*filho);
+	// Apaga camada do filho
+	for (auto i = 0; i < SEMANA; i++) {
+		for (auto j = 0; j < blocosTamanho; j++) {
+			auto pos = filho->horario->getPosition(i, j, camada);
+			filho->horario->matriz[pos] = nullptr;
+		}
+	}
+
+	// Tenta inserir as disciplinas da camada do pai. Se alguma falhar, volta 
+	// ao fallback e encerra
+	for (auto i = 0; i < SEMANA; i++) {
+		for (auto j = 0; j < blocosTamanho; j++) {
+			auto pos = filho->horario->getPosition(i, j, camada);
+			auto alocPai = pai->horario->matriz[pos];
+			if (!alocPai || filho->horario->insert(i, j, camada, alocPai)) {
+				continue;
+			}
+
+			if (verbose)
+				std::cout << "Deu treta no cruzamento tipo 2\n";
+
+			delete filho;
+			filho = fallback;
+			return;
+		}
+	}
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio2(Solucao* solucaoPai1, Solucao* solucaoPai2)
+{
+	auto camadaCruz = aleatorio::randomInt() % camadasTamanho;
+	auto filho1 = new Solucao(*solucaoPai1);
+	auto filho2 = new Solucao(*solucaoPai2);
+
+	for (auto k = camadaCruz; k < camadasTamanho; k++) {
+		cruzaCamada(filho1, solucaoPai2, k);
+		cruzaCamada(filho2, solucaoPai1, k);
+	}
+
+	gerarGradeTipoGraspClear(filho1);
+	gerarGradeTipoGraspClear(filho2);
+
+	return {filho1, filho2};
 }
 
 bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG)

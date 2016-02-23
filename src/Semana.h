@@ -1,29 +1,22 @@
 #ifndef SEMANA_H
-#define	SEMANA_H
+#define SEMANA_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+const int SEMANA  = 5;
 
-#define SEMANA    5
+const int SEGUNDA = 0;
+const int TERCA   = 1;
+const int QUARTA  = 2;
+const int QUINTA  = 3;
+const int SEXTA   = 4;
+const int SABADO  = 5;
+const int DOMINGO = 6;
 
-#define SEGUNDA   0
-#define TERCA     1
-#define QUARTA    2
-#define QUINTA    3
-#define SEXTA     4
-#define SABADO    5
-#define DOMINGO   6
+const double HORA_MINUTO  = 60.0;
+const double MINUTO_ALUA  = 60.0;
+const double SEMANA_MES   = 4.0;
+const double MES_SEMESTRE = 6.0;
 
-#define HORA_MINUTO 60.0
-#define MINUTO_ALUA 60.0
-#define SEMANA_MES 4.0
-#define MES_SEMESTRE 6.0
-#define CARGA_HORARIA ((double)(MINUTO_ALUA/HORA_MINUTO))
+const double CARGA_HORARIA = MINUTO_ALUA * 1. / HORA_MINUTO;
 
-#ifdef	__cplusplus
-}
-#endif
-
-#endif	/* SEMANA_H */
+#endif /* SEMANA_H */
 

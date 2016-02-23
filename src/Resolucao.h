@@ -52,10 +52,13 @@ public:
     double horarioTorneioPopulacao;
 
     // Horário cruzamento
+	double horarioCruzamentoPorcentagem = 0;
     int horarioCruzamentoFilhos = 2;
     int horarioCruzamentoDias;
     double horarioCruzamentoCamadas;
     int horarioCruzamentoTentativasMax = 1;
+	// Operador de cruzamento selecionado
+	Configuracao::TipoCruzamento horarioTipoCruzamento;
 
     int horarioIteracao;
 
@@ -99,12 +102,14 @@ private:
     std::vector<Disciplina*> ordenarDisciplinas();
     std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
     void atualizarDisciplinasIndex();
-
-    std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
+	std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
+	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
     std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao);
     std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2);
+	void cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
+	std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio2(Solucao *solucaoPai1, Solucao *solucaoPai2);
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);

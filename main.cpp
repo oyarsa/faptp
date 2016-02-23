@@ -136,6 +136,8 @@ void semArgumentos()
 	Resolucao resolucaoGrasp {Configuracao()
 		.arquivoEntrada("input.json")
 		.populacaoInicial(100)
+		.porcentagemCruzamentos(0) // %
+		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		.mutacaoProbabilidade(20) // %
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)

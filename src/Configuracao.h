@@ -16,6 +16,11 @@ public:
 		aleatorios,
 		crescente
 	};
+	enum class TipoCruzamento
+	{
+		simples,
+		construtivo_reparo
+	};
 	Configuracao() = default;
 	Configuracao& arquivoEntrada(const std::string& filename);
 	Configuracao& blocoTamanho(int n);
@@ -32,6 +37,8 @@ public:
 	Configuracao& graspTempoConstrucao(int tempo);
 	Configuracao& graspNumVizinhos(int n);
 	Configuracao& graspAlfa(int alfa);
+	Configuracao& porcentagemCruzamentos(int p);
+	Configuracao& tipoCruzamento(TipoCruzamento tipo);
 private:
 	friend class Resolucao;
 	std::string filename_ = "input.json";
@@ -49,6 +56,8 @@ private:
 	double graspTempo_ = 0.001;
 	int numVizinhos_ = 2;
 	double graspAlfa_ = 0.3;
+	double porcentCruz_;
+	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -107,7 +116,7 @@ inline Configuracao& Configuracao::numTorneioPopulacao(int n)
 
 inline Configuracao& Configuracao::mutacaoProbabilidade(int p)
 {
-	mutProb_ = p / 100;
+	mutProb_ = p / 100.0;
 	return *this;
 }
 
@@ -125,7 +134,7 @@ inline Configuracao& Configuracao::graspVizinhanca(TipoVizinhos tipo)
 
 inline Configuracao& Configuracao::graspTempoConstrucao(int tempo)
 {
-	graspTempo_ = tempo / 1000;
+	graspTempo_ = tempo / 1000.0;
 	return *this;
 }
 
@@ -137,6 +146,18 @@ inline Configuracao& Configuracao::graspNumVizinhos(int n)
 
 inline Configuracao& Configuracao::graspAlfa(int alfa)
 {
-	graspAlfa_ = alfa / 100;
+	graspAlfa_ = alfa / 100.0;
+	return *this;
+}
+
+inline Configuracao& Configuracao::porcentagemCruzamentos(int p)
+{
+	porcentCruz_ = p / 100.0;
+	return *this;
+}
+
+inline Configuracao& Configuracao::tipoCruzamento(TipoCruzamento tipo)
+{
+	tipoCruz_ = tipo;
 	return *this;
 }
