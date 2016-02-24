@@ -16,6 +16,8 @@ public:
 		aleatorios,
 		crescente
 	};
+	// Simples é operador novo, que só cruza a camada inteira
+	// Construtivo_reparo é o antigo
 	enum class TipoCruzamento
 	{
 		simples,

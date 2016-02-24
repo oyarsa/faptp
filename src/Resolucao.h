@@ -107,11 +107,14 @@ private:
     std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao);
-    std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio(Solucao *solucaoPai1, Solucao *solucaoPai2);
-	void cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
-	std::vector<Solucao*> gerarHorarioAGCruzamentoAleatorio2(Solucao *solucaoPai1, Solucao *solucaoPai2);
+
+    std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(Solucao *solucaoPai1, Solucao *solucaoPai2);
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
+
+	void cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
+	std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao *solucaoPai1, Solucao *solucaoPai2);
+
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
     std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);

@@ -142,7 +142,7 @@ void semArgumentos()
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)
 		.graspAlfa(30) // %
-		.numIteracoes(10)
+		.numIteracoes(100)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)

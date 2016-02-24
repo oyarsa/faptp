@@ -348,15 +348,15 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solu
 	case Configuracao::TipoCruzamento::construtivo_reparo:
 	{
 		std::vector<Solucao*> filhos;
-		auto filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
-		auto filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
+		auto filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
+		auto filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
 		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
 		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
 		return filhos;
 	}
 
 	case Configuracao::TipoCruzamento::simples:
-		return gerarHorarioAGCruzamentoAleatorio2(parVencedor[0], parVencedor[1]);
+		return gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
 	}
 
 	return {};
@@ -385,9 +385,9 @@ Solucao* Resolucao::gerarHorarioAG()
 
 			parVencedor = gerarHorarioAGTorneioPar(populacao);
 
-			//filhos1 = gerarHorarioAGCruzamentoAleatorio(parVencedor[0], parVencedor[1]);
-			//filhos2 = gerarHorarioAGCruzamentoAleatorio(parVencedor[1], parVencedor[0]);
-			//filhos = gerarHorarioAGCruzamentoAleatorio2(parVencedor[0], parVencedor[1]);
+			//filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
+			//filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
+			//filhos = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
 			filhos = gerarHorarioAGCruzamento(parVencedor);
 
 
@@ -689,7 +689,9 @@ Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulac
 	return (solucoesPopulacao[primeiro]->getObjectiveFunction() > solucoesPopulacao[segundo]->getObjectiveFunction()) ? solucoesPopulacao[primeiro] : solucoesPopulacao[segundo];
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio(Solucao* solucaoPai1, Solucao* solucaoPai2)
+// Construtivo-reparo é o operador inicial, que tenta inserir uma disciplina
+// de cada vez e reparar a solução se uma restrição for violada
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
 	std::vector<Solucao*> filhos;
 	std::vector<ProfessorDisciplina*> matrizBackup;
@@ -821,7 +823,11 @@ void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) con
 	}
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoAleatorio2(Solucao* solucaoPai1, Solucao* solucaoPai2)
+// Simples é o novo, que simplesmente tenta substituir todos os perídos 
+// do filho pelos do pai a partir de certo ponto de corte. Se durante uma
+// operação em uma dessas camadas for violada alguma restrição, aquela camada
+// retorna ao original, e a próxima será tentada
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
 	auto camadaCruz = aleatorio::randomInt() % camadasTamanho;
 	auto filho1 = new Solucao(*solucaoPai1);
