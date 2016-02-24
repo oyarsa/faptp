@@ -39,10 +39,9 @@ public:
 	const std::vector<fagoc::Aluno>& getAlunos() const;
 
 	std::vector<std::vector<char>> converteHorario(Solucao *pSolucao) const;
-
-    /*
-     Parâmetros da execução da solução
-     */
+	/*
+	 Parâmetros da execução da solução
+	 */
     // Horário população inicial
     int horarioPopulacaoInicial;
     int horarioProfessorColisaoMax = 2;
@@ -59,6 +58,8 @@ public:
     int horarioCruzamentoTentativasMax = 1;
 	// Operador de cruzamento selecionado
 	Configuracao::TipoCruzamento horarioTipoCruzamento;
+	// Operador de mutação selecionado
+	Configuracao::TipoMutacao horarioTipoMutacao;
 
     int horarioIteracao;
 
@@ -118,6 +119,7 @@ private:
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
     std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);
+    Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
     double gerarGrade(Solucao *&pSolucao);
@@ -145,6 +147,8 @@ private:
     int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) const;
 
     void showResult(Solucao *pSolucao);
+
+	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const;
 };
 
 #endif /* RESOLUCAO_H */

@@ -17,6 +17,7 @@ Resolucao::Resolucao(const Configuracao& c)
 	  , horarioTorneioPopulacao(c.numTorneioPop_)
 	  , horarioCruzamentoPorcentagem(c.porcentCruz_)
 	  , horarioTipoCruzamento(c.tipoCruz_)
+	  , horarioTipoMutacao(c.tipoMut_)
 	  , horarioIteracao(c.numIter_)
 	  , horarioMutacaoProbabilidade(c.mutProb_)
 	  , horarioMutacaoTentativas(c.mutTentativas_)
@@ -910,7 +911,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
 		if (porcentagem <= horarioMutacaoProbabilidade) {
 			solucaoTemp = gerarHorarioAGMutacao(filhos[j]);
 
-			if (solucaoTemp != NULL) {
+			if (solucaoTemp) {
 				gerarGradeTipoGraspClear(solucaoTemp);
 				genesX.push_back(solucaoTemp);
 			}
@@ -920,7 +921,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> fil
 	return genesX;
 }
 
-Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
+Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
 {
 	Solucao* currentSolucao = new Solucao(*pSolucao);
 	bool success = false;
@@ -979,6 +980,17 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
 		delete currentSolucao;
 		return nullptr;
 	}
+}
+
+Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
+{
+	switch (horarioTipoMutacao) {
+	case Configuracao::TipoMutacao::subst_disc:
+		return gerarHorarioAGMutacaoSubstDisc(pSolucao);
+	case Configuracao::TipoMutacao::subst_prof:
+		return gerarHorarioAGMutacaoSubstProf(pSolucao);
+	}
+	return nullptr;
 }
 
 double Resolucao::gerarGrade()
@@ -1570,3 +1582,45 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) con
 	return horarioBin;
 }
 
+Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const
+{
+	auto mut = new Solucao(*pSolucao);
+
+	// Determina aleatoriamente qual disciplina terá seu professor substituído
+	auto i = aleatorio::randomInt() % mut->horario->matriz.size();
+	auto disc = mut->horario->matriz[i];
+	if (!disc || disc->disciplina->professoresCapacitados.size() == 1) {
+		return nullptr;
+	}
+	// Encontra um professor substituto, que não seja o original
+	Professor* prof = nullptr;
+	do {
+		auto j = aleatorio::randomInt() % disc->disciplina->professoresCapacitados.size();
+		prof = disc->disciplina->professoresCapacitados[j];
+	} while (prof == disc->professor);
+	// Remove todas as ocorrências da alocãção, guardando suas posições
+	int coord[3];
+	mut->horario->get3DMatrix(i, coord);
+	auto camada = coord[2];
+	auto posicoesAloc = std::vector<std::pair<int, int>>{};
+	for (auto d = 0; d < SEMANA; d++) {
+		for (auto h = 0; h < blocosTamanho; h++) {
+			auto linearPos = mut->horario->getPosition(d, h, camada);
+			if (mut->horario->matriz[linearPos] == disc) {
+				posicoesAloc.emplace_back(d, h);
+				mut->horario->matriz[linearPos] = nullptr;
+			}
+		}
+	}
+	// Modifica a alocação para o novo professor
+	disc->professor = prof;
+	// Reinsere com a nova alocação
+	for (const auto& pos : posicoesAloc) {
+		auto success = mut->horario->insert(pos.first, pos.second, camada, disc);
+		if (!success) {
+			return nullptr;
+		}
+	}
+
+	return mut;
+}

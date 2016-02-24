@@ -134,20 +134,24 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
-		.arquivoEntrada("input.json")
-		.populacaoInicial(100)
+		.arquivoEntrada("input_fagoc.json")
+		//.arquivoEntrada("input.json")
+		.populacaoInicial(5)
 		.porcentagemCruzamentos(0) // %
-		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
+		//.tipoMutacao(Configuracao::TipoMutacao::subst_prof)
+		.tipoMutacao(Configuracao::TipoMutacao::subst_disc)
 		.mutacaoProbabilidade(20) // %
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)
 		.graspAlfa(30) // %
-		.numIteracoes(100)
+		.numIteracoes(10)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::modelo)};
+		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
@@ -160,7 +164,7 @@ void semArgumentos()
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "\nResultado:" << fo << std::endl;
-	resolucaoGrasp.showResult();
+	//resolucaoGrasp.showResult();
 
 #if defined(_WIN32)
 	std::string folder{"teste\\"};

@@ -23,6 +23,13 @@ public:
 		simples,
 		construtivo_reparo
 	};
+	// SubstDisc é o operador antigo, que troca disciplinas de lugar
+	// SubstProf é o operador novo, que modifica quem leciona uma disciplina
+	enum class TipoMutacao
+	{
+		subst_disc,
+		subst_prof
+	};
 	Configuracao() = default;
 	Configuracao& arquivoEntrada(const std::string& filename);
 	Configuracao& blocoTamanho(int n);
@@ -41,6 +48,7 @@ public:
 	Configuracao& graspAlfa(int alfa);
 	Configuracao& porcentagemCruzamentos(int p);
 	Configuracao& tipoCruzamento(TipoCruzamento tipo);
+	Configuracao& tipoMutacao(TipoMutacao tipo);
 private:
 	friend class Resolucao;
 	std::string filename_ = "input.json";
@@ -60,6 +68,7 @@ private:
 	double graspAlfa_ = 0.3;
 	double porcentCruz_;
 	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
+	TipoMutacao tipoMut_ = TipoMutacao::subst_disc;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -161,5 +170,11 @@ inline Configuracao& Configuracao::porcentagemCruzamentos(int p)
 inline Configuracao& Configuracao::tipoCruzamento(TipoCruzamento tipo)
 {
 	tipoCruz_ = tipo;
+	return *this;
+}
+
+inline Configuracao& Configuracao::tipoMutacao(TipoMutacao tipo)
+{
+	tipoMut_ = tipo;
 	return *this;
 }
