@@ -46,8 +46,6 @@ void comArgumentos(char** argv)
 
 void calibracao()
 {
-	Output o;
-
 	experimento = false;
 
 	double fo;
@@ -122,26 +120,24 @@ void calibracao()
 
 			auto savePath = "experimento/p" + std::to_string(j) + std::to_string(i)
 				+ "fo" + std::to_string(fo);
-			o.write(resolucaoGrasp.getSolucao(), savePath);
+			Output::write(resolucaoGrasp.getSolucao(), savePath);
 		}
 	}
 }
 
 void semArgumentos()
 {
-	Output o;
-
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
 		//.arquivoEntrada("input_fagoc.json")
-		.arquivoEntrada("input.json")
+		.arquivoEntrada("input_maroto3.json")
 		.populacaoInicial(5)
 		.porcentagemCruzamentos(0) // %
 		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
-		.tipoMutacao(Configuracao::TipoMutacao::subst_prof)
-		//.tipoMutacao(Configuracao::TipoMutacao::subst_disc)
+		.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
+		//.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
 		.mutacaoProbabilidade(20) // %
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)
@@ -151,7 +147,7 @@ void semArgumentos()
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
+		.tipoConstrucao(Configuracao::TipoGrade::modelo)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
@@ -167,7 +163,7 @@ void semArgumentos()
 	resolucaoGrasp.showResult();
 
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
-	o.write(resolucaoGrasp.getSolucao(), savePath);
+	Output::write(resolucaoGrasp.getSolucao(), savePath);
 }
 
 int main(int argc, char** argv)
