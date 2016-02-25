@@ -6,11 +6,13 @@
  */
 
 #include <ctime>
+#include <cstdlib>
+#include <iostream>
 
 #include "UUID.h"
 
 std::string UUID::GenerateUuid() {
-
+	const int UUID_LENGTH = 40;
   std::string uuid_code;
   char *guidStr = new char[UUID_LENGTH];
   char *pGuidStr = guidStr;

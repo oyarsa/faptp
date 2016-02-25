@@ -8,11 +8,6 @@
 #include "Disciplina.h"
 #include "UUID.h"
 
-#define ALUNO_PERFIL_ID         0
-#define ALUNO_PERFIL_PESO       1
-#define ALUNO_PERFIL_RESTANTE   2
-#define ALUNO_PERFIL_CURSADAS   3
-
 class AlunoPerfil {
   friend class Grade;
   friend class Solucao;

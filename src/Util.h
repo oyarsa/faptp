@@ -36,12 +36,15 @@ public:
 	static void insert_sorted(Container& c, ForwardIterator first, ForwardIterator last, Compare cmp = Compare())
 	{
 		for (auto it = first; it != last; ++it) {
-			c.insert(
-				std::lower_bound(begin(c), end(c), *it, cmp),
-				*it
-			);
+			insert_sorted(c, *it, cmp);
 		}
 	}
+
+	static std::string join_path(const std::vector<std::string>& folders, 
+								 const std::string& file = "");
+
+	static void create_folder(const std::string& path);
+
 };
 
 #endif /* UTIL_H */

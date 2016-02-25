@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "parametros.h"
 #include "Horario.h"
 

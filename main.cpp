@@ -134,14 +134,14 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
-		.arquivoEntrada("input_fagoc.json")
-		//.arquivoEntrada("input.json")
+		//.arquivoEntrada("input_fagoc.json")
+		.arquivoEntrada("input.json")
 		.populacaoInicial(5)
 		.porcentagemCruzamentos(0) // %
-		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
-		.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
-		//.tipoMutacao(Configuracao::TipoMutacao::subst_prof)
-		.tipoMutacao(Configuracao::TipoMutacao::subst_disc)
+		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
+		.tipoMutacao(Configuracao::TipoMutacao::subst_prof)
+		//.tipoMutacao(Configuracao::TipoMutacao::subst_disc)
 		.mutacaoProbabilidade(20) // %
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)
@@ -164,14 +164,9 @@ void semArgumentos()
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "\nResultado:" << fo << std::endl;
-	//resolucaoGrasp.showResult();
+	resolucaoGrasp.showResult();
 
-#if defined(_WIN32)
-	std::string folder{"teste\\"};
-#else
-	std::string folder{"teste/"};
-#endif
-	auto savePath = folder + "fo" + std::to_string(fo);
+	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
 	o.write(resolucaoGrasp.getSolucao(), savePath);
 }
 

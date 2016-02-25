@@ -1,5 +1,6 @@
 #include <fstream>
 #include <numeric>
+#include <iostream>
 
 #include <modelo-grade/arquivos.h>
 #include <modelo-grade/modelo_solver.h>
@@ -91,12 +92,8 @@ const std::vector<fagoc::Aluno>& Resolucao::getAlunos() const
 
 void Resolucao::carregarDados()
 {
-#if defined(_WIN32)
-	std::string folder = "res\\";
-#else 
-	std::string folder = "res/";
-#endif
-	std::ifstream myfile(folder + arquivoEntrada);
+	auto filepath = Util::join_path({"res"}, arquivoEntrada);
+	std::ifstream myfile(filepath);
 
 	if (myfile.is_open()) {
 		myfile >> jsonRoot;
@@ -107,7 +104,7 @@ void Resolucao::carregarDados()
 		carregarAlunoPerfis();
 
 		if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
-			auto p = fagoc::ler_json(folder + arquivoEntrada);
+			auto p = fagoc::ler_json(filepath);
 			curso.reset(new fagoc::Curso(std::move(p.first)));
 			alunos = move(p.second);
 		}

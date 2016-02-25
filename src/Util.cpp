@@ -62,3 +62,29 @@ int Util::randomBetween(int min, int max) {
   }
   return random;
 }
+
+std::string Util::join_path(const std::vector<std::string>& folders, const std::string& file)
+{
+	auto oss = std::ostringstream{};
+#if defined(_WIN32)
+	auto sep = "\\";
+#else
+	auto sep = "/";
+#endif
+	for (const auto& f : folders) {
+		oss << f << sep;
+	}
+	oss << file;
+
+	return oss.str();
+}
+
+void Util::create_folder(const std::string& path)
+{
+#if defined(_WIN32)
+    std::string command {"mkdir " + path + " 2> NUL"};
+#else
+	std::string command {"mkdir -p" + path + " > /dev/null 2>&1"};
+#endif
+    system(command.c_str());
+}

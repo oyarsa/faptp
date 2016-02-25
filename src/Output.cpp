@@ -28,13 +28,7 @@ void Output::write(Solucao *pSolucao) {
 
 void Output::write(Solucao *pSolucao, std::string savePath) {
     // Criando o diret�rio de saida
-#if defined(_WIN32)
-    std::string command {"mkdir " + savePath + " 2> NUL"};
-#else
-	std::string command {"mkdir -p" + savePath + " > /dev/null 2>&1"};
-#endif
-    system(command.c_str());
-
+	Util::create_folder(savePath);
     std::stringstream saida{};
     const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta",
 								   "Sexta", "Sabado", "Domingo"};

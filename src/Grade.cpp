@@ -1,7 +1,9 @@
+#include <iostream>
+#include <unordered_map>
+
 #include "parametros.h"
 #include "Grade.h"
 #include "Resolucao.h"
-#include <unordered_map>
 #include "Semana.h"
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,

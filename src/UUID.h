@@ -8,10 +8,6 @@
 #ifndef UUID_H
 #define	UUID_H
 
-#define UUID_LENGTH 40
-
-#include <cstdlib>
-#include <iostream>
 #include <string>
 
 class UUID {
