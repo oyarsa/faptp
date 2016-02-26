@@ -130,10 +130,11 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
-		//.arquivoEntrada("input_fagoc.json")
+		//.arquivoEntrada("input.json")
 		.arquivoEntrada("input_maroto3.json")
-		.populacaoInicial(5)
-		.porcentagemCruzamentos(0) // %
+		.populacaoInicial(100)
+		.porcentagemCruzamentos(40) // %
+		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
@@ -147,7 +148,7 @@ void semArgumentos()
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-		.tipoConstrucao(Configuracao::TipoGrade::modelo)};
+		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
@@ -160,7 +161,7 @@ void semArgumentos()
 
 	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
 	std::cout << "\nResultado:" << fo << std::endl;
-	resolucaoGrasp.showResult();
+	//resolucaoGrasp.showResult();
 
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
 	Output::write(resolucaoGrasp.getSolucao(), savePath);

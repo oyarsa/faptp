@@ -18,17 +18,20 @@ public:
 	};
 	// Simples é operador novo, que só cruza a camada inteira
 	// Construtivo_reparo é o antigo
+	// Substitui_bloco forma listas de disciplinas a serem trocadas, mantendo
+	// blocos unidos (Timóteo 2002)
 	enum class TipoCruzamento
 	{
 		simples,
-		construtivo_reparo
+		construtivo_reparo,
+		substitui_bloco
 	};
 	// SubstDisc é o operador antigo, que troca disciplinas de lugar
 	// SubstProf é o operador novo, que modifica quem leciona uma disciplina
 	enum class TipoMutacao
 	{
-		subst_disc,
-		subst_prof
+		substiui_disciplina,
+		substitui_professor
 	};
 	Configuracao() = default;
 	Configuracao& arquivoEntrada(const std::string& filename);
@@ -68,7 +71,7 @@ private:
 	double graspAlfa_ = 0.3;
 	double porcentCruz_;
 	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
-	TipoMutacao tipoMut_ = TipoMutacao::subst_disc;
+	TipoMutacao tipoMut_ = TipoMutacao::substiui_disciplina;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)

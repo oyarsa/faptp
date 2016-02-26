@@ -116,6 +116,8 @@ private:
 	void cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
 	std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao *solucaoPai1, Solucao *solucaoPai2);
 
+	std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao *solucaoPai1, Solucao *solucaoPai2);
+
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
     std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);

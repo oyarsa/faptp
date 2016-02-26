@@ -12,7 +12,7 @@
 #include "Semana.h"
 #include <ctime>
 
-std::string Output::getDir() const {
+std::string Output::getDir() {
     time_t current_time = time(NULL);
     std::string time_str = ctime(&current_time);
     time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());

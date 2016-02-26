@@ -151,7 +151,9 @@ void Resolucao::carregarDadosProfessores()
 
 			it = find_if(disciplinas.begin(), disciplinas.end(),
 			             DisciplinaFindDisciplinaId(disciplinaId));
-			(*it)->addProfessorCapacitado(professores[id]);
+			if (it != disciplinas.end()) {
+				(*it)->addProfessorCapacitado(professores[id]);
+			}
 		}
 	}
 }
@@ -173,6 +175,7 @@ void Resolucao::carregarDadosDisciplinas()
 		const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asString();
 
 		Disciplina* disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
+		disciplina->ofertada = jsonDisciplinas[i]["ofertada"].asBool();
 
 		const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
 		for (auto j = 0u; j < corequisitos.size(); j++) {
@@ -191,8 +194,9 @@ void Resolucao::carregarDadosDisciplinas()
 		disciplina->equivalentes.push_back(nome);
 
 		disciplinas.push_back(disciplina);
-
-		periodoXdisciplina[curso + periodo].push_back(disciplina);
+		if (disciplina->ofertada) {
+			periodoXdisciplina[curso + periodo].push_back(disciplina);
+		}
 	}
 
 	disciplinas = ordenarDisciplinas();
@@ -343,8 +347,7 @@ void Resolucao::atualizarDisciplinasIndex()
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor)
 {
 	switch (horarioTipoCruzamento) {
-	case Configuracao::TipoCruzamento::construtivo_reparo:
-	{
+	case Configuracao::TipoCruzamento::construtivo_reparo: {
 		std::vector<Solucao*> filhos;
 		auto filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
 		auto filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
@@ -355,6 +358,15 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solu
 
 	case Configuracao::TipoCruzamento::simples:
 		return gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
+
+	case Configuracao::TipoCruzamento::substitui_bloco: {
+		std::vector<Solucao*> filhos;
+		auto filhos1 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[0], parVencedor[1]);
+		auto filhos2 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[1], parVencedor[0]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+	}
+
 	}
 
 	return {};
@@ -842,6 +854,223 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* soluca
 	return {filho1, filho2};
 }
 
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2)
+{
+	int dia, bloco, camada;
+	std::size_t pos;
+	auto filho1 = new Solucao(*solucaoPai1);
+	auto filho2 = new Solucao(*solucaoPai2);
+	auto& mat1 = filho1->horario->matriz;
+	auto& mat2 = filho2->horario->matriz;
+	auto fallback1 = new Solucao(*filho1);
+	auto fallback2 = new Solucao(*filho2);
+
+	// Escolhe posição de cruzamento. Se estiver no meio um bloco tenta de novo
+	do {
+		pos = aleatorio::randomInt() % mat1.size();
+		int coord[3];
+		filho1->horario->get3DMatrix(pos, coord);
+		dia = coord[0];
+		bloco = coord[1];
+		camada = coord[2];
+	} while (bloco % 2 == 1);
+
+	struct Gene
+	{
+		ProfessorDisciplina* disc;
+		int                  posGene;
+		int                  posCruz;
+		bool                 disponivel;
+
+		Gene(ProfessorDisciplina* p, int g, int c, bool d)
+			: disc(p), posGene(g), posCruz(c), disponivel(d) {}
+	};
+
+	auto lista1 = std::vector<Gene>{};
+	auto lista2 = std::vector<Gene>{};
+	for (auto d = dia; d < SEMANA; d++) {
+		for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
+			auto i = filho1->horario->getPosition(d, h, camada);
+			lista1.emplace_back(mat1[i], i, -1, true);
+			mat1[i] = nullptr;
+			lista2.emplace_back(mat2[i], i, -1, true);
+			mat2[i] = nullptr;
+		}
+	}
+	/*
+	for (auto& gene : lista1) {
+		auto it = std::find_if(begin(lista2), end(lista2), [&](Gene& g) {
+			return g.disc == gene.disc;
+		});
+		if (it == end(lista2)) {
+			continue;
+		}
+
+		gene.posCruz = it->posGene;
+		it->posCruz = gene.posGene;
+		gene.disponivel = false;
+		it->disponivel = false;
+	}
+	*/
+
+	for (auto& gene : lista2) {
+		auto it = std::find_if(begin(lista1), end(lista1), [&](Gene& g) {
+			return g.disc == gene.disc;
+		});
+		if (it == end(lista1)) {
+			continue;
+		}
+
+		gene.posCruz = it->posGene;
+		it->posCruz = gene.posGene;
+		gene.disponivel = false;
+		it->disponivel = false;
+	}
+	auto sepBlocos = [this](std::vector<Gene>& lista, const std::vector<ProfessorDisciplina*>& mat) {
+		auto blocos = std::vector<Gene>{};
+		auto isoladas = std::vector<Gene>{};
+		for (auto i = 0u; i < lista.size(); i++) {
+			auto p = lista[i].posGene;
+			if (p < blocosTamanho - 1 && mat[p] == mat[p+1]) {
+				blocos.emplace_back(std::move(lista[i]));
+			} else {
+				isoladas.emplace_back(std::move(lista[i]));
+			}
+		}
+
+		return std::make_pair(blocos, isoladas);
+	};
+
+	auto ret1 = sepBlocos(lista1, mat1);
+	auto blocos1 = std::move(ret1.first);
+	auto isoladas1 = std::move(ret1.second);
+	auto ret2 = sepBlocos(lista2, mat2);
+	auto blocos2 = std::move(ret2.first);
+	auto isoladas2 = std::move(ret2.second);
+
+	auto sepCompat = [](std::vector<Gene>& lista) {
+		auto compat = std::vector<Gene>{};
+		auto incompat = std::vector<Gene>{};
+
+		for (auto&& gene : lista) {
+			if (gene.disponivel) {
+				incompat.emplace_back(std::move(gene));
+			} else {
+				compat.emplace_back(std::move(gene));
+			}
+		}
+
+		return std::make_pair(compat, incompat);
+	};
+
+	auto retBloco1 = sepCompat(blocos1);
+	auto blocos1Comp = retBloco1.first;
+	auto blocos1Incomp = retBloco1.second;
+	auto retBloco2 = sepCompat(blocos2);
+	auto blocos2Comp = retBloco2.first;
+	auto blocos2Incomp = retBloco2.second;
+
+	auto retIso1 = sepCompat(isoladas1);
+	auto iso1Comp = retIso1.first;
+	auto iso1Incomp = retIso1.second;
+	auto retIso2 = sepCompat(isoladas2);
+	auto iso2Comp = retIso2.first;
+	auto iso2Incomp = retIso2.second;
+
+	auto insertBlocoComp = [](Horario* hor, std::vector<Gene>& blocos) {
+		for (auto& b : blocos) {
+			int coord[3];
+			hor->get3DMatrix(b.posCruz, coord);
+			if (!hor->insert(coord[0], coord[1], coord[2], b.disc)
+				|| !hor->insert(coord[0], coord[1]+1, coord[2], b.disc)) {
+				return false;
+			}
+		}
+		return true;
+	};
+
+	auto insertIsoComp = [](Horario* hor, std::vector<Gene>& blocos) {
+		for (auto& b : blocos) {
+			if (!b.disc) {
+				continue;
+			}
+			int coord[3];
+			hor->get3DMatrix(b.posCruz, coord);
+			if (!hor->insert(coord[0], coord[1], coord[2], b.disc)) {
+				return false;
+			}
+		}
+		return true;
+	};
+
+	auto insertBlocoIncom = [&](Horario *hor, std::vector<Gene>& blocos, std::vector<Gene>& iso) {
+		for (auto& b : blocos) {
+			if (![&](Gene& g) {
+				int coord[3];
+				hor->get3DMatrix(g.posCruz, coord);
+
+				for (auto d = dia; d < SEMANA; d++) {
+					for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
+						if (h < blocosTamanho - 1 && !hor->matriz[h] && !hor->matriz[h + 1] &&
+							hor->insert(d, h, camada, g.disc)) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}(b)) {
+				iso.push_back(b);
+				iso.emplace_back(std::move(b));
+			}
+		}
+		return true;
+	};
+
+	auto insertIsoIncom = [&](Horario *hor, std::vector<Gene>& blocos) {
+		for (auto& b : blocos) {
+			if (![&](Gene& g) {
+				int coord[3];
+				hor->get3DMatrix(g.posCruz, coord);
+
+				for (auto d = dia; d < SEMANA; d++) {
+					for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
+						if (!hor->matriz[h] && hor->insert(d, h, camada, g.disc)) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}(b)) {
+				return false;
+			}
+		}
+		return true;
+	};
+
+	if (insertBlocoComp(filho1->horario, blocos2Comp) && 
+		insertBlocoIncom(filho1->horario, blocos2Incomp, iso2Incomp) &&
+		insertIsoComp(filho1->horario, iso2Comp) &&
+		insertIsoIncom(filho1->horario, iso2Incomp)) {
+		// ok
+	} else {
+		delete filho1;
+		filho1 = fallback1;
+	}
+
+	if (insertBlocoComp(filho2->horario, blocos1Comp) &&
+		insertBlocoIncom(filho2->horario, blocos1Incomp, iso2Incomp) &&
+		insertIsoComp(filho2->horario, iso1Comp) &&
+		insertIsoIncom(filho2->horario, iso1Incomp)) {
+		// ok
+	} else {
+		delete filho2;
+		filho2 = fallback2;
+	}
+
+	return {filho1, filho2};
+}
+
+
 bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG)
 {
 	bool success = false;
@@ -982,9 +1211,9 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
 Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
 {
 	switch (horarioTipoMutacao) {
-	case Configuracao::TipoMutacao::subst_disc:
+	case Configuracao::TipoMutacao::substiui_disciplina:
 		return gerarHorarioAGMutacaoSubstDisc(pSolucao);
-	case Configuracao::TipoMutacao::subst_prof:
+	case Configuracao::TipoMutacao::substitui_professor:
 		return gerarHorarioAGMutacaoSubstProf(pSolucao);
 	}
 	return nullptr;

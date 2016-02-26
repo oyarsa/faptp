@@ -14,12 +14,10 @@
 
 class Output {
 public:
-    Output() = default;
-    
-    void write(Solucao *solucao);
-    void write(Solucao *solucao, std::string savePath);
+    static void write(Solucao *solucao);
+	static void write(Solucao *solucao, std::string savePath);
 private:
-    std::string getDir() const;
+    static std::string getDir();
 };
 
 #endif /* OUTPUT_H */

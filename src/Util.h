@@ -9,9 +9,6 @@
 class Util
 {
 public:
-	Util();
-	virtual ~Util();
-
 	int getPosition(int y, int x, int z, int Y, int Z);
 	void get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z);
 

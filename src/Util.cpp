@@ -3,12 +3,6 @@
 #include "Util.h"
 #include "Aleatorio.h"
 
-Util::Util() {
-}
-
-Util::~Util() {
-}
-
 int Util::getPosition(int y, int x, int z, int Y, int Z) {
   return (x + (y * Y) + (z * Y * Z));
 }
