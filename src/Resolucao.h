@@ -38,6 +38,8 @@ public:
 	fagoc::Curso& getCurso();
 	const std::vector<fagoc::Aluno>& getAlunos() const;
 
+	// Converte a matriz tridimensional do horário em uma matriz bidimensional
+	// de binários para o modelo
 	std::vector<std::vector<char>> converteHorario(Solucao *pSolucao) const;
 	/*
 	 Parâmetros da execução da solução

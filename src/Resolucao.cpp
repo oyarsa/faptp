@@ -1,6 +1,7 @@
 #include <fstream>
 #include <numeric>
 #include <iostream>
+#include <chrono>
 
 #include <modelo-grade/arquivos.h>
 #include <modelo-grade/modelo_solver.h>
@@ -365,6 +366,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solu
 		auto filhos2 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[1], parVencedor[0]);
 		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
 		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+		return filhos;
 	}
 
 	}
@@ -383,14 +385,14 @@ Solucao* Resolucao::gerarHorarioAG()
 	std::vector<Solucao*> geneX;
 
 	int iMax = horarioIteracao; //(populacao.size() * horarioTorneioPopulacao) * horarioTorneioPares;
+	auto numCruz = std::max(1, static_cast<int>(horarioPopulacaoInicial 
+												* horarioCruzamentoPorcentagem));
+
 
 	for (int i = 0; i < iMax; i++) {
 		std::cout << "i: " << i << "\n";
 
 		//sort(populacao.begin(), populacao.end(), std::greater<Solucao*>());
-		auto numCruz = std::max(1, static_cast<int>(horarioPopulacaoInicial 
-													* horarioCruzamentoPorcentagem));
-
 		for (auto j = 0; j < numCruz; j++) {
 
 			parVencedor = gerarHorarioAGTorneioPar(populacao);
@@ -400,8 +402,8 @@ Solucao* Resolucao::gerarHorarioAG()
 			//filhos = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
 			filhos = gerarHorarioAGCruzamento(parVencedor);
 
-
 			//populacao.insert(populacao.end(), filhos1.begin(), filhos1.end());
+			//populacao.insert(populacao.end(), filhos.begin(), filhos.end());
 			Util::insert_sorted(populacao, begin(filhos), end(filhos),
 								SolucaoComparaMaior());
 			// Adiciona o segundo grupo de filhos no primeiro vetor
@@ -466,16 +468,13 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 	 * Priorizar esses professores para que eles tenham as aulas montadas
 	 * antes dos outros professores
 	 */
-
 	while (static_cast<int>(solucoesAG.size()) != horarioPopulacaoInicial) {
 		Solucao* solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 		int i = 0;
 
 		creditosUtilizadosProfessor.clear();
 		colisaoProfessor.clear();
-
 		for (const auto& par : periodoXdisciplina) {
-
 			std::vector<Disciplina*> disciplinas = par.second;
 			std::map<std::string, int> creditosUtilizadosDisciplina;
 			std::map<std::string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
@@ -826,11 +825,13 @@ void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) con
 			if (verbose)
 				std::cout << "Deu treta no cruzamento tipo 2\n";
 
-			delete filho;
+			auto temp = filho;
 			filho = fallback;
+			delete temp;
 			return;
 		}
 	}
+	delete fallback;
 }
 
 // Simples é o novo, que simplesmente tenta substituir todos os perídos 
@@ -877,15 +878,17 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 
 	struct Gene
 	{
-		ProfessorDisciplina* disc;
-		int                  posGene;
-		int                  posCruz;
-		bool                 disponivel;
+		ProfessorDisciplina* disc; // professorDisciplina da célula escolhida
+		int                  posGene; // posição original da célula no pai
+		int                  posCruz; // posição final da célula no filho
+		bool                 disponivel; // registra se a célula já encontrou um compatível
 
 		Gene(ProfessorDisciplina* p, int g, int c, bool d)
 			: disc(p), posGene(g), posCruz(c), disponivel(d) {}
 	};
 
+	// Insere as disciplinas após o ponto de corte na camada original
+	// Modifica então para nulo, para poder inserir as novas alocações no slot
 	auto lista1 = std::vector<Gene>{};
 	auto lista2 = std::vector<Gene>{};
 	for (auto d = dia; d < SEMANA; d++) {
@@ -897,7 +900,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 			mat2[i] = nullptr;
 		}
 	}
-	/*
+	
+	// Procura o primeiro gene compatível com o atual na lista 2, e os marca
+	// para troca
 	for (auto& gene : lista1) {
 		auto it = std::find_if(begin(lista2), end(lista2), [&](Gene& g) {
 			return g.disc == gene.disc;
@@ -911,21 +916,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		gene.disponivel = false;
 		it->disponivel = false;
 	}
-	*/
 
-	for (auto& gene : lista2) {
-		auto it = std::find_if(begin(lista1), end(lista1), [&](Gene& g) {
-			return g.disc == gene.disc;
-		});
-		if (it == end(lista1)) {
-			continue;
-		}
-
-		gene.posCruz = it->posGene;
-		it->posCruz = gene.posGene;
-		gene.disponivel = false;
-		it->disponivel = false;
-	}
+	// Separa uma lista em duas: blocos (disciplinas que estão alocadas em blocos)
+	// e isoladas (o resto)
 	auto sepBlocos = [this](std::vector<Gene>& lista, const std::vector<ProfessorDisciplina*>& mat) {
 		auto blocos = std::vector<Gene>{};
 		auto isoladas = std::vector<Gene>{};
@@ -941,6 +934,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return std::make_pair(blocos, isoladas);
 	};
 
+	// Separa as listas 1 e 2
 	auto ret1 = sepBlocos(lista1, mat1);
 	auto blocos1 = std::move(ret1.first);
 	auto isoladas1 = std::move(ret1.second);
@@ -948,6 +942,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 	auto blocos2 = std::move(ret2.first);
 	auto isoladas2 = std::move(ret2.second);
 
+	// Separa uma lista entre compatíveis (aqueles que acharam um equivalente)
+	// e não compatíveis
 	auto sepCompat = [](std::vector<Gene>& lista) {
 		auto compat = std::vector<Gene>{};
 		auto incompat = std::vector<Gene>{};
@@ -963,6 +959,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return std::make_pair(compat, incompat);
 	};
 
+	// Separa as isoladas e as blocos da 1 e da 2
 	auto retBloco1 = sepCompat(blocos1);
 	auto blocos1Comp = retBloco1.first;
 	auto blocos1Incomp = retBloco1.second;
@@ -977,6 +974,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 	auto iso2Comp = retIso2.first;
 	auto iso2Incomp = retIso2.second;
 
+	// Tenta inserir um bloco no horário de acordo com a posição determinada anteriormente
 	auto insertBlocoComp = [](Horario* hor, std::vector<Gene>& blocos) {
 		for (auto& b : blocos) {
 			int coord[3];
@@ -989,6 +987,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return true;
 	};
 
+	// Tenta inserir uma isolada no horário de acordo com a posição determinada anteriormente
 	auto insertIsoComp = [](Horario* hor, std::vector<Gene>& blocos) {
 		for (auto& b : blocos) {
 			if (!b.disc) {
@@ -1003,8 +1002,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return true;
 	};
 
+	// Para blocos incompatíveis, tenta-se achar um lugar no horário que caibam os dois juntos
+	// Se não for encontrado, são adicionados na lista de isolados
 	auto insertBlocoIncom = [&](Horario *hor, std::vector<Gene>& blocos, std::vector<Gene>& iso) {
 		for (auto& b : blocos) {
+			// Tenta inserir o bloco na matriz
 			if (![&](Gene& g) {
 				int coord[3];
 				hor->get3DMatrix(g.posCruz, coord);
@@ -1018,6 +1020,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 					}
 				}
 				return false;
+			// Não conseguindo, insere nas isoladas (duas instancias)
 			}(b)) {
 				iso.push_back(b);
 				iso.emplace_back(std::move(b));
@@ -1026,6 +1029,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return true;
 	};
 
+	// Insere uma isolada incompatível, procurando uma posição vazia na grade
 	auto insertIsoIncom = [&](Horario *hor, std::vector<Gene>& blocos) {
 		for (auto& b : blocos) {
 			if (![&](Gene& g) {
@@ -1047,11 +1051,12 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		return true;
 	};
 
+	// Verifica se conseguiu terminar o cruzamento. Se não, volta para o fallback
 	if (insertBlocoComp(filho1->horario, blocos2Comp) && 
 		insertBlocoIncom(filho1->horario, blocos2Incomp, iso2Incomp) &&
 		insertIsoComp(filho1->horario, iso2Comp) &&
 		insertIsoIncom(filho1->horario, iso2Incomp)) {
-		// ok
+		delete fallback1;
 	} else {
 		delete filho1;
 		filho1 = fallback1;
@@ -1061,12 +1066,14 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		insertBlocoIncom(filho2->horario, blocos1Incomp, iso2Incomp) &&
 		insertIsoComp(filho2->horario, iso1Comp) &&
 		insertIsoIncom(filho2->horario, iso1Incomp)) {
-		// ok
+		delete fallback2;
 	} else {
 		delete filho2;
 		filho2 = fallback2;
 	}
 
+	gerarGradeTipoGraspClear(filho1);
+	gerarGradeTipoGraspClear(filho2);
 	return {filho1, filho2};
 }
 
@@ -1672,12 +1679,14 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 	}
 	//std::cout << iteracoes << std::endl;
 
-	solucao = pSolucao;
 	return pSolucao->getObjectiveFunction();
 }
 
 double Resolucao::gerarGradeTipoGraspClear(Solucao*& pSolucao)
 {
+	for (auto& par : pSolucao->grades) {
+		delete par.second;
+	}
 	pSolucao->grades.clear();
 	pSolucao->gradesLength = 0;
 
@@ -1816,6 +1825,7 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) cons
 	auto i = aleatorio::randomInt() % mut->horario->matriz.size();
 	auto disc = mut->horario->matriz[i];
 	if (!disc || disc->disciplina->professoresCapacitados.size() == 1) {
+		delete mut;
 		return nullptr;
 	}
 	// Encontra um professor substituto, que não seja o original
@@ -1844,6 +1854,7 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) cons
 	for (const auto& pos : posicoesAloc) {
 		auto success = mut->horario->insert(pos.first, pos.second, camada, disc);
 		if (!success) {
+			delete mut;
 			return nullptr;
 		}
 	}

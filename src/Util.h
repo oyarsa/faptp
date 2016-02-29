@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <chrono>
+#include <functional>
 #include <ctime>
 
 class Util
@@ -19,6 +21,7 @@ public:
 
 	int randomBetween(int min, int max);
 
+	// Insere um item num container ordenado
 	template <typename Container, typename T, typename Compare = std::less<T>>
 	static void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
 	{
@@ -28,6 +31,7 @@ public:
 		);
 	}
 
+	// Insere todos os item de `first` a `last` num container ordenado
 	template <typename Container, typename ForwardIterator,
 	          typename Compare = std::less<typename ForwardIterator::value_type>>
 	static void insert_sorted(Container& c, ForwardIterator first, ForwardIterator last, Compare cmp = Compare())
@@ -37,9 +41,11 @@ public:
 		}
 	}
 
+	// Une uma lista de nomes de pastas e um arquivo em uma string de forma portável
 	static std::string join_path(const std::vector<std::string>& folders, 
 								 const std::string& file = "");
 
+	// Cria uma pasta de forma portável
 	static void create_folder(const std::string& path);
 
 };

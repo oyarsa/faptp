@@ -13,6 +13,7 @@
 #include "src/Resolucao.h"
 #include "src/Output.h"
 #include "src/Configuracao.h"
+#include "src/Util.h"
 
 void comArgumentos(char** argv)
 {
@@ -130,10 +131,10 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao resolucaoGrasp {Configuracao()
-		//.arquivoEntrada("input.json")
-		.arquivoEntrada("input_maroto3.json")
-		.populacaoInicial(100)
-		.porcentagemCruzamentos(40) // %
+		.arquivoEntrada("input.json")
+		//.arquivoEntrada("input_maroto3.json")
+		.populacaoInicial(10)
+		.porcentagemCruzamentos(0) // %
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
@@ -148,11 +149,12 @@ void semArgumentos()
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+		//.tipoConstrucao(Configuracao::TipoGrade::modelo)};
 		.tipoConstrucao(Configuracao::TipoGrade::grasp)};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
-	auto inicio= std::chrono::steady_clock::now();
+	auto inicio = std::chrono::steady_clock::now();
 	resolucaoGrasp.start(false);
 	auto fim = std::chrono::steady_clock::now();
 
@@ -170,7 +172,6 @@ void semArgumentos()
 int main(int argc, char** argv)
 {
 	verbose = false;
-
 	if (argc == 3) {
 		comArgumentos(argv);
 	} else if (argc == 2) {
