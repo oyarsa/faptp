@@ -18,8 +18,10 @@ public:
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
     double getObjectiveFunction();
-private:
 
+	std::size_t getHash();
+private:
+	std::size_t hash_;
 };
 
 #endif /* HORARIO_H */

@@ -18,9 +18,9 @@ void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
   // Camada
   z = pLinear / (X * Y);
   
-  triDimensional[0] = y;
-  triDimensional[1] = x;
-  triDimensional[2] = z;
+  triDimensional[1] = x; // Dia
+  triDimensional[0] = y; // Bloco
+  triDimensional[2] = z; // Camada
 }
 
 std::vector<std::string> &Util::strSplit(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -40,6 +40,12 @@ std::vector<std::string> Util::strSplit(const std::string &s, char delim) {
 
 double Util::timeDiff(clock_t tf, clock_t t0) {
   return ((((float) tf - (float) t0) / 1000000.0F) * 1000);
+}
+
+long long Util::chronoDiff(std::chrono::time_point<std::chrono::system_clock> t1, std::chrono::time_point<std::chrono::system_clock> t2)
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>
+		(t1 - t2).count();
 }
 
 int Util::randomBetween(int min, int max) {

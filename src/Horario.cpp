@@ -1,22 +1,23 @@
 #include <iostream>
+#include <sstream>
 
 #include "parametros.h"
 #include "Horario.h"
 
-Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho) {
+Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_() {
 }
 
 Horario::~Horario() {
 }
 
 Horario::Horario(const Horario& outro) 
-    : Representacao(outro) 
+    : Representacao(outro), hash_()
 {
 }
 
 Horario& Horario::operator=(const Horario& outro) {
     Representacao::operator=(outro);
-
+	hash_ = 0;
 	return *this;
 }
 
@@ -65,4 +66,21 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
 
 double Horario::getObjectiveFunction() {
     return 0;
+}
+
+std::size_t Horario::getHash() 
+{
+	if (hash_ != 0) {
+		return hash_;
+	}
+	auto oss = std::ostringstream{};
+
+	for (const auto& pd : matriz) {
+		if (pd) {
+			oss << pd->disciplina->nome;
+		}
+	}
+
+	hash_ = std::hash<std::string>{}(oss.str());
+	return hash_;
 }

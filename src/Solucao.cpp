@@ -1,4 +1,5 @@
 #include <numeric>
+#include <functional>
 
 #include "Solucao.h"
 #include "Aleatorio.h"
@@ -18,6 +19,7 @@ Solucao::Solucao(const Solucao& outro)
     , camadasTamanho(outro.camadasTamanho)
     , perfisTamanho(outro.perfisTamanho)
     , gradesLength(outro.gradesLength)
+	, fo(-1)
 {
     for (const auto& par : outro.grades) {
         grades[par.first] = new Grade(*(par.second));
@@ -31,6 +33,7 @@ Solucao& Solucao::operator=(const Solucao& outro) {
     camadasTamanho = outro.camadasTamanho;
     perfisTamanho = outro.perfisTamanho;
     gradesLength = outro.gradesLength;
+	fo = -1;
     
     for (const auto& par : outro.grades) {
         grades[par.first] = new Grade(*(par.second));
@@ -64,10 +67,16 @@ void Solucao::insertGrade(Grade* grade) {
     alvoInsercao = grade;
 }
 
-//change
 double Solucao::getObjectiveFunction() {
-    return std::accumulate(begin(grades), end(grades), 0.0,
-            [](const double& acc, const std::pair<std::string, Grade*>& par) {
-                return acc + par.second->getObjectiveFunction();
-            });
+	if (fo == -1) {
+		fo = std::accumulate(begin(grades), end(grades), 0.0,
+							   [](const double& acc, const std::pair<std::string, Grade*>& par) {
+			return acc + par.second->getObjectiveFunction();
+		});
+	}
+	return fo;
+}
+
+std::size_t Solucao::getHash() const {
+	return horario->getHash();
 }

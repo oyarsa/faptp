@@ -31,7 +31,12 @@ Grade::~Grade() {
 
 bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
 {
-    return alunoPerfil->periodo >= pDisciplina->periodoMinimo;
+    auto success = alunoPerfil->periodo >= pDisciplina->periodoMinimo;
+
+	if (!success)
+		std::cout << "---INVALIDO[" << pDisciplina->nome << "] PERIDOMIN\n";
+
+	return success;
 }
 
 bool Grade::discRepetida(const Disciplina * const pDisciplina) {
@@ -42,6 +47,8 @@ bool Grade::discRepetida(const Disciplina * const pDisciplina) {
         const auto& equivalentes = discAtual->equivalentes;
         if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
+			if (verbose)
+				std::cout << "---INVIAVEL[" << pDisciplina->nome << "] REPETIDA\n";
             return true;
         }
     }
@@ -52,6 +59,8 @@ bool Grade::discRepetida(const Disciplina * const pDisciplina) {
         const auto& equivalentes = getDisciplina(discAtual)->equivalentes;
         if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
                 != end(equivalentes)) {
+			if (verbose)
+				std::cout << "---INVIAVEL[" << pDisciplina->nome << "] EQUIV REPETE\n";
             return true;
         }
     }
@@ -114,6 +123,8 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
                         != equivalentes.end();
 
                 if (!possuiPreReq) {
+					if (verbose)
+						std::cout << "---INVIAVEL[" << pDisciplina->nome << "] PREREQ [" << preRequisito << "]\n";
                     viavel = false;
                     break;
                 }
@@ -165,6 +176,8 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
                 }
 
                 if (colisao) {
+					if (verbose)
+						std::cout << "---INVIAVEL[" << pDisciplina->nome << "] COLISAO [" << i << "," << j << "]\n";
                     break;
                 }
             }
@@ -176,6 +189,8 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
 }
 
 bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
+	if (verbose && !pDisciplina->ofertada)
+		std::cout << "---INVIAVEL[" << pDisciplina->nome << "] N OFERT\n";
     return havePreRequisitos(pDisciplina) &&
 		checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
 		!discRepetida(pDisciplina) &&

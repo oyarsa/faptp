@@ -12,6 +12,7 @@
 #include "Util.h"
 #include "Semana.h"
 #include "Aleatorio.h"
+#include <set>
 
 Resolucao::Resolucao(const Configuracao& c)
 	: horarioPopulacaoInicial(c.popInicial_)
@@ -93,8 +94,7 @@ const std::vector<fagoc::Aluno>& Resolucao::getAlunos() const
 
 void Resolucao::carregarDados()
 {
-	auto filepath = Util::join_path({"res"}, arquivoEntrada);
-	std::ifstream myfile(filepath);
+	std::ifstream myfile(arquivoEntrada);
 
 	if (myfile.is_open()) {
 		myfile >> jsonRoot;
@@ -105,7 +105,7 @@ void Resolucao::carregarDados()
 		carregarAlunoPerfis();
 
 		if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
-			auto p = fagoc::ler_json(filepath);
+			auto p = fagoc::ler_json(arquivoEntrada);
 			curso.reset(new fagoc::Curso(std::move(p.first)));
 			alunos = move(p.second);
 		}
@@ -384,36 +384,34 @@ Solucao* Resolucao::gerarHorarioAG()
 	std::vector<Solucao*> filhos2;
 	std::vector<Solucao*> geneX;
 
-	int iMax = horarioIteracao; //(populacao.size() * horarioTorneioPopulacao) * horarioTorneioPares;
+	int iMax = horarioIteracao;
 	auto numCruz = std::max(1, static_cast<int>(horarioPopulacaoInicial 
 												* horarioCruzamentoPorcentagem));
+	auto tempoInicio = std::chrono::steady_clock::now();
+	foAlvo = populacao[0]->getObjectiveFunction();
+	iteracaoAlvo = 0;
+	tempoAlvo = 0;
 
 
 	for (int i = 0; i < iMax; i++) {
+		if (populacao[0]->getObjectiveFunction() > foAlvo) {
+			foAlvo = populacao[0]->getObjectiveFunction();
+			iteracaoAlvo = i;
+			tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(), tempoInicio);
+		}
 		std::cout << "i: " << i << "\n";
 
-		//sort(populacao.begin(), populacao.end(), std::greater<Solucao*>());
+		logPopulacao(populacao);
+
 		for (auto j = 0; j < numCruz; j++) {
 
 			parVencedor = gerarHorarioAGTorneioPar(populacao);
 
-			//filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
-			//filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
-			//filhos = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
 			filhos = gerarHorarioAGCruzamento(parVencedor);
 
-			//populacao.insert(populacao.end(), filhos1.begin(), filhos1.end());
-			//populacao.insert(populacao.end(), filhos.begin(), filhos.end());
 			Util::insert_sorted(populacao, begin(filhos), end(filhos),
 								SolucaoComparaMaior());
-			// Adiciona o segundo grupo de filhos no primeiro vetor
-			//filhos1.insert(filhos1.end(), filhos2.begin(), filhos2.end());
-			//Util::insert_sorted(populacao, begin(filhos2), end(filhos2),
-								//SolucaoComparaMaior());
-
 			geneX = gerarHorarioAGMutacao(filhos);
-
-			//populacao.insert(populacao.end(), geneX.begin(), geneX.end());
 			Util::insert_sorted(populacao, begin(geneX), end(geneX),
 								SolucaoComparaMaior());
 
@@ -421,7 +419,6 @@ Solucao* Resolucao::gerarHorarioAG()
 		gerarHorarioAGSobrevivenciaElitismo(populacao);
 	}
 
-	//sort(populacao.begin(), populacao.end(), std::greater<Solucao*>());
 	gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
 	solucaoAG = populacao[0];
 
@@ -475,7 +472,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 		creditosUtilizadosProfessor.clear();
 		colisaoProfessor.clear();
 		for (const auto& par : periodoXdisciplina) {
-			std::vector<Disciplina*> disciplinas = par.second;
+			auto disciplinas = par.second;
 			std::map<std::string, int> creditosUtilizadosDisciplina;
 			std::map<std::string, ProfessorDisciplina*> disciplinaXprofessorDisciplina;
 			int dia = 0, bloco = 0;
@@ -503,13 +500,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 				disciplinaAleatoria = disciplinas[randInt];
 				dId = disciplinaAleatoria->getId();
 
-				// Se a disciplina ainda n�o foi adicionada a lista de creditos utilizados
-				if (creditosUtilizadosDisciplina.count(dId) == 0) {
-					creditosUtilizadosDisciplina[dId] = 0;
-				}
-
 				// Se a disciplina ainda n�o tem professor alocado
-				if (disciplinaXprofessorDisciplina.count(dId) == 0) {
+				if (!disciplinaXprofessorDisciplina[dId]) {
 
 					do {
 						randInt = aleatorio::randomInt() % disciplinaAleatoria->professoresCapacitados.size();
@@ -517,33 +509,17 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 						professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
 						pId = professorSelecionado->getId();
 
-						if (creditosUtilizadosProfessor.count(pId) == 0) {
-							creditosUtilizadosProfessor[pId] = 0;
-						}
-						professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 && professorSelecionado->creditoMaximo < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+						professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 
+												   && professorSelecionado->creditoMaximo 
+												      <= (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
 					} while (professorPossuiCreditos);
 
-					int profNum = randInt; //0;
-
-					/*for (; profNum < disciplinaAleatoria->professoresCapacitados.size(); profNum++) {
-					    const auto& professor = disciplinaAleatoria->professoresCapacitados[profNum];
-					    pId = professor->getId();
-
-					    if (creditosUtilizadosProfessor.count(pId) == 0) {
-					        creditosUtilizadosProfessor[pId] = 0;
-					    }
-
-					    if (professor->creditoMaximo != 0
-					            && professor->creditoMaximo < (creditosUtilizadosProfessor[pId]
-					            + disciplinaAleatoria->getCreditos())) {
-					        continue;
-					    } else break;
-					}*/
+					int profNum = randInt; 
 
 					creditosUtilizadosProfessor[pId] += disciplinaAleatoria->getCreditos();
 
 					pdId = "pr" + pId + "di" + dId;
-					if (professorDisciplinas.count(pdId) == 0) {
+					if (!professorDisciplinas[pdId]) {
 						professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[profNum], disciplinaAleatoria, pdId);
 					}
 
@@ -808,6 +784,7 @@ void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) con
 	for (auto i = 0; i < SEMANA; i++) {
 		for (auto j = 0; j < blocosTamanho; j++) {
 			auto pos = filho->horario->getPosition(i, j, camada);
+			filho->horario->alocados[pos] = "";
 			filho->horario->matriz[pos] = nullptr;
 		}
 	}
@@ -819,15 +796,18 @@ void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) con
 			auto pos = filho->horario->getPosition(i, j, camada);
 			auto alocPai = pai->horario->matriz[pos];
 			if (!alocPai || filho->horario->insert(i, j, camada, alocPai)) {
+				//puts("Sucesso");
 				continue;
 			}
 
-			if (verbose)
-				std::cout << "Deu treta no cruzamento tipo 2\n";
+			//puts("Falha no cruzamento\n\n");
 
-			auto temp = filho;
+			if (verbose) {
+				std::cout << "Problemas no cruzamento tipo simples\n";
+			}
+
+			delete filho;
 			filho = fallback;
-			delete temp;
 			return;
 		}
 	}
@@ -871,8 +851,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		pos = aleatorio::randomInt() % mat1.size();
 		int coord[3];
 		filho1->horario->get3DMatrix(pos, coord);
-		dia = coord[0];
-		bloco = coord[1];
+		dia = coord[1];
+		bloco = coord[0];
 		camada = coord[2];
 	} while (bloco % 2 == 1);
 
@@ -979,8 +959,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		for (auto& b : blocos) {
 			int coord[3];
 			hor->get3DMatrix(b.posCruz, coord);
-			if (!hor->insert(coord[0], coord[1], coord[2], b.disc)
-				|| !hor->insert(coord[0], coord[1]+1, coord[2], b.disc)) {
+			if (!hor->insert(coord[1], coord[0], coord[2], b.disc)
+				|| !hor->insert(coord[1], coord[0]+1, coord[2], b.disc)) {
 				return false;
 			}
 		}
@@ -1008,9 +988,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 		for (auto& b : blocos) {
 			// Tenta inserir o bloco na matriz
 			if (![&](Gene& g) {
-				int coord[3];
-				hor->get3DMatrix(g.posCruz, coord);
-
 				for (auto d = dia; d < SEMANA; d++) {
 					for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
 						if (h < blocosTamanho - 1 && !hor->matriz[h] && !hor->matriz[h + 1] &&
@@ -1033,9 +1010,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 	auto insertIsoIncom = [&](Horario *hor, std::vector<Gene>& blocos) {
 		for (auto& b : blocos) {
 			if (![&](Gene& g) {
-				int coord[3];
-				hor->get3DMatrix(g.posCruz, coord);
-
 				for (auto d = dia; d < SEMANA; d++) {
 					for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
 						if (!hor->matriz[h] && hor->insert(d, h, camada, g.disc)) {
@@ -1782,7 +1756,6 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 		total += novaGrade->fo;
 
 		auto& adicionadas = novaGrade->disciplinasAdicionadas;
-		adicionadas.clear();
 		for (const auto& disc : solucao.nomes_disciplinas) {
 			adicionadas.push_back(disciplinas[disciplinasIndex[disc]]);
 		}
@@ -1805,7 +1778,7 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) con
 		if (!matriz[i]) {
 			continue;
 		}
-		auto index = curso->nome_to_indice()[matriz[i]->disciplina->id];
+		auto index = curso->id_to_indice()[matriz[i]->disciplina->id];
 		pSolucao->horario->get3DMatrix(i, posicoes);
 		auto dia = posicoes[1];
 		auto bloco = posicoes[0];
@@ -1860,4 +1833,22 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) cons
 	}
 
 	return mut;
+}
+
+void Resolucao::logPopulacao(const std::vector<Solucao*>& populacao) const
+{
+	// Imprime FO e Hash de todas as soluções e determina frequência dos hashes
+	std::unordered_map<std::size_t, int> freq;
+	puts("Populacao");
+	printf("%-8s %s\n", "FO", "Hash");
+	for (auto& individuo : populacao) {
+		printf("%-8g %u\n", individuo->getObjectiveFunction(), individuo->getHash());
+		freq[individuo->getHash()]++;
+	}
+	printf("\n%-11s %-5s %s\n", "Hash", "Freq", "%");
+	for (const auto& par : freq) {
+		auto porc = par.second * 1. / populacao.size() * 100;
+		printf("%-11u %-5d %g\n", par.first, par.second, porc);
+	}
+	puts("\n\n");
 }

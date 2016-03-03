@@ -5,7 +5,6 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
-#include <functional>
 #include <ctime>
 
 class Util
@@ -19,6 +18,9 @@ public:
 
 	double timeDiff(clock_t tf, clock_t t0);
 
+	static long long chronoDiff(std::chrono::time_point<std::chrono::system_clock> t1,
+								std::chrono::time_point<std::chrono::system_clock> t2);
+
 	int randomBetween(int min, int max);
 
 	// Insere um item num container ordenado
@@ -26,7 +28,7 @@ public:
 	static void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
 	{
 		c.insert(
-			std::lower_bound(begin(c), end(c), item, cmp),
+			std::upper_bound(begin(c), end(c), item, cmp),
 			item
 		);
 	}

@@ -77,6 +77,11 @@ public:
     Configuracao::TipoVizinhos gradeGraspVizinhanca;
     int gradeGraspVizinhos;
     double gradeGraspTempoConstrucao;
+	
+	// Solução alvo, a iteração em que ela foi alcançada primeiro e o tempo
+	double foAlvo;
+	int iteracaoAlvo;
+	long long tempoAlvo;
 
 private:
     int blocosTamanho;
@@ -153,6 +158,8 @@ private:
     void showResult(Solucao *pSolucao);
 
 	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const;
+
+	void logPopulacao(const std::vector<Solucao*>& populacao) const;
 };
 
 #endif /* RESOLUCAO_H */

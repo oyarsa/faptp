@@ -20,6 +20,8 @@ public:
     double getObjectiveFunction();
 
     bool operator<( Solucao *&s2);
+
+	std::size_t getHash() const;
 private:
     Horario *horario;
     std::unordered_map<std::string, Grade*> grades;
@@ -30,6 +32,7 @@ private:
     int perfisTamanho;
 
     int gradesLength;
+	double fo = -1;
 
     void init();
 };

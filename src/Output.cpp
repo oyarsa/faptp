@@ -13,13 +13,19 @@
 #include <ctime>
 
 std::string Output::getDir() {
+    std::string dir = "output/" + timestamp();
+
+    return dir;
+}
+
+std::string Output::timestamp()
+{
     time_t current_time = time(NULL);
     std::string time_str = ctime(&current_time);
     time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());
     time_str.erase(remove(time_str.begin(), time_str.end(), '\n'), time_str.end());
-    std::string dir = "output/" + time_str;
-
-    return dir;
+    time_str.erase(remove(time_str.begin(), time_str.end(), ':'), time_str.end());
+	return time_str;
 }
 
 void Output::write(Solucao *pSolucao) {
@@ -67,7 +73,7 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
             for (int k = 0; k < SEMANA; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
                 std::string pds = "-";
-                if (pd != NULL) {
+                if (pd) {
                     pds = pd->getDisciplina()->getNome();
                 }
                 saida << "<td>" << pds << "</td>";
