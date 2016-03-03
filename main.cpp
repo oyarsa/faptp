@@ -134,10 +134,10 @@ void semArgumentos()
 		.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(10)
-		.porcentagemCruzamentos(0) // %
+		.porcentagemCruzamentos(20) // %
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
-		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
-		.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
+		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
 		.mutacaoProbabilidade(20) // %

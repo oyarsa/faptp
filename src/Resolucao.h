@@ -160,6 +160,8 @@ private:
 	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const;
 
 	void logPopulacao(const std::vector<Solucao*>& populacao) const;
+
+	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
 };
 
 #endif /* RESOLUCAO_H */

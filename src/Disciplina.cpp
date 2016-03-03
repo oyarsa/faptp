@@ -99,3 +99,9 @@ void Disciplina::addProfessorCapacitado(Professor *professor) {
             , professor
             );
 }
+
+int Disciplina::periodoNum() const
+{
+	auto pos = periodo.find('-');
+	return std::stoi(periodo.substr(0, pos));
+}

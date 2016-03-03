@@ -377,7 +377,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solu
 Solucao* Resolucao::gerarHorarioAG()
 {
 	Solucao* solucaoAG;
-	std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial();
+	std::vector<Solucao*> populacao = gerarHorarioAGPopulacaoInicial2();
 
 	std::vector<Solucao*> parVencedor;
 	std::vector<Solucao*> filhos;
@@ -511,7 +511,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 
 						professorPossuiCreditos = (professorSelecionado->creditoMaximo != 0 
 												   && professorSelecionado->creditoMaximo 
-												      <= (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
+												      < (creditosUtilizadosProfessor[pId] + disciplinaAleatoria->getCreditos()));
 					} while (professorPossuiCreditos);
 
 					int profNum = randInt; 
@@ -531,6 +531,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 				}
 
 				if (finding) {
+					inserted = false;
 					std::vector<int> empties = solucaoLocal->horario->getAllEmpty(i);
 					int positions[3];
 
@@ -549,9 +550,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 						//std::cout << i << " " << par.first << " (" << (*it) << " - " << dia << " - " << bloco << ") [" << disciplinaAleatoria->nome << "]" << std::endl;
 					}
 
-					if (infactiveis.count(dId) == 0) {
-						infactiveis[dId] = 0;
-					}
 					infactiveis[dId]++;
 
 					//std::cerr << infactiveis[dId] << ") Deu merda! " << par.first << " [" << disciplinaAleatoria->nome << "]" << std::endl;
@@ -582,10 +580,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 						}
 					}
 				} else {
-					if (colisaoProfessor.count(dId) == 0) {
-						colisaoProfessor[dId] = 0;
-					}
-
 					colisaoProfessor[dId]++;
 
 					if (colisaoProfessor[dId] == horarioProfessorColisaoMax) {
@@ -796,11 +790,11 @@ void Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) con
 			auto pos = filho->horario->getPosition(i, j, camada);
 			auto alocPai = pai->horario->matriz[pos];
 			if (!alocPai || filho->horario->insert(i, j, camada, alocPai)) {
-				//puts("Sucesso");
+				////puts("Sucesso");
 				continue;
 			}
 
-			//puts("Falha no cruzamento\n\n");
+			////puts("Falha no cruzamento\n\n");
 
 			if (verbose) {
 				std::cout << "Problemas no cruzamento tipo simples\n";
@@ -1839,7 +1833,7 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& populacao) const
 {
 	// Imprime FO e Hash de todas as soluções e determina frequência dos hashes
 	std::unordered_map<std::size_t, int> freq;
-	puts("Populacao");
+	//puts("Populacao");
 	printf("%-8s %s\n", "FO", "Hash");
 	for (auto& individuo : populacao) {
 		printf("%-8g %u\n", individuo->getObjectiveFunction(), individuo->getHash());
@@ -1850,5 +1844,143 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& populacao) const
 		auto porc = par.second * 1. / populacao.size() * 100;
 		printf("%-11u %-5d %g\n", par.first, par.second, porc);
 	}
-	puts("\n\n");
+	printf("\n\n");
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
+{
+	std::vector<Solucao*> solucoes;
+
+	while (int(solucoes.size()) < horarioPopulacaoInicial) {
+		//puts("Gerando nova solucao");
+		auto solucao = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+		std::unordered_map<std::string, int> creditos_alocados_prof;
+
+		auto num_periodos = periodoXdisciplina.size();
+		auto num_per_visitados = 0u;
+		auto camada = 0;
+		std::vector<char> periodos_visitados(num_periodos, false);
+		// Percorre todos os períodos aleatoriamente
+		while (num_per_visitados < num_periodos) {
+			//puts("Periodo");
+			// Escolhe um período. Escolhe outro se já for percorrido.
+			int rnd_per;
+			do {
+				rnd_per = aleatorio::randomInt() % num_periodos;
+			} while (periodos_visitados[rnd_per]);
+
+			periodos_visitados[rnd_per] = true;
+			num_per_visitados++;
+
+			// Encontra o período referente ao número, copia suas disciplinas
+			auto it = periodoXdisciplina.begin();
+			std::advance(it, rnd_per);
+			auto discs = it->second;
+
+			auto num_discs = discs.size();
+			auto num_disc_visitadas = 0u;
+			std::vector<char> disc_visitadas(num_discs, false);
+
+			while (num_disc_visitadas < num_discs) {
+				//puts("Disciplina");
+				int rnd_disc;
+				do {
+					rnd_disc = aleatorio::randomInt() % num_discs;
+				} while (disc_visitadas[rnd_disc]);
+
+				disc_visitadas[rnd_disc] = true;
+				num_disc_visitadas++;
+				auto disc = discs[rnd_disc];
+
+				auto& profs = disc->professoresCapacitados;
+				auto num_profs = profs.size();
+				auto num_prof_visitados = 0u;
+				std::vector<char> prof_visitados(num_profs, false);
+				auto success = false;
+
+				while (!success && num_prof_visitados < num_profs) {
+					//puts("Professor");
+					int rnd_prof;
+					do {
+						rnd_prof = aleatorio::randomInt() % num_profs;
+					} while (prof_visitados[rnd_prof]);
+
+					prof_visitados[rnd_prof] = true;
+					num_prof_visitados++;
+					auto prof = profs[rnd_prof];
+
+					if (prof->creditoMaximo != 0 &&
+						prof->creditoMaximo < creditos_alocados_prof[prof->nome]
+						+ disc->cargaHoraria) {
+						continue;
+					}
+
+					auto creditos_alocados_disc = 0;
+					auto num_slots = SEMANA * blocosTamanho;
+					auto num_slot_visitados = 0;
+					std::vector<std::vector<char>> slots_visitados(SEMANA, std::vector<char>(blocosTamanho, false));
+					while (creditos_alocados_disc < disc->cargaHoraria && num_slot_visitados < num_slots) {
+						//puts("Creditos");
+						auto restante = disc->cargaHoraria - creditos_alocados_disc;
+						int bloco, dia;
+						auto success_prof = false;
+						//puts("oi");
+						while (!success_prof && num_slot_visitados < num_slots) {
+							//puts("Dia e hora");
+							do {
+								dia = aleatorio::randomInt() % SEMANA;
+								// Se restante for maior que um, deve alocar um bloco de duas disciplinas
+								// em um horário par. Para isso se gera um número até a metade do número
+								// de blocos e multiplica por dois. Ex: 4 blocos, serão gerados números 0 ou 1,
+								// que possibilitam o bloco 0 ou 2.
+								if (restante > 1) {
+									bloco = 2 * (aleatorio::randomInt() % (blocosTamanho / 2));
+								} else {
+									// Se não for o caso, qualquer bloco serve
+									bloco = aleatorio::randomInt() % blocosTamanho;
+								}
+							} while (slots_visitados[dia][bloco]);
+							auto pd = new ProfessorDisciplina(prof, disc);
+							if (restante == 1) {
+								slots_visitados[dia][bloco] = true;
+								num_slot_visitados++;
+								success_prof = solucao->horario->insert(dia, bloco, camada, pd);
+							} else {
+								slots_visitados[dia][bloco] = true;
+								slots_visitados[dia][bloco+1] = true;
+								num_slot_visitados += 2;
+								success_prof = solucao->horario->insert(dia, bloco, camada, pd)
+									&& solucao->horario->insert(dia, bloco + 1, camada, pd);
+							}
+							if (success_prof) {
+								if (restante == 1) {
+									creditos_alocados_disc++;
+								} else {
+									creditos_alocados_disc += 2;
+								}
+							}
+						}
+						//puts("thcau");
+					}
+					if (creditos_alocados_disc == disc->cargaHoraria) {
+						success = true;
+						//puts("Deu certo");
+					}
+				}
+				if (!success) {
+					//puts("acabaram os professores");
+					//printf("disc: %s\n", disc->nome.c_str());
+					goto err;
+				}
+			}
+			camada++;
+		}
+		gerarGradeTipoGraspClear(solucao);
+		Util::insert_sorted(solucoes, solucao, SolucaoComparaMaior());
+		continue;
+	err:
+		delete solucao;
+	}
+
+	return solucoes;
 }

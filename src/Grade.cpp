@@ -33,8 +33,9 @@ bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
 {
     auto success = alunoPerfil->periodo >= pDisciplina->periodoMinimo;
 
-	if (!success)
+	if (!success && verbose) {
 		std::cout << "---INVALIDO[" << pDisciplina->nome << "] PERIDOMIN\n";
+	}
 
 	return success;
 }

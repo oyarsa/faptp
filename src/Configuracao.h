@@ -56,8 +56,8 @@ private:
 	friend class Resolucao;
 	std::string filename_ = "input.json";
 	int blocoTam_ = 4;
-	int camadaTam_ = 35;
-	int perfilTam_ = 1413;
+	int camadaTam_ = 4;
+	int perfilTam_ = 150;
 	TipoGrade tipoConstr_ = TipoGrade::grasp;
 	int popInicial_ = 10;
 	int numIter_ = 100;
