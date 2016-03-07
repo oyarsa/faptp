@@ -36,7 +36,8 @@ public:
 	// Insere todos os item de `first` a `last` num container ordenado
 	template <typename Container, typename ForwardIterator,
 	          typename Compare = std::less<typename ForwardIterator::value_type>>
-	static void insert_sorted(Container& c, ForwardIterator first, ForwardIterator last, Compare cmp = Compare())
+	static void insert_sorted(Container& c, ForwardIterator first, 
+							  ForwardIterator last, Compare cmp = Compare())
 	{
 		for (auto it = first; it != last; ++it) {
 			insert_sorted(c, *it, cmp);

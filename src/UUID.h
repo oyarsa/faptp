@@ -13,7 +13,7 @@
 class UUID {
 public:
   UUID() = default;
-  std::string GenerateUuid();
+	static std::string GenerateUuid();
 };
 
 #endif	/* UUID_H */

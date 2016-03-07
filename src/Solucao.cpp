@@ -45,7 +45,7 @@ Solucao& Solucao::operator=(const Solucao& outro) {
 
 void Solucao::init() {
     horario = new Horario(blocosTamanho, camadasTamanho);
-
+	fo = -1;
     gradesLength = 0;
 }
 
@@ -77,6 +77,6 @@ double Solucao::getObjectiveFunction() {
 	return fo;
 }
 
-std::size_t Solucao::getHash() const {
+std::size_t Solucao::getHash() {
 	return horario->getHash();
 }

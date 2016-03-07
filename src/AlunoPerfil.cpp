@@ -1,11 +1,10 @@
 #include "AlunoPerfil.h"
 
 AlunoPerfil::AlunoPerfil(double pPeso) {
-  UUID uuid;
   std::string pId, pTurma;
   std::string pPeriodo;
   
-  pId = uuid.GenerateUuid();
+  pId = UUID::GenerateUuid();
   pTurma = "A";
   pPeriodo = "1";
   

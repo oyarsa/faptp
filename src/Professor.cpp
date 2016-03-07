@@ -1,10 +1,9 @@
 #include "Professor.h"
 
 Professor::Professor(std::string pNome) : creditoMaximo(), numDisponibilidade() {
-  UUID uuid;
   std::string pId;
 
-  pId = uuid.GenerateUuid();
+  pId = UUID::GenerateUuid();
 
   init(pNome, pId);
 }

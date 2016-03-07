@@ -135,8 +135,8 @@ void semArgumentos()
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(10)
 		.porcentagemCruzamentos(20) // %
-		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
-		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
@@ -144,7 +144,8 @@ void semArgumentos()
 		.graspTempoConstrucao(1) // ms
 		.graspNumVizinhos(2)
 		.graspAlfa(30) // %
-		.numIteracoes(10)
+		.porcentagemSolucoesAleatorias(0) // %
+		.numIteracoes(5)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
@@ -169,9 +170,10 @@ void semArgumentos()
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
 	Output::write(resolucaoGrasp.getSolucao(), savePath);
 
-	std::cout << "solucaoAlvo:" << resolucaoGrasp.foAlvo << "\n";
-	std::cout << "iteracoes:" << resolucaoGrasp.iteracaoAlvo << "\n";
-	std::cout << "tempoAlvo:" << resolucaoGrasp.tempoAlvo << "\n";
+	std::cout << "solucaoAlvo: " << resolucaoGrasp.foAlvo << "\n";
+	std::cout << "hashAlvo: " << resolucaoGrasp.hashAlvo << "\n";
+	std::cout << "iteracoes: " << resolucaoGrasp.iteracaoAlvo << "\n";
+	std::cout << "tempoAlvo: " << resolucaoGrasp.tempoAlvo << "\n";
 }
 
 

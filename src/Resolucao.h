@@ -82,7 +82,11 @@ public:
 	double foAlvo;
 	int iteracaoAlvo;
 	long long tempoAlvo;
+	std::size_t hashAlvo;
 
+	// Porcentagem de soluções aleatórias que serão criadas e adicionadas à população
+	// à cada iteração
+	double porcentagemSolucoesAleatorias;
 private:
     int blocosTamanho;
     int camadasTamanho;
@@ -99,6 +103,7 @@ private:
 	Util util;
 	std::unique_ptr<fagoc::Curso> curso;
 	std::vector<fagoc::Aluno> alunos;
+	std::chrono::system_clock::time_point tempoInicio;
 
     void carregarDados();
     void carregarDadosProfessores();
@@ -120,13 +125,13 @@ private:
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
 
-	void cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
+	int cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
 	std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao *solucaoPai1, Solucao *solucaoPai2);
 
 	std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao *solucaoPai1, Solucao *solucaoPai2);
 
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
-    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax);
+    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) const;
     std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
@@ -162,6 +167,18 @@ private:
 	void logPopulacao(const std::vector<Solucao*>& populacao) const;
 
 	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
+	bool gerarCamada(Solucao* solucao, int camada, std::vector<Disciplina*> discs,
+					 std::unordered_map<std::string, int>& creditos_alocados_prof);
+	bool geraProfessorDisciplina(Solucao* solucao, Disciplina* disc,
+								 int camada, std::unordered_map<std::string, int>& creditos_alocados_prof);
+	bool geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof, int camada);
+	Solucao* gerarSolucaoAleatoria();
+
+	std::vector<Solucao*> gerarSolucoesAleatorias(int numSolucoes);
+	void reinsereGrades(Solucao* solucao) const;
+
+	void gerarHorarioAGEvoluiPopulacao(std::vector<Solucao*>& populacao, int numCruz);
+	void gerarHorarioAGRegistraSolucaoAlvo(std::vector<Solucao*>& populacao, int iteracaoAtual);
 };
 
 #endif /* RESOLUCAO_H */

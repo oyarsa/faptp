@@ -1,28 +1,24 @@
 #include "ProfessorDisciplina.h"
 
-ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina) {
-  UUID uuid;
-  std::string pId;
+ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina)
+	: id(UUID::GenerateUuid())
+	, professor(pProfessor)
+	, disciplina(pDisciplina)
+{}
 
-  pId = uuid.GenerateUuid();
-
-  init(pProfessor, pDisciplina, pId);
-}
-
-ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina, std::string pId) {
-  init(pProfessor, pDisciplina, pId);
-}
-
-void ProfessorDisciplina::init(Professor* pProfessor, Disciplina* pDisciplina, std::string pId) {
-  id = pId;
-
-  professor = pProfessor;
-  disciplina = pDisciplina;
-}
-
-ProfessorDisciplina::~ProfessorDisciplina() {
-}
+ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, 
+										 Disciplina* pDisciplina, 
+										 const std::string& pId)
+	: id(pId)
+	, professor(pProfessor)
+	, disciplina(pDisciplina)
+{}
 
 Disciplina* ProfessorDisciplina::getDisciplina() const {
   return disciplina;
+}
+
+Professor* ProfessorDisciplina::getProfessor() const
+{
+	return professor;
 }

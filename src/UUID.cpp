@@ -49,6 +49,7 @@ std::string UUID::GenerateUuid() {
   *pGuidStr = '\0';
   
   uuid_code = guidStr;
+  delete[] guidStr;
   
   return uuid_code;
 }

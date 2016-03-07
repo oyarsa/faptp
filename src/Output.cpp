@@ -13,14 +13,12 @@
 #include <ctime>
 
 std::string Output::getDir() {
-    std::string dir = "output/" + timestamp();
-
-    return dir;
+    return "output/" + timestamp();
 }
 
 std::string Output::timestamp()
 {
-    time_t current_time = time(NULL);
+    auto current_time = time(nullptr);
     std::string time_str = ctime(&current_time);
     time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());
     time_str.erase(remove(time_str.begin(), time_str.end(), '\n'), time_str.end());
@@ -33,7 +31,7 @@ void Output::write(Solucao *pSolucao) {
 }
 
 void Output::write(Solucao *pSolucao, std::string savePath) {
-    // Criando o diret�rio de saida
+    // Criando o diretorio de saida
 	Util::create_folder(savePath);
     std::stringstream saida{};
     const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta",
@@ -74,7 +72,8 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
                 auto pd = pSolucao->horario->at(k, j, i);
                 std::string pds = "-";
                 if (pd) {
-                    pds = pd->getDisciplina()->getNome();
+					pds = pd->getDisciplina()->getNome() + "<br>" 
+						+ "<i>" + pd->getProfessor()->getNome() + "</i>";
                 }
                 saida << "<td>" << pds << "</td>";
             }
@@ -116,13 +115,6 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
             }
             saida << "</tr>";
         }
-
-        /*
-        const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
-        for (const auto disc : discEscolhidas) {
-            std::cout << disc->nome << "; ";
-        }
-        */
 
         saida << "</table>\n";
     }

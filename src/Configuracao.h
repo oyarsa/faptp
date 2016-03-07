@@ -52,6 +52,7 @@ public:
 	Configuracao& porcentagemCruzamentos(int p);
 	Configuracao& tipoCruzamento(TipoCruzamento tipo);
 	Configuracao& tipoMutacao(TipoMutacao tipo);
+	Configuracao& porcentagemSolucoesAleatorias(int n);
 private:
 	friend class Resolucao;
 	std::string filename_ = "input.json";
@@ -72,6 +73,7 @@ private:
 	double porcentCruz_;
 	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
 	TipoMutacao tipoMut_ = TipoMutacao::substiui_disciplina;
+	double porcSolucoesAleatorias_ = 0.1;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -179,5 +181,11 @@ inline Configuracao& Configuracao::tipoCruzamento(TipoCruzamento tipo)
 inline Configuracao& Configuracao::tipoMutacao(TipoMutacao tipo)
 {
 	tipoMut_ = tipo;
+	return *this;
+}
+
+inline Configuracao& Configuracao::porcentagemSolucoesAleatorias(int n)
+{
+	porcSolucoesAleatorias_ = n / 100.;
 	return *this;
 }

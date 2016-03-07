@@ -3,10 +3,9 @@
 #include "Disciplina.h"
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
-    UUID uuid;
     std::string pId;
 
-    pId = uuid.GenerateUuid();
+    pId = UUID::GenerateUuid();
 
     init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade, pPeriodoMinimo);
 }

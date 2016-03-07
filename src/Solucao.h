@@ -19,9 +19,7 @@ public:
 
     double getObjectiveFunction();
 
-    bool operator<( Solucao *&s2);
-
-	std::size_t getHash() const;
+	std::size_t getHash();
 private:
     Horario *horario;
     std::unordered_map<std::string, Grade*> grades;

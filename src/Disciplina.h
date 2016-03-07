@@ -21,6 +21,7 @@ public:
 
   std::string getId() const;
 
+  int periodoNum() const;
   std::string getNome();
   void setNome(std::string pNome);
 
@@ -40,8 +41,6 @@ public:
   bool isPreRequisito(std::string pDisciplina);
   
   void addProfessorCapacitado(Professor *professor);
-
-  int periodoNum() const;
 private:
   std::string id;
   std::string turma;
