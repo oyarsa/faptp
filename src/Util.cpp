@@ -1,4 +1,5 @@
 #include <sstream>
+#include <utility>
 
 #include "Util.h"
 #include "Aleatorio.h"
@@ -23,7 +24,8 @@ void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
   triDimensional[2] = z; // Camada
 }
 
-std::vector<std::string> &Util::strSplit(const std::string &s, char delim, std::vector<std::string> &elems) {
+std::vector<std::string> &Util::strSplit(const std::string &s, char delim, std::vector<std::string> &elems) 
+{
   std::stringstream ss(s);
   std::string item;
   while (std::getline(ss, item, delim)) {
@@ -42,10 +44,16 @@ double Util::timeDiff(clock_t tf, clock_t t0) {
   return ((((float) tf - (float) t0) / 1000000.0F) * 1000);
 }
 
-long long Util::chronoDiff(std::chrono::time_point<std::chrono::system_clock> t1, std::chrono::time_point<std::chrono::system_clock> t2)
+long long Util::chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t1,
+						   std::chrono::time_point<std::chrono::high_resolution_clock> t2)
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>
 		(t1 - t2).count();
+}
+
+std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()
+{
+	return std::chrono::high_resolution_clock::now();
 }
 
 int Util::randomBetween(int min, int max) {
@@ -74,6 +82,7 @@ std::string Util::join_path(const std::vector<std::string>& folders, const std::
 	for (const auto& f : folders) {
 		oss << f << sep;
 	}
+
 	oss << file;
 
 	return oss.str();
@@ -87,4 +96,10 @@ void Util::create_folder(const std::string& path)
 	std::string command {"mkdir -p" + path + " > /dev/null 2>&1"};
 #endif
     system(command.c_str());
+}
+
+std::size_t Util::hash_string(const std::string& str)
+{
+	static std::hash<std::string> hasher;
+	return hasher(str);
 }

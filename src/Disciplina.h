@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "Professor.h"
 
@@ -22,7 +23,7 @@ public:
   std::string getId() const;
 
   int periodoNum() const;
-  std::string getNome();
+  std::string getNome() const;
   void setNome(std::string pNome);
 
   std::string getPeriodo();
@@ -57,9 +58,9 @@ private:
   int alocados;
   bool ofertada;
 
-  std::vector<std::string> preRequisitos;
-  std::vector<std::string> coRequisitos;
-  std::vector<std::string> equivalentes;
+  std::unordered_set<std::string> preRequisitos;
+  std::unordered_set<std::string> coRequisitos;
+  std::unordered_set<std::string> equivalentes;
 
   std::vector<Professor*> professoresCapacitados;
 

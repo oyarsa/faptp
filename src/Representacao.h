@@ -31,6 +31,7 @@ public:
 
     std::vector<int> getAllEmpty(int camada);
     void clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada);
+	void clearSlot(int pDia, int pBloco, int pCamda);
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
@@ -46,8 +47,6 @@ protected:
 
     std::vector< ProfessorDisciplina* > matriz;
     std::vector<std::string> alocados;
-
-	Util util;
 
     void initMatriz();
 };

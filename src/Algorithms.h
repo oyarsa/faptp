@@ -3,6 +3,8 @@
 
 #include "ProfessorDisciplina.h"
 #include "Solucao.h"
+#include <string>
+#include <unordered_set>
 
 template<typename T, typename M, template<typename> class C = std::less>
 struct member_comparer : std::binary_function<T, T, bool> {
@@ -104,6 +106,20 @@ struct DisciplinasRemoveDisciplinas {
         return find_if(disciplinas.begin(), disciplinas.end(), DisciplinaFindDisciplina(d)) != disciplinas.end();
     }
 };
+
+inline void RemoveDisciplinasNome(std::unordered_set<std::string>& hashset, 
+								  std::vector<Disciplina*>& disciplinas)
+{
+	for (auto it = std::begin(hashset); it != std::end(hashset); ++it) {
+		auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
+								  [&](Disciplina* d) {
+			return d->getNome() == *it;
+		});
+		if (found != std::end(disciplinas)) {
+			hashset.erase(it);
+		}
+	}
+}
 
 struct DisciplinaFindDisciplinaId {
 

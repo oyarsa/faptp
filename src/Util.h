@@ -5,11 +5,9 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
-#include <ctime>
 
-class Util
+namespace Util
 {
-public:
 	int getPosition(int y, int x, int z, int Y, int Z);
 	void get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z);
 
@@ -18,14 +16,16 @@ public:
 
 	double timeDiff(clock_t tf, clock_t t0);
 
-	static long long chronoDiff(std::chrono::time_point<std::chrono::system_clock> t1,
-								std::chrono::time_point<std::chrono::system_clock> t2);
+	long long chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t1,
+						 std::chrono::time_point<std::chrono::high_resolution_clock> t2);
+
+	std::chrono::time_point<std::chrono::high_resolution_clock> now();
 
 	int randomBetween(int min, int max);
 
 	// Insere um item num container ordenado
 	template <typename Container, typename T, typename Compare = std::less<T>>
-	static void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
+	void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
 	{
 		c.insert(
 			std::upper_bound(begin(c), end(c), item, cmp),
@@ -36,7 +36,7 @@ public:
 	// Insere todos os item de `first` a `last` num container ordenado
 	template <typename Container, typename ForwardIterator,
 	          typename Compare = std::less<typename ForwardIterator::value_type>>
-	static void insert_sorted(Container& c, ForwardIterator first, 
+	void insert_sorted(Container& c, ForwardIterator first, 
 							  ForwardIterator last, Compare cmp = Compare())
 	{
 		for (auto it = first; it != last; ++it) {
@@ -45,11 +45,13 @@ public:
 	}
 
 	// Une uma lista de nomes de pastas e um arquivo em uma string de forma portável
-	static std::string join_path(const std::vector<std::string>& folders, 
+	std::string join_path(const std::vector<std::string>& folders, 
 								 const std::string& file = "");
 
 	// Cria uma pasta de forma portável
-	static void create_folder(const std::string& path);
+	void create_folder(const std::string& path);
+
+	std::size_t hash_string(const std::string& str);
 
 };
 

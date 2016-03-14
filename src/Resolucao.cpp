@@ -1,6 +1,7 @@
 #include <fstream>
 #include <numeric>
 #include <iostream>
+#include <unordered_map>
 #include <chrono>
 
 #include <modelo-grade/arquivos.h>
@@ -12,6 +13,8 @@
 #include "Util.h"
 #include "Semana.h"
 #include "Aleatorio.h"
+#include "Output.h"
+#include <iomanip>
 #include <set>
 
 Resolucao::Resolucao(const Configuracao& c)
@@ -41,9 +44,11 @@ Resolucao::Resolucao(const Configuracao& c)
 	  , professorDisciplinas()
 	  , solucao(nullptr)
 	  , jsonRoot()
-	  , util()
 	  , curso(nullptr)
 	  , alunos()
+	  , tempoLimiteModelo(c.tempoLimMod_)
+	  , numMaximoIteracoesSemEvolucaoAG(c.numMaxIterSemEvoAG_)
+	  , numMaximoIteracoesSemEvolucaoGRASP(c.numMaxIterSemEvoGRASP_)
 {
 	carregarDados();
 }
@@ -93,6 +98,11 @@ const std::vector<fagoc::Aluno>& Resolucao::getAlunos() const
 	return alunos;
 }
 
+std::string Resolucao::getLog() const
+{
+	return log.str();
+}
+
 void Resolucao::carregarDados()
 {
 	std::ifstream myfile(arquivoEntrada);
@@ -114,6 +124,17 @@ void Resolucao::carregarDados()
 		std::cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
 		throw 1;
 	}
+
+	for (auto i = 0; i < 3; i++) {
+		contadorIguaisCruz[i] = contadorMelhoresCruz[i] = 0;
+		tempoTotalCruz[i] = 0;
+	}
+
+	contadorIguaisMut[0] = contadorIguaisMut[1] = 0;
+	contadorMelhoresMut[0] = contadorMelhoresMut[1] = 0;
+	tempoTotalMut[0] = tempoTotalMut[1] = 0;
+	tempoTotalElit = tempoTotalSelec = 0;
+
 }
 
 void Resolucao::carregarDadosProfessores()
@@ -181,19 +202,19 @@ void Resolucao::carregarDadosDisciplinas()
 
 		const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
 		for (auto j = 0u; j < corequisitos.size(); j++) {
-			disciplina->coRequisitos.push_back(corequisitos[j].asString());
+			disciplina->coRequisitos.insert(corequisitos[j].asString());
 		}
 
 		const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
 		for (auto j = 0u; j < prerequisitos.size(); j++) {
-			disciplina->preRequisitos.push_back(prerequisitos[j].asString());
+			disciplina->preRequisitos.insert(prerequisitos[j].asString());
 		}
 
 		const auto& equivalentes = jsonDisciplinas[i]["equivalentes"];
 		for (auto j = 0u; j < equivalentes.size(); j++) {
-			disciplina->equivalentes.push_back(equivalentes[j].asString());
+			disciplina->equivalentes.insert(equivalentes[j].asString());
 		}
-		disciplina->equivalentes.push_back(nome);
+		disciplina->equivalentes.insert(nome);
 
 		disciplinas.push_back(disciplina);
 		if (disciplina->ofertada) {
@@ -238,11 +259,14 @@ void Resolucao::carregarAlunoPerfis()
 		AlunoPerfil* alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
 		const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
+		auto worstFit = 99;
+		auto bestFit = 0;
 		for (auto j = 0u; j < jsonRestantes.size(); j++) {
 			Disciplina* disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
-			alunoPerfil->addRestante(disciplina);
+			bestFit = std::max(bestFit, disciplina->cargaHoraria);
+			worstFit = std::min(worstFit, disciplina->cargaHoraria);
+			alunoPerfil->addRestante(disciplina->id);
 		}
-		alunoPerfil->restante = ordenarDisciplinas(alunoPerfil->restante);
 
 		const auto& jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
 		for (auto j = 0u; j < jsonCursadas.size(); j++) {
@@ -252,21 +276,17 @@ void Resolucao::carregarAlunoPerfis()
 
 		std::vector<Disciplina*> aprovadas;
 		const auto& restantes = alunoPerfil->restante;
-	/*	set_difference(disciplinas.begin(), disciplinas.end(),
-		               alunoPerfil->restante.begin(), alunoPerfil->restante.end(),
-		               inserter(aprovadas, aprovadas.begin()), DisciplinaCargaHorariaDesc());
-*/
 		std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
 							[&restantes](Disciplina* d) {
-			return find_if(begin(restantes), end(restantes), [&d](Disciplina* x) {
-				return x->id == d->id;
+			return find_if(begin(restantes), end(restantes), [&d](const std::string& x) {
+				return x == d->id;
 			}) != end(restantes);
 		});
 
 		auto& aprovadasNomes = alunoPerfil->aprovadas;
 
 		for (const auto& aprovada : aprovadas) {
-			aprovadasNomes.push_back(aprovada->nome);
+			aprovadasNomes.insert(aprovada->id);
 		}
 
 		alunoPerfis[id] = alunoPerfil;
@@ -313,6 +333,11 @@ void Resolucao::carregarSolucao()
 	solucao = solucaoLeitura;
 }
 
+Disciplina* Resolucao::getDisciplinaByName(const std::string& nomeDisc)
+{
+	return disciplinas[disciplinasIndex[nomeDisc]];
+}
+
 std::vector<Disciplina*> Resolucao::ordenarDisciplinas()
 {
 	disciplinas = ordenarDisciplinas(disciplinas);
@@ -348,31 +373,84 @@ void Resolucao::atualizarDisciplinasIndex()
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor)
 {
+	std::vector<Solucao*> filhos;
 	switch (horarioTipoCruzamento) {
 	case Configuracao::TipoCruzamento::construtivo_reparo: {
-		std::vector<Solucao*> filhos;
 		auto filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
 		auto filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
 		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
 		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
-		return filhos;
+		break;
 	}
 
-	case Configuracao::TipoCruzamento::simples:
-		return gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
+	case Configuracao::TipoCruzamento::simples: {
+		auto filhos1 = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		break;
+	}
 
 	case Configuracao::TipoCruzamento::substitui_bloco: {
-		std::vector<Solucao*> filhos;
 		auto filhos1 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[0], parVencedor[1]);
 		auto filhos2 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[1], parVencedor[0]);
 		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
 		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
-		return filhos;
+		break;
 	}
 
 	}
 
-	return {};
+	return filhos;
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor, Configuracao::TipoCruzamento tipoCruz)
+{
+	std::vector<Solucao*> filhos;
+	auto idx = 0;
+
+	switch (tipoCruz) {
+	case Configuracao::TipoCruzamento::construtivo_reparo:
+	{
+		auto filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
+		auto filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+		idx = 0;
+		break;
+	}
+
+	case Configuracao::TipoCruzamento::simples:
+	{
+		auto filhos1 = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		idx = 1;
+		break;
+	}
+
+	case Configuracao::TipoCruzamento::substitui_bloco:
+	{
+		auto filhos1 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[0], parVencedor[1]);
+		auto filhos2 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[1], parVencedor[0]);
+		filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
+		filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+		idx = 2;
+		break;
+	}
+
+	}
+
+	for (auto& filho : filhos) {
+		auto fofilho = filho->getObjectiveFunction();
+		auto fopai1 = parVencedor[0]->getObjectiveFunction();
+		auto fopai2 = parVencedor[1]->getObjectiveFunction();
+
+		if (fofilho > fopai1 || fofilho > fopai2) {
+			contadorMelhoresCruz[idx]++;
+		} else if (fofilho == fopai1 || fofilho == fopai2) {
+			contadorIguaisCruz[idx]++;
+		}
+	}
+
+	return filhos;
 }
 
 Solucao* Resolucao::gerarHorarioAG()
@@ -385,25 +463,199 @@ Solucao* Resolucao::gerarHorarioAG()
 
 	auto populacao = gerarHorarioAGPopulacaoInicial2();
 	foAlvo = populacao[0]->getObjectiveFunction();
-	iteracaoAlvo = 0;
+	iteracaoAlvo = -1;
 	tempoAlvo = Util::chronoDiff(std::chrono::system_clock::now(), tempoInicio);
 
-	for (auto i = 0; i < horarioIteracao; i++) {
-		std::cout << "i: " << i << "\n";
-
-		logPopulacao(populacao);
+	//for (auto i = 0; i < horarioIteracao; i++) {
+	for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+		ultimaIteracao = i;
+		logPopulacao(populacao, i);
 
 		// Insere novas soluções aleatórias na população
 		auto solucoesAleatorias = gerarSolucoesAleatorias(numSolucoesAleatorias);
 		Util::insert_sorted(populacao, begin(solucoesAleatorias), 
 							end(solucoesAleatorias), SolucaoComparaMaior());
 
-		// Aplica os operadores de mutação e cruzamento
+		// Aplica os operadores de cruzamento
 		gerarHorarioAGEvoluiPopulacao(populacao, numCruz);
+		// Aplica mutação
+		gerarHorarioAGEfetuaMutacao(populacao);
 		// Aplica o elitismo, deletando as que sobraram
 		gerarHorarioAGSobrevivenciaElitismo(populacao);
 		// Verifica se a nova população possui uma solução melhor que a anterior
-		gerarHorarioAGRegistraSolucaoAlvo(populacao, i);
+		gerarHorarioAGVerificaEvolucao(populacao, i);
+	}
+
+	// Captura a melhor solução da população, deletando o resto
+	gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
+	auto solucaoAG = populacao[0];
+
+	// Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
+	// o que causa problemas com a escrita do html. 
+	if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
+		reinsereGrades(solucaoAG);
+	}
+
+	solucao = solucaoAG;
+
+	return solucaoAG;
+}
+
+Solucao* Resolucao::gerarHorarioAG2()
+{
+	tempoInicio = std::chrono::steady_clock::now();
+
+	auto populacao = gerarHorarioAGPopulacaoInicial2();
+	foAlvo = populacao[0]->getObjectiveFunction();
+	iteracaoAlvo = -1;
+	tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
+
+	//for (auto i = 0; i < horarioIteracao; i++) {
+	for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+		ultimaIteracao = i;
+		logPopulacao(populacao, i);
+
+		auto selecbegin = Util::now();
+		auto pais = gerarHorarioAGTorneioPar(populacao);
+		auto totalselc = Util::chronoDiff(Util::now(), selecbegin);
+		log << "Tempo selecao: " << totalselc << "ms\n";
+		tempoTotalSelec += totalselc;
+		
+		// Aplica os operadores de cruzamento
+
+		auto simplesbegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::simples, pais);
+		auto simplestotal = Util::chronoDiff(Util::now(), simplesbegin);
+		log << "Tempo C2: " << simplestotal << "ms\n";
+		tempoTotalCruz[1] += simplestotal;
+
+		auto subblocobegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::substitui_bloco, pais);
+		auto subblocototal = Util::chronoDiff(Util::now(), subblocobegin);
+		log << "Tempo C3: " << subblocototal << "ms\n";
+		tempoTotalCruz[2] += subblocototal;
+
+		auto constrbegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::construtivo_reparo, pais);
+		auto constrtotal = Util::chronoDiff(Util::now(), constrbegin);
+		log << "Tempo C1: " << constrtotal << "ms\n";
+		tempoTotalCruz[0] += constrtotal;
+
+		// Aplica mutação
+
+		auto disctempo = Util::now();
+		gerarHorarioAGEfetuaMutacaoExper(populacao, Configuracao::TipoMutacao::substiui_disciplina);
+		auto disctotal = Util::chronoDiff(Util::now(), disctempo);
+		log << "Tempo M1: " << disctotal << "ms\n";
+		tempoTotalMut[0] += disctotal;
+
+		auto profbegin = Util::now();
+		gerarHorarioAGEfetuaMutacaoExper(populacao, Configuracao::TipoMutacao::substitui_professor);
+		auto proftotal = Util::chronoDiff(Util::now(), profbegin);
+		log << "Tempo M2: " << proftotal << "ms\n";
+		tempoTotalMut[1] += proftotal;
+
+		// Aplica o elitismo, deletando as que sobraram
+		auto elitbegin = Util::now();
+		gerarHorarioAGSobrevivenciaElitismo(populacao);
+		auto elittotal = Util::chronoDiff(Util::now(), elitbegin);
+		log << "Tempo Elitismo: " << elittotal << "ms\n";
+		tempoTotalElit += elittotal;
+
+		// Verifica se a nova população possui uma solução melhor que a anterior
+		gerarHorarioAGVerificaEvolucao(populacao, i);
+	}
+
+	// Captura a melhor solução da população, deletando o resto
+	gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
+	auto solucaoAG = populacao[0];
+
+	// Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
+	// o que causa problemas com a escrita do html. 
+	if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
+		reinsereGrades(solucaoAG);
+	}
+
+	solucao = solucaoAG;
+
+	return solucaoAG;
+}
+
+Solucao* Resolucao::gerarHorarioAG3()
+{
+	tempoInicio = std::chrono::steady_clock::now();
+
+	auto populacao = gerarHorarioAGPopulacaoInicial2();
+	foAlvo = populacao[0]->getObjectiveFunction();
+	iteracaoAlvo = -1;
+	tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
+
+	//for (auto i = 0; i < horarioIteracao; i++) {
+	for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+		ultimaIteracao = i;
+		logPopulacao(populacao, i);
+
+		// Aplica os operadores de cruzamento
+		auto selecbegin = Util::now();
+		auto pais = gerarHorarioAGTorneioPar(populacao);
+		auto totalselc = Util::chronoDiff(Util::now(), selecbegin);
+		log << "Tempo selecao: " << totalselc << "ms\n";
+		tempoTotalSelec += totalselc;
+
+		auto simplesbegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::simples, pais);
+		auto simplestotal = Util::chronoDiff(Util::now(), simplesbegin);
+		log << "Tempo C2: " << simplestotal << "ms\n";
+		tempoTotalCruz[1] += simplestotal;
+
+		selecbegin = Util::now();
+		pais = gerarHorarioAGTorneioPar(populacao);
+		totalselc = Util::chronoDiff(Util::now(), selecbegin);
+		log << "Tempo selecao: " << totalselc << "ms\n";
+		tempoTotalSelec += totalselc;
+
+		auto subblocobegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::substitui_bloco, pais);
+		auto subblocototal = Util::chronoDiff(Util::now(), subblocobegin);
+		log << "Tempo C3: " << subblocototal << "ms\n";
+		tempoTotalCruz[2] += subblocototal;
+
+		selecbegin = Util::now();
+		pais = gerarHorarioAGTorneioPar(populacao);
+		totalselc = Util::chronoDiff(Util::now(), selecbegin);
+		log << "Tempo selecao: " << totalselc << "ms\n";
+		tempoTotalSelec += totalselc;
+
+		auto constrbegin = Util::now();
+		gerarHorarioAGEvoluiPopulacaoExper(populacao, Configuracao::TipoCruzamento::construtivo_reparo, pais);
+		auto constrtotal = Util::chronoDiff(Util::now(), constrbegin);
+		log << "Tempo C1: " << constrtotal << "ms\n";
+		tempoTotalCruz[0] += constrtotal;
+
+		// Aplica mutação
+
+		auto disctempo = Util::now();
+		gerarHorarioAGEfetuaMutacaoExper(populacao, Configuracao::TipoMutacao::substiui_disciplina);
+		auto disctotal = Util::chronoDiff(Util::now(), disctempo);
+		log << "Tempo M1: " << disctotal << "ms\n";
+		tempoTotalMut[0] += disctotal;
+
+		auto profbegin = Util::now();
+		gerarHorarioAGEfetuaMutacaoExper(populacao, Configuracao::TipoMutacao::substitui_professor);
+		auto proftotal = Util::chronoDiff(Util::now(), profbegin);
+		log << "Tempo M2: " << proftotal << "ms\n";
+		tempoTotalMut[1] += proftotal;
+
+		// Aplica o elitismo, deletando as que sobraram
+
+		auto elitbegin = Util::now();
+		gerarHorarioAGSobrevivenciaElitismo(populacao);
+		auto elittotal = Util::chronoDiff(Util::now(), elitbegin);
+		log << "Tempo Elitismo: " << elittotal << "ms\n";
+		tempoTotalElit += elittotal;
+
+		// Verifica se a nova população possui uma solução melhor que a anterior
+		gerarHorarioAGVerificaEvolucao(populacao, i);
 	}
 
 	// Captura a melhor solução da população, deletando o resto
@@ -862,10 +1114,14 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 	for (auto d = dia; d < SEMANA; d++) {
 		for (auto h = d == dia ? bloco : 0; h < blocosTamanho; h++) {
 			auto i = filho1->horario->getPosition(d, h, camada);
-			lista1.emplace_back(mat1[i], i, -1, true);
-			mat1[i] = nullptr;
-			lista2.emplace_back(mat2[i], i, -1, true);
-			mat2[i] = nullptr;
+			if (mat1[i]) {
+				lista1.emplace_back(mat1[i], i, -1, true);
+				mat1[i] = nullptr;
+			}
+			if (mat2[i]) {
+				lista2.emplace_back(mat2[i], i, -1, true);
+				mat2[i] = nullptr;
+			}
 		}
 	}
 	
@@ -1090,21 +1346,66 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& popul
 	populacao.resize(populacaoMax);
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*> filhos)
+std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*>& populacao)
 {
 	std::vector<Solucao*> genesX;
 	Solucao* solucaoTemp;
 
 	double porcentagem;
 
-	// Muta��o dos filhos
-	for (auto j = 0u; j < filhos.size(); j++) {
+	// Muta��o dos populacao
+	for (auto j = 0u; j < populacao.size(); j++) {
 		porcentagem = ((aleatorio::randomInt() % 100) / 100);
 
 		if (porcentagem <= horarioMutacaoProbabilidade) {
-			solucaoTemp = gerarHorarioAGMutacao(filhos[j]);
+			solucaoTemp = gerarHorarioAGMutacao(populacao[j]);
 
 			if (solucaoTemp) {
+				gerarGradeTipoGraspClear(solucaoTemp);
+				genesX.push_back(solucaoTemp);
+			}
+		}
+	}
+
+	return genesX;
+}
+
+std::vector<Solucao*> Resolucao::gerarHorarioAGMutacaoExper(std::vector<Solucao*>& populacao, Configuracao::TipoMutacao tipoMut)
+{
+	std::vector<Solucao*> genesX;
+	Solucao* solucaoTemp = nullptr;
+
+	double porcentagem;
+
+	// Muta��o dos populacao
+	for (auto j = 0u; j < populacao.size(); j++) {
+		porcentagem = ((aleatorio::randomInt() % 100) / 100);
+
+		if (porcentagem <= horarioMutacaoProbabilidade) {
+			switch (tipoMut) {
+			case Configuracao::TipoMutacao::substitui_professor:
+				solucaoTemp = gerarHorarioAGMutacaoSubstProf(populacao[j]);
+				break;
+			case Configuracao::TipoMutacao::substiui_disciplina:
+				solucaoTemp = gerarHorarioAGMutacaoSubstDisc(populacao[j]);
+				break;
+			}
+
+			if (solucaoTemp) {
+				auto idx = 0;
+				switch (tipoMut) {
+				case Configuracao::TipoMutacao::substiui_disciplina:
+					idx = 0; break;
+				case Configuracao::TipoMutacao::substitui_professor:
+					idx = 1; break;
+				}
+				if (solucaoTemp->getObjectiveFunction() 
+	                   > populacao[j]->getObjectiveFunction()) {
+					contadorMelhoresMut[idx]++;
+				} else if (solucaoTemp->getObjectiveFunction()
+						      == populacao[j]->getObjectiveFunction()) {
+					contadorIguaisMut[idx]++;
+				}
 				gerarGradeTipoGraspClear(solucaoTemp);
 				genesX.push_back(solucaoTemp);
 			}
@@ -1186,6 +1487,30 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
 	return nullptr;
 }
 
+double Resolucao::gerarGradeTipoGrasp2(Solucao* solucao)
+{
+	auto total = 0.0;
+	std::unordered_map<long long, Grade*> gradesGeradas;
+
+	for (auto& par : alunoPerfis) {
+		auto aluno = par.second;
+		Grade* novaGrade = nullptr;
+		if (gradesGeradas[aluno->getHash()]) {
+			novaGrade = new Grade(*gradesGeradas[aluno->getHash()]);
+			novaGrade->alunoPerfil = aluno;
+		} else {
+			novaGrade = GRASP(aluno, solucao);
+			gradesGeradas[aluno->getHash()] = novaGrade;
+		}
+
+		total += novaGrade->fo;
+		solucao->insertGrade(novaGrade);
+	}
+	solucao->fo = total;
+
+	return total;
+}
+
 double Resolucao::gerarGrade()
 {
 	return gerarGrade(solucao);
@@ -1198,7 +1523,8 @@ double Resolucao::gerarGrade(Solucao*& pSolucao)
 		return gerarGradeTipoGuloso(pSolucao);
 
 	case Configuracao::TipoGrade::grasp:
-		return gerarGradeTipoGrasp(pSolucao);
+		//return gerarGradeTipoGrasp(pSolucao);
+		return gerarGradeTipoGrasp2(pSolucao);
 
 	case Configuracao::TipoGrade::combinatorio:
 		return gerarGradeTipoCombinacaoConstrutiva(pSolucao);
@@ -1217,33 +1543,24 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 
 	std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
 	std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
-	AlunoPerfil* alunoPerfil;
-
-	std::vector<Disciplina*>::iterator dIter;
-	std::vector<Disciplina*>::iterator dIterEnd;
-	Disciplina* disciplina;
-	std::vector<Disciplina*> apRestante;
-	std::vector<std::string> apCursadas;
 
 	horario = pSolucao->horario;
 
 	for (; apIter != apIterEnd; ++apIter) {
 		if (verbose)
 			std::cout << apIter->first << std::endl;
-		alunoPerfil = alunoPerfis[apIter->first];
+		auto alunoPerfil = alunoPerfis[apIter->first];
 
 		apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
 
-		apRestante = alunoPerfil->restante;
-		apCursadas = alunoPerfil->cursadas;
+		auto apRestante = alunoPerfil->restante;
+		auto apCursadas = alunoPerfil->cursadas;
 
-		dIter = apRestante.begin();
-		dIterEnd = apRestante.end();
+		auto dIter = apRestante.begin();
+		auto dIterEnd = apRestante.end();
 
 		for (; dIter != dIterEnd; ++dIter) {
-			disciplina = *dIter;
-
-			apGrade->insert(disciplina);
+			apGrade->insert(getDisciplinaByName(*dIter));
 		}
 
 		pSolucao->insertGrade(apGrade);
@@ -1252,7 +1569,8 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 	return pSolucao->getObjectiveFunction();
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current)
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, 
+													  int maxDeep, int deep, std::unordered_set<std::string>::const_iterator current)
 {
 	Grade* bestGrade = new Grade(*pGrade);
 	Grade* currentGrade;
@@ -1261,17 +1579,17 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector
 
 	bool viavel;
 
-	for (size_t i = current; i < disciplinasRestantes.size(); i++) {
+	for (auto it = current; it != std::end(disciplinasRestantes); ++it) {
 		currentGrade = new Grade(*pGrade);
 
 		if (verbose)
-			std::cout << "Nivel: " << (deep) << " Disciplina: " << i << " (" << disciplinasRestantes[i]->id << ")" << std::endl;
+			std::cout << "Nivel: " << (deep) << " Disciplina: " << *it << ")\n";
 
-		viavel = currentGrade->insert(disciplinasRestantes[i]);
+		viavel = currentGrade->insert(getDisciplinaByName(*it));
 		if (viavel) {
 
 			if (deep != maxDeep) {
-				currentGrade = gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, maxDeep, (deep + 1), (i + 1));
+				currentGrade = gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, maxDeep, deep + 1, ++it);
 			}
 
 			bestFO = bestGrade->getObjectiveFunction();
@@ -1295,9 +1613,9 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector
 	return bestGrade;
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep)
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, int maxDeep)
 {
-	return gerarGradeTipoCombinacaoConstrutiva(pGrade, disciplinasRestantes, maxDeep, 0, 0);
+	return gerarGradeTipoCombinacaoConstrutiva(pGrade, disciplinasRestantes, maxDeep, 0, std::begin(disciplinasRestantes));
 }
 
 double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
@@ -1307,18 +1625,15 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
 
 	std::map<std::string, AlunoPerfil*>::iterator apIter = alunoPerfis.begin();
 	std::map<std::string, AlunoPerfil*>::iterator apIterEnd = alunoPerfis.end();
-	AlunoPerfil* alunoPerfil;
-
-	std::vector<Disciplina*> apRestante;
 
 	horario = pSolucao->horario;
 
 	for (; apIter != apIterEnd; ++apIter) {
 		if (verbose)
 			std::cout << "[" << apIter->first << "]" << std::endl;
-		alunoPerfil = alunoPerfis[apIter->first];
+		auto alunoPerfil = alunoPerfis[apIter->first];
 
-		apRestante = alunoPerfil->restante;
+		auto apRestante = alunoPerfil->restante;
 
 		apGrade = gerarGradeTipoCombinacaoConstrutiva(new Grade(blocosTamanho, alunoPerfil, horario,
 		                                                        disciplinas, disciplinasIndex), apRestante, apRestante.size());
@@ -1348,36 +1663,29 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade)
 
 void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar)
 {
-	AlunoPerfil* alunoPerfil;
+	auto disponivel = (SEMANA - 2) * camadasTamanho;
+	auto alunoPerfil = pGrade->alunoPerfil;
+	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> apRestante;
+	//std::transform(begin(alunoPerfil->restante), end(alunoPerfil->restante), 
+	//			   std::inserter(apRestante, begin(apRestante)),
+	//			   [this](const std::string& nomedisc) {
+	//	return getDisciplinaByName(nomedisc);
+	//});
+	for (const auto& nomedisc : alunoPerfil->restante) {
+		auto d = getDisciplinaByName(nomedisc);
+		apRestante.insert(d);
+	}
+	//auto apRestante = alunoPerfil->restante;
+	auto dIterStart = apRestante.begin();
 
-	std::vector<std::string> apCursadas;
-	std::vector<Disciplina*> apRestante;
-	std::vector<Disciplina*>::iterator dIterStart;
-	std::vector<Disciplina*>::iterator current;
-	Disciplina* disciplina;
-
-	Util util;
-
-	int adicionados;
-	int disponivel = (SEMANA - 2) * camadasTamanho;
-
-	int rand;
-	int distancia;
-
-	alunoPerfil = pGrade->alunoPerfil;
-
-	apCursadas = alunoPerfil->cursadas;
-	apRestante = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
-
-	dIterStart = apRestante.begin();
-
-	adicionados = 0;
+	auto adicionados = 0;
 	while (apRestante.size() != 0 && dIterStart != apRestante.end() && disponivel != adicionados) {
 
-		distancia = getIntervaloAlfaGrasp(apRestante);
-		rand = util.randomBetween(0, distancia);
-		current = dIterStart + rand;
-		disciplina = *current;
+		auto distancia = getIntervaloAlfaGrasp(apRestante);
+		auto rand = Util::randomBetween(0, distancia);
+		auto current = apRestante.begin();
+		std::advance(current, rand);
+		auto disciplina = *current;
 
 		if (pGrade->insert(disciplina, professorDisciplinasIgnorar)) {
 
@@ -1451,13 +1759,13 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
 
 			disciplinasSize = grade->disciplinasAdicionadas.size();
 			disciplinasRemoveMax = int(ceil(disciplinasSize * 1));
-			disciplinasRemoveRand = util.randomBetween(1, disciplinasRemoveMax);
+			disciplinasRemoveRand = Util::randomBetween(1, disciplinasRemoveMax);
 
 			for (int j = 0; j < disciplinasRemoveRand; j++) {
 				ProfessorDisciplina* professorDisciplinaRemovido = NULL;
 
 				disciplinasSize = grade->disciplinasAdicionadas.size();
-				random = util.randomBetween(0, disciplinasSize);
+				random = Util::randomBetween(0, disciplinasSize);
 				grade->remove(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
 
 				// Se houve uma remo��o
@@ -1499,13 +1807,10 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
 	Disciplina* disciplinaRemovida;
 	std::vector<Disciplina*> disciplinasRemovidas;
-	std::vector<Disciplina*> disciplinasRestantes;
 	std::vector<Disciplina*>::iterator drIter;
 	std::vector<Disciplina*>::iterator drIterEnd;
 
 	Grade *bestGrade, *currentGrade;
-
-	Util util;
 
 	int random;
 
@@ -1527,22 +1832,21 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 				std::cout << std::endl << "------NGH" << i << std::endl;
 
 			disciplinasRemovidas.clear();
-			disciplinasRestantes = std::vector<Disciplina*>(alunoPerfil->restante.begin(), alunoPerfil->restante.end());
+			auto disciplinasRestantes = alunoPerfil->restante;
 
 			for (int j = 0; j < (i + 1); j++) {
-				random = util.randomBetween(0, currentGrade->disciplinasAdicionadas.size());
+				random = Util::randomBetween(0, currentGrade->disciplinasAdicionadas.size());
 				if (random == -1) {
 					break;
 				}
 				disciplinaRemovida = currentGrade->remove(currentGrade->disciplinasAdicionadas[random]);
-				if (disciplinaRemovida != NULL) {
+				if (disciplinaRemovida) {
 					disciplinasRemovidas.push_back(disciplinaRemovida);
 				}
 			}
 
-			disciplinasRestantes.erase(remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(disciplinasRemovidas)), disciplinasRestantes.end());
-			disciplinasRestantes.erase(remove_if(disciplinasRestantes.begin(), disciplinasRestantes.end(), DisciplinasRemoveDisciplinas(currentGrade->disciplinasAdicionadas)), disciplinasRestantes.end());
-
+			RemoveDisciplinasNome(disciplinasRestantes, disciplinasRemovidas);
+			RemoveDisciplinasNome(disciplinasRestantes, currentGrade->disciplinasAdicionadas);
 			gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, i);
 
 			bestFO = bestGrade->getObjectiveFunction();
@@ -1577,8 +1881,6 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 	Solucao* temp;
 
 	double bestFO, currentFO;
-
-	Util util;
 
 	clock_t t0;
 	double diff = 0;
@@ -1618,7 +1920,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 		if (verbose)
 			std::cout << "----FIT(NGH):" << currentSolucao->getObjectiveFunction() << std::endl;
 
-		diff += util.timeDiff(clock(), t0);
+		diff += Util::timeDiff(clock(), t0);
 
 		currentFO = currentSolucao->getObjectiveFunction();
 		if (bestFO < currentFO) {
@@ -1653,45 +1955,15 @@ double Resolucao::gerarGradeTipoGraspClear(Solucao*& pSolucao)
 	return gerarGrade(pSolucao);
 }
 
-std::vector<Disciplina*>::iterator Resolucao::getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante)
+int Resolucao::getIntervaloAlfaGrasp(const std::multiset<Disciplina*, DisciplinaCargaHorariaDesc>& apRestante)
 {
-	std::vector<Disciplina*>::iterator dIter = pApRestante.begin();
-	std::vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
-	std::vector<Disciplina*>::iterator dIterLimit = dIter;
-
-	int bestFIT = (*dIter)->cargaHoraria;
-	int worstFIT = (pApRestante.back())->cargaHoraria;
-
-	int currentFIT = 0;
+	auto distancia = 0;
+	auto bestFIT = (*begin(apRestante))->cargaHoraria;
+	auto worstFIT = (*rbegin(apRestante))->cargaHoraria;
 	auto acceptFIT = bestFIT - int(ceil((1 - gradeAlfa) * (bestFIT - worstFIT)));
 
-	for (; dIter != dIterEnd; ++dIter) {
-		currentFIT = (*dIter)->cargaHoraria;
-		if (currentFIT < acceptFIT) {
-
-			break;
-		}
-		dIterLimit = dIter;
-	}
-
-	return dIterLimit;
-}
-
-int Resolucao::getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) const
-{
-	std::vector<Disciplina*>::iterator dIter = pApRestante.begin();
-	std::vector<Disciplina*>::iterator dIterEnd = pApRestante.end();
-
-	int distancia = 0;
-
-	int bestFIT = (*dIter)->cargaHoraria;
-	int worstFIT = (pApRestante.back())->cargaHoraria;
-
-	int currentFIT = 0;
-	auto acceptFIT = bestFIT - int(ceil((1 - gradeAlfa) * (bestFIT - worstFIT)));
-
-	for (; dIter != dIterEnd; ++dIter) {
-		currentFIT = (*dIter)->cargaHoraria;
+	for (const auto& disc : apRestante) {
+		auto currentFIT = disc->cargaHoraria;
 		if (currentFIT < acceptFIT) {
 			break;
 		}
@@ -1727,27 +1999,86 @@ Solucao* Resolucao::getSolucao()
 	return solucao;
 }
 
+void Resolucao::teste()
+{
+	Solucao* sol = nullptr;
+	do {
+		sol = gerarSolucaoAleatoria();
+	} while (!sol);
+	printf("hash: %u\n", sol->getHash());
+	auto n = 1;
+	auto& now = std::chrono::steady_clock::now;
+	// bench grasp
+	auto tgrasp = 0ll;
+	auto fograsp = 0.0;
+	auto maxfograsp = 0.0;
+	gradeTipoConstrucao = Configuracao::TipoGrade::grasp;
+	for (auto i = 0; i < n; i++) {
+		auto t1 = now();
+		auto r = gerarGradeTipoGraspClear(sol);
+
+		if (r > maxfograsp) maxfograsp = r;
+
+		fograsp += r;
+		auto t2 = now();
+		auto t = Util::chronoDiff(t2, t1);
+		tgrasp += t;
+		std::cout << "Tempo: " << t << "\n";
+		std::cout << "Fo: " << r << "\n\n";
+	}
+	std::cout << "Media tempo:" << tgrasp / (1. * n) << "\n";
+	std::cout << "Media FO:   " << fograsp / n << "\n";
+	std::cout << "Maior fo:   " << maxfograsp << "\n\n\n";
+
+	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fograsp / n) + "grasp"});
+	Output::write(sol, savePath);
+
+	// bench modelo
+	gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
+	auto t1 = now();
+	auto r = gerarGradeTipoGraspClear(sol);
+	auto t2 = now();
+	auto t = Util::chronoDiff(t2, t1);
+	std::cout << "Tempo mod: " << t << "\n";
+	std::cout << "FO modelo: " << r << "\n";
+	
+	reinsereGrades(sol);
+	savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
+	Output::write(sol, savePath);
+	//showResult(sol);
+}
+
 double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 {
 	auto horarioBin = converteHorario(pSolucao);
 	auto total = 0.0;
+	std::unordered_map<long long, Grade*> gradesGeradas;
+
 	for (const auto& aluno : alunos) {
 		auto currAluno = alunoPerfis[aluno.nome()];
-		auto novaGrade = new Grade(blocosTamanho, currAluno, pSolucao->horario, disciplinas, disciplinasIndex);
-		fagoc::Modelo_solver solver(*curso, aluno, horarioBin);
+		Grade* novaGrade = nullptr;
+		if (gradesGeradas[currAluno->getHash()]) {
+			novaGrade = new Grade(*gradesGeradas[currAluno->getHash()]);
+			novaGrade->alunoPerfil = currAluno;
+		} else {
+			novaGrade = new Grade(blocosTamanho, currAluno, pSolucao->horario,
+								  disciplinas, disciplinasIndex);
+			fagoc::Modelo_solver solver(*curso, aluno, horarioBin, tempoLimiteModelo);
+			solver.solve();
+			const auto& solucao = solver.solucao();
+			novaGrade->fo = solucao.funcao_objetivo;
 
-		solver.solve();
-		const auto& solucao = solver.solucao();
-		novaGrade->fo = solucao.funcao_objetivo;
-		total += novaGrade->fo;
-
-		auto& adicionadas = novaGrade->disciplinasAdicionadas;
-		for (const auto& disc : solucao.nomes_disciplinas) {
-			adicionadas.push_back(disciplinas[disciplinasIndex[disc]]);
+			auto& adicionadas = novaGrade->disciplinasAdicionadas;
+			for (const auto& disc : solucao.nomes_disciplinas) {
+				adicionadas.push_back(disciplinas[disciplinasIndex[disc]]);
+			}
+			gradesGeradas[currAluno->getHash()] = novaGrade;
 		}
 
+		total += novaGrade->fo;
 		pSolucao->insertGrade(novaGrade);
 	}
+	pSolucao->fo = total;
 
 	return total;
 }
@@ -1776,68 +2107,107 @@ std::vector<std::vector<char>> Resolucao::converteHorario(Solucao* pSolucao) con
 	return horarioBin;
 }
 
-Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const
+void Resolucao::logExperimentos()
 {
-	auto mut = new Solucao(*pSolucao);
+	char str[101];
+	sprintf(str, "Tempo total selecao: %llu\n", tempoTotalSelec);
+	log << str; puts(str);
 
-	// Determina aleatoriamente qual disciplina terá seu professor substituído
-	auto i = aleatorio::randomInt() % mut->horario->matriz.size();
-	auto disc = mut->horario->matriz[i];
-	if (!disc || disc->disciplina->professoresCapacitados.size() == 1) {
-		delete mut;
-		return nullptr;
-	}
-	// Encontra um professor substituto, que não seja o original
-	Professor* prof = nullptr;
-	do {
-		auto j = aleatorio::randomInt() % disc->disciplina->professoresCapacitados.size();
-		prof = disc->disciplina->professoresCapacitados[j];
-	} while (prof == disc->professor);
-	// Remove todas as ocorrências da alocãção, guardando suas posições
-	int coord[3];
-	mut->horario->get3DMatrix(i, coord);
-	auto camada = coord[2];
-	auto posicoesAloc = std::vector<std::pair<int, int>>{};
-	for (auto d = 0; d < SEMANA; d++) {
-		for (auto h = 0; h < blocosTamanho; h++) {
-			auto linearPos = mut->horario->getPosition(d, h, camada);
-			if (mut->horario->matriz[linearPos] == disc) {
-				posicoesAloc.emplace_back(d, h);
-				mut->horario->matriz[linearPos] = nullptr;
-			}
-		}
-	}
-	// Modifica a alocação para o novo professor
-	disc->professor = prof;
-	// Reinsere com a nova alocação
-	for (const auto& pos : posicoesAloc) {
-		auto success = mut->horario->insert(pos.first, pos.second, camada, disc);
-		if (!success) {
-			delete mut;
-			return nullptr;
-		}
-	}
+	sprintf(str, "Tempo total elitismo: %llu\n", tempoTotalElit);
+	log << str; puts(str);
 
-	return mut;
+	for (auto i = 0; i < 3; i++) {
+		sprintf(str, "C%d: tempo total: %llu iguais: %d melhores: %d\n", i+1,
+			   tempoTotalCruz[i], contadorIguaisCruz[i], contadorMelhoresCruz[i]);
+		log << str; puts(str);
+	}
+	for (auto i = 0; i < 2; i++) {
+		sprintf(str, "M%d: tempo total: %llu iguais: %d melhores: %d\n", i+1,
+			   tempoTotalMut[i], contadorIguaisMut[i], contadorMelhoresMut[i]);
+		log << str; puts(str);
+	}
 }
 
-void Resolucao::logPopulacao(const std::vector<Solucao*>& populacao) const
+Solucao* Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const
+{
+	for (auto i = 0; i < horarioMutacaoTentativas; i++) {
+		auto mut = new Solucao(*pSolucao);
+
+		// Determina aleatoriamente qual disciplina terá seu professor substituído
+		auto idx = aleatorio::randomInt() % mut->horario->matriz.size();
+		auto disc = mut->horario->matriz[idx];
+		if (!disc || disc->disciplina->professoresCapacitados.size() == 1) {
+			delete mut;
+			continue;
+		}
+		// Encontra um professor substituto, que não seja o original
+		Professor* prof = nullptr;
+		do {
+			auto j = aleatorio::randomInt() % disc->disciplina->professoresCapacitados.size();
+			prof = disc->disciplina->professoresCapacitados[j];
+		} while (prof == disc->professor);
+		// Remove todas as ocorrências da alocãção, guardando suas posições
+		int coord[3];
+		mut->horario->get3DMatrix(idx, coord);
+		auto camada = coord[2];
+		auto posicoesAloc = std::vector<std::pair<int, int>>{};
+		for (auto d = 0; d < SEMANA; d++) {
+			for (auto h = 0; h < blocosTamanho; h++) {
+				auto linearPos = mut->horario->getPosition(d, h, camada);
+				if (mut->horario->matriz[linearPos] == disc) {
+					posicoesAloc.emplace_back(d, h);
+					mut->horario->matriz[linearPos] = nullptr;
+				}
+			}
+		}
+		// Modifica a alocação para o novo professor
+		disc->professor = prof;
+		// Reinsere com a nova alocação
+		for (const auto& pos : posicoesAloc) {
+			auto success = mut->horario->insert(pos.first, pos.second, camada, disc);
+			if (!success) {
+				delete mut;
+				continue;
+			}
+		}
+
+		return mut;
+	}
+	return nullptr;
+}
+
+void Resolucao::logPopulacao(const std::vector<Solucao*>& populacao,
+                             int iter)
 {
 	// Imprime FO e Hash de todas as soluções e determina frequência dos hashes
 	std::unordered_map<std::size_t, int> freq;
-	//puts("Populacao");
+	printf("iteracao: %d\n", iter);
+	log << "iteracao: " << iter << "\n";
+
 	printf("%-8s %s\n", "FO", "Hash");
+	log << std::left << std::setw(8) << "FO" << " Hash\n";
 	for (auto& individuo : populacao) {
-		printf("%-8g %u\n", individuo->getObjectiveFunction(), 
-						    individuo->getHash());
+		auto hash = std::to_string(individuo->getHash());
+		log << std::left << std::setw(8) << individuo->getObjectiveFunction() << " "
+			<< hash << "\n";
+		printf("%-8g %s\n", individuo->getObjectiveFunction(), 
+						    hash.c_str());
 		freq[individuo->getHash()]++;
 	}
+
 	printf("\n%-11s %-5s %s\n", "Hash", "Freq", "%");
+	log << std::left << std::setw(11) << "Hash" << std::setw(5) << "Freq" << " %\n";
+
 	for (const auto& par : freq) {
 		auto porc = par.second * 1. / populacao.size() * 100;
+		log << std::left << std::setw(11) << std::left << par.first
+			<< std::setw(5) << par.second << porc << "\n";
 		printf("%-11u %-5d %g\n", par.first, par.second, porc);
 	}
+
+	log << "\n\n";
 	printf("\n\n");
+
 }
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2() 
@@ -1858,7 +2228,6 @@ bool Resolucao::gerarCamada(Solucao* solucao, int camada, std::vector<Disciplina
 	std::vector<char> disc_visitadas(num_discs, false);
 
 	while (num_disc_visitadas < num_discs) {
-		//puts("Disciplina");
 		int rnd_disc;
 		do {
 			rnd_disc = aleatorio::randomInt() % num_discs;
@@ -1872,7 +2241,6 @@ bool Resolucao::gerarCamada(Solucao* solucao, int camada, std::vector<Disciplina
 		if (!success) {
 			return false;
 		}
-
 	}
 	return true;
 }
@@ -1887,7 +2255,6 @@ bool Resolucao::geraProfessorDisciplina(Solucao* solucao, Disciplina* disc,
 	auto success = false;
 
 	while (!success && num_prof_visitados < num_profs) {
-		//puts("Professor");
 		int rnd_prof;
 		do {
 			rnd_prof = aleatorio::randomInt() % num_profs;
@@ -1909,24 +2276,23 @@ bool Resolucao::geraProfessorDisciplina(Solucao* solucao, Disciplina* disc,
 
 bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof, int camada)
 {
-	ProfessorDisciplina* pd = nullptr;
 	auto pdId = "pr" + prof->id + "di" + disc->id;
 	if (!professorDisciplinas[pdId]) {
 		professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
 	}
-	pd = professorDisciplinas[pdId];
+	auto pd = professorDisciplinas[pdId];
 
 	auto creditos_alocados_disc = 0;
 	auto num_slots = SEMANA * blocosTamanho;
 	auto num_slot_visitados = 0;
 	std::vector<std::vector<char>> slots_visitados(SEMANA, std::vector<char>(blocosTamanho, false));
+
 	while (creditos_alocados_disc < disc->cargaHoraria && num_slot_visitados < num_slots) {
-		//puts("Creditos");
 		auto restante = disc->cargaHoraria - creditos_alocados_disc;
 		int bloco, dia;
 		auto success_prof = false;
+
 		while (!success_prof && num_slot_visitados < num_slots) {
-			//puts("Dia e hora");
 			do {
 				dia = aleatorio::randomInt() % SEMANA;
 				// Se restante for maior que um, deve alocar um bloco de duas disciplinas
@@ -1940,46 +2306,50 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 					bloco = aleatorio::randomInt() % blocosTamanho;
 				}
 			} while (slots_visitados[dia][bloco]);
+
 			if (restante == 1) {
 				slots_visitados[dia][bloco] = true;
 				num_slot_visitados++;
 				success_prof = solucao->horario->insert(dia, bloco, camada, pd);
+				if (success_prof) {
+					creditos_alocados_disc++;
+				}
 			} else {
 				slots_visitados[dia][bloco] = true;
 				slots_visitados[dia][bloco + 1] = true;
 				num_slot_visitados += 2;
-				success_prof = solucao->horario->insert(dia, bloco, camada, pd)
-					&& solucao->horario->insert(dia, bloco + 1, camada, pd);
-			}
-			if (success_prof) {
-				if (restante == 1) {
-					creditos_alocados_disc++;
-				} else {
+				auto success_bloco1 = solucao->horario->insert(dia, bloco, camada, pd);
+				auto success_bloco2 = solucao->horario->insert(dia, bloco + 1, camada, pd);
+				success_prof = success_bloco1 && success_bloco2;
+				if (success_prof) {
 					creditos_alocados_disc += 2;
+				} else if (!success_prof) {
+					if (success_bloco1) {
+						solucao->horario->clearSlot(dia, bloco, camada);
+					} 
+					if (success_bloco2) {
+						solucao->horario->clearSlot(dia, bloco + 1, camada);
+					}
 				}
 			}
 		}
 	}
-	if (creditos_alocados_disc == disc->cargaHoraria) {
-		return true;
-	} else {
-		return false;
-	}
+
+	return creditos_alocados_disc == disc->cargaHoraria;
 }
 
 Solucao* Resolucao::gerarSolucaoAleatoria() 
 {
-	//puts("Gerando nova solucao");
-	auto solucao = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+	auto solucaoRnd = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
 	std::unordered_map<std::string, int> creditos_alocados_prof;
 
 	auto num_periodos = periodoXdisciplina.size();
 	auto num_per_visitados = 0u;
 	auto camada = 0;
 	std::vector<char> periodos_visitados(num_periodos, false);
+
 	// Percorre todos os períodos aleatoriamente
 	while (num_per_visitados < num_periodos) {
-		//puts("Periodo");
 		// Escolhe um período. Escolhe outro se já for percorrido.
 		int rnd_per;
 		do {
@@ -1994,21 +2364,22 @@ Solucao* Resolucao::gerarSolucaoAleatoria()
 		std::advance(it, rnd_per);
 		auto& discs = it->second;
 
-		auto success = gerarCamada(solucao, camada, discs, creditos_alocados_prof);
+		auto success = gerarCamada(solucaoRnd, camada, discs, creditos_alocados_prof);
 		if (!success) {
-			delete solucao;
+			delete solucaoRnd;
 			return nullptr;
 		}
 
 		camada++;
 	}
-	return solucao;
+	return solucaoRnd;
 }
 
 std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes) 
 {
 	std::vector<Solucao*> solucoes;
 	for (auto i = 0; i < numSolucoes; i++) {
+		printf("sol: %d\n", i);
 		Solucao* currSolucao = nullptr;
 		while (!currSolucao) {
 			currSolucao = gerarSolucaoAleatoria();
@@ -2016,6 +2387,7 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 		gerarGradeTipoGraspClear(currSolucao);
 		solucoes.push_back(currSolucao);
 	}
+	puts("\n");
 	return solucoes;
 }
 
@@ -2043,14 +2415,36 @@ void Resolucao::gerarHorarioAGEvoluiPopulacao(std::vector<Solucao*>& populacao,
 
 		Util::insert_sorted(populacao, begin(filhos), end(filhos),
 							SolucaoComparaMaior());
-		auto geneX = gerarHorarioAGMutacao(filhos);
-		Util::insert_sorted(populacao, begin(geneX), end(geneX),
-							SolucaoComparaMaior());
 
 	}
 }
 
-void Resolucao::gerarHorarioAGRegistraSolucaoAlvo(std::vector<Solucao*>& populacao, 
+void Resolucao::gerarHorarioAGEvoluiPopulacaoExper(
+	std::vector<Solucao*>& populacao, Configuracao::TipoCruzamento tipoCruz,
+	std::vector<Solucao*>& pais)
+{
+	auto filhos = gerarHorarioAGCruzamentoExper(pais, tipoCruz);
+	Util::insert_sorted(populacao, begin(filhos), end(filhos),
+						SolucaoComparaMaior());
+}
+
+void Resolucao::gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& populacao)
+{
+	auto geneX = gerarHorarioAGMutacao(populacao);
+	Util::insert_sorted(populacao, begin(geneX), end(geneX),
+						SolucaoComparaMaior());
+}
+
+void Resolucao::gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& populacao, 
+												 Configuracao::TipoMutacao tipoMut)
+{
+	
+	auto geneX = gerarHorarioAGMutacaoExper(populacao, tipoMut);
+	Util::insert_sorted(populacao, begin(geneX), end(geneX),
+						SolucaoComparaMaior());
+}
+
+void Resolucao::gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao, 
 												  int iteracaoAtual)
 {
 	if (populacao[0]->getObjectiveFunction() > foAlvo) {
@@ -2059,5 +2453,110 @@ void Resolucao::gerarHorarioAGRegistraSolucaoAlvo(std::vector<Solucao*>& populac
 		iteracaoAlvo = iteracaoAtual;
 		tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(), 
 									 tempoInicio);
+		puts("Nova melhor solucao!");
+		log << "Nova melhor solucao!\n";
+		char str[101];
+		sprintf(str, "%-8g %u\n", populacao[0]->getObjectiveFunction(),
+								  populacao[0]->getHash());
+		puts(str); log << str;
 	}
+}
+
+Grade* Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao)
+{
+	auto novaGrade = new Grade(blocosTamanho, alunoPerfil, solucao->horario,
+							   disciplinas, disciplinasIndex);
+	auto horariosMax = (SEMANA - 2) * blocosTamanho;
+	auto adicionados = 0;
+
+	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> restantes;
+	for (const auto& nomedisc : alunoPerfil->restante) {
+		restantes.insert(getDisciplinaByName(nomedisc));
+	}
+
+	while (!restantes.empty() && adicionados < horariosMax) {
+		auto current = getRandomDisc(restantes);
+
+		auto success = novaGrade->insert(*current);
+		if (success) {
+			adicionados++;
+		}
+		restantes.erase(current);
+	}
+
+	return novaGrade;
+}
+
+Grade* Resolucao::vizinhoGrasp(Grade* grade)
+{
+	auto currGrade = new Grade(*grade);
+
+	const auto& adicionadas = currGrade->disciplinasAdicionadas;
+	Disciplina* discremovida = nullptr;
+
+	if (!adicionadas.empty()) {
+		auto rand = aleatorio::randomInt() % adicionadas.size();
+		discremovida = currGrade->remove(adicionadas[rand]);
+	}
+
+	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> restantes;
+	for (const auto& nomedisc : currGrade->alunoPerfil->restante) {
+		restantes.insert(getDisciplinaByName(nomedisc));
+	}
+
+	while (!restantes.empty()) {
+		auto current = getRandomDisc(restantes);
+		auto discJaAdicionada = std::find(
+			begin(adicionadas), end(adicionadas), *current) != end(adicionadas);
+
+		if (*current == discremovida || discJaAdicionada) {
+			restantes.erase(current);
+			continue;
+		}
+
+		if (currGrade->insert(*current)) {
+			break;
+		}
+		restantes.erase(current);
+	}
+
+	return currGrade;
+}
+
+void Resolucao::buscaLocal(Grade*& grade)
+{
+	auto bestGrade = grade;
+
+	for (auto i = 0; i < gradeGraspVizinhos; i++) {
+		auto vizinho = vizinhoGrasp(grade);
+		if (vizinho->getObjectiveFunction() > bestGrade->getObjectiveFunction()) {
+			delete bestGrade;
+			bestGrade = vizinho;
+		} else {
+			delete vizinho;
+		}
+	}
+
+	grade = bestGrade;
+}
+
+Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao)
+{
+	auto melhorGrade = gradeAleatoria(alunoPerfil, solucao);
+	auto ultimaMelhoriaIter = -1;
+
+	for (auto i = 0; i - ultimaMelhoriaIter < numMaximoIteracoesSemEvolucaoGRASP; i++) {
+		auto gradeCandidata = gradeAleatoria(alunoPerfil, solucao);
+		buscaLocal(gradeCandidata);
+
+		if (gradeCandidata->getObjectiveFunction() > melhorGrade->getObjectiveFunction()) {
+			ultimaMelhoriaIter = i;
+			delete melhorGrade;
+			melhorGrade = gradeCandidata;
+		} else {
+			delete gradeCandidata;
+		}
+	}
+
+	return melhorGrade;
 }

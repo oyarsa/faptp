@@ -30,7 +30,7 @@ void Output::write(Solucao *pSolucao) {
     write(pSolucao, getDir());
 }
 
-void Output::write(Solucao *pSolucao, std::string savePath) {
+void Output::write(Solucao *pSolucao, const std::string& savePath) {
     // Criando o diretorio de saida
 	Util::create_folder(savePath);
     std::stringstream saida{};
@@ -70,12 +70,13 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
             saida << "<tr>";
             for (int k = 0; k < SEMANA; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
-                std::string pds = "-";
                 if (pd) {
-					pds = pd->getDisciplina()->getNome() + "<br>" 
-						+ "<i>" + pd->getProfessor()->getNome() + "</i>";
-                }
-                saida << "<td>" << pds << "</td>";
+					saida << "<td>"<< pd->getDisciplina()->getNome() << "<br>"
+						<< "<i>" << pd->getProfessor()->getNome() << "</i>"
+						<< "</td>";
+				} else {
+					saida << "<td>" << " -- " << "</td>";
+				}
             }
             saida << "</tr>";
         }
@@ -89,7 +90,7 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
         double fo = gradeAtual->getObjectiveFunction();
 
         if (fo == 0) {
-            continue;
+            //continue;
         }
 
         saida << "<table align='center' class='grade'>\n";
@@ -107,11 +108,13 @@ void Output::write(Solucao *pSolucao, std::string savePath) {
             saida << "<tr>";
             for (int k = 0; k < SEMANA; k++) {
                 auto pd = gradeAtual->at(k, j, 0);
-                std::string pds = "-";
-                if (pd != NULL) {
-                    pds = pd->getDisciplina()->getNome();
+                if (pd) {
+					saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
+						<< "<b>" << pd->getDisciplina()->getId() << "</b>"
+						<< "</td>";
+                } else {
+					saida << "<td> -- </td>";
                 }
-                saida << "<td>" << pds << "</td>";
             }
             saida << "</tr>";
         }

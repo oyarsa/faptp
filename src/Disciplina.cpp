@@ -38,7 +38,8 @@ std::string Disciplina::getId() const {
     return id;
 }
 
-std::string Disciplina::getNome() {
+std::string Disciplina::getNome() const
+{
     return nome;
 }
 
@@ -79,7 +80,7 @@ int Disciplina::getCreditos() {
 }
 
 void Disciplina::addPreRequisito(std::string pDisciplina) {
-    preRequisitos.push_back(pDisciplina);
+    preRequisitos.insert(pDisciplina);
 }
 
 bool Disciplina::isPreRequisito(std::string pDisciplina) {

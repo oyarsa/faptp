@@ -22,7 +22,7 @@ public:
 	std::size_t getHash();
 private:
     Horario *horario;
-    std::unordered_map<std::string, Grade*> grades;
+    std::map<std::string, Grade*> grades;
     
     int id;
     int blocosTamanho;

@@ -54,7 +54,7 @@ private:
   bool isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
   //! Verifica se a disciplina sendo considerada não está na lista de equivalências
   //! de outra que já foi inserida
-  bool discRepetida(const Disciplina* const pDisciplina);
+  bool discRepetida(const Disciplina* pDisciplina);
   void add(Disciplina* pDisciplina, int pCamada);
 };
 

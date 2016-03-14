@@ -53,12 +53,15 @@ public:
 	Configuracao& tipoCruzamento(TipoCruzamento tipo);
 	Configuracao& tipoMutacao(TipoMutacao tipo);
 	Configuracao& porcentagemSolucoesAleatorias(int n);
+	Configuracao& tempoLimiteModelo(double tempo);
+	Configuracao& numMaximoIteracoesSemEvolucaoAG(int n);
+	Configuracao& numMaximoIteracoesSemEvolucaoGRASP(int n);
 private:
 	friend class Resolucao;
 	std::string filename_ = "input.json";
 	int blocoTam_ = 4;
-	int camadaTam_ = 4;
-	int perfilTam_ = 150;
+	int camadaTam_ = 20;
+	int perfilTam_ = 600;
 	TipoGrade tipoConstr_ = TipoGrade::grasp;
 	int popInicial_ = 10;
 	int numIter_ = 100;
@@ -74,6 +77,9 @@ private:
 	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
 	TipoMutacao tipoMut_ = TipoMutacao::substiui_disciplina;
 	double porcSolucoesAleatorias_ = 0.1;
+	double tempoLimMod_ = 0;
+	int numMaxIterSemEvoAG_ = 5;
+	int numMaxIterSemEvoGRASP_ = 5;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -187,5 +193,23 @@ inline Configuracao& Configuracao::tipoMutacao(TipoMutacao tipo)
 inline Configuracao& Configuracao::porcentagemSolucoesAleatorias(int n)
 {
 	porcSolucoesAleatorias_ = n / 100.;
+	return *this;
+}
+
+inline Configuracao& Configuracao::tempoLimiteModelo(double tempo)
+{
+	tempoLimMod_ = tempo;
+	return *this;
+}
+
+inline Configuracao& Configuracao::numMaximoIteracoesSemEvolucaoAG(int n)
+{
+	numMaxIterSemEvoAG_ = n;
+	return *this;
+}
+
+inline Configuracao& Configuracao::numMaximoIteracoesSemEvolucaoGRASP(int n)
+{
+	numMaxIterSemEvoGRASP_ = n;
 	return *this;
 }

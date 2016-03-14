@@ -4,14 +4,14 @@
 #include "parametros.h"
 #include "Horario.h"
 
-Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_() {
+Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {
 }
 
 Horario::~Horario() {
 }
 
 Horario::Horario(const Horario& outro) 
-    : Representacao(outro), hash_()
+    : Representacao(outro), hash_(0)
 {
 }
 
@@ -77,10 +77,11 @@ std::size_t Horario::getHash()
 
 	for (const auto& pd : matriz) {
 		if (pd) {
-			oss << pd->disciplina->nome;
+			oss << pd->disciplina->id + pd->professor->id;
+		} else {
+			oss << "00";
 		}
 	}
-
-	hash_ = std::hash<std::string>{}(oss.str());
+	hash_ = Util::hash_string(oss.str());
 	return hash_;
 }

@@ -40,32 +40,24 @@ bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
 	return success;
 }
 
-bool Grade::discRepetida(const Disciplina * const pDisciplina) {
+bool Grade::discRepetida(const Disciplina * pDisciplina) {
     // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplina
     // se encontra em suas listas de equival�ncias. Se sim, ela � uma disciplina
     // repetida e n�o pode ser inserida
-    for (const auto& discAtual : disciplinasAdicionadas) {
-        const auto& equivalentes = discAtual->equivalentes;
-        if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
-                != end(equivalentes)) {
-			if (verbose)
-				std::cout << "---INVIAVEL[" << pDisciplina->nome << "] REPETIDA\n";
-            return true;
-        }
-    }
+	auto found = std::find_if(begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
+							  [&pDisciplina](Disciplina* d) {
+		return d == pDisciplina;
+	});
+	if (found != end(disciplinasAdicionadas)) {
+		if (verbose)
+			std::cout << "---INVIAVEL[" << pDisciplina->nome << "] EQUIV REPETE\n";
+		return true;
+	}
     // Percorre as disciplinas cursadas do aluno e verifica se o nome de pDisciplina
     // � equivalente a alguma. Se sim, ela � uma disciplina repetida e n�o pode
     // ser inserida
-    for (const auto& discAtual : alunoPerfil->cursadas) {
-        const auto& equivalentes = getDisciplina(discAtual)->equivalentes;
-        if (find(begin(equivalentes), end(equivalentes), pDisciplina->nome)
-                != end(equivalentes)) {
-			if (verbose)
-				std::cout << "---INVIAVEL[" << pDisciplina->nome << "] EQUIV REPETE\n";
-            return true;
-        }
-    }
-    return false;
+	return alunoPerfil->cursadas.find(pDisciplina->getNome()) 
+		!= end(alunoPerfil->cursadas);
 }
 
 bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
@@ -109,31 +101,17 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
     bool viavel = true;
 
     const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
+	const auto& disciplinasAprovadas = alunoPerfil->aprovadas;
 
-    if (pDisciplinaPreRequisitos.size() > 0) {
-        const auto& disciplinasAprovadas = alunoPerfil->aprovadas;
-
-        if (disciplinasAprovadas.size() > 0) {
-            // Percorre a lista de disciplinas que s�o pre-requisitos da atual
-            // e procura alguma disciplina equivalente deste pre-requisito
-            // na lista de cursadas do aluno
-            for (const auto& preRequisito : pDisciplinaPreRequisitos) {
-                const auto& equivalentes = getDisciplina(preRequisito)->equivalentes;
-                auto possuiPreReq = find_first_of(equivalentes.begin(), equivalentes.end(),
-                        disciplinasAprovadas.begin(), disciplinasAprovadas.end())
-                        != equivalentes.end();
-
-                if (!possuiPreReq) {
-					if (verbose)
-						std::cout << "---INVIAVEL[" << pDisciplina->nome << "] PREREQ [" << preRequisito << "]\n";
-                    viavel = false;
-                    break;
-                }
-            }
-
-        } else {
-            viavel = false;
-        }
+	// Percorre a lista de disciplinas que sao pre-requisitos da atual
+	for (const auto& preRequisito : pDisciplinaPreRequisitos) {
+		// Se não foi encontrado, retorna falso
+		if (disciplinasAprovadas.find(preRequisito) == end(disciplinasAprovadas)) {
+			if (verbose)
+				std::cout << "---INVIAVEL[" << pDisciplina->nome << "] PREREQ [" << preRequisito << "]\n";
+			viavel = false;
+			break;
+		}
     }
 
     if (!viavel && verbose) {
@@ -192,11 +170,12 @@ bool Grade::checkCollision(const Disciplina * const pDisciplina, const int pCama
 bool Grade::isViable(const Disciplina * const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar) {
 	if (verbose && !pDisciplina->ofertada)
 		std::cout << "---INVIAVEL[" << pDisciplina->nome << "] N OFERT\n";
-    return havePreRequisitos(pDisciplina) &&
-		checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
+	return
+		pDisciplina->ofertada &&
 		!discRepetida(pDisciplina) &&
-		hasPeriodoMinimo(pDisciplina) &&
-		pDisciplina->ofertada;
+		havePreRequisitos(pDisciplina) &&
+		checkCollision(pDisciplina, pCamada, professorDisciplinasIgnorar) &&
+		hasPeriodoMinimo(pDisciplina);
 }
 
 void Grade::add(Disciplina* pDisciplina, int pCamada) {

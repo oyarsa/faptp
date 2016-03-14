@@ -2,7 +2,7 @@
 #define	ALUNOPERFIL_H
 
 #include <string>
-#include <algorithm>
+#include <unordered_set>
 #include <vector>
 
 #include "Disciplina.h"
@@ -14,30 +14,30 @@ class AlunoPerfil {
   friend class Resolucao;
   friend class Output;
 public:
-  AlunoPerfil(double pPeso);
-  AlunoPerfil(double pPeso, std::string pId, std::string pTurma, std::string pPeriodo);
+  AlunoPerfil(double pPeso, const std::string& pId, const std::string& pTurma, const std::string& pPeriodo);
   virtual ~AlunoPerfil();
   
-  double getPeso();
+  double getPeso() const;
+  long long getHash();
   void setPeso(double pPeso);
   
-  void addCursada(std::string pCursada);
-  bool isCursada(std::string pCursada);
+  void addCursada(const std::string& pCursada);
+  bool isCursada(const std::string& pCursada);
   
-  void addRestante(Disciplina* pRestante);
-  bool isRestante(Disciplina* pRestante);
+  void addRestante(const std::string& pRestante);
+  bool isRestante(const std::string& pRestante);
 private:
   std::string id;
   std::string turma;
   std::string periodo;
   
   double peso;
+  long long hash;
   
-  std::vector<std::string> cursadas;
-  std::vector<std::string> aprovadas;
-  std::vector<Disciplina*> restante;
+  std::unordered_set<std::string> cursadas;
+  std::unordered_set<std::string> aprovadas;
+  std::unordered_set<std::string> restante;
   
-  void init(double pPeso, std::string pId, std::string pTurma, std::string pPeriodo);
 };
 
 #endif	/* ALUNOPERFIL_H */

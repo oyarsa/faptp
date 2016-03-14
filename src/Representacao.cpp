@@ -6,9 +6,7 @@
 #include "Algorithms.h"
 #include "Semana.h"
 
-#include "Util.h"
-
-Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) : util() {
+Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;
 
@@ -22,8 +20,7 @@ Representacao::Representacao(const Representacao& outro)
 , blocos(outro.blocos)
 , camadas(outro.camadas)
 , matriz(outro.matriz)
-, alocados(outro.alocados)
-, util() {
+, alocados(outro.alocados) {
 }
 
 Representacao& Representacao::operator=(const Representacao& outro) {
@@ -78,7 +75,7 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
 }
 
 void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
-    util.get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
+    Util::get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
 }
 
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {
@@ -129,6 +126,14 @@ void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, i
             }
         }
     }
+}
+
+void Representacao::clearSlot(int pDia, int pBloco, int pCamada)
+{
+	int position = getPosition(pDia, pBloco, pCamada);
+
+	matriz[position] = nullptr;
+	alocados[position] = "";
 }
 
 int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound) {

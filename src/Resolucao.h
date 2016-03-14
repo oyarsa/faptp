@@ -4,17 +4,19 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <set>
 
 #include <modelo-grade/aluno.h>
 #include <modelo-grade/curso.h>
 #include "includes/json/json.h"
 
+#include "Algorithms.h"
 #include "Professor.h"
 #include "Disciplina.h"
 #include "ProfessorDisciplina.h"
 #include "AlunoPerfil.h"
 #include "Solucao.h"
-#include "Util.h"
+#include "Aleatorio.h"
 #include "Configuracao.h"
 
 class Resolucao {
@@ -28,6 +30,8 @@ public:
     double start(bool input);
 
     Solucao* gerarHorarioAG();
+    Solucao* gerarHorarioAG2();
+    Solucao* gerarHorarioAG3();
 
     double gerarGrade();
 
@@ -35,8 +39,11 @@ public:
 
     Solucao* getSolucao();
 
+	void teste();
+
 	fagoc::Curso& getCurso();
 	const std::vector<fagoc::Aluno>& getAlunos() const;
+	std::string getLog() const;
 
 	// Converte a matriz tridimensional do horário em uma matriz bidimensional
 	// de binários para o modelo
@@ -84,9 +91,26 @@ public:
 	long long tempoAlvo;
 	std::size_t hashAlvo;
 
+	void logExperimentos();
+
 	// Porcentagem de soluções aleatórias que serão criadas e adicionadas à população
 	// à cada iteração
 	double porcentagemSolucoesAleatorias;
+	
+	// Número de iterações máximo que o AG continuará sem evoluir a solução
+	int numMaximoIteracoesSemEvolucaoAG;
+	int ultimaIteracao;
+	// Número de iterações máximo que o GRASP continuará sem evoluir a grade
+	int numMaximoIteracoesSemEvolucaoGRASP;
+
+	int contadorIguaisCruz[3];
+	int contadorIguaisMut[2];
+	int contadorMelhoresCruz[3];
+	int contadorMelhoresMut[2];
+	long long tempoTotalCruz[3];
+	long long tempoTotalMut[3];
+	long long tempoTotalSelec;
+	long long tempoTotalElit;
 private:
     int blocosTamanho;
     int camadasTamanho;
@@ -100,10 +124,11 @@ private:
     std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
-	Util util;
 	std::unique_ptr<fagoc::Curso> curso;
 	std::vector<fagoc::Aluno> alunos;
 	std::chrono::system_clock::time_point tempoInicio;
+	double tempoLimiteModelo;
+	std::ostringstream log;
 
     void carregarDados();
     void carregarDadosProfessores();
@@ -112,10 +137,13 @@ private:
     void carregarDadosProfessorDisciplinas();
     void carregarSolucao();
 
+	Disciplina* getDisciplinaByName(const std::string& nomeDisc);
     std::vector<Disciplina*> ordenarDisciplinas();
     std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
     void atualizarDisciplinasIndex();
 	std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
+	std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
+													Configuracao::TipoCruzamento tipoCruz);
 	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
     std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
@@ -132,16 +160,20 @@ private:
 
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) const;
-    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*> filhos);
+    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*>& populacao);
+    std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& populacao,
+												 Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
-    double gerarGrade(Solucao *&pSolucao);
+	double gerarGradeTipoGrasp2(Solucao* solucao);
+	double gerarGrade(Solucao *&pSolucao);
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep, int deep, int current);
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, std::vector<Disciplina*> disciplinasRestantes, int maxDeep);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, int maxDeep, int deep, 
+											   std::unordered_set<std::string>::const_iterator current);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
@@ -157,14 +189,13 @@ private:
 
 	double gerarGradeTipoModelo(Solucao *pSolucao);
 
-    std::vector<Disciplina*>::iterator getLimiteIntervaloGrasp(std::vector<Disciplina*> pApRestante);
-    int getIntervaloAlfaGrasp(std::vector<Disciplina*> pApRestante) const;
+    int getIntervaloAlfaGrasp(const std::multiset<Disciplina*, DisciplinaCargaHorariaDesc>& apRestante);
 
     void showResult(Solucao *pSolucao);
 
 	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const;
 
-	void logPopulacao(const std::vector<Solucao*>& populacao) const;
+	void logPopulacao(const std::vector<Solucao*>& populacao, int iter);
 
 	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
 	bool gerarCamada(Solucao* solucao, int camada, std::vector<Disciplina*> discs,
@@ -178,7 +209,30 @@ private:
 	void reinsereGrades(Solucao* solucao) const;
 
 	void gerarHorarioAGEvoluiPopulacao(std::vector<Solucao*>& populacao, int numCruz);
-	void gerarHorarioAGRegistraSolucaoAlvo(std::vector<Solucao*>& populacao, int iteracaoAtual);
+	void gerarHorarioAGEvoluiPopulacaoExper(std::vector<Solucao*>& populacao, 
+										Configuracao::TipoCruzamento tipoCruz,
+										std::vector<Solucao*>& pais);
+	void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& populacao);
+	void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& populacao, 
+									  Configuracao::TipoMutacao tipoMut);
+	void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao, int iteracaoAtual);
+
+
+	Grade* gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);
+	Grade* vizinhoGrasp(Grade* grade);
+	void buscaLocal(Grade*& grade);
+	Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
+
+	template <typename Set>
+	typename Set::iterator getRandomDisc(Set& restantes)
+	{
+		auto current = begin(restantes);
+		auto distancia = getIntervaloAlfaGrasp(restantes);
+		auto rand = aleatorio::randomInt() % distancia;
+		std::advance(current, rand);
+
+		return current;
+	}
 };
 
 #endif /* RESOLUCAO_H */

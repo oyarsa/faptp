@@ -130,70 +130,85 @@ void semArgumentos()
 {
 	experimento = false;
 
-	Resolucao resolucaoGrasp {Configuracao()
+	Resolucao r{Configuracao()
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
 		.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(10)
+		.populacaoInicial(5)
 		.porcentagemCruzamentos(20) // %
-		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
-		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		.numMaximoIteracoesSemEvolucaoGRASP(5)
+		.numMaximoIteracoesSemEvolucaoAG(5)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
+		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
 		.mutacaoProbabilidade(20) // %
-		.graspTempoConstrucao(1) // ms
+		.graspTempoConstrucao(2) // ms
 		.graspNumVizinhos(2)
-		.graspAlfa(30) // %
-		.porcentagemSolucoesAleatorias(0) // %
-		.numIteracoes(5)
+		.graspAlfa(40) // %
+		.camadaTamanho(20)
+		.perfilTamanho(600)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
 		//.tipoConstrucao(Configuracao::TipoGrade::modelo)
+		//.tempoLimiteModelo(0.09)
 		.tipoConstrucao(Configuracao::TipoGrade::grasp)
 	};
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
 	auto inicio = std::chrono::steady_clock::now();
-	resolucaoGrasp.start(false);
+	//resolucaoGrasp.start(false);
+	r.gerarHorarioAG3();
 	auto fim = std::chrono::steady_clock::now();
 
 	std::cout << "Tempo do horario: " << std::chrono::duration_cast<std::chrono::milliseconds>
 		(fim - inicio).count() << "ms\n\n";
 
-	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
+	auto fo = r.getSolucao()->getObjectiveFunction();
 	std::cout << "\nResultado:" << fo << std::endl;
-	//resolucaoGrasp.showResult();
+	//r.showResult();
 
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
-	Output::write(resolucaoGrasp.getSolucao(), savePath);
+	Output::write(r.getSolucao(), savePath);
 
-	std::cout << "solucaoAlvo: " << resolucaoGrasp.foAlvo << "\n";
-	std::cout << "hashAlvo: " << resolucaoGrasp.hashAlvo << "\n";
-	std::cout << "iteracoes: " << resolucaoGrasp.iteracaoAlvo << "\n";
-	std::cout << "tempoAlvo: " << resolucaoGrasp.tempoAlvo << "\n";
+	std::cout << "solucaoAlvo: " << r.foAlvo << "\n";
+	std::cout << "hashAlvo: " << r.hashAlvo << "\n";
+	std::cout << "iteracoes: " << r.iteracaoAlvo << "\n";
+	std::cout << "tempoAlvo: " << r.tempoAlvo << "\n";
+	std::cout << "ultima iteracao: " << r.ultimaIteracao << "\n";
+
+	std::ofstream out{savePath + "teste.txt"};
+	r.logExperimentos();
+	out << r.getLog();
 }
 
 
-void exper(const std::string& filein, const std::string& fileout,
+void exper(const std::string& filein, 
 		 Configuracao::TipoMutacao mut, Configuracao::TipoCruzamento cruz,
-		 Configuracao::TipoGrade grade)
+		 Configuracao::TipoGrade grade, int numindividuos, int numger)
 {
 	experimento = false;
+	auto timenow = Output::timestamp();
+	auto path = Util::join_path({"exper", timenow});
+	Util::create_folder(path);
+	auto fileout = path + "result.txt";
+	std::cout << "File: " << fileout << "\n";
 
-	Resolucao resolucaoGrasp{Configuracao()
+	Resolucao r{Configuracao()
 		.arquivoEntrada(filein)
-		.populacaoInicial(100)
+		.populacaoInicial(numindividuos)
 		.porcentagemCruzamentos(0) // %
 		.tipoCruzamento(cruz)
 		.tipoMutacao(mut)
 		.mutacaoProbabilidade(20) // %
-		.graspTempoConstrucao(1000) // ms
+		.graspTempoConstrucao(30000) // ms
 		.graspNumVizinhos(2)
 		.graspAlfa(30) // %
-		.numIteracoes(100)
+		.numIteracoes(numger)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
@@ -202,31 +217,67 @@ void exper(const std::string& filein, const std::string& fileout,
 	};
 
 	auto inicio = std::chrono::steady_clock::now();
-	resolucaoGrasp.start(false);
+	r.start(false);
 	auto fim = std::chrono::steady_clock::now();
 
 	auto saida = std::ofstream(fileout);
-	if (!saida.is_open()) std::cout << "Ixi\n";
 	saida << "Tempo do horario: " << std::chrono::duration_cast<std::chrono::milliseconds>
-		(fim - inicio).count() << "ms\n\n";
+		(fim - inicio).count() << "ms\n";
 
-	auto fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
+	auto fo = r.getSolucao()->getObjectiveFunction();
 	saida << "\nResultado:" << fo << std::endl;
 	//resolucaoGrasp.showResult();
 
-	saida << "solucaoAlvo:" << resolucaoGrasp.foAlvo << "\n";
-	saida << "iteracoes:" << resolucaoGrasp.iteracaoAlvo << "\n";
-	saida << "tempoAlvo:" << resolucaoGrasp.tempoAlvo << "\n";
+	saida << "hash: " << r.hashAlvo << "\n";
+	saida << "solucaoAlvo:" << r.foAlvo << "\n";
+	saida << "iteracoes:" << r.iteracaoAlvo << "\n";
+	saida << "tempoAlvo:" << r.tempoAlvo << "\n";
+	saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
+	saida << r.getLog() << "\n";
+
+	Output::write(r.getSolucao(), path);
+}
+
+void teste()
+{
+	Resolucao resolucaoGrasp{Configuracao()
+		.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
+		.populacaoInicial(1)
+		.numIteracoes(0)
+		.porcentagemSolucoesAleatorias(0) // %
+		.porcentagemCruzamentos(0) // %
+		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
+		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
+		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+		.mutacaoProbabilidade(20) // %
+		.graspTempoConstrucao(600) // ms
+		.graspNumVizinhos(2)
+		.graspAlfa(30) // %
+		.camadaTamanho(20)
+		.perfilTamanho(600)
+		.numTorneioPares(0)
+		.numTorneioPopulacao(1)
+		.tentativasMutacao(2)
+		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+		.tipoConstrucao(Configuracao::TipoGrade::modelo)
+		//.tempoLimiteModelo(0.09)
+		//.tipoConstrucao(Configuracao::TipoGrade::grasp)
+	};
+
+	resolucaoGrasp.teste();
 }
 
 void menu(std::string filein)
 {
 	int num;
+	std::ofstream dados{"parametros.txt"};
 	std::cout << "Rodar quantas vezes? ";
 	std::cin >> num;
 
-	auto fileout = Output::timestamp() + ".txt";
-	std::cout << "File: " << fileout << "\n";
 	Configuracao::TipoMutacao mut;
 	Configuracao::TipoGrade grade;
 	Configuracao::TipoCruzamento cruz;
@@ -261,6 +312,14 @@ void menu(std::string filein)
 
 	std::cout << "\n";
 
+	int numindividuos, numger;
+	std::cout << "Quantos individuos? ";
+	std::cin >> numindividuos;
+	std::cout << "Quantas geracoes? ";
+	std::cin >> numger;
+
+	std::cout << "\n\n";
+
 	switch (optcruz) {
 	case 1: cruz = Configuracao::TipoCruzamento::construtivo_reparo; break;
 	case 2: cruz = Configuracao::TipoCruzamento::simples; break;
@@ -280,7 +339,15 @@ void menu(std::string filein)
 	default: goto err;
 	}
 
-	exper(filein, fileout, mut, cruz, grade);
+	dados << "Individuos: " << numindividuos << "\n";
+	dados << "Geracoes: " << numger << "\n";
+	dados << "Opt grade: " << optgrade << "\n";
+	dados << "Opt mut: " << optmut << "\n";
+	dados << "Opt cruz: " << optcruz << "\n";
+
+	for (auto i = 0; i < num; i++) {
+		exper(filein, mut, cruz, grade, numindividuos, numger);
+	}
 	return;
 
 err:
@@ -298,6 +365,7 @@ int main(int argc, char** argv)
 		menu(argv[1]);
 	} else {
 		semArgumentos();
+		//teste();
 	}
 }
 

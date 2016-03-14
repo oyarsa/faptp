@@ -53,7 +53,7 @@ Solucao::~Solucao() {
     delete horario;
     
     for (auto& par : grades) {
-        delete par.second;
+		delete par.second;
     }
 }
 

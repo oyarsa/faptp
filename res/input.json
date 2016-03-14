@@ -18,6 +18,22 @@
                     "turma": "A"
                 },
                 {
+                    "id": "NOVO2",
+                    "periodo": 1,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A1",
+                                "B",
+                                "C",
+                                "D",
+                                "A2",
+                                "E",
+                                "F"
+                            ],
+                    "turma": "A"
+                },
+                {
                     "cursadas":
                             [
                                 "B",
