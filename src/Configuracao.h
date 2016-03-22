@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 
 class Configuracao
 {
@@ -24,7 +23,9 @@ public:
 	{
 		simples,
 		construtivo_reparo,
-		substitui_bloco
+		substitui_bloco,
+		ordem,
+		ciclo
 	};
 	// SubstDisc é o operador antigo, que troca disciplinas de lugar
 	// SubstProf é o operador novo, que modifica quem leciona uma disciplina

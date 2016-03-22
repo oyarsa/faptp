@@ -78,6 +78,14 @@ void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
     Util::get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
 }
 
+std::tuple<int, int, int> Representacao::getCoords(int pLinear) const
+{
+	int coord[3];
+	Util::get3DMatrix(pLinear, coord, SEMANA, blocosTamanho, camadasTamanho);
+
+	return std::make_tuple(coord[0], coord[1], coord[2]);
+}
+
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {
     std::vector<ProfessorDisciplina*>::iterator xIter = find_if(iter, iterEnd, HorarioFindDisciplina(pDisciplina));
 

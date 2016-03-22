@@ -3,6 +3,7 @@
 
 #include "parametros.h"
 #include "Horario.h"
+#include "Semana.h"
 
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {
 }
@@ -11,12 +12,13 @@ Horario::~Horario() {
 }
 
 Horario::Horario(const Horario& outro) 
-    : Representacao(outro), hash_(0)
+    : Representacao(outro), creditos_alocados_(outro.creditos_alocados_), hash_(0)
 {
 }
 
 Horario& Horario::operator=(const Horario& outro) {
     Representacao::operator=(outro);
+	creditos_alocados_ = outro.creditos_alocados_;
 	hash_ = 0;
 	return *this;
 }
@@ -49,19 +51,42 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
 bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
     int position = getPosition(pDia, pBloco, pCamada);
     bool professorAlocado = false;
+	auto disc = pProfessorDisciplina->disciplina;
 
     if (verbose)
         std::cout << "(" << position << ")" << std::endl;
+
+	if (creditos_alocados_[disc->id] >= disc->cargaHoraria) {
+		return false;
+	}
 
     if (alocados[position] == "" || force) {
         professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
                 pProfessorDisciplina->professor->getId());
         if (!professorAlocado || force) {
+			creditos_alocados_[disc->id]++;
             return Representacao::insert(pDia, pBloco, pCamada, pProfessorDisciplina, force);
         }
     }
-
     return false;
+}
+
+void Horario::clearSlot(int pDia, int pBloco, int pCamada)
+{
+	auto pos = getPosition(pDia, pBloco, pCamada);
+	auto profdisc = matriz[pos];
+	if (!profdisc) return;
+	creditos_alocados_[profdisc->disciplina->id]--;
+	Representacao::clearSlot(pDia, pBloco, pCamada);
+}
+
+void Horario::clearCamada(int camada)
+{
+	for (auto d = 0; d < SEMANA; d++) {
+		for (auto b = 0; b < blocosTamanho; b++) {
+			clearSlot(d, b, camada);
+		}
+	}
 }
 
 double Horario::getObjectiveFunction() {

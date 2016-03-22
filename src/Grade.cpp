@@ -206,9 +206,7 @@ void Grade::add(Disciplina* pDisciplina, int pCamada) {
 }
 
 bool Grade::insert(Disciplina* pDisciplina) {
-    std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
-
-    return insert(pDisciplina, professorDisciplinasIgnorar, false);
+	return insert(pDisciplina, {}, false);
 }
 
 bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar) {

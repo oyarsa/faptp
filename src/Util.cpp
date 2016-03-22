@@ -1,5 +1,6 @@
 #include <sstream>
 #include <utility>
+#include <stdexcept>
 
 #include "Util.h"
 #include "Aleatorio.h"
@@ -19,8 +20,8 @@ void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
   // Camada
   z = pLinear / (X * Y);
   
-  triDimensional[1] = x; // Dia
   triDimensional[0] = y; // Bloco
+  triDimensional[1] = x; // Dia
   triDimensional[2] = z; // Camada
 }
 
@@ -56,20 +57,24 @@ std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()
 	return std::chrono::high_resolution_clock::now();
 }
 
-int Util::randomBetween(int min, int max) {
-  int random = 0;
-
-  if (max < min) {
-    random = -1;
-    //std::cerr << "The min number is biggest than max";
-  } else if (max == min) {
-    random = max;
-  } else if (max != 0) {
-//    random = (rand() % (max - min)) + min;
-    random = (aleatorio::randomInt() % (max - min)) + min;
-  }
-  return random;
+int Util::randomBetween(int min, int max) 
+{
+	if (max < min) {
+		throw std::logic_error("Minimo maior que maximo em randomBetween");
+	} 
+	  
+	if (max == min) {
+		return max;
+	}
+	  
+	return aleatorio::randomInt() % (max - min) + min;
 }
+
+int Util::warpIntervalo(int i, int tamIntervalo, int comecoIntervalo) 
+{
+	return (i - comecoIntervalo) % tamIntervalo + comecoIntervalo;
+}
+
 
 std::string Util::join_path(const std::vector<std::string>& folders, const std::string& file)
 {

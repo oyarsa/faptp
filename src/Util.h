@@ -23,6 +23,8 @@ namespace Util
 
 	int randomBetween(int min, int max);
 
+	int warpIntervalo(int i, int tamIntervalo, int comecoIntervalo);
+
 	// Insere um item num container ordenado
 	template <typename Container, typename T, typename Compare = std::less<T>>
 	void insert_sorted(Container& c, const T& item, Compare cmp = Compare())

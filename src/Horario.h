@@ -1,6 +1,7 @@
 #ifndef HORARIO_H
 #define HORARIO_H
 
+#include <unordered_map>
 #include "Representacao.h"
 
 class Horario : public Representacao {
@@ -14,13 +15,16 @@ public:
     
     bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
     
-    bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-    bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+    bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) override;
+    bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) override;
+	void clearSlot(int pDia, int pBloco, int pCamada) override;
+	void clearCamada(int camada);
 
-    double getObjectiveFunction();
+    double getObjectiveFunction() override;
 
 	std::size_t getHash();
 private:
+	std::unordered_map<std::string, int> creditos_alocados_;
 	std::size_t hash_;
 };
 

@@ -103,12 +103,12 @@ public:
 	// Número de iterações máximo que o GRASP continuará sem evoluir a grade
 	int numMaximoIteracoesSemEvolucaoGRASP;
 
-	int contadorIguaisCruz[3];
+	int contadorIguaisCruz[5];
 	int contadorIguaisMut[2];
-	int contadorMelhoresCruz[3];
+	int contadorMelhoresCruz[5];
 	int contadorMelhoresMut[2];
-	long long tempoTotalCruz[3];
-	long long tempoTotalMut[3];
+	long long tempoTotalCruz[5];
+	long long tempoTotalMut[2];
 	long long tempoTotalSelec;
 	long long tempoTotalElit;
 private:
@@ -154,7 +154,7 @@ private:
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
 
 	int cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
-	std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao *solucaoPai1, Solucao *solucaoPai2);
+	std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao *pai1, Solucao *pai2);
 
 	std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao *solucaoPai1, Solucao *solucaoPai2);
 
@@ -167,7 +167,7 @@ private:
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
 	double gerarGradeTipoGrasp2(Solucao* solucao);
-	double gerarGrade(Solucao *&pSolucao);
+	double gerarGrade(Solucao *pSolucao);
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
@@ -185,15 +185,13 @@ private:
     double gerarGradeTipoGrasp();
     double gerarGradeTipoGrasp(Solucao *&pSolucao);
 
-    double gerarGradeTipoGraspClear(Solucao *&pSolucao);
-
 	double gerarGradeTipoModelo(Solucao *pSolucao);
 
     int getIntervaloAlfaGrasp(const std::multiset<Disciplina*, DisciplinaCargaHorariaDesc>& apRestante);
 
     void showResult(Solucao *pSolucao);
 
-	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao* pSolucao) const;
+	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const;
 
 	void logPopulacao(const std::vector<Solucao*>& populacao, int iter);
 
@@ -217,22 +215,32 @@ private:
 									  Configuracao::TipoMutacao tipoMut);
 	void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao, int iteracaoAtual);
 
-
-	Grade* gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);
-	Grade* vizinhoGrasp(Grade* grade);
-	void buscaLocal(Grade*& grade);
+	std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);
+	std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade);
+	void buscaLocal(std::unique_ptr<Grade>& grade);
 	Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
 
-	template <typename Set>
-	typename Set::iterator getRandomDisc(Set& restantes)
+	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> 
+		restantesStringToDisc(const std::unordered_set<std::string>& apRestante);
+
+	std::vector<ProfessorDisciplina*> getSubTour(const Solucao& pai, int xbegin, int xend) const;
+	Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2);
+	std::pair<int, int> getCrossoverPoints(const Solucao& pai) const;
+
+	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
+
+	template <typename Container>
+	typename Container::iterator getRandomDisc(Container& restantes)
 	{
-		auto current = begin(restantes);
+		auto current = std::begin(restantes);
 		auto distancia = getIntervaloAlfaGrasp(restantes);
 		auto rand = aleatorio::randomInt() % distancia;
 		std::advance(current, rand);
 
 		return current;
 	}
+
+	std::vector<Solucao*> populacao;
 };
 
 #endif /* RESOLUCAO_H */

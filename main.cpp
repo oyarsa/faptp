@@ -132,26 +132,28 @@ void semArgumentos()
 
 	Resolucao r{Configuracao()
 		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(5)
+		.populacaoInicial(10)
 		.porcentagemCruzamentos(20) // %
 		.numMaximoIteracoesSemEvolucaoGRASP(5)
-		.numMaximoIteracoesSemEvolucaoAG(5)
-		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
-		.tipoCruzamento(Configuracao::TipoCruzamento::simples)
+		.numMaximoIteracoesSemEvolucaoAG(10)
+		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-		.mutacaoProbabilidade(20) // %
-		.graspTempoConstrucao(2) // ms
+		.mutacaoProbabilidade(40) // %
 		.graspNumVizinhos(2)
 		.graspAlfa(40) // %
 		.camadaTamanho(20)
 		.perfilTamanho(600)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
-		.tentativasMutacao(2)
+		.tentativasMutacao(5)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
 		//.tipoConstrucao(Configuracao::TipoGrade::modelo)
 		//.tempoLimiteModelo(0.09)
@@ -160,13 +162,11 @@ void semArgumentos()
 
 	std::cout << "Montando horarios [AG + Modelo]..." << std::endl;
 
-	auto inicio = std::chrono::steady_clock::now();
-	//resolucaoGrasp.start(false);
-	r.gerarHorarioAG3();
-	auto fim = std::chrono::steady_clock::now();
+	auto inicio = Util::now();
+	r.gerarHorarioAG();
+	auto fim = Util::now();
 
-	std::cout << "Tempo do horario: " << std::chrono::duration_cast<std::chrono::milliseconds>
-		(fim - inicio).count() << "ms\n\n";
+	std::cout << "Tempo do horario: " << Util::chronoDiff(fim, inicio) << "ms\n\n";
 
 	auto fo = r.getSolucao()->getObjectiveFunction();
 	std::cout << "\nResultado:" << fo << std::endl;
@@ -175,14 +175,17 @@ void semArgumentos()
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
 	Output::write(r.getSolucao(), savePath);
 
-	std::cout << "solucaoAlvo: " << r.foAlvo << "\n";
-	std::cout << "hashAlvo: " << r.hashAlvo << "\n";
-	std::cout << "iteracoes: " << r.iteracaoAlvo << "\n";
-	std::cout << "tempoAlvo: " << r.tempoAlvo << "\n";
-	std::cout << "ultima iteracao: " << r.ultimaIteracao << "\n";
+	std::ostringstream oss;
+	oss << "solucaoAlvo: " << r.foAlvo << "\n";
+	oss << "hashAlvo: " << r.hashAlvo << "\n";
+	oss << "iteracoes: " << r.iteracaoAlvo << "\n";
+	oss << "tempoAlvo: " << r.tempoAlvo << "\n";
+	oss << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
+	std::cout << oss.str();
 
 	std::ofstream out{savePath + "teste.txt"};
 	r.logExperimentos();
+	out << oss.str();
 	out << r.getLog();
 }
 
@@ -248,6 +251,7 @@ void teste()
 		.numIteracoes(0)
 		.porcentagemSolucoesAleatorias(0) // %
 		.porcentagemCruzamentos(0) // %
+		.numMaximoIteracoesSemEvolucaoGRASP(15)
 		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)

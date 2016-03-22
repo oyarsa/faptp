@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include "ProfessorDisciplina.h"
 #include "Util.h"
 
@@ -23,6 +24,7 @@ public:
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
     void get3DMatrix(int pLinear, int* triDimensional);
+	std::tuple<int, int, int> getCoords(int pLinear) const;
 
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
 
@@ -31,7 +33,7 @@ public:
 
     std::vector<int> getAllEmpty(int camada);
     void clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada);
-	void clearSlot(int pDia, int pBloco, int pCamda);
+	virtual void clearSlot(int pDia, int pBloco, int pCamda);
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
