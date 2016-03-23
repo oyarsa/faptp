@@ -136,7 +136,7 @@ struct SolucaoComparaMaior
 {
 	bool operator()(Solucao* lhs, Solucao* rhs) const
 	{
-		return lhs->getObjectiveFunction() > rhs->getObjectiveFunction();
+		return lhs->getFO() > rhs->getFO();
 	}
 };
 

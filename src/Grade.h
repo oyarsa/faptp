@@ -27,7 +27,7 @@ public:
   Disciplina* remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
   Disciplina* remove(Disciplina* pDisciplina);
 
-  double getObjectiveFunction() override;
+  double getFO();
   
 private:
   AlunoPerfil *alunoPerfil;

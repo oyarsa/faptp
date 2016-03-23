@@ -89,10 +89,6 @@ void Horario::clearCamada(int camada)
 	}
 }
 
-double Horario::getObjectiveFunction() {
-    return 0;
-}
-
 std::size_t Horario::getHash() 
 {
 	if (hash_ != 0) {

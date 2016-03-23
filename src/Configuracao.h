@@ -25,7 +25,8 @@ public:
 		construtivo_reparo,
 		substitui_bloco,
 		ordem,
-		ciclo
+		ciclo,
+		pmx
 	};
 	// SubstDisc é o operador antigo, que troca disciplinas de lugar
 	// SubstProf é o operador novo, que modifica quem leciona uma disciplina

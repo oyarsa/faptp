@@ -87,7 +87,7 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
     for (const auto& par : pSolucao->grades) {
         const auto gradeAtual = par.second;
 
-        double fo = gradeAtual->getObjectiveFunction();
+        double fo = gradeAtual->getFO();
 
         if (fo == 0) {
             //continue;

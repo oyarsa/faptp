@@ -67,11 +67,11 @@ void Solucao::insertGrade(Grade* grade) {
     alvoInsercao = grade;
 }
 
-double Solucao::getObjectiveFunction() {
+double Solucao::getFO() {
 	if (fo == -1) {
 		fo = std::accumulate(begin(grades), end(grades), 0.0,
 							   [](const double& acc, const std::pair<std::string, Grade*>& par) {
-			return acc + par.second->getObjectiveFunction();
+			return acc + par.second->getFO();
 		});
 	}
 	return fo;

@@ -20,8 +20,6 @@ public:
 	void clearSlot(int pDia, int pBloco, int pCamada) override;
 	void clearCamada(int camada);
 
-    double getObjectiveFunction() override;
-
 	std::size_t getHash();
 private:
 	std::unordered_map<std::string, int> creditos_alocados_;

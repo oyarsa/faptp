@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <unordered_map>
 
 #include "parametros.h"
@@ -302,7 +302,7 @@ Disciplina* Grade::remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfes
     return rDisciplina;
 }
 
-double Grade::getObjectiveFunction() {
+double Grade::getFO() {
     ProfessorDisciplina *professorDisciplina;
 
 	if (fo != -1) {

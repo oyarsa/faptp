@@ -101,13 +101,14 @@ public:
 	int numMaximoIteracoesSemEvolucaoAG;
 	int ultimaIteracao;
 	// Número de iterações máximo que o GRASP continuará sem evoluir a grade
-	int numMaximoIteracoesSemEvolucaoGRASP;
+	int maxIterSemEvoGrasp;
 
-	int contadorIguaisCruz[5];
+	static const int numcruz = 6;
+	int contadorIguaisCruz[numcruz];
 	int contadorIguaisMut[2];
-	int contadorMelhoresCruz[5];
+	int contadorMelhoresCruz[numcruz];
 	int contadorMelhoresMut[2];
-	long long tempoTotalCruz[5];
+	long long tempoTotalCruz[numcruz];
 	long long tempoTotalMut[2];
 	long long tempoTotalSelec;
 	long long tempoTotalElit;
@@ -223,9 +224,16 @@ private:
 	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> 
 		restantesStringToDisc(const std::unordered_set<std::string>& apRestante);
 
-	std::vector<ProfessorDisciplina*> getSubTour(const Solucao& pai, int xbegin, int xend) const;
+	std::unordered_set<ProfessorDisciplina*> 
+		getSubTour(const Solucao& pai, int xbegin, int xend) const;
+	Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
+								  int camadaCruz);
 	Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2);
-	std::pair<int, int> getCrossoverPoints(const Solucao& pai) const;
+	std::pair<int, int> getCrossoverPoints(const Solucao& pai, int camada) const;
+
+	Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
+	Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2, 
+							    int camadaCruz);
 
 	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
 
@@ -240,6 +248,7 @@ private:
 		return current;
 	}
 
+	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao);
 	std::vector<Solucao*> populacao;
 };
 

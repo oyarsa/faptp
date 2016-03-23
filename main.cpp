@@ -15,6 +15,7 @@
 #include "src/Configuracao.h"
 #include "src/Util.h"
 
+
 void comArgumentos(char** argv)
 {
 	experimento = true;
@@ -113,7 +114,7 @@ void calibracao()
 			resolucaoGrasp.start(false);
 			auto fimHorario = clock();
 
-			fo = resolucaoGrasp.getSolucao()->getObjectiveFunction();
+			fo = resolucaoGrasp.getSolucao()->getFO();
 			std::cout << "FO da solucao: " << fo << std::endl;
 
 			double diff = ((double) (fimHorario - inicioHorario) / 1000 / 1000);
@@ -131,15 +132,16 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao r{Configuracao()
-		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
-		.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(10)
-		.porcentagemCruzamentos(20) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(5)
-		.numMaximoIteracoesSemEvolucaoAG(10)
-		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
+		.populacaoInicial(50)
+		.porcentagemCruzamentos(40) // %
+		.numMaximoIteracoesSemEvolucaoGRASP(20)
+		.numMaximoIteracoesSemEvolucaoAG(40)
+		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
@@ -152,11 +154,10 @@ void semArgumentos()
 		.camadaTamanho(20)
 		.perfilTamanho(600)
 		.numTorneioPares(0)
-		.numTorneioPopulacao(1)
+		.numTorneioPopulacao(4)
 		.tentativasMutacao(5)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
 		//.tipoConstrucao(Configuracao::TipoGrade::modelo)
-		//.tempoLimiteModelo(0.09)
 		.tipoConstrucao(Configuracao::TipoGrade::grasp)
 	};
 
@@ -168,7 +169,7 @@ void semArgumentos()
 
 	std::cout << "Tempo do horario: " << Util::chronoDiff(fim, inicio) << "ms\n\n";
 
-	auto fo = r.getSolucao()->getObjectiveFunction();
+	auto fo = r.getSolucao()->getFO();
 	std::cout << "\nResultado:" << fo << std::endl;
 	//r.showResult();
 
@@ -227,7 +228,7 @@ void exper(const std::string& filein,
 	saida << "Tempo do horario: " << std::chrono::duration_cast<std::chrono::milliseconds>
 		(fim - inicio).count() << "ms\n";
 
-	auto fo = r.getSolucao()->getObjectiveFunction();
+	auto fo = r.getSolucao()->getFO();
 	saida << "\nResultado:" << fo << std::endl;
 	//resolucaoGrasp.showResult();
 

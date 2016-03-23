@@ -17,7 +17,7 @@ public:
 
     void insertGrade(Grade* grade);
 
-    double getObjectiveFunction();
+    double getFO();
 
 	std::size_t getHash();
 private:

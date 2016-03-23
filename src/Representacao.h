@@ -37,7 +37,6 @@ public:
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
-    virtual double getObjectiveFunction() = 0;
 protected:
     int blocosTamanho;
     int camadasTamanho;
