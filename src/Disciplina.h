@@ -20,9 +20,10 @@ public:
   Disciplina(const Disciplina& orig);
   virtual ~Disciplina();
 
-  std::string getId() const;
+  const std::string & getId() const;
 
   int periodoNum() const;
+  int periodoMinimoNum() const;
   std::string getNome() const;
   void setNome(std::string pNome);
 

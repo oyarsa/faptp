@@ -22,6 +22,7 @@ public:
 
 	std::size_t getHash();
 private:
+	std::unordered_map<std::string, int> discCamada;
 	std::unordered_map<std::string, int> creditos_alocados_;
 	std::size_t hash_;
 };

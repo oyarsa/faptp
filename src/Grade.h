@@ -16,15 +16,17 @@ class Grade : public Representacao {
   friend class Output;
 public:
   Grade(int pBlocosTamanho, AlunoPerfil *pAlunoPerfil, Horario *pHorario,
-        std::vector<Disciplina*>& pDisciplinasCurso, std::map<std::string, int>& pDiscToIndex);
+        std::vector<Disciplina*>& pDisciplinasCurso, 
+		std::unordered_map<std::string, int>& pDiscToIndex);
   Grade(const Grade& outro);
   Grade& operator=(const Grade& outro);
   virtual ~Grade();
 
-  bool insert(Disciplina* pDisciplina);
+  bool insert2(Disciplina* pDisciplina);
   bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
   bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force);
-  Disciplina* remove(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
+  bool insert(Disciplina* pDisciplina);
+  Disciplina* remove2(Disciplina* pDisciplina, ProfessorDisciplina* &pProfessorDisciplina);
   Disciplina* remove(Disciplina* pDisciplina);
 
   double getFO();
@@ -39,7 +41,7 @@ private:
   std::vector<Disciplina*> disciplinasAdicionadas;
   
   std::vector<Disciplina*>& disciplinasCurso;
-  std::map<std::string, int>& discToIndex;
+  std::unordered_map<std::string, int>& discToIndex;
   
   //! Guarda a função objetiva dessa grade, vale 0 se ainda não foi definida
   double fo;
@@ -50,8 +52,8 @@ private:
   bool havePreRequisitos(const Disciplina* const pDisciplina);
   bool hasPeriodoMinimo(const Disciplina* const pDisciplina) const;
   bool hasCoRequisitos(const Disciplina* const pDisciplina);
-  bool checkCollision(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
-  bool isViable(const Disciplina* const pDisciplina, const int pCamada, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+  bool checkCollision(const Disciplina* pDisciplina, int pCamada);
+  bool isViable(const Disciplina* pDisciplina, int pCamada);
   //! Verifica se a disciplina sendo considerada não está na lista de equivalências
   //! de outra que já foi inserida
   bool discRepetida(const Disciplina* pDisciplina);

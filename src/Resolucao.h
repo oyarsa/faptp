@@ -117,12 +117,12 @@ private:
     int camadasTamanho;
     int perfisTamanho;
     std::string arquivoEntrada;
-    std::map<std::string, Professor*> professores;
+    std::unordered_map<std::string, Professor*> professores;
     std::vector<Disciplina*> disciplinas;
-    std::map<std::string, int> disciplinasIndex;
-    std::map< std::string, std::vector<Disciplina*> > periodoXdisciplina;
-    std::map<std::string, AlunoPerfil*> alunoPerfis;
-    std::map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    std::unordered_map<std::string, int> disciplinasIndex;
+    std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
+    std::unordered_map<std::string, AlunoPerfil*> alunoPerfis;
+    std::unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
 	std::unique_ptr<fagoc::Curso> curso;
@@ -172,9 +172,9 @@ private:
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, int maxDeep, int deep, 
-											   std::unordered_set<std::string>::const_iterator current);
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::unordered_set<std::string>& disciplinasRestantes, int maxDeep);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, int maxDeep, int deep, 
+											   std::vector<std::string>::const_iterator current);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
@@ -188,7 +188,7 @@ private:
 
 	double gerarGradeTipoModelo(Solucao *pSolucao);
 
-    int getIntervaloAlfaGrasp(const std::multiset<Disciplina*, DisciplinaCargaHorariaDesc>& apRestante);
+    int getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante);
 
     void showResult(Solucao *pSolucao);
 
@@ -221,9 +221,6 @@ private:
 	void buscaLocal(std::unique_ptr<Grade>& grade);
 	Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
 
-	std::multiset<Disciplina*, DisciplinaCargaHorariaDesc> 
-		restantesStringToDisc(const std::unordered_set<std::string>& apRestante);
-
 	std::unordered_set<ProfessorDisciplina*> 
 		getSubTour(const Solucao& pai, int xbegin, int xend) const;
 	Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
@@ -236,17 +233,8 @@ private:
 							    int camadaCruz);
 
 	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
-
-	template <typename Container>
-	typename Container::iterator getRandomDisc(Container& restantes)
-	{
-		auto current = std::begin(restantes);
-		auto distancia = getIntervaloAlfaGrasp(restantes);
-		auto rand = aleatorio::randomInt() % distancia;
-		std::advance(current, rand);
-
-		return current;
-	}
+	Disciplina
+	* getRandomDisc(const std::vector<Disciplina*>& restantes);
 
 	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao);
 	std::vector<Solucao*> populacao;

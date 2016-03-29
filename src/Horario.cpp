@@ -12,7 +12,8 @@ Horario::~Horario() {
 }
 
 Horario::Horario(const Horario& outro) 
-    : Representacao(outro), creditos_alocados_(outro.creditos_alocados_), hash_(0)
+    : Representacao(outro), discCamada(outro.discCamada), 
+	creditos_alocados_(outro.creditos_alocados_), hash_(0)
 {
 }
 
@@ -20,6 +21,7 @@ Horario& Horario::operator=(const Horario& outro) {
     Representacao::operator=(outro);
 	creditos_alocados_ = outro.creditos_alocados_;
 	hash_ = 0;
+	discCamada = outro.discCamada;
 	return *this;
 }
 

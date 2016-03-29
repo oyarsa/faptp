@@ -34,7 +34,8 @@ void Disciplina::init(std::string pNome, int pCargaHoraria, std::string pPeriodo
 Disciplina::~Disciplina() {
 }
 
-std::string Disciplina::getId() const {
+const std::string & Disciplina::getId() const
+{
     return id;
 }
 
@@ -104,4 +105,12 @@ int Disciplina::periodoNum() const
 {
 	auto pos = periodo.find('-');
 	return std::stoi(periodo.substr(0, pos));
+}
+
+int Disciplina::periodoMinimoNum() const
+{
+	if (periodoMinimo == "") return 0;
+
+	auto pos = periodoMinimo.find('-');
+	return std::stoi(periodoMinimo.substr(0, pos));
 }

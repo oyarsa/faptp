@@ -1,6 +1,7 @@
 #ifndef SORTTEMPLATE_H
 #define SORTTEMPLATE_H
 
+#include "Disciplina.h"
 #include "ProfessorDisciplina.h"
 #include "Solucao.h"
 #include <string>
@@ -107,16 +108,30 @@ struct DisciplinasRemoveDisciplinas {
     }
 };
 
-inline void RemoveDisciplinasNome(std::unordered_set<std::string>& hashset, 
+//inline void RemoveDisciplinasNome(std::unordered_set<std::string>& hashset, 
+//								  std::vector<Disciplina*>& disciplinas)
+//{
+//	for (auto it = std::begin(hashset); it != std::end(hashset); ++it) {
+//		auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
+//								  [&](Disciplina* d) {
+//			return d->getNome() == *it;
+//		});
+//		if (found != std::end(disciplinas)) {
+//			hashset.erase(it);
+//		}
+//	}
+//}
+
+inline void RemoveDisciplinasNome(std::vector<std::string>& vec,
 								  std::vector<Disciplina*>& disciplinas)
 {
-	for (auto it = std::begin(hashset); it != std::end(hashset); ++it) {
+	for (auto it = std::begin(vec); it != std::end(vec); ++it) {
 		auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
 								  [&](Disciplina* d) {
 			return d->getNome() == *it;
 		});
 		if (found != std::end(disciplinas)) {
-			hashset.erase(it);
+			vec.erase(it);
 		}
 	}
 }

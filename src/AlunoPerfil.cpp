@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "AlunoPerfil.h"
+#include "Util.h"
 
 AlunoPerfil::AlunoPerfil(double pPeso, const std::string& pId, 
 						 const std::string& pTurma, const std::string& pPeriodo) 
@@ -47,10 +48,13 @@ bool AlunoPerfil::isCursada(const std::string& pCursada) {
   return find(cursadas.begin(), cursadas.end(), pCursada) != cursadas.end();
 }
 
-void AlunoPerfil::addRestante(const std::string& pRestante) {
-  restante.insert(pRestante);
+void AlunoPerfil::addRestante(Disciplina* pRestante) {
+  //restante.insert(pRestante->getId());
+	restante.push_back(pRestante->getId());
+  Util::insert_sorted(restanteOrd, pRestante, DisciplinaCargaHorariaDesc{});
 }
 
 bool AlunoPerfil::isRestante(const std::string& pRestante) {
-  return find(restante.begin(), restante.end(), pRestante) != restante.end();
+  //return restante.find(pRestante) != restante.end();
+	return find(begin(restante), end(restante), pRestante) != end(restante);
 }

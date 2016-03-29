@@ -18,12 +18,9 @@ Solucao::Solucao(const Solucao& outro)
     , blocosTamanho(outro.blocosTamanho)
     , camadasTamanho(outro.camadasTamanho)
     , perfisTamanho(outro.perfisTamanho)
-    , gradesLength(outro.gradesLength)
+    , gradesLength(0)
 	, fo(-1)
 {
-    for (const auto& par : outro.grades) {
-        grades[par.first] = new Grade(*(par.second));
-    }
 }
 
 Solucao& Solucao::operator=(const Solucao& outro) {

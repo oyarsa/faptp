@@ -6,6 +6,7 @@
 #include <tuple>
 #include "ProfessorDisciplina.h"
 #include "Util.h"
+#include "Semana.h"
 
 class Representacao {
     friend class Resolucao;
@@ -15,7 +16,7 @@ public:
     Representacao& operator=(const Representacao& outro);
     virtual ~Representacao();
 
-    int getPosition(int pDia, int pBloco, int pCamada);
+    int getPosition(int pDia, int pBloco, int pCamada) const;
 
     ProfessorDisciplina* at(int pDia, int pBloco, int pCamada);
     ProfessorDisciplina* at(int position);
@@ -51,6 +52,11 @@ protected:
 
     void initMatriz();
 };
+
+inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
+{
+	return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * SEMANA));
+}
 
 #endif /* REPRESENTACAO_H */
 

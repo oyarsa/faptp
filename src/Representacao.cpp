@@ -49,10 +49,6 @@ void Representacao::initMatriz() {
     }
 }
 
-int Representacao::getPosition(int pDia, int pBloco, int pCamada) {
-    return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * SEMANA));
-}
-
 ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) {
     return at(getPosition(pDia, pBloco, pCamada));
 }

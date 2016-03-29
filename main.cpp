@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -7,7 +6,6 @@
 #include <chrono>
 
 #include <modelo-grade/modelo_solver.h>
-#include <modelo-grade/arquivos.h>
 
 #include "src/parametros.h"
 #include "src/Resolucao.h"
@@ -132,14 +130,14 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao r{Configuracao()
-		.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
-		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(50)
 		.porcentagemCruzamentos(40) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(20)
-		.numMaximoIteracoesSemEvolucaoAG(40)
+		.numMaximoIteracoesSemEvolucaoGRASP(30)
+		.numMaximoIteracoesSemEvolucaoAG(50)
 		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
@@ -170,7 +168,7 @@ void semArgumentos()
 	std::cout << "Tempo do horario: " << Util::chronoDiff(fim, inicio) << "ms\n\n";
 
 	auto fo = r.getSolucao()->getFO();
-	std::cout << "\nResultado:" << fo << std::endl;
+	std::cout << "\nResultado:" << fo << "\n";
 	//r.showResult();
 
 	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
@@ -245,14 +243,15 @@ void exper(const std::string& filein,
 void teste()
 {
 	Resolucao resolucaoGrasp{Configuracao()
-		.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
+		.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(1)
 		.numIteracoes(0)
 		.porcentagemSolucoesAleatorias(0) // %
 		.porcentagemCruzamentos(0) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(15)
+		.numMaximoIteracoesSemEvolucaoGRASP(30)
 		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
