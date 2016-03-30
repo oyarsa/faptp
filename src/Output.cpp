@@ -95,7 +95,7 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
 
         saida << "<table align='center' class='grade'>\n";
 
-        saida << "<tr><th colspan=\"" << SEMANA << "\">" << gradeAtual->alunoPerfil->id << " (" << fo << ")</th></tr>\n";
+        saida << "<tr><th colspan=\"" << SEMANA << "\">" << gradeAtual->aluno->id << " (" << fo << ")</th></tr>\n";
 
         saida << "<tr>";
         for (int j = 0; j < SEMANA; j++) {

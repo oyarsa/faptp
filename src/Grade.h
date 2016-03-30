@@ -30,9 +30,10 @@ public:
   Disciplina* remove(Disciplina* pDisciplina);
 
   double getFO();
+  double getFO2();
   
 private:
-  AlunoPerfil *alunoPerfil;
+  AlunoPerfil *aluno;
   Horario *horario;
   
   std::vector<ProfessorDisciplina*> professorDisciplinas;

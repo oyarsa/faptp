@@ -45,11 +45,11 @@ double Util::timeDiff(clock_t tf, clock_t t0) {
   return ((((float) tf - (float) t0) / 1000000.0F) * 1000);
 }
 
-long long Util::chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t1,
-						   std::chrono::time_point<std::chrono::high_resolution_clock> t2)
+long long Util::chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t_end,
+                           std::chrono::time_point<std::chrono::high_resolution_clock> t_begin)
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>
-		(t1 - t2).count();
+		(t_end - t_begin).count();
 }
 
 std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()

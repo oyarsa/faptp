@@ -55,7 +55,7 @@ Solucao::~Solucao() {
 }
 
 void Solucao::insertGrade(Grade* grade) {
-    auto& alvoInsercao = grades[grade->alunoPerfil->id];
+    auto& alvoInsercao = grades[grade->aluno->id];
     if (alvoInsercao) {
         delete alvoInsercao;
     } else {

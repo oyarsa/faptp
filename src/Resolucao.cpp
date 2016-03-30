@@ -912,7 +912,10 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 			i++;
 		}
 
+		auto t1 = Util::now();
 		gerarGrade(solucaoLocal);
+		auto tend = Util::chronoDiff(Util::now(), t1);
+		std::cout << "t: " << tend << "\n";
 		//gerarGradeTipoGrasp(solucaoLocal, false);
 		//solucoesAG.push_back(solucaoLocal);
 		Util::insert_sorted(solucoesAG, solucaoLocal, SolucaoComparaMaior());
@@ -1575,11 +1578,17 @@ double Resolucao::gerarGradeTipoGrasp2(Solucao* solucao)
 		Grade* novaGrade = nullptr;
 		if (gradesGeradas[aluno->getHash()]) {
 			novaGrade = new Grade(*gradesGeradas[aluno->getHash()]);
-			novaGrade->alunoPerfil = aluno;
+			novaGrade->aluno = aluno;
 		} else {
 			novaGrade = GRASP(aluno, solucao);
 			gradesGeradas[aluno->getHash()] = novaGrade;
 		}
+
+		//printf("Aluno: %s\nDiscs: ", aluno->id.c_str());
+		//for (auto& disc : novaGrade->disciplinasAdicionadas) {
+		//	printf("%s ", disc->nome.c_str());
+		//}
+		//puts("\n");
 
 		total += novaGrade->getFO();
 		solucao->insertGrade(novaGrade);
@@ -1753,7 +1762,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade,
 	std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar)
 {
 	auto disponivel = (SEMANA - 2) * camadasTamanho;
-	auto alunoPerfil = pGrade->alunoPerfil;
+	auto alunoPerfil = pGrade->aluno;
 	auto apRestante = alunoPerfil->restanteOrd;
 	auto dIterStart = apRestante.begin();
 
@@ -2044,7 +2053,7 @@ void Resolucao::showResult(Solucao* pSolucao)
 	const auto& grades = pSolucao->grades;
 	for (const auto& par : grades) {
 		const auto gradeAtual = par.second;
-		std::cout << gradeAtual->alunoPerfil->id << ":\n";
+		std::cout << gradeAtual->aluno->id << ":\n";
 		const auto& discEscolhidas = gradeAtual->disciplinasAdicionadas;
 		for (const auto disc : discEscolhidas) {
 
@@ -2063,12 +2072,14 @@ Solucao* Resolucao::getSolucao()
 void Resolucao::teste()
 {
 	Solucao* sol = nullptr;
+	puts("Gerando solucao");
 	while (!sol) {
 		sol = gerarSolucaoAleatoria();
 	} 
 	printf("hash: %u\n", sol->getHash());
-	auto n = 50;
+
 	// bench grasp
+	auto n = 1;
 	auto t_grasp = 0ll;
 	auto fo_grasp = 0.0;
 	auto max_fo_grasp = 0.0;
@@ -2098,18 +2109,18 @@ void Resolucao::teste()
 	Output::write(sol, savePath);
 
 	 //bench modelo
-	gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
-	auto t1 = Util::now();
-	auto r = gerarGrade(sol);
-	auto t2 = Util::now();
-	auto t = Util::chronoDiff(t2, t1);
-	std::cout << "Tempo mod: " << t << "\n";
-	std::cout << "FO modelo: " << r << "\n";
-	
-	reinsereGrades(sol);
-	savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
-	Output::write(sol, savePath);
-	////showResult(sol);
+	//gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
+	//auto t1 = Util::now();
+	//auto r = gerarGrade(sol);
+	//auto t2 = Util::now();
+	//auto t = Util::chronoDiff(t2, t1);
+	//std::cout << "Tempo mod: " << t << "\n";
+	//std::cout << "FO modelo: " << r << "\n";
+	//
+	//reinsereGrades(sol);
+	//savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
+	//Output::write(sol, savePath);
+	//showResult(sol);
 }
 
 double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
@@ -2124,7 +2135,7 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 
 		if (gradesGeradas[currAluno->getHash()]) {
 			novaGrade = new Grade(*gradesGeradas[currAluno->getHash()]);
-			novaGrade->alunoPerfil = currAluno;
+			novaGrade->aluno = currAluno;
 		} else {
 			novaGrade = new Grade(blocosTamanho, currAluno, pSolucao->horario,
 								  disciplinas, disciplinasIndex);
@@ -2364,6 +2375,10 @@ bool Resolucao::geraProfessorDisciplina(
 
 bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof, int camada)
 {
+	puts("aloc");
+	printf("camada: %d\n", camada);
+	printf("disc: %s\nprof: %s\n", disc->nome.c_str(), prof->nome.c_str());
+	printf("id: %s\n", disc->id.c_str());
 	auto pdId = "pr" + prof->id + "di" + disc->id;
 	if (!professorDisciplinas[pdId]) {
 		professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
@@ -2375,7 +2390,7 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 	auto num_slots = SEMANA * blocosTamanho;
 	auto num_slot_visitados = 0;
 	std::vector<std::vector<char>> slots_visitados(
-		SEMANA, std::vector<char>(blocosTamanho, false));
+		SEMANA, std::vector<char>(blocosTamanho, 0));
 
 	while (creditos_alocados_disc < disc->cargaHoraria && num_slot_visitados < num_slots) {
 		auto restante = disc->cargaHoraria - creditos_alocados_disc;
@@ -2398,15 +2413,15 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 			} while (slots_visitados[dia][bloco]);
 
 			if (restante == 1) {
-				slots_visitados[dia][bloco] = true;
+				slots_visitados[dia][bloco] = 1;
 				num_slot_visitados++;
 				success_prof = solucao->horario->insert(dia, bloco, camada, pd);
 				if (success_prof) {
 					creditos_alocados_disc++;
 				}
 			} else {
-				slots_visitados[dia][bloco] = true;
-				slots_visitados[dia][bloco + 1] = true;
+				slots_visitados[dia][bloco] = 1;
+				slots_visitados[dia][bloco + 1] = 1;
 				num_slot_visitados += 2;
 				auto success_bloco1 = solucao->horario->insert(dia, bloco, 
 															   camada, pd);
@@ -2415,7 +2430,7 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 				success_prof = success_bloco1 && success_bloco2;
 				if (success_prof) {
 					creditos_alocados_disc += 2;
-				} else if (!success_prof) {
+				} else {
 					if (success_bloco1) {
 						solucao->horario->clearSlot(dia, bloco, camada);
 					} 
@@ -2427,7 +2442,14 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 		}
 	}
 
-	return creditos_alocados_disc == disc->cargaHoraria;
+	auto succ = creditos_alocados_disc == disc->cargaHoraria;
+	if (!succ) {
+		puts("Problema Aloc");
+		printf("cred: %d aloc: %d\n", disc->cargaHoraria, creditos_alocados_disc);
+	}
+	puts("");
+
+	return succ;
 }
 
 Solucao* Resolucao::gerarSolucaoAleatoria() 
@@ -2438,7 +2460,6 @@ Solucao* Resolucao::gerarSolucaoAleatoria()
 
 	auto num_periodos = periodoXdisciplina.size();
 	auto num_per_visitados = 0u;
-	auto camada = 0;
 	std::vector<char> periodos_visitados(num_periodos, false);
 
 	// Percorre todos os períodos aleatoriamente
@@ -2457,13 +2478,12 @@ Solucao* Resolucao::gerarSolucaoAleatoria()
 		std::advance(it, rnd_per);
 		auto& discs = it->second;
 
+		printf("c: %s\n", it->first.c_str());
 		auto success = gerarCamada(solucaoRnd.get(), rnd_per, discs,
 								   creditos_alocados_prof);
 		if (!success) {
 			return nullptr;
 		}
-
-		camada++;
 	}
 	return solucaoRnd.release();
 }
@@ -2475,8 +2495,10 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 		printf("sol: %d\n", i);
 		Solucao* currSolucao = nullptr;
 		while (!currSolucao) {
+			puts("gerando");
 			currSolucao = gerarSolucaoAleatoria();
 		}
+		puts("oi");
 		gerarGrade(currSolucao);
 		solucoes.push_back(currSolucao);
 	}
@@ -2546,7 +2568,7 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao,
 		hashAlvo = populacao[0]->getHash();
 		iteracaoAlvo = iteracaoAtual;
 		tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(), 
-									 tempoInicio);
+		                             tempoInicio);
 		puts("Nova melhor solucao!");
 		log << "Nova melhor solucao!\n";
 		char str[101];
@@ -2593,7 +2615,7 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade)
 		discremovida = currGrade->remove(adicionadas[rand]);
 	}
 
-	auto restantes = currGrade->alunoPerfil->restanteOrd;
+	auto restantes = currGrade->aluno->restanteOrd;
 
 	while (!restantes.empty()) {
 		auto current = getRandomDisc(restantes);

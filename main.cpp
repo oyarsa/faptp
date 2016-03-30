@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <ctime>
 #include <string>
 #include <chrono>
@@ -131,13 +132,14 @@ void semArgumentos()
 
 	Resolucao r{Configuracao()
 		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
-		.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
+		.arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(100)
+		.populacaoInicial(10)
 		.porcentagemCruzamentos(40) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(20)
-		.numMaximoIteracoesSemEvolucaoAG(100)
+		.numMaximoIteracoesSemEvolucaoGRASP(3)
+		.numMaximoIteracoesSemEvolucaoAG(1)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
@@ -149,8 +151,8 @@ void semArgumentos()
 		.mutacaoProbabilidade(20) // %
 		.graspNumVizinhos(2)
 		.graspAlfa(40) // %
-		.camadaTamanho(20)
-		.perfilTamanho(600)
+		.camadaTamanho(40)
+		.perfilTamanho(1400)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(4)
 		.tentativasMutacao(5)
@@ -244,14 +246,15 @@ void teste()
 {
 	Resolucao resolucaoGrasp{Configuracao()
 		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
-		.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
+		.arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(1)
 		.numIteracoes(0)
 		.porcentagemSolucoesAleatorias(0) // %
 		.porcentagemCruzamentos(0) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(20)
+		.numMaximoIteracoesSemEvolucaoGRASP(5)
 		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)

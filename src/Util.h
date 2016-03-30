@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <chrono>
+#include <chrono>
 
 namespace Util
 {
@@ -16,8 +18,10 @@ namespace Util
 
 	double timeDiff(clock_t tf, clock_t t0);
 
-	long long chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t1,
-						 std::chrono::time_point<std::chrono::high_resolution_clock> t2);
+	// Calcula a distância entre t_end - t_begin em milissegundos
+	long long chronoDiff(
+		std::chrono::time_point<std::chrono::high_resolution_clock> t_end,
+		std::chrono::time_point<std::chrono::high_resolution_clock> t_begin);
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> now();
 

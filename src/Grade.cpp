@@ -10,7 +10,7 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 			 std::vector<Disciplina*>& pDisciplinasCurso,
 			 std::unordered_map<std::string, int>& pDiscToIndex)
 : Representacao(pBlocosTamanho, 1)
-, alunoPerfil(pAlunoPerfil)
+, aluno(pAlunoPerfil)
 , horario(pHorario)
 , professorDisciplinas()
 , problemas()
@@ -24,7 +24,7 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 
 Grade::Grade(const Grade& outro)
 	: Representacao(outro)
-	, alunoPerfil(outro.alunoPerfil)
+	, aluno(outro.aluno)
 	, horario(outro.horario)
 	, professorDisciplinas(outro.professorDisciplinas)
 	, problemas(outro.problemas)
@@ -38,7 +38,7 @@ Grade::Grade(const Grade& outro)
 Grade& Grade::operator=(const Grade& outro)
 {
 	Representacao::operator=(outro);
-	alunoPerfil = outro.alunoPerfil;
+	aluno = outro.aluno;
 	horario = outro.horario;
 	professorDisciplinas = outro.professorDisciplinas;
 	problemas = outro.problemas;
@@ -61,7 +61,7 @@ Grade::~Grade() {
 
 bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
 {
-	auto aluPeriodoSplit = Util::strSplit(alunoPerfil->periodo, '-');
+	auto aluPeriodoSplit = Util::strSplit(aluno->periodo, '-');
 	auto aluPeriodoNum = std::stoi(aluPeriodoSplit[0]);
     auto success = aluPeriodoNum >= pDisciplina->periodoMinimoNum();
 
@@ -88,7 +88,7 @@ bool Grade::discRepetida(const Disciplina * pDisciplina) {
     // Percorre as disciplinas cursadas do aluno e verifica se o nome de pDisciplina
     // � equivalente a alguma. Se sim, ela � uma disciplina repetida e n�o pode
     // ser inserida
-	return !alunoPerfil->isRestante(pDisciplina->getId());
+	return !aluno->isRestante(pDisciplina->getId());
 }
 
 bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
@@ -97,7 +97,7 @@ bool Grade::hasCoRequisitos(const Disciplina * const pDisciplina) {
     const auto& pDisciplinaCoRequisitos = pDisciplina->coRequisitos;
 
     if (pDisciplinaCoRequisitos.size() > 0) {
-        const auto& disciplinasCursadas = alunoPerfil->cursadas;
+        const auto& disciplinasCursadas = aluno->cursadas;
 
         if (disciplinasCursadas.size() > 0) {
             for (const auto& coRequisito : pDisciplinaCoRequisitos) {
@@ -132,7 +132,7 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
     bool viavel = true;
 
     const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
-	const auto& disciplinasAprovadas = alunoPerfil->aprovadas;
+	const auto& disciplinasAprovadas = aluno->aprovadas;
 
 	// Percorre a lista de disciplinas que sao pre-requisitos da atual
 	for (const auto& preRequisito : pDisciplinaPreRequisitos) {
@@ -328,15 +328,15 @@ Disciplina* Grade::remove2(Disciplina* pDisciplina, ProfessorDisciplina* &pProfe
     return rDisciplina;
 }
 
-double Grade::getFO() {
+double Grade::getFO2() {
 	if (fo != -1) {
 		return fo;
 	}
 	fo = 0;
 
     std::unordered_map<std::string, int> discAvaliada;
-    const auto turmaAluno = alunoPerfil->turma;
-    const auto periodoAluno = alunoPerfil->periodo;
+    const auto turmaAluno = aluno->turma;
+    const auto periodoAluno = aluno->periodo;
 
     if (problemas.size() > 0) {
         fo = -1;
@@ -364,4 +364,18 @@ double Grade::getFO() {
     }
 
     return fo;
+}
+
+double Grade::getFO()
+{
+	if (fo != -1) return fo;
+	fo = 0;
+
+	for (const auto& disc : disciplinasAdicionadas) {
+		fo += disc->cargaHoraria;
+		if (disc->periodo == aluno->periodo && disc->turma == aluno->turma)
+			fo += 0.1;
+	}
+	
+	return fo;
 }
