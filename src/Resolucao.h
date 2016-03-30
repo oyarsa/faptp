@@ -165,6 +165,7 @@ private:
     std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& populacao,
 												 Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
+	bool swapBlocos(Solucao& solucao, int posX1, int posX2) const;
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
 	double gerarGradeTipoGrasp2(Solucao* solucao);

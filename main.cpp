@@ -134,11 +134,11 @@ void semArgumentos()
 		.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(50)
+		.populacaoInicial(100)
 		.porcentagemCruzamentos(40) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(30)
-		.numMaximoIteracoesSemEvolucaoAG(50)
-		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+		.numMaximoIteracoesSemEvolucaoGRASP(20)
+		.numMaximoIteracoesSemEvolucaoAG(100)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
@@ -146,7 +146,7 @@ void semArgumentos()
 		//.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-		.mutacaoProbabilidade(40) // %
+		.mutacaoProbabilidade(20) // %
 		.graspNumVizinhos(2)
 		.graspAlfa(40) // %
 		.camadaTamanho(20)
@@ -251,7 +251,7 @@ void teste()
 		.numIteracoes(0)
 		.porcentagemSolucoesAleatorias(0) // %
 		.porcentagemCruzamentos(0) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(30)
+		.numMaximoIteracoesSemEvolucaoGRASP(20)
 		.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
@@ -268,7 +268,6 @@ void teste()
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
 		.tipoConstrucao(Configuracao::TipoGrade::modelo)
-		//.tempoLimiteModelo(0.09)
 		//.tipoConstrucao(Configuracao::TipoGrade::grasp)
 	};
 

@@ -259,12 +259,8 @@ void Resolucao::carregarAlunoPerfis()
 		AlunoPerfil* alunoPerfil = new AlunoPerfil(peso, id, turma, periodo);
 
 		const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
-		auto worstFit = 99;
-		auto bestFit = 0;
 		for (auto j = 0u; j < jsonRestantes.size(); j++) {
 			Disciplina* disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
-			bestFit = std::max(bestFit, disciplina->cargaHoraria);
-			worstFit = std::min(worstFit, disciplina->cargaHoraria);
 			alunoPerfil->addRestante(disciplina);
 		}
 
@@ -978,8 +974,8 @@ Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulac
 // de cada vez e reparar a solução se uma restrição for violada
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
-	puts("Constr");
-	printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
+	//puts("Constr");
+	//printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
 	std::vector<Solucao*> filhos;
 	std::vector<ProfessorDisciplina*> matrizBackup;
 
@@ -1070,11 +1066,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(Soluc
 			}
 		}
 		gerarGrade(filho);
-		printf("filho: %g\n", filho->getFO());
+		//printf("filho: %g\n", filho->getFO());
 		filhos.push_back(filho);
 		numFilhos++;
 	} while (numFilhos <= horarioCruzamentoFilhos);
-	puts("\n");
+	//puts("\n");
 
 	return filhos;
 }
@@ -1152,8 +1148,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
-	puts("subsbloco");
-	printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
+	//puts("subsbloco");
+	//printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
 	int dia, bloco, camada;
 	std::size_t pos;
 	auto filho1 = new Solucao(*solucaoPai1);
@@ -1369,8 +1365,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 
 	gerarGrade(filho1);
 	gerarGrade(filho2);
-	printf("filho: %g\n", filho1->fo);
-	printf("filho: %g\n\n", filho2->fo);
+	//printf("filho: %g\n", filho1->fo);
+	//printf("filho: %g\n\n", filho2->fo);
 	return {filho1, filho2};
 }
 
@@ -1428,19 +1424,15 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& popul
 std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*>& populacao)
 {
 	std::vector<Solucao*> genesX;
-	Solucao* solucaoTemp;
 
-	double porcentagem;
-
-	// Muta��o dos populacao
 	for (auto j = 0u; j < populacao.size(); j++) {
-		porcentagem = ((aleatorio::randomInt() % 100) / 100.0);
+		auto porcentagem = aleatorio::randomInt() % 100 / 100.0;
 
 		if (porcentagem <= horarioMutacaoProbabilidade) {
-			solucaoTemp = gerarHorarioAGMutacao(populacao[j]);
+			//printf("pai: %g\n", populacao[j]->getFO());
+			auto solucaoTemp = gerarHorarioAGMutacao(populacao[j]);
 
 			if (solucaoTemp) {
-				gerarGrade(solucaoTemp);
 				//printf("filho: %g\n\n", solucaoTemp->getFO());
 				genesX.push_back(solucaoTemp);
 			}
@@ -1486,7 +1478,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacaoExper(std::vector<Solucao*
 						      == populacao[j]->getFO()) {
 					contadorIguaisMut[idx]++;
 				}
-				gerarGrade(solucaoTemp);
 				genesX.push_back(solucaoTemp);
 			}
 		}
@@ -1495,54 +1486,71 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacaoExper(std::vector<Solucao*
 	return genesX;
 }
 
-Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
+Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao) 
 {
 	//printf("pai: %g\n", pSolucao->fo);
-	auto mut = std::make_unique<Solucao>(*pSolucao);
 
 	for (auto i = 0; i < horarioMutacaoTentativas; i++) {
+		auto mut = std::make_unique<Solucao>(*pSolucao);
 		auto camadaX = aleatorio::randomInt() % camadasTamanho;
 
 		auto diaX1 = aleatorio::randomInt() % SEMANA;
-		auto diaX2 = aleatorio::randomInt() % SEMANA;
-
-		auto blocoX1 = aleatorio::randomInt() % blocosTamanho;
-		auto blocoX2 = aleatorio::randomInt() % blocosTamanho;
-
+		auto blocoX1 = 2 * Util::randomBetween(0, blocosTamanho/2);
 		auto x1 = mut->horario->getPosition(diaX1, blocoX1, camadaX);
+
+		auto diaX2 = aleatorio::randomInt() % SEMANA;
+		auto blocoX2 = 2 * Util::randomBetween(0, blocosTamanho/2);
 		auto x2 = mut->horario->getPosition(diaX2, blocoX2, camadaX);
 
-		auto pdX1 = mut->horario->at(x1);
-		auto pdX2 = mut->horario->at(x2);
-
-		if (pdX1 == pdX2) {
-			continue;
-		} 
-		if (!pdX1) {
-			if (mut->horario->insert(diaX1, blocoX1, camadaX, pdX2)) {
-				mut->horario->clearSlot(diaX2, blocoX2, camadaX);
-				return mut.release();
-			}
-			continue;
-		} 
-		if (!pdX2) {
-			if (mut->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
-				mut->horario->clearSlot(diaX1, blocoX1, camadaX);
-				return mut.release();
-			}
-			continue;
-		} 
-
-		mut->horario->clearSlot(diaX1, blocoX1, camadaX);
-		mut->horario->clearSlot(diaX2, blocoX2, camadaX);
-
-		if (mut->horario->insert(diaX1, blocoX1, camadaX, pdX2)
-				&& mut->horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+		if (swapBlocos(*mut, x1, x2) && swapBlocos(*mut, x1+1, x2+1)) {
+			gerarGrade(mut.get());
 			return mut.release();
 		}
 	}
 
 	return nullptr;
+}
+
+bool Resolucao::swapBlocos(Solucao& solucao, int posX1, int posX2) const
+{
+	int diaX1, blocoX1, diaX2, blocoX2, camadaX;
+	std::tie(diaX1, blocoX1, camadaX) = solucao.horario->getCoords(posX1);
+	std::tie(diaX2, blocoX2, std::ignore) = solucao.horario->getCoords(posX2);
+
+	auto pdX1 = solucao.horario->at(posX1);
+	auto pdX2 = solucao.horario->at(posX2);
+
+	// Não faz sentido trocar duas Pd iguais. Se ambas forem nulas, 
+	// também tenta de novo
+	if (pdX1 == pdX2) {
+		return false;
+	}
+	// Se o slot  de x1 for vazio
+	if (!pdX1) {
+		if (solucao.horario->insert(diaX1, blocoX1, camadaX, pdX2)) {
+			solucao.horario->clearSlot(diaX2, blocoX2, camadaX);
+			return true;
+		}
+		return false;
+	}
+	// Se o slot  de x2 for vazio
+	if (!pdX2) {
+		if (solucao.horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+			solucao.horario->clearSlot(diaX1, blocoX1, camadaX);
+			return true;
+		}
+		return false;
+	}
+
+	// Se ambos forem preenchidos
+	solucao.horario->clearSlot(diaX1, blocoX1, camadaX);
+	solucao.horario->clearSlot(diaX2, blocoX2, camadaX);
+
+	if (solucao.horario->insert(diaX1, blocoX1, camadaX, pdX2)
+			&& solucao.horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
+		return true;
+	}
+	return false;
 }
 
 Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
@@ -1563,6 +1571,7 @@ double Resolucao::gerarGradeTipoGrasp2(Solucao* solucao)
 
 	for (auto& par : alunoPerfis) {
 		auto aluno = par.second;
+
 		Grade* novaGrade = nullptr;
 		if (gradesGeradas[aluno->getHash()]) {
 			novaGrade = new Grade(*gradesGeradas[aluno->getHash()]);
@@ -2054,49 +2063,52 @@ Solucao* Resolucao::getSolucao()
 void Resolucao::teste()
 {
 	Solucao* sol = nullptr;
-	do {
+	while (!sol) {
 		sol = gerarSolucaoAleatoria();
-	} while (!sol);
+	} 
 	printf("hash: %u\n", sol->getHash());
 	auto n = 50;
 	// bench grasp
-	auto tgrasp = 0ll;
-	auto fograsp = 0.0;
-	auto maxfograsp = 0.0;
+	auto t_grasp = 0ll;
+	auto fo_grasp = 0.0;
+	auto max_fo_grasp = 0.0;
+	auto min_fo_grasp = std::numeric_limits<double>::max();
 	gradeTipoConstrucao = Configuracao::TipoGrade::grasp;
 	for (auto i = 0; i < n; i++) {
-		auto t1 = Util::now();
-		auto r = gerarGrade(sol);
+		auto begin = Util::now();
+		auto curr_fo = gerarGrade(sol);
 
-		if (r > maxfograsp) maxfograsp = r;
+		max_fo_grasp = std::max(curr_fo, max_fo_grasp);
+		min_fo_grasp = std::min(curr_fo, min_fo_grasp);
+		fo_grasp += curr_fo;
 
-		fograsp += r;
-		auto t2 = Util::now();
-		auto t = Util::chronoDiff(t2, t1);
-		tgrasp += t;
-		std::cout << "Tempo: " << t << "\n";
-		std::cout << "Fo: " << r << "\n\n";
+		auto end = Util::now();
+		auto total = Util::chronoDiff(end, begin);
+		t_grasp += total;
+		std::cout << "Tempo: " << total << "\n";
+		std::cout << "Fo: " << curr_fo << "\n\n";
 	}
-	std::cout << "Media tempo:" << tgrasp / (1. * n) << "\n";
-	std::cout << "Media FO:   " << fograsp / n << "\n";
-	std::cout << "Maior fo:   " << maxfograsp << "\n\n\n";
+	std::cout << "Media tempo:" << t_grasp / (1. * n) << "\n";
+	std::cout << "Media FO:   " << fo_grasp / n << "\n";
+	std::cout << "Menor fo:   " << min_fo_grasp << "\n";
+	std::cout << "Maior fo:   " << max_fo_grasp << "\n\n\n";
 
-	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fograsp / n)
+	auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo_grasp / n)
 									 + "grasp"});
 	Output::write(sol, savePath);
 
 	 //bench modelo
-	//gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
-	//auto t1 = Util::now();
-	//auto r = gerarGrade(sol);
-	//auto t2 = Util::now();
-	//auto t = Util::chronoDiff(t2, t1);
-	//std::cout << "Tempo mod: " << t << "\n";
-	//std::cout << "FO modelo: " << r << "\n";
-	//
-	//reinsereGrades(sol);
-	//savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
-	//Output::write(sol, savePath);
+	gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
+	auto t1 = Util::now();
+	auto r = gerarGrade(sol);
+	auto t2 = Util::now();
+	auto t = Util::chronoDiff(t2, t1);
+	std::cout << "Tempo mod: " << t << "\n";
+	std::cout << "FO modelo: " << r << "\n";
+	
+	reinsereGrades(sol);
+	savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
+	Output::write(sol, savePath);
 	////showResult(sol);
 }
 
@@ -2109,6 +2121,7 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 	for (const auto& aluno : alunos) {
 		auto currAluno = alunoPerfis[aluno.nome()];
 		Grade* novaGrade = nullptr;
+
 		if (gradesGeradas[currAluno->getHash()]) {
 			novaGrade = new Grade(*gradesGeradas[currAluno->getHash()]);
 			novaGrade->alunoPerfil = currAluno;

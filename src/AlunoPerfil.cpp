@@ -25,6 +25,7 @@ long long AlunoPerfil::getHash()
 	}
 
 	std::ostringstream oss;
+	oss << turma << periodo;
 	for (auto& disc : aprovadas) {
 		oss << disc;
 	}
