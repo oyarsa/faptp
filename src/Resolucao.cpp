@@ -517,13 +517,9 @@ Solucao* Resolucao::gerarHorarioAG()
 		ultimaIteracao = i;
 		logPopulacao(populacao, i);
 		
-		// Aplica os operadores de cruzamento
-		gerarHorarioAGEvoluiPopulacao(populacao, numCruz);
-		// Aplica mutação
+		gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
 		gerarHorarioAGEfetuaMutacao(populacao);
-		// Aplica o elitismo, deletando as que sobraram
 		gerarHorarioAGSobrevivenciaElitismo(populacao);
-		// Verifica se a nova população possui uma solução melhor que a anterior
 		gerarHorarioAGVerificaEvolucao(populacao, i);
 	}
 
@@ -2375,10 +2371,10 @@ bool Resolucao::geraProfessorDisciplina(
 
 bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof, int camada)
 {
-	puts("aloc");
-	printf("camada: %d\n", camada);
-	printf("disc: %s\nprof: %s\n", disc->nome.c_str(), prof->nome.c_str());
-	printf("id: %s\n", disc->id.c_str());
+	//puts("aloc");
+	//printf("camada: %d\n", camada);
+	//printf("disc: %s\nprof: %s\n", disc->nome.c_str(), prof->nome.c_str());
+	//printf("id: %s\n", disc->id.c_str());
 	auto pdId = "pr" + prof->id + "di" + disc->id;
 	if (!professorDisciplinas[pdId]) {
 		professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
@@ -2444,10 +2440,10 @@ bool Resolucao::geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof
 
 	auto succ = creditos_alocados_disc == disc->cargaHoraria;
 	if (!succ) {
-		puts("Problema Aloc");
-		printf("cred: %d aloc: %d\n", disc->cargaHoraria, creditos_alocados_disc);
+		//puts("Problema Aloc");
+		//printf("cred: %d aloc: %d\n", disc->cargaHoraria, creditos_alocados_disc);
 	}
-	puts("");
+	//puts("");
 
 	return succ;
 }
@@ -2478,7 +2474,7 @@ Solucao* Resolucao::gerarSolucaoAleatoria()
 		std::advance(it, rnd_per);
 		auto& discs = it->second;
 
-		printf("c: %s\n", it->first.c_str());
+		//printf("c: %s\n", it->first.c_str());
 		auto success = gerarCamada(solucaoRnd.get(), rnd_per, discs,
 								   creditos_alocados_prof);
 		if (!success) {
@@ -2495,10 +2491,8 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 		printf("sol: %d\n", i);
 		Solucao* currSolucao = nullptr;
 		while (!currSolucao) {
-			puts("gerando");
 			currSolucao = gerarSolucaoAleatoria();
 		}
-		puts("oi");
 		gerarGrade(currSolucao);
 		solucoes.push_back(currSolucao);
 	}
@@ -2521,7 +2515,7 @@ void Resolucao::reinsereGrades(Solucao* solucao) const
 }
 
 void Resolucao::
-gerarHorarioAGEvoluiPopulacao(std::vector<Solucao*>& populacao, int numCruz)
+gerarHorarioAGEfetuaCruzamento(std::vector<Solucao*>& populacao, int numCruz)
 {
 	for (auto j = 0; j < numCruz; j++) {
 		auto parVencedor = gerarHorarioAGTorneioPar(populacao);

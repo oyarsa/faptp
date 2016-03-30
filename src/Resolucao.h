@@ -208,13 +208,14 @@ private:
 	std::vector<Solucao*> gerarSolucoesAleatorias(int numSolucoes);
 	void reinsereGrades(Solucao* solucao) const;
 
-	void gerarHorarioAGEvoluiPopulacao(std::vector<Solucao*>& populacao, int numCruz);
+	void gerarHorarioAGEfetuaCruzamento(std::vector<Solucao*>& populacao, int numCruz);
 	void gerarHorarioAGEvoluiPopulacaoExper(std::vector<Solucao*>& populacao, 
 										Configuracao::TipoCruzamento tipoCruz,
 										std::vector<Solucao*>& pais);
 	void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& populacao);
 	void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& populacao, 
 									  Configuracao::TipoMutacao tipoMut);
+	// Verifica se a nova população possui uma solução melhor que a anterior
 	void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao, int iteracaoAtual);
 
 	std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);

@@ -136,16 +136,16 @@ void semArgumentos()
 		.arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
-		.populacaoInicial(10)
-		.porcentagemCruzamentos(40) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(3)
-		.numMaximoIteracoesSemEvolucaoAG(1)
+		.populacaoInicial(100)
+		.porcentagemCruzamentos(20) // %
+		.numMaximoIteracoesSemEvolucaoGRASP(25)
+		.numMaximoIteracoesSemEvolucaoAG(40)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::substitui_bloco)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::simples)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::construtivo_reparo)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
-		//.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
+		.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
 		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
 		.mutacaoProbabilidade(20) // %
@@ -184,8 +184,8 @@ void semArgumentos()
 	oss << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
 	std::cout << oss.str();
 
-	std::ofstream out{savePath + "teste.txt"};
-	r.logExperimentos();
+	std::ofstream out{savePath + "log.txt"};
+	//r.logExperimentos();
 	out << oss.str();
 	out << r.getLog();
 }
