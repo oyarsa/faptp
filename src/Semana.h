@@ -1,7 +1,7 @@
 #ifndef SEMANA_H
 #define SEMANA_H
 
-const int SEMANA  = 5;
+const int SEMANA  = 6;
 
 const int SEGUNDA = 0;
 const int TERCA   = 1;
