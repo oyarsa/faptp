@@ -61,9 +61,7 @@ Grade::~Grade() {
 
 bool Grade::hasPeriodoMinimo(const Disciplina * const pDisciplina) const
 {
-	auto aluPeriodoSplit = Util::strSplit(aluno->periodo, '-');
-	auto aluPeriodoNum = std::stoi(aluPeriodoSplit[0]);
-    auto success = aluPeriodoNum >= pDisciplina->periodoMinimoNum();
+    auto success = aluno->getPeriodoNum() >= pDisciplina->periodoMinimoNum();
 
 	if (!success && verbose) {
 		std::cout << "---INVALIDO[" << pDisciplina->nome << "] PERIDOMIN\n";

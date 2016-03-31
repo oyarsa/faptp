@@ -50,12 +50,22 @@ bool AlunoPerfil::isCursada(const std::string& pCursada) {
 }
 
 void AlunoPerfil::addRestante(Disciplina* pRestante) {
-  //restante.insert(pRestante->getId());
-	restante.push_back(pRestante->getId());
+  restante.insert(pRestante->getId());
+	//restante.push_back(pRestante->getId());
   Util::insert_sorted(restanteOrd, pRestante, DisciplinaCargaHorariaDesc{});
 }
 
 bool AlunoPerfil::isRestante(const std::string& pRestante) {
-  //return restante.find(pRestante) != restante.end();
-	return find(begin(restante), end(restante), pRestante) != end(restante);
+  return restante.find(pRestante) != restante.end();
+	//return find(begin(restante), end(restante), pRestante) != end(restante);
+}
+
+int AlunoPerfil::getPeriodoNum() const
+{
+	if (periodo == "") return 0;
+
+	static auto pos = periodo.find('-');
+	static auto per_num = std::stoi(periodo.substr(0, pos));
+
+	return per_num;
 }

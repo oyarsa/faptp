@@ -122,16 +122,17 @@ struct DisciplinasRemoveDisciplinas {
 //	}
 //}
 
-inline void RemoveDisciplinasNome(std::vector<std::string>& vec,
+template<typename Container>
+void RemoveDisciplinasNome(Container& c,
 								  std::vector<Disciplina*>& disciplinas)
 {
-	for (auto it = std::begin(vec); it != std::end(vec); ++it) {
+	for (auto it = std::begin(c); it != std::end(c); ++it) {
 		auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
 								  [&](Disciplina* d) {
 			return d->getNome() == *it;
 		});
 		if (found != std::end(disciplinas)) {
-			vec.erase(it);
+			c.erase(it);
 		}
 	}
 }

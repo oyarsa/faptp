@@ -19,8 +19,7 @@ Representacao::Representacao(const Representacao& outro)
 , size(outro.size)
 , blocos(outro.blocos)
 , camadas(outro.camadas)
-, matriz(outro.matriz)
-, alocados(outro.alocados) {
+, matriz(outro.matriz) {
 }
 
 Representacao& Representacao::operator=(const Representacao& outro) {
@@ -30,7 +29,6 @@ Representacao& Representacao::operator=(const Representacao& outro) {
     blocos = outro.blocos;
     camadas = outro.camadas;
     matriz = outro.matriz;
-    alocados = outro.alocados;
 
     return *this;
 }
@@ -41,12 +39,7 @@ Representacao::~Representacao() {
 void Representacao::initMatriz() {
     size = (camadasTamanho * blocosTamanho * SEMANA);
 
-    matriz.resize(size);
-    alocados.resize(size);
-
-    for (int i = 0; i < size; i++) {
-        matriz[i] = NULL;
-    }
+    matriz.resize(size, nullptr);
 }
 
 ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) {
@@ -65,7 +58,6 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
     int position = getPosition(pDia, pBloco, pCamada);
 
     matriz[position] = pProfessorDisciplina;
-    alocados[position] = pProfessorDisciplina->professor->id;
 
     return true;
 }
@@ -110,7 +102,7 @@ std::vector<int> Representacao::getAllEmpty(int camada) {
     for (int d = 0; d < SEMANA; d++) {
         for (int b = 0; b < blocosTamanho; b++) {
             position = getPosition(d, b, camada);
-            if (matriz[position] == NULL) {
+            if (matriz[position] == nullptr) {
                 empties.push_back(position);
             }
         }
@@ -126,7 +118,7 @@ void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, i
         for (int b = 0; b < blocosTamanho; b++) {
             position = getPosition(d, b, camada);
             if (matriz[position] == pProfessorDisciplina) {
-                matriz[position] = NULL;
+                matriz[position] = nullptr;
             }
         }
     }
@@ -137,7 +129,6 @@ void Representacao::clearSlot(int pDia, int pBloco, int pCamada)
 	int position = getPosition(pDia, pBloco, pCamada);
 
 	matriz[position] = nullptr;
-	alocados[position] = "";
 }
 
 int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound) {

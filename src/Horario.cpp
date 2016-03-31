@@ -35,7 +35,7 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professo
 
             if (verbose) {
                 std::cout << "\nColisao[" << professorId << " || "
-                        << alocados[positionCamada] << "](" << positionCamada
+                        << matriz[positionCamada]->professor->id << "](" << positionCamada
                         << "): " << i << " " << pDia << " " << pBloco
                         << std::endl;
             }
@@ -62,7 +62,7 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
 		return false;
 	}
 
-    if (alocados[position] == "" || force) {
+    if (!matriz[position] || force) {
         professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
                 pProfessorDisciplina->professor->getId());
         if (!professorAlocado || force) {

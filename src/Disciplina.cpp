@@ -103,14 +103,20 @@ void Disciplina::addProfessorCapacitado(Professor *professor) {
 
 int Disciplina::periodoNum() const
 {
-	auto pos = periodo.find('-');
-	return std::stoi(periodo.substr(0, pos));
+	if (periodo == "") return 0;
+
+	static auto pos = periodo.find('-');
+	static auto per_num = std::stoi(periodo.substr(0, pos));
+
+	return per_num;
 }
 
 int Disciplina::periodoMinimoNum() const
 {
 	if (periodoMinimo == "") return 0;
 
-	auto pos = periodoMinimo.find('-');
-	return std::stoi(periodoMinimo.substr(0, pos));
+	static auto pos = periodoMinimo.find('-');
+	static auto permin_num = std::stoi(periodoMinimo.substr(0, pos));
+
+	return permin_num;
 }

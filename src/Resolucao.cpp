@@ -2,6 +2,7 @@
 #include <numeric>
 #include <iostream>
 #include <unordered_map>
+#include <algorithm>
 #include <chrono>
 
 #include <modelo-grade/arquivos.h>
@@ -1083,9 +1084,7 @@ int Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) cons
 	// Apaga camada do filho
 	for (auto i = 0; i < SEMANA; i++) {
 		for (auto j = 0; j < blocosTamanho; j++) {
-			auto pos = filho->horario->getPosition(i, j, camada);
-			filho->horario->alocados[pos] = "";
-			filho->horario->matriz[pos] = nullptr;
+			filho->horario->clearSlot(i, j, camada);
 		}
 	}
 
@@ -1657,12 +1656,13 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 	return pSolucao->getFO();
 }
 
-Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, 
-													  int maxDeep, int deep, std::vector<std::string>::const_iterator current)
+Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep, 
+													  std::unordered_set<std::string>::const_iterator current)
 {
 	Grade* bestGrade = new Grade(*pGrade);
 	Grade* currentGrade;
 
+	auto disciplinasRestantes = pGrade->aluno->restante;
 	double bestFO, currentFO;
 
 	bool viavel;
@@ -1677,7 +1677,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::
 		if (viavel) {
 
 			if (deep != maxDeep) {
-				currentGrade = gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, maxDeep, deep + 1, ++it);
+				currentGrade = gerarGradeTipoCombinacaoConstrutiva(currentGrade, maxDeep, deep + 1, ++it);
 			}
 
 			bestFO = bestGrade->getFO();
@@ -1702,12 +1702,11 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::
 }
 
 Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(
-	Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, 
-	int maxDeep)
+	Grade* pGrade, int maxDeep)
 {
-	return gerarGradeTipoCombinacaoConstrutiva(pGrade, disciplinasRestantes, 
-											   maxDeep, 0, 
-											   std::begin(disciplinasRestantes));
+	auto restantes = pGrade->aluno->restante;
+	return gerarGradeTipoCombinacaoConstrutiva(pGrade, maxDeep, 0, 
+											   std::begin(restantes));
 }
 
 double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
@@ -1729,7 +1728,7 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
 
 		apGrade = gerarGradeTipoCombinacaoConstrutiva(new Grade(
 			blocosTamanho, alunoPerfil, horario,
-			disciplinas, disciplinasIndex), apRestante, apRestante.size());
+			disciplinas, disciplinasIndex), apRestante.size());
 
 		pSolucao->insertGrade(apGrade);
 
@@ -1928,7 +1927,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
 			RemoveDisciplinasNome(disciplinasRestantes, disciplinasRemovidas);
 			RemoveDisciplinasNome(disciplinasRestantes, currentGrade->disciplinasAdicionadas);
-			gerarGradeTipoCombinacaoConstrutiva(currentGrade, disciplinasRestantes, i);
+			gerarGradeTipoCombinacaoConstrutiva(currentGrade, i);
 
 			bestFO = bestGrade->getFO();
 			currentFO = currentGrade->getFO();
@@ -2023,20 +2022,17 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 
 int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante)
 {
-	auto distancia = 0;
-	auto bestFIT = (*begin(apRestante))->cargaHoraria;
-	auto worstFIT = (*rbegin(apRestante))->cargaHoraria;
-	auto acceptFIT = bestFIT - int(ceil((1 - gradeAlfa) * (bestFIT - worstFIT)));
+	auto bestFIT = apRestante.front()->cargaHoraria;
+	auto worstFIT = apRestante.back()->cargaHoraria;
+	auto deltaFIT = bestFIT - worstFIT;
+	auto acceptFIT = bestFIT - Util::fast_ceil((1 - gradeAlfa) * deltaFIT);
 
-	for (const auto& disc : apRestante) {
-		auto currentFIT = disc->cargaHoraria;
-		if (currentFIT < acceptFIT) {
-			break;
-		}
-		distancia++;
-	}
+	auto it = std::lower_bound(begin(apRestante), end(apRestante), acceptFIT,
+							   [](Disciplina* d, int accept) {
+		return d->cargaHoraria >= accept;
+	});
 
-	return distancia;
+	return std::distance(begin(apRestante), it);
 }
 
 void Resolucao::showResult()
@@ -2244,7 +2240,6 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
 				if (mut->horario->matriz[linearPos] == profDisc) {
 					posicoesAloc.emplace_back(d, h);
 					mut->horario->matriz[linearPos] = nullptr;
-					mut->horario->alocados[linearPos] = "";
 				}
 			}
 		}

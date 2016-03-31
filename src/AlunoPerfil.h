@@ -26,6 +26,8 @@ public:
 
 	void addRestante(Disciplina* pRestante);
 	bool isRestante(const std::string& pRestante);
+
+	int getPeriodoNum() const;
 private:
 
 	struct DisciplinaCargaHorariaDesc
@@ -45,8 +47,8 @@ private:
 
 	std::unordered_set<std::string> cursadas;
 	std::unordered_set<std::string> aprovadas;
-	//std::unordered_set<std::string> restante;
-	std::vector<std::string> restante;
+	std::unordered_set<std::string> restante;
+	//std::vector<std::string> restante;
 	std::vector<Disciplina*> restanteOrd;
 };
 

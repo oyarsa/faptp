@@ -48,7 +48,6 @@ protected:
     std::vector<std::string> camadas;
 
     std::vector< ProfessorDisciplina* > matriz;
-    std::vector<std::string> alocados;
 
     void initMatriz();
 };

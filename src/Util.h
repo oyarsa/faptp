@@ -59,6 +59,16 @@ namespace Util
 
 	std::size_t hash_string(const std::string& str);
 
+
+	inline int fast_ceil(double x)
+	{
+		return int(x) + (x > int(x));
+	}
+
+	inline int fast_floor(double x)
+	{
+		return int(x) - (x < int(x));
+	}
 };
 
 #endif /* UTIL_H */

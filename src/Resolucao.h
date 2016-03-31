@@ -173,9 +173,9 @@ private:
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, int maxDeep, int deep, 
-											   std::vector<std::string>::const_iterator current);
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, const std::vector<std::string>& disciplinasRestantes, int maxDeep);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep, 
+											   std::unordered_set<std::string>::const_iterator current);
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Solucao *pSolucao);
