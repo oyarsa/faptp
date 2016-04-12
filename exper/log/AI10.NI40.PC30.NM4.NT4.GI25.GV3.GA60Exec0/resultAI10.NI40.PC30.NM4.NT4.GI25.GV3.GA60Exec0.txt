@@ -1,0 +1,14 @@
+AI10.NI40.PC30.NM4.NT4.GI25.GV3.GA60
+Exec0
+Tempo do horario: 78798ms
+
+Resultado:22641.2
+hash: 449193303
+solucaoAlvo:22641.2
+iteracoes:0
+tempoAlvo:17233
+ultima iteracao: 10
+
+Nova melhor solucao!
+22641.2  449193303
+

@@ -96,9 +96,9 @@ std::string Util::join_path(const std::vector<std::string>& folders, const std::
 void Util::create_folder(const std::string& path)
 {
 #if defined(_WIN32)
-    std::string command {"mkdir " + path + " 2> NUL"};
+    std::string command {"mkdir \"\"" + path + "\"\" 2> NUL"};
 #else
-	std::string command {"mkdir -p" + path + " > /dev/null 2>&1"};
+	std::string command {"mkdir -p \"\"" + path + "\"\" > /dev/null 2>&1"};
 #endif
     system(command.c_str());
 }

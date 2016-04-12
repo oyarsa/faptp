@@ -1,0 +1,12 @@
+AI10.NI40.PC30.NM4.NT4.GI25.GV4.GA40
+Exec0
+Tempo do horario: 89765ms
+
+Resultado:22643.2
+hash: 2005111960
+solucaoAlvo:22643.2
+iteracoes:-1
+tempoAlvo:13548
+ultima iteracao: 9
+
+

@@ -5,8 +5,6 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
-#include <chrono>
-#include <chrono>
 
 namespace Util
 {
@@ -69,6 +67,7 @@ namespace Util
 	{
 		return int(x) - (x < int(x));
 	}
+	
 };
 
 #endif /* UTIL_H */

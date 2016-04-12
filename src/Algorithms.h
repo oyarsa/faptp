@@ -156,5 +156,29 @@ struct SolucaoComparaMaior
 	}
 };
 
+inline bool pd_equals(ProfessorDisciplina* lhs, ProfessorDisciplina* rhs)
+{
+	if (lhs == rhs) return true;
+	if (!lhs || !rhs) return false;
+	return lhs->getDisciplina() == rhs->getDisciplina();
+}
+
+inline std::vector<ProfessorDisciplina*>::iterator
+procura_gene(std::vector<ProfessorDisciplina*>& genes,
+			 ProfessorDisciplina* pd)
+{
+	return std::find_if(begin(genes), end(genes), [&pd](ProfessorDisciplina* o) {
+		return pd_equals(o, pd);
+	});
+}
+
+inline bool genes_contem(const std::vector<ProfessorDisciplina*>& genes,
+						 ProfessorDisciplina* pd)
+{
+	return std::find_if(begin(genes), end(genes), [&pd](ProfessorDisciplina* o) {
+		return pd_equals(o, pd);
+	}) != end(genes);
+}
+
 #endif /* SORTTEMPLATE_H */
 

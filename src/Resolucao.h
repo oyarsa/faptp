@@ -223,22 +223,24 @@ private:
 	void buscaLocal(std::unique_ptr<Grade>& grade);
 	Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
 
-	std::unordered_set<ProfessorDisciplina*> 
+	std::vector<ProfessorDisciplina*> 
 		getSubTour(const Solucao& pai, int xbegin, int xend) const;
 	Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
 								  int camadaCruz);
 	Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2);
 	std::pair<int, int> getCrossoverPoints(const Solucao& pai, int camada) const;
-
+	bool insereSubTour(const std::vector<ProfessorDisciplina*>& genes,
+	                   Solucao& filho, int xbegin);
 	Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
 	Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2, 
 							    int camadaCruz);
-
+	Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
+								  int camadaCruz);
 	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
 	Disciplina
 	* getRandomDisc(const std::vector<Disciplina*>& restantes);
 
-	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao);
+	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao) const;
 	std::vector<Solucao*> populacao;
 };
 

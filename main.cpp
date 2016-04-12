@@ -131,19 +131,17 @@ void semArgumentos()
 	experimento = false;
 
 	Resolucao r{Configuracao()
-		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante.json"))
-		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		.arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+		//.arquivoEntrada(Util::join_path({"res"}, "input_gigante2.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input_maroto3.json"))
 		//.arquivoEntrada(Util::join_path({"res"}, "input.json"))
 		.populacaoInicial(10)
 		.porcentagemCruzamentos(20) // %
 		.numMaximoIteracoesSemEvolucaoGRASP(25)
 		.numMaximoIteracoesSemEvolucaoAG(20)
-		//.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
 		//.tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
-		.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
-		//.tipoMutacao(Configuracao::TipoMutacao::substitui_professor)
+		//.tipoCruzamento(Configuracao::TipoCruzamento::ordem)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
 		.mutacaoProbabilidade(20) // %
 		.graspNumVizinhos(3)
@@ -189,8 +187,9 @@ void semArgumentos()
 
 
 void exper(const std::string& filein, 
-		 Configuracao::TipoMutacao mut, Configuracao::TipoCruzamento cruz,
-		 Configuracao::TipoGrade grade, int numindividuos, int numger)
+		   Configuracao::TipoMutacao mut, Configuracao::TipoCruzamento cruz,
+		   Configuracao::TipoGrade grade, int numindividuos, 
+		   int percent_cruz, int numiterag, int numitergrasp)
 {
 	experimento = false;
 	auto timenow = Output::timestamp();
@@ -206,15 +205,17 @@ void exper(const std::string& filein,
 		.tipoCruzamento(cruz)
 		.tipoMutacao(mut)
 		.mutacaoProbabilidade(20) // %
-		.graspTempoConstrucao(30000) // ms
 		.graspNumVizinhos(2)
-		.graspAlfa(30) // %
-		.numIteracoes(numger)
+		.graspAlfa(40) // %
+		.numMaximoIteracoesSemEvolucaoAG(numiterag)
+		.numMaximoIteracoesSemEvolucaoGRASP(numitergrasp)
 		.numTorneioPares(0)
-		.numTorneioPopulacao(1)
+		.numTorneioPopulacao(3)
 		.tentativasMutacao(2)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
 		.tipoConstrucao(grade)
+		.camadaTamanho(40)
+		.perfilTamanho(1400)
 	};
 
 	auto inicio = std::chrono::steady_clock::now();
@@ -239,6 +240,69 @@ void exper(const std::string& filein,
 	Output::write(r.getSolucao(), path);
 }
 
+
+std::pair<long long, double>
+novo_experimento(const std::string& input, const std::string& id, 
+				 int n_indiv, int p_cruz, int grasp_iter, int ag_iter, 
+				 int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
+				 int exec_i)
+{
+	experimento = false;
+
+	auto timenow = Output::timestamp();
+	auto execstr = "Exec" + std::to_string(exec_i);
+	auto path = Util::join_path({"exper", "log", id + execstr});
+	Util::create_folder(path);
+	auto fileout = path + "result" + id + execstr + ".txt";
+	//std::cout << id << "\n";
+	//std::cout << "File: " << fileout << "\n";
+
+	Resolucao r{Configuracao()
+		.arquivoEntrada(input)
+		.populacaoInicial(n_indiv)
+		.porcentagemCruzamentos(p_cruz) // %
+		.numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
+		.numMaximoIteracoesSemEvolucaoAG(ag_iter)
+		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+		.mutacaoProbabilidade(20) // %
+		.graspNumVizinhos(grasp_nviz)
+		.graspAlfa(grasp_alfa) // %
+		.camadaTamanho(40)
+		.perfilTamanho(1400)
+		.numTorneioPares(0)
+		.numTorneioPopulacao(n_tour)
+		.tentativasMutacao(n_mut)
+		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+		.tipoConstrucao(Configuracao::TipoGrade::grasp)
+	};
+
+	auto inicio = Util::now();
+	r.gerarHorarioAG();
+	auto fim = Util::now();
+	auto tempo = Util::chronoDiff(fim, inicio);
+
+	auto saida = std::ofstream(fileout);
+	saida << id << "\n";
+	saida << execstr << "\n";
+	saida << "Tempo do horario: " << tempo << "ms\n";
+
+	auto fo = r.getSolucao()->getFO();
+	saida << "\nResultado:" << fo << std::endl;
+
+	saida << "hash: " << r.hashAlvo << "\n";
+	saida << "solucaoAlvo:" << r.foAlvo << "\n";
+	saida << "iteracoes:" << r.iteracaoAlvo << "\n";
+	saida << "tempoAlvo:" << r.tempoAlvo << "\n";
+	saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
+	saida << r.getLog() << "\n";
+
+	Output::write(r.getSolucao(), path);
+
+	return {tempo, fo};
+}
+
+
 void teste()
 {
 	Resolucao resolucaoGrasp{Configuracao()
@@ -261,8 +325,8 @@ void teste()
 		.graspTempoConstrucao(600) // ms
 		.graspNumVizinhos(2)
 		.graspAlfa(30) // %
-		.camadaTamanho(20)
-		.perfilTamanho(600)
+		.camadaTamanho(40)
+		.perfilTamanho(1400)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(1)
 		.tentativasMutacao(2)
@@ -281,7 +345,7 @@ void menu(std::string filein)
 	std::cout << "Rodar quantas vezes? ";
 	std::cin >> num;
 
-	Configuracao::TipoMutacao mut;
+	auto mut = Configuracao::TipoMutacao::substiui_disciplina;
 	Configuracao::TipoGrade grade;
 	Configuracao::TipoCruzamento cruz;
 	
@@ -289,9 +353,9 @@ void menu(std::string filein)
 
 	int optcruz;
 	std::cout << "Operador de cruzamento:\n";
-	std::cout << "1 - Construtivo-reparo (original)\n";
-	std::cout << "2 - Simples (troca-camada)\n";
-	std::cout << "3 - Troca-blocos\n";
+	std::cout << "1 - PMX\n";
+	std::cout << "2 - CX\n";
+	std::cout << "3 - OX\n";
 	std::cout << "Opcao> ";
 	std::cin >> optcruz;
 
@@ -306,27 +370,22 @@ void menu(std::string filein)
 
 	std::cout << "\n";
 
-	int optmut;
-	std::cout << "Operador de mutacao:\n";
-	std::cout << "1 - Substitui disciplina\n";
-	std::cout << "2 - Substitui professor\n";
-	std::cout << "Opcao> ";
-	std::cin >> optmut;
-
-	std::cout << "\n";
-
-	int numindividuos, numger;
+	int numindividuos, numiterag, numitergrasp, percent_cruz;
 	std::cout << "Quantos individuos? ";
 	std::cin >> numindividuos;
-	std::cout << "Quantas geracoes? ";
-	std::cin >> numger;
+	std::cout << "Quantas iteracoes sem melhoria (AG)? ";
+	std::cin >> numiterag;
+	std::cout << "Quantas iteracoes sem melhoria (GRASP)? ";
+	std::cin >> numitergrasp;
+	std::cout << "Porcentagem de cruzamentos por geracao? ";
+	std::cin >> percent_cruz;
 
 	std::cout << "\n\n";
 
 	switch (optcruz) {
-	case 1: cruz = Configuracao::TipoCruzamento::construtivo_reparo; break;
-	case 2: cruz = Configuracao::TipoCruzamento::simples; break;
-	case 3: cruz = Configuracao::TipoCruzamento::substitui_bloco; break;
+	case 1: cruz = Configuracao::TipoCruzamento::pmx; break;
+	case 2: cruz = Configuracao::TipoCruzamento::ciclo; break;
+	case 3: cruz = Configuracao::TipoCruzamento::ordem; break;
 	default: goto err;
 	}
 
@@ -336,20 +395,15 @@ void menu(std::string filein)
 	default: goto err;
 	}
 
-	switch (optmut) {
-	case 1: mut = Configuracao::TipoMutacao::substiui_disciplina; break;
-	case 2: mut = Configuracao::TipoMutacao::substitui_professor; break;
-	default: goto err;
-	}
-
 	dados << "Individuos: " << numindividuos << "\n";
-	dados << "Geracoes: " << numger << "\n";
+	dados << "Numero maximo iteracoes (AG) " << numiterag << "\n";
+	dados << "Numero maximo iteracoes (GRASP) " << numitergrasp << "\n";
 	dados << "Opt grade: " << optgrade << "\n";
-	dados << "Opt mut: " << optmut << "\n";
 	dados << "Opt cruz: " << optcruz << "\n";
 
 	for (auto i = 0; i < num; i++) {
-		exper(filein, mut, cruz, grade, numindividuos, numger);
+		exper(filein, mut, cruz, grade, numindividuos, percent_cruz, numiterag,
+			  numitergrasp);
 	}
 	return;
 
@@ -358,14 +412,66 @@ err:
 	return;
 }
 
+void novo_experimento_cli(const std::string& input, const std::string& file)
+{
+	std::ifstream config{file};
+
+	// comentário do topo
+	// formato entrada: 
+	// ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
+	// formato saida:
+	// ID,NExec,Tempo,Fo
+	std::string junk; 
+	std::getline(config, junk);
+
+	std::string id;
+	int ag_iter, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
+	int grasp_nviz, grasp_alfa, n_exec;
+	
+
+	while (config >> id >> ag_iter >> n_indiv >> p_cruz >> n_mut >> n_tour 
+			   >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
+
+		auto path = Util::join_path({"exper", "result"});
+		Util::create_folder(path);
+
+		auto filename = path + "result" + id + ".txt";
+		std::ofstream out{filename};
+
+		std::cout << "\n\nID: " << id << "\n";
+
+		out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+		for (auto i = 0; i < n_exec; i++) {
+			long long tempo; double fo;
+			std::tie(tempo, fo) = novo_experimento(
+				input, id, n_indiv, p_cruz, grasp_iter, ag_iter,
+				grasp_nviz, grasp_alfa, n_tour, n_mut, i);
+
+			std::cout << id << "," << i << "," << tempo << "," << fo << "\n";
+			out << id << "," << i << "," << tempo << "," << fo << "\n";
+			
+			// TODO:
+			// Refatorar os métodos de crossover (DRY)
+		}
+	}
+
+}
+
 int main(int argc, char** argv)
 {
 	verbose = false;
 	if (argc == 3) {
-		comArgumentos(argv);
+		// Primeiro argumento é a entrada, o segundo é o arquivo de configuração
+		novo_experimento_cli(argv[1], argv[2]);
 	} else if (argc == 2) {
 		//calibracao();
-		menu(argv[1]);
+		//menu(argv[1]);
+		std::string flag{argv[1]};
+		if (flag == "-h" || flag == "--help") {
+			std::cout << "Primeiro argumento é a entrada, o segundo é o arquivo de configuração\n";
+			std::cout << "Formato da config:\n";
+			std::cout << "ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec\n";
+		}
 	} else {
 		semArgumentos();
 		//teste();

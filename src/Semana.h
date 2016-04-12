@@ -12,11 +12,11 @@ const int SABADO  = 5;
 const int DOMINGO = 6;
 
 const double HORA_MINUTO  = 60.0;
-const double MINUTO_ALUA  = 60.0;
+const double MINUTO_AULA  = 60.0;
 const double SEMANA_MES   = 4.0;
 const double MES_SEMESTRE = 6.0;
 
-const double CARGA_HORARIA = MINUTO_ALUA * 1. / HORA_MINUTO;
+const double CARGA_HORARIA = MINUTO_AULA / HORA_MINUTO;
 
 #endif /* SEMANA_H */
 
