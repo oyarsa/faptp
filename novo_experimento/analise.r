@@ -22,4 +22,5 @@ result <- ddply(frames, ~ID.Algoritmo, summarise,
                 RPD.Tempo=(function(x) { rpd.reduce(mean, x, min(frames$Tempo.total)) })(Tempo.total)
                 )
 
-result
+result <- ddply(result, .(RPD.FO))
+head(result, 5)

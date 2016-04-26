@@ -251,9 +251,9 @@ novo_experimento(const std::string& input, const std::string& id,
 
 	auto timenow = Output::timestamp();
 	auto execstr = "Exec" + std::to_string(exec_i);
-	auto path = Util::join_path({"exper", "log", id + execstr});
-	Util::create_folder(path);
-	auto fileout = path + "result" + id + execstr + ".txt";
+	//auto path = Util::join_path({"exper", "log", id + execstr});
+	//Util::create_folder(path);
+	//auto fileout = path + "result" + id + execstr + ".txt";
 	//std::cout << id << "\n";
 	//std::cout << "File: " << fileout << "\n";
 
@@ -282,24 +282,81 @@ novo_experimento(const std::string& input, const std::string& id,
 	auto fim = Util::now();
 	auto tempo = Util::chronoDiff(fim, inicio);
 
-	auto saida = std::ofstream(fileout);
-	saida << id << "\n";
-	saida << execstr << "\n";
-	saida << "Tempo do horario: " << tempo << "ms\n";
+	//auto saida = std::ofstream(fileout);
+	//saida << id << "\n";
+	//saida << execstr << "\n";
+	//saida << "Tempo do horario: " << tempo << "ms\n";
 
 	auto fo = r.getSolucao()->getFO();
-	saida << "\nResultado:" << fo << std::endl;
+	//saida << "\nResultado:" << fo << std::endl;
 
-	saida << "hash: " << r.hashAlvo << "\n";
-	saida << "solucaoAlvo:" << r.foAlvo << "\n";
-	saida << "iteracoes:" << r.iteracaoAlvo << "\n";
-	saida << "tempoAlvo:" << r.tempoAlvo << "\n";
-	saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
-	saida << r.getLog() << "\n";
+	//saida << "hash: " << r.hashAlvo << "\n";
+	//saida << "solucaoAlvo:" << r.foAlvo << "\n";
+	//saida << "iteracoes:" << r.iteracaoAlvo << "\n";
+	//saida << "tempoAlvo:" << r.tempoAlvo << "\n";
+	//saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
+	//saida << r.getLog() << "\n";
 
-	Output::write(r.getSolucao(), path);
+	//Output::write(r.getSolucao(), path);
 
 	return {tempo, fo};
+}
+
+std::pair<long long, double>
+novo_experimento_fase2(const std::string& input, const std::string& id, int exec_i,
+					   int ag_iter, Configuracao::TipoCruzamento tipo_cruz)
+{
+	auto timenow = Output::timestamp();
+	auto execstr = "Exec" + std::to_string(exec_i);
+	//auto path = Util::join_path({"exper", "log", id + execstr});
+	//Util::create_folder(path);
+	//auto fileout = path + "result" + id + execstr + ".txt";
+	//std::cout << id << "\n";
+	//std::cout << "File: " << fileout << "\n";
+
+	Resolucao r{Configuracao()
+		.arquivoEntrada(input)
+		.populacaoInicial(40)
+		.porcentagemCruzamentos(30) // %
+		.numMaximoIteracoesSemEvolucaoGRASP(25)
+		.numMaximoIteracoesSemEvolucaoAG(ag_iter)
+		.tipoCruzamento(tipo_cruz)
+		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+		.mutacaoProbabilidade(20) // %
+		.graspNumVizinhos(2)
+		.graspAlfa(60) // %
+		.camadaTamanho(40)
+		.perfilTamanho(1400)
+		.numTorneioPares(0)
+		.numTorneioPopulacao(4)
+		.tentativasMutacao(2)
+		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+		.tipoConstrucao(Configuracao::TipoGrade::grasp)
+	};
+
+	auto inicio = Util::now();
+	r.gerarHorarioAG();
+	auto fim = Util::now();
+	auto tempo = Util::chronoDiff(fim, inicio);
+
+	//auto saida = std::ofstream(fileout);
+	//saida << id << "\n";
+	//saida << execstr << "\n";
+	//saida << "Tempo do horario: " << tempo << "ms\n";
+
+	auto fo = r.getSolucao()->getFO();
+	//saida << "\nResultado:" << fo << std::endl;
+
+	//saida << "hash: " << r.hashAlvo << "\n";
+	//saida << "solucaoAlvo:" << r.foAlvo << "\n";
+	//saida << "iteracoes:" << r.iteracaoAlvo << "\n";
+	//saida << "tempoAlvo:" << r.tempoAlvo << "\n";
+	//saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
+	//saida << r.getLog() << "\n";
+
+	//Output::write(r.getSolucao(), path);
+
+	return{tempo, fo};
 }
 
 
@@ -421,14 +478,11 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
 	// ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
 	// formato saida:
 	// ID,NExec,Tempo,Fo
-	std::string junk; 
-	std::getline(config, junk);
 
 	std::string id;
 	int ag_iter, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
 	int grasp_nviz, grasp_alfa, n_exec;
 	
-
 	while (config >> id >> ag_iter >> n_indiv >> p_cruz >> n_mut >> n_tour 
 			   >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
 
@@ -457,16 +511,67 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
 
 }
 
+void novo_experimento_cli_fase2(const std::string& input, const std::string& file)
+{
+	experimento = true;
+	std::ifstream config{file};
+
+	// comentário do topo
+	// formato entrada: 
+	// ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
+	// formato saida:
+	// ID,NExec,Tempo,Fo
+
+	std::string id;
+	int ag_iter, xover_id, n_exec;
+	Configuracao::TipoCruzamento xover;
+
+	while (config >> id >> ag_iter >> xover_id >> n_exec) {
+		switch (xover_id) {
+		case 1:
+			xover = Configuracao::TipoCruzamento::pmx; break;
+		case 2:
+			xover = Configuracao::TipoCruzamento::ordem; break;
+		case 3:
+			xover = Configuracao::TipoCruzamento::ciclo; break;
+		default:
+			xover = Configuracao::TipoCruzamento::pmx; break;
+		}
+
+		auto path = Util::join_path({"exper", "result"});
+		Util::create_folder(path);
+
+		auto filename = path + "result" + id + ".txt";
+		std::ofstream out{filename};
+
+		std::cout << "\n\nID: " << id << "\n";
+
+		out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+		for (auto i = 0; i < n_exec; i++) {
+			long long tempo; double fo;
+			std::tie(tempo, fo) = novo_experimento_fase2(
+				input, id, i, ag_iter, xover);
+
+			std::cout << id << "," << i << "," << tempo << "," << fo << "\n";
+			out << id << "," << i << "," << tempo << "," << fo << "\n";
+
+			// TODO:
+			// Refatorar os métodos de crossover (DRY)
+		}
+	}
+
+}
+
 int main(int argc, char** argv)
 {
 	verbose = false;
 	if (argc == 3) {
 		// Primeiro argumento é a entrada, o segundo é o arquivo de configuração
-		novo_experimento_cli(argv[1], argv[2]);
+		novo_experimento_cli_fase2(argv[1], argv[2]);
 	} else if (argc == 2) {
 		//calibracao();
 		//menu(argv[1]);
-		std::string flag{argv[1]};
+		std::string flag = argv[1];
 		if (flag == "-h" || flag == "--help") {
 			std::cout << "Primeiro argumento é a entrada, o segundo é o arquivo de configuração\n";
 			std::cout << "Formato da config:\n";

@@ -514,7 +514,12 @@ Solucao* Resolucao::gerarHorarioAG()
 	iteracaoAlvo = -1;
 	tempoAlvo = Util::chronoDiff(std::chrono::system_clock::now(), tempoInicio);
 
-	for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+	const auto uma_hora = 60 /* min */ * 60 /* sec */ * 1000 /* ms */;
+
+	for (auto i = 0; 
+		 i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG
+		    && Util::chronoDiff(Util::now(), tempoInicio) < uma_hora;
+		 i++) {
 		ultimaIteracao = i;
 		//logPopulacao(populacao, i);
 
@@ -2558,12 +2563,13 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao,
 		iteracaoAlvo = iteracaoAtual;
 		tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(), 
 		                             tempoInicio);
-		puts("Nova melhor solucao!");
+		//puts("Nova melhor solucao!");
 		log << "Nova melhor solucao!\n";
 		char str[101];
 		sprintf(str, "%-8g %u\n", populacao[0]->getFO(),
 								  populacao[0]->getHash());
-		puts(str); log << str;
+		//puts(str); 
+		log << str;
 	}
 }
 
