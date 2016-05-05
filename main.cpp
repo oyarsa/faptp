@@ -95,7 +95,9 @@ void teste()
 
 std::pair<long long, double>
 novo_experimento(const std::string& input, const std::string& id,
-				 int n_indiv, int p_cruz, int grasp_iter, int ag_iter,
+				 int n_indiv, int taxa_mut, int p_cruz, 
+				 const std::string& oper_cruz,
+				 int grasp_iter, int ag_iter,
 				 int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
 				 int exec_i)
 {
@@ -103,11 +105,12 @@ novo_experimento(const std::string& input, const std::string& id,
 
 	auto timenow = Output::timestamp();
 	auto execstr = "Exec" + std::to_string(exec_i);
-	//auto path = Util::join_path({"exper", "log", id + execstr});
-	//Util::create_folder(path);
-	//auto fileout = path + "result" + id + execstr + ".txt";
-	//std::cout << id << "\n";
-	//std::cout << "File: " << fileout << "\n";
+	
+	Configuracao::TipoCruzamento cruz;
+	if (oper_cruz == "PMX") cruz = Configuracao::TipoCruzamento::pmx;
+	else if (oper_cruz == "CX") cruz = Configuracao::TipoCruzamento::ciclo;
+	else if (oper_cruz == "OX") cruz = Configuracao::TipoCruzamento::ordem;
+	else cruz = Configuracao::TipoCruzamento::pmx;
 
 	Resolucao r{Configuracao()
 		.arquivoEntrada(input)
@@ -115,12 +118,12 @@ novo_experimento(const std::string& input, const std::string& id,
 		.porcentagemCruzamentos(p_cruz) // %
 		.numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
 		.numMaximoIteracoesSemEvolucaoAG(ag_iter)
-		.tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+		.tipoCruzamento(cruz)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-		.mutacaoProbabilidade(30) // %
+		.mutacaoProbabilidade(taxa_mut) // %
 		.graspNumVizinhos(grasp_nviz)
 		.graspAlfa(grasp_alfa) // %
-		.camadaTamanho(40)
+		.camadaTamanho(33)
 		.perfilTamanho(1400)
 		.numTorneioPares(0)
 		.numTorneioPopulacao(n_tour)
@@ -133,23 +136,7 @@ novo_experimento(const std::string& input, const std::string& id,
 	r.gerarHorarioAG();
 	auto fim = Util::now();
 	auto tempo = Util::chronoDiff(fim, inicio);
-
-	//auto saida = std::ofstream(fileout);
-	//saida << id << "\n";
-	//saida << execstr << "\n";
-	//saida << "Tempo do horario: " << tempo << "ms\n";
-
 	auto fo = r.getSolucao()->getFO();
-	//saida << "\nResultado:" << fo << std::endl;
-
-	//saida << "hash: " << r.hashAlvo << "\n";
-	//saida << "solucaoAlvo:" << r.foAlvo << "\n";
-	//saida << "iteracoes:" << r.iteracaoAlvo << "\n";
-	//saida << "tempoAlvo:" << r.tempoAlvo << "\n";
-	//saida << "ultima iteracao: " << r.ultimaIteracao << "\n\n";
-	//saida << r.getLog() << "\n";
-
-	//Output::write(r.getSolucao(), path);
 
 	return {tempo, fo};
 }
@@ -217,21 +204,22 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
 
 	// comentário do topo
 	// formato entrada:
-	// ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
+	// ID AGIter TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
 	// formato saida:
 	// ID,NExec,Tempo,Fo
 
-	std::string id;
-	int ag_iter, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
+	std::string id, cruz_oper;
+	int ag_iter, taxa_mut, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
 	int grasp_nviz, grasp_alfa, n_exec;
 
-	while (config >> id >> ag_iter >> n_indiv >> p_cruz >> n_mut >> n_tour
+	while (config >> id >> ag_iter >> taxa_mut >> n_indiv >> p_cruz
+		       >> cruz_oper >> n_mut >> n_tour
 			   >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
 
-		auto path = Util::join_path({"exper", "result"});
+		auto path = Util::join_path({"experimento"});
 		Util::create_folder(path);
 
-		auto filename = path + "result" + id + ".txt";
+		auto filename = path + id + ".txt";
 		std::ofstream out{filename};
 
 		std::cout << "\n\nID: " << id << "\n";
@@ -240,14 +228,11 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
 		for (auto i = 0; i < n_exec; i++) {
 			long long tempo; double fo;
 			std::tie(tempo, fo) = novo_experimento(
-				input, id, n_indiv, p_cruz, grasp_iter, ag_iter,
-				grasp_nviz, grasp_alfa, n_tour, n_mut, i);
+				input, id, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
+				ag_iter, grasp_nviz, grasp_alfa, n_tour, n_mut, i);
 
 			std::cout << id << "," << i << "," << tempo << "," << fo << "\n";
 			out << id << "," << i << "," << tempo << "," << fo << "\n";
-
-			// TODO:
-			// Refatorar os métodos de crossover (DRY)
 		}
 	}
 
@@ -309,8 +294,8 @@ int main(int argc, char** argv)
 	verbose = false;
 	if (argc == 3) {
 		// Primeiro argumento é a entrada, o segundo é o arquivo de configuração
-		//novo_experimento_cli_fase2(argv[1], argv[2]);
-		semArgumentos();
+		novo_experimento_cli(argv[1], argv[2]);
+		//semArgumentos();
 	} else if (argc == 2) {
 		std::string flag = argv[1];
 		if (flag == "-h" || flag == "--help") {
