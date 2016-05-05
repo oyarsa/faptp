@@ -40,7 +40,7 @@ set(FAPTP_FILES
     src/Configuracao.h
     )
 
-add_definitions(-DIL_STD)
+add_definitions(-DIL_STD -DMODELO)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${CMAKE_CXX_FLAGS_DEBUG}")

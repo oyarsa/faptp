@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <chrono>
 
-#include <modelo-grade/arquivos.h>
-#include <modelo-grade/modelo_solver.h>
+#ifdef MODELO
+	#include <modelo-grade/arquivos.h>
+	#include <modelo-grade/modelo_solver.h>
+#endif
 
 #include "parametros.h"
 #include "Resolucao.h"
@@ -47,8 +49,10 @@ Resolucao::Resolucao(const Configuracao& c)
 	  , professorDisciplinas()
 	  , solucao(nullptr)
 	  , jsonRoot()
+#ifdef MODELO
 	  , curso(nullptr)
 	  , alunos()
+#endif
 	  , tempoLimiteModelo(c.tempoLimMod_)
 {
 	carregarDados();
@@ -61,8 +65,10 @@ Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
 	  , camadasTamanho(pCamadasTamanho)
 	  , perfisTamanho(pPerfisTamanho)
 	  , arquivoEntrada(pArquivoEntrada)
+#ifdef MODELO
 	  , curso(nullptr)
 	  , alunos()
+#endif
 {
 	carregarDados();
 }
@@ -89,6 +95,7 @@ Resolucao::~Resolucao()
 	}
 }
 
+#ifdef MODELO
 fagoc::Curso& Resolucao::getCurso()
 {
 	return *curso;
@@ -98,6 +105,7 @@ const std::vector<fagoc::Aluno>& Resolucao::getAlunos() const
 {
 	return alunos;
 }
+#endif
 
 std::string Resolucao::getLog() const
 {
@@ -116,11 +124,13 @@ void Resolucao::carregarDados()
 		carregarDadosProfessores();
 		carregarAlunoPerfis();
 
+#ifdef MODELO
 		if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
 			auto p = fagoc::ler_json(arquivoEntrada);
 			curso.reset(new fagoc::Curso(std::move(p.first)));
 			alunos = move(p.second);
 		}
+#endif
 	} else {
 		std::cerr << "We had a problem reading file (" << arquivoEntrada << ")\n";
 		throw 1;
@@ -2076,7 +2086,7 @@ void Resolucao::teste()
 	printf("hash: %u\n", sol->getHash());
 
 	// bench grasp
-	auto n = 1;
+	auto n = 5;
 	auto t_grasp = 0ll;
 	auto fo_grasp = 0.0;
 	auto max_fo_grasp = 0.0;
@@ -2122,6 +2132,7 @@ void Resolucao::teste()
 
 double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 {
+#ifdef MODELO
 	auto horarioBin = converteHorario(pSolucao);
 	auto total = 0.0;
 	std::unordered_map<long long, Grade*> gradesGeradas;
@@ -2155,11 +2166,15 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 	pSolucao->fo = total;
 
 	return total;
+#else
+	return 0;
+#endif
 }
 
 std::vector<std::vector<char>> 
 Resolucao::converteHorario(Solucao* pSolucao) const
 {
+#ifdef MODELO
 	const auto& matriz = pSolucao->horario->matriz;
 	auto numDisciplinas = disciplinas.size();
 	auto numHorarios = SEMANA * blocosTamanho;
@@ -2179,8 +2194,11 @@ Resolucao::converteHorario(Solucao* pSolucao) const
 
 		horarioBin[posicao][index] = 1;
 	}
-
 	return horarioBin;
+#else
+	return {};
+#endif
+
 }
 
 void Resolucao::logExperimentos()

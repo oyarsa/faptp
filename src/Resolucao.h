@@ -6,8 +6,11 @@
 #include <memory>
 #include <set>
 
-#include <modelo-grade/aluno.h>
-#include <modelo-grade/curso.h>
+#ifdef MODELO
+	#include <modelo-grade/aluno.h>
+	#include <modelo-grade/curso.h>
+#endif
+
 #include "includes/json/json.h"
 
 #include "Algorithms.h"
@@ -22,7 +25,8 @@
 class Resolucao {
 public:
     Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,
-			  Configuracao::TipoGrade pTipoConstrucao, std::string arquivoEntrada = "input.json");
+			  Configuracao::TipoGrade pTipoConstrucao, 
+			  std::string arquivoEntrada = "input.json");
 	Resolucao(const Configuracao& c);
     virtual ~Resolucao();
 
@@ -41,8 +45,10 @@ public:
 
 	void teste();
 
+#ifdef MODELO
 	fagoc::Curso& getCurso();
 	const std::vector<fagoc::Aluno>& getAlunos() const;
+#endif
 	std::string getLog() const;
 
 	// Converte a matriz tridimensional do horário em uma matriz bidimensional
@@ -125,8 +131,10 @@ private:
     std::unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
+#ifdef MODELO
 	std::unique_ptr<fagoc::Curso> curso;
 	std::vector<fagoc::Aluno> alunos;
+#endif
 	std::chrono::system_clock::time_point tempoInicio;
 	double tempoLimiteModelo;
 	std::ostringstream log;
@@ -237,8 +245,7 @@ private:
 	Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
 								  int camadaCruz);
 	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
-	Disciplina
-	* getRandomDisc(const std::vector<Disciplina*>& restantes);
+	Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes);
 
 	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao) const;
 	std::vector<Solucao*> populacao;
