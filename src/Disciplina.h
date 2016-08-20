@@ -14,23 +14,30 @@ class Disciplina {
   friend class Solucao;
   friend class Resolucao;
   friend class Output;
-public:
-  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
-  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
-  virtual ~Disciplina();
 
-  const std::string & getId() const;
+public:
+  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, 
+			 std::string pCurso, std::string pTurma, int pCapacidade, 
+			 std::string pPeriodoMinimo);
+
+  Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, 
+			 std::string pCurso, std::string pId, std::string pTurma, 
+			 int pCapacidade, std::string pPeriodoMinimo);
+
+  const std::string& getId() const;
 
   int periodoNum() const;
+
   int periodoMinimoNum() const;
-  std::string getNome() const;
-  void setNome(std::string pNome);
 
-  std::string getPeriodo();
-  void setPeriodo(std::string pPeriodo);
+  const std::string& getNome() const;
+  void setNome(const std::string& pNome);
 
-  std::string getCurso();
-  void setCurso(std::string pCurso);
+  const std::string & getPeriodo();
+  void setPeriodo(const std::string& pPeriodo);
+
+  const std::string & getCurso();
+  void setCurso(const std::string& pCurso);
 
   int getCargaHoraria() const;
   void setCargaHoraria(int pCargaHoraria);
@@ -38,33 +45,27 @@ public:
   int getAulasSemana();
   int getCreditos();
 
-  void addPreRequisito(std::string pDisciplina);
-  bool isPreRequisito(std::string pDisciplina);
+  void addPreRequisito(const std::string& pDisciplina);
+  bool isPreRequisito(const std::string& pDisciplina);
   
-  void addProfessorCapacitado(Professor *professor);
+  void addProfessorCapacitado(Professor* professor);
+
 private:
   std::string id;
   std::string turma;
-
   std::string nome;
-
   std::string periodo;
   std::string periodoMinimo;
   std::string curso;
-
   int cargaHoraria;
   int aulasSemana;
   int capacidade;
   int alocados;
   bool ofertada;
-
   std::unordered_set<std::string> preRequisitos;
   std::unordered_set<std::string> coRequisitos;
   std::unordered_set<std::string> equivalentes;
-
   std::vector<Professor*> professoresCapacitados;
-
-  void init(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo);
 };
 
 #endif	/* DISCIPLINA_H */

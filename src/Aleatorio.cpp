@@ -1,6 +1,8 @@
 #include <random>
 #include <chrono>
 
+#include <gsl.h>
+
 #include "Aleatorio.h"
 
 class Aleatorio
@@ -24,33 +26,32 @@ public:
 	std::mt19937 geradorAleatorio();
 private:
 	//! Constante para maior valor a ser gerado. Igual ao RAND_MAX padrao
-	const int MAX_RANDOM = 32767;
+	const int max_random_ = 32767;
 	//! Gera uma distribuicao uniforme na mesma faixa do rand()
-	std::uniform_int_distribution<> dist;
+	std::uniform_int_distribution<> dist_;
 	//! Seed do mersenne twister. Numero de milissegundos, em alta precisao,
 	//! desde Epoch
-	TipoSeed seed;
+	TipoSeed seed_;
 	//! Engine de numeros aleatorios
-	std::mt19937 gerador;
+	std::mt19937 gerador_;
 };
 
-Aleatorio::Aleatorio() : dist {
-  0, MAX_RANDOM
+Aleatorio::Aleatorio() : dist_ {
+  0, max_random_
 },
-seed{static_cast<TipoSeed> (
+seed_{gsl::narrow_cast<TipoSeed> (
   TipoRelogio::now().time_since_epoch().count())},
-gerador{seed}
+gerador_{seed_}
 {
 }
 
 std::mt19937 Aleatorio::geradorAleatorio() {
-  return gerador;
+  return gerador_;
 }
 
 int Aleatorio::randomInt() {
-  return dist(gerador);
+  return dist_(gerador_);
 }
-
 
 int aleatorio::randomInt()
 {

@@ -20,6 +20,7 @@ public:
     double getFO();
 
 	std::size_t getHash();
+	std::unordered_map<int, std::string> camada_periodo;
 private:
     Horario *horario;
     std::unordered_map<std::string, Grade*> grades;

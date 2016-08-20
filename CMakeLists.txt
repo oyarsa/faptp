@@ -2,8 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project(faPTP)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
+set(MODELO FALSE)
+
+if (MODELO)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
+    add_definitions(-DIL_STD -DMODELO)
+endif()
+
 
 set(FAPTP_FILES
     src/Aleatorio.cpp
@@ -38,9 +44,12 @@ set(FAPTP_FILES
     src/includes/jsoncpp.cpp
     src/Algorithms.h
     src/Configuracao.h
+    src/SA.cpp
+    src/SA.h
+    src/ILS.cpp
+    src/ILS.h
     )
 
-add_definitions(-DIL_STD -DMODELO)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${CMAKE_CXX_FLAGS_DEBUG}")
@@ -61,4 +70,6 @@ if (MSVC)
 endif()
 
 add_executable(faptp ${FAPTP_FILES} main.cpp)
-target_link_libraries(faptp modelo-grade-lib)
+if (MODELO)
+  target_link_libraries(faptp modelo-grade-lib)
+endif()

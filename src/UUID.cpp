@@ -9,8 +9,11 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <gsl.h>
+
 #include "UUID.h"
 
+[[suppress(bounds.1)]]
 std::string UUID::GenerateUuid() {
 	const int UUID_LENGTH = 40;
   std::string uuid_code;
@@ -18,7 +21,7 @@ std::string UUID::GenerateUuid() {
   char *pGuidStr = guidStr;
   int i;
 
-  srand(static_cast<unsigned int> (time(NULL))); /*Randomize based on time.*/
+  srand(gsl::narrow_cast<unsigned>(time(nullptr))); /*Randomize based on time.*/
 
   /*Data1 - 8 characters.*/
   //*pGuidStr++ = '{';  

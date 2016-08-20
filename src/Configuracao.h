@@ -75,7 +75,7 @@ private:
 	double graspTempo_ = 0.001;
 	int numVizinhos_ = 2;
 	double graspAlfa_ = 0.3;
-	double porcentCruz_;
+	double porcentCruz_ = 0.5;
 	TipoCruzamento tipoCruz_ = TipoCruzamento::construtivo_reparo;
 	TipoMutacao tipoMut_ = TipoMutacao::substiui_disciplina;
 	double porcSolucoesAleatorias_ = 0.1;

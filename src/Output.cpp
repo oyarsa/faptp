@@ -6,6 +6,7 @@
  */
 
 #include <sstream>
+#include <array>
 #include <fstream>
 
 #include "Output.h"
@@ -34,8 +35,9 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
     // Criando o diretorio de saida
 	Util::create_folder(savePath);
     std::stringstream saida{};
-    const std::string diasDaSemana[] = {"Segunda", "Terca", "Quarta", "Quinta",
-								   "Sexta", "Sabado", "Domingo"};
+	const std::array<std::string, dias_semana_total> diasDaSemana {
+		"Segunda", "Terca", "Quarta", "Quinta",
+		"Sexta", "Sabado", "Domingo"};
 
     saida << std::nounitbuf;
     saida << "<!DOCTYPE html>\n"
@@ -57,18 +59,19 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
 
     saida << "<hr /> <h3>Horario</h3>\n";
     for (int i = 0; i < pSolucao->camadasTamanho; i++) {
+		saida << "<center><h1>" << pSolucao->camada_periodo[i] << "</h1></center>";
         saida << "<table align='center' class='horario'>\n";
 
         saida << "<tr>";
-        for (int j = 0; j < SEMANA; j++) {
-            saida << "<th>" << diasDaSemana[j] << "</th>";
+        for (const auto& dia : diasDaSemana) {
+            saida << "<th>" << dia << "</th>";
         }
         saida << "</tr>";
 
 
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
-            for (int k = 0; k < SEMANA; k++) {
+            for (int k = 0; k < dias_semana_util; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
                 if (pd) {
 					saida << "<td>"<< pd->getDisciplina()->getNome() << "<br>"
@@ -89,24 +92,20 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
 
         double fo = gradeAtual->getFO();
 
-        if (fo == 0) {
-            //continue;
-        }
-
         saida << "<table align='center' class='grade'>\n";
-
-        saida << "<tr><th colspan=\"" << SEMANA << "\">" << gradeAtual->aluno->id << " (" << fo << ")</th></tr>\n";
+        saida << "<tr><th colspan=\"" << dias_semana_util << "\">" << "Aluno: " 
+			<< gradeAtual->aluno->id << " FO: (" << fo << ")</th></tr>\n";
 
         saida << "<tr>";
-        for (int j = 0; j < SEMANA; j++) {
-            saida << "<th>" << diasDaSemana[j] << "</th>";
+        for (const auto& dia : diasDaSemana) {
+            saida << "<th>" << dia << "</th>";
         }
         saida << "</tr>";
 
 
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
-            for (int k = 0; k < SEMANA; k++) {
+            for (int k = 0; k < dias_semana_util; k++) {
                 auto pd = gradeAtual->at(k, j, 0);
                 if (pd) {
 					saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
@@ -125,8 +124,7 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
     saida << "</body>\n"
             << "</html>\n";
 
-	std::ofstream arquivoSaida(savePath + "/horario.html");
-    arquivoSaida << std::nounitbuf << saida.str() << std::endl;
-    arquivoSaida.close();
+	std::ofstream arquivoSaida{savePath + "/horario.html"};
+    arquivoSaida << std::nounitbuf << saida.str() << "\n";
 }
 

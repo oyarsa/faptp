@@ -1,4 +1,5 @@
 #include "Professor.h"
+#include "Semana.h"
 
 Professor::Professor(std::string pNome) : creditoMaximo(), numDisponibilidade() {
   std::string pId;
@@ -17,9 +18,6 @@ void Professor::init(std::string pNome, std::string pId) {
   id = pId;
 }
 
-Professor::~Professor() {
-}
-
 std::string Professor::getId() {
   return id;
 }
@@ -27,7 +25,6 @@ std::string Professor::getId() {
 int Professor::getNumDisponibilidade() const {
     return numDisponibilidade;
 }
-
 
 std::string Professor::getNome() {
   return nome;
@@ -38,7 +35,7 @@ void Professor::setNome(std::string pNome) {
 }
 
 bool Professor::isDiaValido(unsigned int dia) {
-  return (dia < 7);
+  return dia < dias_semana_total;
 }
 
 void Professor::setCreditoMaximo(int pCreditoMaximo) {

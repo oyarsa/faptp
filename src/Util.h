@@ -6,10 +6,13 @@
 #include <algorithm>
 #include <chrono>
 
+#include <gsl.h>
+
 namespace Util
 {
 	int getPosition(int y, int x, int z, int Y, int Z);
-	void get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z);
+	// Bloco, dia, camada
+	void get3DMatrix(int pLinear, int triDimensional[3], int X, int Y, int Z);
 
 	std::vector<std::string>& strSplit(const std::string& s, char delim, std::vector<std::string>& elems);
 	std::vector<std::string> strSplit(const std::string& s, char delim);
@@ -24,6 +27,7 @@ namespace Util
 	std::chrono::time_point<std::chrono::high_resolution_clock> now();
 
 	int randomBetween(int min, int max);
+	double randomDouble();
 
 	int warpIntervalo(int i, int tamIntervalo, int comecoIntervalo);
 
@@ -57,7 +61,6 @@ namespace Util
 
 	std::size_t hash_string(const std::string& str);
 
-
 	inline int fast_ceil(double x)
 	{
 		return int(x) + (x > int(x));
@@ -66,6 +69,32 @@ namespace Util
 	inline int fast_floor(double x)
 	{
 		return int(x) - (x < int(x));
+	}
+
+	template <typename Container>
+	auto& randomChoice(Container& c)
+	{
+		auto n = randomBetween(0, c.size());
+		auto it = begin(c);
+		std::advance(it, n);
+		return *it;
+	}
+
+	template <typename T>
+	std::array<T, 100> gen_chance_array(const std::vector<std::pair<T, int>>& chances)
+	{
+		std::array<T, 100> chance_array{};
+		auto it = begin(chance_array);
+
+		for (const auto& p : chances) {
+			it = std::fill_n(it, p.second, p.first);
+		}
+
+		if (it != end(chance_array)) {
+			std::fill(it, end(chance_array), chances.back().first);
+		}
+
+		return chance_array;
 	}
 	
 };

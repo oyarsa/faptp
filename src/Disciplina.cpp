@@ -1,66 +1,58 @@
 #include <algorithm>
 
 #include "Disciplina.h"
+#include "Util.h"
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
-    std::string pId;
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
+	: Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, UUID::GenerateUuid(), 
+				 pTurma, pCapacidade, pPeriodoMinimo) {}
 
-    pId = UUID::GenerateUuid();
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) 
+    : id(pId),
+	  turma(pTurma),
+	  nome(pNome),
+	  periodo(pPeriodo),
+	  periodoMinimo(pPeriodoMinimo),
+	  curso (pCurso),
+	  cargaHoraria(pCargaHoraria),
+	  aulasSemana(cargaHoraria),
+	  capacidade(pCapacidade),
+	  alocados(0),
+	  ofertada(true),
+	  preRequisitos(),
+	  coRequisitos(),
+	  equivalentes(),
+	  professoresCapacitados() {}
 
-    init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade, pPeriodoMinimo);
-}
-
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
-    init(pNome, pCargaHoraria, pPeriodo, pCurso, pId, pTurma, pCapacidade, pPeriodoMinimo);
-}
-
-void Disciplina::init(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) {
-    id = pId;
-    cargaHoraria = pCargaHoraria;
-    periodo = pPeriodo;
-    periodoMinimo = pPeriodoMinimo;
-    curso = pCurso;
-    turma = pTurma;
-    capacidade = pCapacidade;
-
-    //aulasSemana = std::ceil(((cargaHoraria / SEMANA_MES / MES_SEMESTRE) * HORA_MINUTO) / MINUTO_ALUA);
-    aulasSemana = cargaHoraria;
-
-    alocados = 0;
-    ofertada = true;
-    setNome(pNome);
-}
-
-Disciplina::~Disciplina() {
-}
-
-const std::string & Disciplina::getId() const
+const std::string& Disciplina::getId() const
 {
     return id;
 }
 
-std::string Disciplina::getNome() const
+const std::string& Disciplina::getNome() const
 {
     return nome;
 }
 
-void Disciplina::setNome(std::string pNome) {
+void Disciplina::setNome(const std::string& pNome) {
     nome = pNome;
 }
 
-std::string Disciplina::getPeriodo() {
+const std::string& Disciplina::getPeriodo()
+{
     return periodo;
 }
 
-void Disciplina::setPeriodo(std::string pPeriodo) {
+void Disciplina::setPeriodo(const std::string& pPeriodo) {
     periodo = pPeriodo;
 }
 
-std::string Disciplina::getCurso() {
+const std::string& Disciplina::getCurso()
+{
     return curso;
 }
 
-void Disciplina::setCurso(std::string pCurso) {
+void Disciplina::setCurso(const std::string& pCurso) {
     curso = pCurso;
 }
 
@@ -80,25 +72,19 @@ int Disciplina::getCreditos() {
     return getAulasSemana();
 }
 
-void Disciplina::addPreRequisito(std::string pDisciplina) {
+void Disciplina::addPreRequisito(const std::string& pDisciplina) {
     preRequisitos.insert(pDisciplina);
 }
 
-bool Disciplina::isPreRequisito(std::string pDisciplina) {
-    return find(preRequisitos.begin(), preRequisitos.end(), pDisciplina) != preRequisitos.end();
+bool Disciplina::isPreRequisito(const std::string& pDisciplina) {
+	return preRequisitos.find(pDisciplina) != end(preRequisitos);
 }
 
 void Disciplina::addProfessorCapacitado(Professor *professor) {
-    professoresCapacitados.insert(
-            std::lower_bound(
-                begin(professoresCapacitados),
-                end(professoresCapacitados), 
-                professor, 
-                [](Professor *a, Professor *b) {
-                    return a->getNumDisponibilidade() < b->getNumDisponibilidade();
-                })
-            , professor
-            );
+	Util::insert_sorted(professoresCapacitados, professor, 
+						[](Professor *a, Professor *b) {
+		return a->getNumDisponibilidade() < b->getNumDisponibilidade();
+	});
 }
 
 int Disciplina::periodoNum() const

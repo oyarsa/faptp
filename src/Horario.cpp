@@ -26,7 +26,7 @@ Horario& Horario::operator=(const Horario& outro) {
 }
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
-    int positionCamada;
+    int positionCamada {};
 
     for (int i = 0; i < camadasTamanho; i++) {
 
@@ -84,7 +84,7 @@ void Horario::clearSlot(int pDia, int pBloco, int pCamada)
 
 void Horario::clearCamada(int camada)
 {
-	for (auto d = 0; d < SEMANA; d++) {
+	for (auto d = 0; d < dias_semana_util; d++) {
 		for (auto b = 0; b < blocosTamanho; b++) {
 			clearSlot(d, b, camada);
 		}

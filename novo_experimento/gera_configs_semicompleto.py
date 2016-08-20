@@ -1,6 +1,4 @@
-"""Imprime arquivos com apenas as configurações que ainda não foram executadas
-As configs executadas devem estar na mesma pasta do script, e as parcialmente executadas
-devem ser removidas"""
+
 
 import itertools
 import os
@@ -47,7 +45,6 @@ def config_str(config):
 configs_todas = [config_str(c) for c in itertools.product(ag_iter, taxa_mutacao, num_indiv, porcent_cruz,
                             oper_cruz, num_mut, num_torneio, grasp_iter,
                             grasp_vizinh, grasp_alfa)]
-
 completos = files = [f[:-4] for f in os.listdir('.') if f.endswith('.txt')]
 configs = [c for c in configs_todas if c.split()[0] not in completos]
 print("Numero configs: ", len(configs))

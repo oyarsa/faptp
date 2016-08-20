@@ -19,7 +19,7 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario *pHorario,
 , disciplinasCurso(pDisciplinasCurso)
 , discToIndex(pDiscToIndex)
 , fo(-1) {
-	disciplinasAdicionadas.reserve(SEMANA * blocosTamanho);
+	disciplinasAdicionadas.reserve(dias_semana_util * blocosTamanho);
 }
 
 Grade::Grade(const Grade& outro)
@@ -152,7 +152,7 @@ bool Grade::havePreRequisitos(const Disciplina * const pDisciplina) {
 bool Grade::checkCollision(const Disciplina * pDisciplina, int pCamada) {
 	// Percorre a grade do aluno inteira procurando slots da disciplina atual
 	// e verificando se já estão ocupados por alguma outra
-    for (auto i = 0; i < SEMANA; i++) {
+    for (auto i = 0; i < dias_semana_util; i++) {
         for (auto j = 0; j < blocosTamanho; j++) {
             auto currPosHorario = getPosition(i, j, pCamada);
 			auto currPosGrade = getPosition(i, j, 0);
@@ -187,7 +187,7 @@ bool Grade::isViable(const Disciplina * pDisciplina, int pCamada) {
 }
 
 void Grade::add(Disciplina* pDisciplina, int pCamada) {
-    for (int i = 0; i < SEMANA; i++) {
+    for (int i = 0; i < dias_semana_util; i++) {
         for (int j = 0; j < blocosTamanho; j++) {
             auto currPosHorario = getPosition(i, j, pCamada);
             auto currPosGrade = getPosition(i, j, 0);
@@ -216,12 +216,13 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
 }
 
 bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force) {
-    int camada, triDimensional[3];
-    int x;
+	int camada {}; 
+	int triDimensional[3] {};
+	int x {};
 
-    std::vector<ProfessorDisciplina*>::iterator pdIter = horario->matriz.begin();
-    std::vector<ProfessorDisciplina*>::iterator pdIterEnd = horario->matriz.end();
-    std::vector<ProfessorDisciplina*>::iterator pdIterFound = horario->matriz.begin();
+    auto pdIter = horario->matriz.begin();
+    auto pdIterEnd = horario->matriz.end();
+    auto pdIterFound = horario->matriz.begin();
 
     bool viavel = false;
     bool first = true;
@@ -230,7 +231,7 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
         while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
             x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
 
-            professorDisciplinaTemp = NULL;
+            professorDisciplinaTemp = nullptr;
 
             get3DMatrix(x, triDimensional);
 			camada = horario->discCamada[pDisciplina->id];
@@ -244,12 +245,12 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
                     std::cout << "]" << std::endl;
             }
             if (viavel || force) {
-                if (professorDisciplinaTemp != NULL) {
+                if (professorDisciplinaTemp != nullptr) {
                     professorDisciplinas.push_back(professorDisciplinaTemp);
                 }
             }
             if (!viavel && force) {
-                if (professorDisciplinaTemp != NULL) {
+                if (professorDisciplinaTemp != nullptr) {
                     problemas.push_back(professorDisciplinaTemp->disciplina->id);
                 }
             }
@@ -275,7 +276,7 @@ bool Grade::insert(Disciplina* pDisciplina)
 }
 
 Disciplina* Grade::remove(Disciplina* pDisciplina) {
-	for (auto d = 0; d < SEMANA; d++) {
+	for (auto d = 0; d < dias_semana_util; d++) {
 		for (auto b = 0; b < blocosTamanho; b++) {
 			auto pos = getPosition(d, b, 0);
 			auto currPd = matriz[pos];

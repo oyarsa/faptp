@@ -3,7 +3,6 @@
 
 #include <string>
 #include <unordered_set>
-#include <set>
 
 #include "Disciplina.h"
 
@@ -15,10 +14,10 @@ class AlunoPerfil
 	friend class Output;
 public:
 	AlunoPerfil(double pPeso, const std::string& pId, const std::string& pTurma, const std::string& pPeriodo);
-	virtual ~AlunoPerfil();
+
+	long long getHash();
 
 	double getPeso() const;
-	long long getHash();
 	void setPeso(double pPeso);
 
 	void addCursada(const std::string& pCursada);
@@ -28,11 +27,12 @@ public:
 	bool isRestante(const std::string& pRestante);
 
 	int getPeriodoNum() const;
+
 private:
 
 	struct DisciplinaCargaHorariaDesc
 	{
-		bool operator()(const Disciplina* a, const Disciplina* b)
+		bool operator()(const Disciplina* a, const Disciplina* b) const
 		{
 			return a->getCargaHoraria() > b->getCargaHoraria();
 		}
@@ -41,14 +41,11 @@ private:
 	std::string id;
 	std::string turma;
 	std::string periodo;
-
 	double peso;
 	long long hash;
-
 	std::unordered_set<std::string> cursadas;
 	std::unordered_set<std::string> aprovadas;
 	std::unordered_set<std::string> restante;
-	//std::vector<std::string> restante;
 	std::vector<Disciplina*> restanteOrd;
 };
 

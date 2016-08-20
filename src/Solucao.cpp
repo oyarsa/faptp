@@ -13,7 +13,8 @@ Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho) {
 }
 
 Solucao::Solucao(const Solucao& outro) 
-    : horario(new Horario(*(outro.horario)))
+	: camada_periodo(outro.camada_periodo)
+    , horario(new Horario(*(outro.horario)))
     , id(aleatorio::randomInt())
     , blocosTamanho(outro.blocosTamanho)
     , camadasTamanho(outro.camadasTamanho)
@@ -24,6 +25,7 @@ Solucao::Solucao(const Solucao& outro)
 }
 
 Solucao& Solucao::operator=(const Solucao& outro) {
+	camada_periodo = outro.camada_periodo;
     horario = new Horario(*(outro.horario));
     id = aleatorio::randomInt();
     blocosTamanho = outro.blocosTamanho;
@@ -67,8 +69,8 @@ void Solucao::insertGrade(Grade* grade) {
 double Solucao::getFO() {
 	if (fo == -1) {
 		fo = std::accumulate(begin(grades), end(grades), 0.0,
-							   [](const double& acc, const std::pair<std::string, Grade*>& par) {
-			return acc + par.second->getFO();
+							   [](double acc, const std::pair<std::string, Grade*>& par) {
+			return acc + static_cast<int>(par.second->getFO());
 		});
 	}
 	return fo;

@@ -24,8 +24,21 @@
 
 class Resolucao {
 public:
+	friend class ILS;
+	friend class SA;
+
+	enum class Vizinhanca
+	{
+		ES,
+		EM,
+		RS,
+		RM,
+		PR,
+		KM
+	};
+
     Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,
-			  Configuracao::TipoGrade pTipoConstrucao, 
+			  Configuracao::TipoGrade pTipoConstrucao,
 			  std::string arquivoEntrada = "input.json");
 	Resolucao(const Configuracao& c);
     virtual ~Resolucao();
@@ -36,6 +49,9 @@ public:
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();
     Solucao* gerarHorarioAG3();
+
+	std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
+	std::unique_ptr<Solucao> gerarHorarioSA_ILS(const SA& sa, const ILS& ils);
 
     double gerarGrade();
 
@@ -90,7 +106,7 @@ public:
     Configuracao::TipoVizinhos gradeGraspVizinhanca;
     int gradeGraspVizinhos;
     double gradeGraspTempoConstrucao;
-	
+
 	// Solução alvo, a iteração em que ela foi alcançada primeiro e o tempo
 	double foAlvo;
 	int iteracaoAlvo;
@@ -102,7 +118,7 @@ public:
 	// Porcentagem de soluções aleatórias que serão criadas e adicionadas à população
 	// à cada iteração
 	double porcentagemSolucoesAleatorias;
-	
+
 	// Número de iterações máximo que o AG continuará sem evoluir a solução
 	int numMaximoIteracoesSemEvolucaoAG;
 	int ultimaIteracao;
@@ -134,9 +150,9 @@ private:
 #ifdef MODELO
 	std::unique_ptr<fagoc::Curso> curso;
 	std::vector<fagoc::Aluno> alunos;
-#endif
-	std::chrono::system_clock::time_point tempoInicio;
 	double tempoLimiteModelo;
+#endif
+	std::chrono::high_resolution_clock::time_point tempoInicio;
 	std::ostringstream log;
 
     void carregarDados();
@@ -156,7 +172,7 @@ private:
 	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
     std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
-    Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*> solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const;
 
     std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(Solucao *solucaoPai1, Solucao *solucaoPai2);
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao *&solucaoFilho, int diaG, int blocoG, int camadaG);
@@ -167,21 +183,21 @@ private:
 
 	std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao *solucaoPai1, Solucao *solucaoPai2);
 
-    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao);
-    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*> &populacao, int populacaoMax) const;
-    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*>& populacao);
-    std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& populacao,
+    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop);
+    void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop, int populacaoMax) const;
+    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*>& pop);
+    std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& pop,
 												 Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
-	bool swapBlocos(Solucao& solucao, int posX1, int posX2) const;
+	bool swapBlocos(Solucao& sol, int posX1, int posX2) const;
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
-	double gerarGradeTipoGrasp2(Solucao* solucao);
+	double gerarGradeTipoGrasp2(Solucao* sol);
 	double gerarGrade(Solucao *pSolucao);
 
     double gerarGradeTipoGuloso(Solucao *&pSolucao);
 
-    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep, 
+    Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
 											   std::unordered_set<std::string>::const_iterator current);
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao *&pSolucao);
@@ -203,35 +219,45 @@ private:
 
 	Solucao* gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const;
 
-	void logPopulacao(const std::vector<Solucao*>& populacao, int iter);
+	void logPopulacao(const std::vector<Solucao*>& pop, int iter);
 
 	std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
-	bool gerarCamada(Solucao* solucao, int camada, std::vector<Disciplina*> discs,
+	bool gerarCamada(Solucao* sol, int camada, std::vector<Disciplina*> discs,
 					 std::unordered_map<std::string, int>& creditos_alocados_prof);
-	bool geraProfessorDisciplina(Solucao* solucao, Disciplina* disc,
+	bool geraProfessorDisciplina(Solucao* sol, Disciplina* disc,
 								 int camada, std::unordered_map<std::string, int>& creditos_alocados_prof);
-	bool geraAlocacao(Solucao* solucao, Disciplina* disc, Professor* prof, int camada);
-	Solucao* gerarSolucaoAleatoria();
+	bool geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada);
+	std::unique_ptr<Solucao> gerarSolucaoAleatoria();
+	std::unique_ptr<Solucao> gerarSolucaoAleatoriaNotNull();
 
 	std::vector<Solucao*> gerarSolucoesAleatorias(int numSolucoes);
-	void reinsereGrades(Solucao* solucao) const;
+    std::vector<Solucao*> gerarSolucoesAleatorias2(int numSolucoes);
+	void reinsereGrades(Solucao* sol) const;
 
-	void gerarHorarioAGEfetuaCruzamento(std::vector<Solucao*>& populacao, int numCruz);
-	void gerarHorarioAGEvoluiPopulacaoExper(std::vector<Solucao*>& populacao, 
+	void gerarHorarioAGEfetuaCruzamento(std::vector<Solucao*>& pop, int numCruz);
+	void gerarHorarioAGEvoluiPopulacaoExper(std::vector<Solucao*>& pop,
 										Configuracao::TipoCruzamento tipoCruz,
 										std::vector<Solucao*>& pais);
-	void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& populacao);
-	void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& populacao, 
+	void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop);
+	void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& pop,
 									  Configuracao::TipoMutacao tipoMut);
 	// Verifica se a nova população possui uma solução melhor que a anterior
-	void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& populacao, int iteracaoAtual);
+	void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& pop, int iteracaoAtual);
 
 	std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);
 	std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade);
 	void buscaLocal(std::unique_ptr<Grade>& grade);
 	Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
 
-	std::vector<ProfessorDisciplina*> 
+	// Operadores de vizinhança
+	std::unique_ptr<Solucao> event_swap(const Solucao& sol) const;
+	std::unique_ptr<Solucao> event_move(const Solucao& sol) const;
+	std::unique_ptr<Solucao> resource_swap(const Solucao& sol) const;
+	std::unique_ptr<Solucao> resource_move(const Solucao& sol) const;
+	std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
+	std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
+
+	std::vector<ProfessorDisciplina*>
 		getSubTour(const Solucao& pai, int xbegin, int xend) const;
 	Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
 								  int camadaCruz);
@@ -240,14 +266,14 @@ private:
 	bool insereSubTour(const std::vector<ProfessorDisciplina*>& genes,
 	                   Solucao& filho, int xbegin);
 	Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
-	Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2, 
+	Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
 							    int camadaCruz);
 	Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
 								  int camadaCruz);
 	Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
 	Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes);
 
-	Solucao* selecaoTorneio(const std::vector<Solucao*>& populacao) const;
+	Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
 	std::vector<Solucao*> populacao;
 };
 

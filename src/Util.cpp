@@ -9,9 +9,11 @@ int Util::getPosition(int y, int x, int z, int Y, int Z) {
   return (x + (y * Y) + (z * Y * Z));
 }
 
-void Util::get3DMatrix(int pLinear, int* triDimensional, int X, int Y, int Z) {
-  int x, y, z;
-  int tamanho = ((X * Y) * Z);
+void Util::get3DMatrix(int pLinear, int triDimensional[3], int X, int Y, int Z) {
+	int x{};
+	int y{};
+	int z{};
+  int tamanho{X * Y * Z};
 
   // Dia
   x = ((pLinear % tamanho) / Y) % X;
@@ -68,6 +70,12 @@ int Util::randomBetween(int min, int max)
 	}
 	  
 	return aleatorio::randomInt() % (max - min) + min;
+}
+
+double Util::randomDouble()
+{
+	constexpr auto max_random = 32767;
+	return static_cast<double>(randomBetween(0, max_random)) / max_random;
 }
 
 int Util::warpIntervalo(int i, int tamIntervalo, int comecoIntervalo) 

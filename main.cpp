@@ -18,18 +18,17 @@ void semArgumentos()
 
 	Resolucao r{Configuracao()
 		.arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
-		.populacaoInicial(40)
+		.populacaoInicial(20)
 		.porcentagemCruzamentos(30) // %
-		.numMaximoIteracoesSemEvolucaoGRASP(25)
+		.numMaximoIteracoesSemEvolucaoGRASP(15)
 		.numMaximoIteracoesSemEvolucaoAG(20)
 		.tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
 		.tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-		.mutacaoProbabilidade(30) // %
+		.mutacaoProbabilidade(15) // %
 		.graspNumVizinhos(2)
-		.graspAlfa(60) // %
-		.camadaTamanho(40)
-		.perfilTamanho(1400)
-		.numTorneioPares(0)
+		.graspAlfa(20) // %
+		.camadaTamanho(33)
+		.perfilTamanho(1392)
 		.numTorneioPopulacao(4)
 		.tentativasMutacao(4)
 		.graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
@@ -106,7 +105,7 @@ novo_experimento(const std::string& input, const std::string& id,
 	auto timenow = Output::timestamp();
 	auto execstr = "Exec" + std::to_string(exec_i);
 	
-	Configuracao::TipoCruzamento cruz;
+	Configuracao::TipoCruzamento cruz {};
 	if (oper_cruz == "PMX") cruz = Configuracao::TipoCruzamento::pmx;
 	else if (oper_cruz == "CX") cruz = Configuracao::TipoCruzamento::ciclo;
 	else if (oper_cruz == "OX") cruz = Configuracao::TipoCruzamento::ordem;
@@ -249,9 +248,11 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
 	// formato saida:
 	// ID,NExec,Tempo,Fo
 
-	std::string id;
-	int ag_iter, xover_id, n_exec;
-	Configuracao::TipoCruzamento xover;
+	std::string id{};
+	int ag_iter{};
+	int xover_id{};
+	int n_exec{};
+	Configuracao::TipoCruzamento xover {};
 
 	while (config >> id >> ag_iter >> xover_id >> n_exec) {
 		switch (xover_id) {
@@ -289,13 +290,13 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
 
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	verbose = false;
 	if (argc == 3) {
 		// Primeiro argumento é a entrada, o segundo é o arquivo de configuração
-		novo_experimento_cli(argv[1], argv[2]);
-		//semArgumentos();
+		//novo_experimento_cli(argv[1], argv[2]);
+		semArgumentos();
 	} else if (argc == 2) {
 		std::string flag = argv[1];
 		if (flag == "-h" || flag == "--help") {

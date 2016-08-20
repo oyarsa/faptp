@@ -37,7 +37,7 @@ Representacao::~Representacao() {
 }
 
 void Representacao::initMatriz() {
-    size = (camadasTamanho * blocosTamanho * SEMANA);
+    size = (camadasTamanho * blocosTamanho * dias_semana_util);
 
     matriz.resize(size, nullptr);
 }
@@ -62,14 +62,14 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
     return true;
 }
 
-void Representacao::get3DMatrix(int pLinear, int* triDimensional) {
-    Util::get3DMatrix(pLinear, triDimensional, SEMANA, blocosTamanho, camadasTamanho);
+void Representacao::get3DMatrix(int pLinear, int triDimensional[3]) {
+    Util::get3DMatrix(pLinear, triDimensional, dias_semana_util, blocosTamanho, camadasTamanho);
 }
 
 std::tuple<int, int, int> Representacao::getCoords(int pLinear) const
 {
 	int coord[3];
-	Util::get3DMatrix(pLinear, coord, SEMANA, blocosTamanho, camadasTamanho);
+	Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
 
 	return std::make_tuple(coord[0], coord[1], coord[2]);
 }
@@ -99,7 +99,7 @@ std::vector<int> Representacao::getAllEmpty(int camada) {
     int position = 0;
     std::vector<int> empties;
 
-    for (int d = 0; d < SEMANA; d++) {
+    for (int d = 0; d < dias_semana_util; d++) {
         for (int b = 0; b < blocosTamanho; b++) {
             position = getPosition(d, b, camada);
             if (matriz[position] == nullptr) {
@@ -114,7 +114,7 @@ std::vector<int> Representacao::getAllEmpty(int camada) {
 void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada) {
     int position = -1;
 
-    for (int d = 0; d < SEMANA; d++) {
+    for (int d = 0; d < dias_semana_util; d++) {
         for (int b = 0; b < blocosTamanho; b++) {
             position = getPosition(d, b, camada);
             if (matriz[position] == pProfessorDisciplina) {

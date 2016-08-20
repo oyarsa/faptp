@@ -17,7 +17,6 @@ class Professor {
 public:
   Professor(std::string pNome);
   Professor(std::string pNome, std::string pId);
-  virtual ~Professor();
 
   std::string getId();
 

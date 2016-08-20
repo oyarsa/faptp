@@ -24,7 +24,9 @@ public:
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
-    void get3DMatrix(int pLinear, int* triDimensional);
+	// Bloco, dia, camada
+    void get3DMatrix(int pLinear, int triDimensional[3]);
+	// Bloco, dia, camada
 	std::tuple<int, int, int> getCoords(int pLinear) const;
 
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
@@ -54,7 +56,7 @@ protected:
 
 inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
 {
-	return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * SEMANA));
+	return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * dias_semana_util));
 }
 
 #endif /* REPRESENTACAO_H */

@@ -6,12 +6,11 @@
 
 AlunoPerfil::AlunoPerfil(double pPeso, const std::string& pId, 
 						 const std::string& pTurma, const std::string& pPeriodo) 
-	: id(pId), turma(pTurma), periodo(pPeriodo), peso(pPeso), hash()
-{
-}
-
-AlunoPerfil::~AlunoPerfil() {
-}
+	: id(pId), 
+	  turma(pTurma), 
+	  periodo(pPeriodo), 
+	  peso(pPeso), 
+	  hash(0) {}
 
 double AlunoPerfil::getPeso() const
 {
@@ -46,18 +45,16 @@ void AlunoPerfil::addCursada(const std::string& pCursada) {
 }
 
 bool AlunoPerfil::isCursada(const std::string& pCursada) {
-  return find(cursadas.begin(), cursadas.end(), pCursada) != cursadas.end();
+  return cursadas.find(pCursada) != cursadas.end();
 }
 
 void AlunoPerfil::addRestante(Disciplina* pRestante) {
   restante.insert(pRestante->getId());
-	//restante.push_back(pRestante->getId());
   Util::insert_sorted(restanteOrd, pRestante, DisciplinaCargaHorariaDesc{});
 }
 
 bool AlunoPerfil::isRestante(const std::string& pRestante) {
   return restante.find(pRestante) != restante.end();
-	//return find(begin(restante), end(restante), pRestante) != end(restante);
 }
 
 int AlunoPerfil::getPeriodoNum() const
