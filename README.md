@@ -37,3 +37,5 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
     - Os arquivos da biblioteca JsonCpp também disparam warnings. Elas devem ser ignoradas.
 - O projeto inclui muitas instâncias que violam as Guidelines. Modificações para conformar essas
   instâncias são bem-vindas. Commits que incluam códigos que não sigam as Guidelines estão sujeitos a discussão.
+
+Copyright 2016 Italo Silva, Saulo Campos, Pedro Mázala  
