@@ -2960,7 +2960,10 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
 }
 
 Solucao* Resolucao::crossoverPMXCamada(
-    const Solucao& pai1, const Solucao& pai2, int camadaCruz)
+    const Solucao& pai1, 
+    const Solucao& pai2, 
+    int camadaCruz
+)
 {
     const auto camada_tam = dias_semana_util * blocosTamanho;
     std::vector<bool> preenchidos(camada_tam);
@@ -3051,8 +3054,11 @@ Solucao* Resolucao::crossoverPMXCamada(
     return filho.release();
 }
 
-Solucao* Resolucao::crossoverCicloCamada(const Solucao& pai1,
-                                         const Solucao& pai2, int camadaCruz)
+Solucao* Resolucao::crossoverCicloCamada(
+    const Solucao& pai1,
+    const Solucao& pai2, 
+    int camadaCruz
+)
 {
     auto tam_camada = dias_semana_util * blocosTamanho;
     std::vector<int> pos_visitados(tam_camada);
@@ -3082,7 +3088,6 @@ Solucao* Resolucao::crossoverCicloCamada(const Solucao& pai1,
         }
 
         do {
-            //puts("oi");
             // Valor respectivo no outro pai
             valpai2 = pai2.horario->at(comeco_camada + ponto);
             auto found = false;
@@ -3145,12 +3150,6 @@ Solucao* Resolucao::crossoverCicloCamada(const Solucao& pai1,
                 break;
         }
 
-        // if (xmask[i] == 0) {
-        //           pd = pai1.horario->at(curr_slot);
-        //       } else if (xmask[i] == 1) {
-        //           pd = pai2.horario->at(curr_slot);
-        //       }
-
         if (pd && !filho->horario->insert(dia, bloco, camada, pd)) {
             return nullptr;
         }
@@ -3162,9 +3161,6 @@ Solucao* Resolucao::crossoverCicloCamada(const Solucao& pai1,
 
 Solucao* Resolucao::crossoverCiclo(const Solucao& pai1, const Solucao& pai2)
 {
-    //puts("\n\nciclo");
-    //printf("pais: %g %g\n", pai1.fo, pai2.fo);
-
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
 
@@ -3176,22 +3172,16 @@ Solucao* Resolucao::crossoverCiclo(const Solucao& pai1, const Solucao& pai2)
             } while (camadas_visitadas[n]);
             return n;
         }();
-        // int camada;
-        // do {
-        //     camada = Util::randomBetween(0, camadasTamanho);
-        // } while (camadas_visitadas[camada]);
 
         num_camadas_visitadas++;
         camadas_visitadas[camada] = true;
 
         auto filho = crossoverCicloCamada(pai1, pai2, camada);
         if (filho) {
-            //printf("filho: %g\n", filho->getFO());
             return filho;
         }
     }
 
-    //printf("Nenhum filho\n");
     return nullptr;
 }
 
@@ -3292,7 +3282,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Determina aleatoriamente qual disciplina terá seu professor substituído
         int aloc_pos{};
         ProfessorDisciplina* aloc{nullptr};
-        std::tie(aloc_pos, aloc) = get_notnull_aloc(*viz);
+        std::tie(aloc_pos, aloc) = get_random_notnull_aloc(*viz);
 
         std::unordered_set<Professor*> professores_capacitados(
             begin(aloc->disciplina->professoresCapacitados),
@@ -3332,7 +3322,7 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         // (e1 e e2 precisam ser diferentes)
         int pos_e1{};
         ProfessorDisciplina* e1{nullptr};
-        std::tie(pos_e1, e1) = get_notnull_aloc(sol);
+        std::tie(pos_e1, e1) = get_random_notnull_aloc(sol);
 
         int pos_e2{};
         ProfessorDisciplina* e2{nullptr};
@@ -3340,7 +3330,7 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
             int pos{};
             ProfessorDisciplina* e{nullptr};
             do {
-                std::tie(pos, e) = get_notnull_aloc(sol);
+                std::tie(pos, e) = get_random_notnull_aloc(sol);
             } while (e == e1);
             return std::make_pair(pos, e);
         }();
@@ -3424,7 +3414,7 @@ bool Resolucao::reinsere_alocacoes(
     return true;
 }
 
-std::pair<int, ProfessorDisciplina*> Resolucao::get_notnull_aloc(
+std::pair<int, ProfessorDisciplina*> Resolucao::get_random_notnull_aloc(
     const Solucao& sol
 ) const
 {
@@ -3439,7 +3429,6 @@ std::pair<int, ProfessorDisciplina*> Resolucao::get_notnull_aloc(
 
 bool Resolucao::is_professor_habilitado(const Disciplina& disc, Professor* prof) const
 {
-    const auto& hablitados = disc.professoresCapacitados;
-    return std::find(begin(hablitados), end(hablitados), prof) 
-        != end(hablitados);
+    const auto& capacitados = disc.professoresCapacitados;
+    return std::find(begin(capacitados), end(capacitados), prof) != end(capacitados);
 }
