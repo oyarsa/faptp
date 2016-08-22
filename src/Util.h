@@ -61,6 +61,15 @@ void create_folder(const std::string& path);
 
 std::size_t hash_string(const std::string& str);
 
+inline int factorial(int n)
+{
+    int x{1};
+    for (auto i = 2; i <= n; i++) {
+        x *= i;
+    }
+    return x;
+}
+
 inline int fast_ceil(double x)
 {
     return int(x) + (x > int(x));
@@ -96,6 +105,26 @@ std::array<T, 100> gen_chance_array(const std::vector<std::pair<T, int>>& chance
 
     return chance_array;
 }
+
+template <class T>
+void hash_combine(std::size_t& seed, const T& v)
+{
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+template <typename S, typename T>
+struct hash_pair
+{
+    size_t operator()(const std::pair<S, T>& p) const
+    {
+        size_t seed{0};
+        hash_combine(seed, p.first);
+        hash_combine(seed, p.second);
+        return seed;
+    }
+};
+
 };
 
 #endif /* UTIL_H */

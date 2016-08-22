@@ -258,7 +258,9 @@ private:
     std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
-    // Helpers dos movimentos de resource
+    /*
+     * Helpers dos movimentos de resource
+    */
 
     // Remove as instâncias de `aloc` na camada `camada` da solução `sol`,
     // salvando os lugares em pares (dia, bloco)

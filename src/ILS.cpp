@@ -74,7 +74,7 @@ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
             Resolucao::Vizinhanca::RS,
             Resolucao::Vizinhanca::RM,
             Resolucao::Vizinhanca::KM
-            };
+    };
 
     auto best = std::make_unique<Solucao>(solucao);
     auto movimentos_restantes = movimentos;
@@ -84,7 +84,7 @@ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
         movimentos_restantes.erase(vizinhanca);
         auto vizinho = gerar_vizinho(vizinhanca, *best);
 
-        if (vizinho->getFO() > best->getFO()) {
+        if (vizinho->getFO() >= best->getFO()) {
             best = std::move(vizinho);
             movimentos_restantes = movimentos;
         }

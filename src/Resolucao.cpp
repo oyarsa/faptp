@@ -3369,7 +3369,63 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
 
 std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 {
-    return {};
+    // Número máximo de disciplinas por restrições de tempo 
+    // (7! = 5040, grande o suficiente)
+    constexpr auto max_per = 7;
+    const auto aulas_semana = blocosTamanho * dias_semana_util;
+
+    auto num_disc_per = std::min(max_per, Util::randomBetween(
+                                 0, aulas_semana / 2));
+    auto camada = Util::randomBetween(0, camadasTamanho);
+    auto viz = std::make_unique<Solucao>(sol);
+
+    std::unordered_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
+    std::vector<ProfessorDisciplina*> eventos(num_disc_per, nullptr);
+
+    for (auto j = 0; j < num_disc_per; j++) {
+        bool inserido{false};
+        int dia{};
+        int bloco{};
+
+        do {
+            dia = Util::randomBetween(0, dias_semana_util);
+            bloco = Util::randomBetween(0, blocosTamanho);
+
+            tie(std::ignore, inserido) = posicoes.emplace(dia, bloco);
+        } while (!inserido);
+
+        eventos[j] = sol.horario->at(dia, bloco, camada);
+        viz->horario->clearSlot(dia, bloco, camada);
+    }
+
+    std::vector<std::unique_ptr<Solucao>> vizinhos{};
+    vizinhos.reserve(Util::factorial(num_disc_per));
+
+    std::sort(begin(eventos), end(eventos), std::less<>{});
+    do {
+        auto atual = std::make_unique<Solucao>(*viz);
+        bool ok{false};
+        auto e_iter = begin(eventos);
+
+        for (const auto& p : posicoes) {
+            ok = atual->horario->insert(p.first, p.second, camada, *e_iter);
+            if (!ok) {
+                break;
+            }
+            ++e_iter;
+        }
+        if (ok) {
+            vizinhos.push_back(std::move(atual));
+        } else {
+            vizinhos.push_back(std::make_unique<Solucao>(sol));
+        }
+    } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
+
+    auto& best = *std::max_element(begin(vizinhos), end(vizinhos), 
+                     [](std::unique_ptr<Solucao>& v1, std::unique_ptr<Solucao>& v2) {
+        return v1->getFO() < v2->getFO();
+    });
+    return std::move(best);
 }
 
 std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
