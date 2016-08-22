@@ -3290,11 +3290,9 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         auto viz = std::make_unique<Solucao>(sol);
 
         // Determina aleatoriamente qual disciplina terá seu professor substituído
-        auto aloc_pos = Util::randomBetween(0, viz->horario->matriz.size());
-        auto aloc = viz->horario->at(aloc_pos);
-        if (!aloc) {
-            continue;
-        }
+        int aloc_pos{};
+        ProfessorDisciplina* aloc{nullptr};
+        std::tie(aloc_pos, aloc) = get_notnull_aloc(*viz);
 
         std::unordered_set<Professor*> professores_capacitados(
             begin(aloc->disciplina->professoresCapacitados),
@@ -3327,7 +3325,56 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
 
 std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
 {
-    return {};
+    for (auto i = 0; i < horarioMutacaoTentativas; i++) {
+        auto viz = std::make_unique<Solucao>(sol);
+
+        // Determina os eventos e1 e e2 que terão seus professores trocados
+        // (e1 e e2 precisam ser diferentes)
+        int pos_e1{};
+        ProfessorDisciplina* e1{nullptr};
+        std::tie(pos_e1, e1) = get_notnull_aloc(sol);
+
+        int pos_e2{};
+        ProfessorDisciplina* e2{nullptr};
+        std::tie(pos_e2, e2) = [&] {
+            int pos{};
+            ProfessorDisciplina* e{nullptr};
+            do {
+                std::tie(pos, e) = get_notnull_aloc(sol);
+            } while (e == e1);
+            return std::make_pair(pos, e);
+        }();
+
+        // Estabelece se o professor de e1 pode lecionar e2 e vice-versa
+        if (!is_professor_habilitado(*e1->getDisciplina(), e2->getProfessor())
+            || !is_professor_habilitado(*e2->getDisciplina(), e1->getProfessor())) {
+            continue;
+        }
+
+        // Remove e1 e e2 da matriz
+        int camada_e1{};
+        tie(std::ignore, std::ignore, camada_e1) = sol.horario->getCoords(pos_e1);
+        auto posicoes_e1 = remove_aloc_memorizando(*viz, e1, camada_e1);
+
+        int camada_e2{};
+        tie(std::ignore, std::ignore, camada_e2) = sol.horario->getCoords(pos_e2);
+        auto posicoes_e2 = remove_aloc_memorizando(*viz, e2, camada_e2);
+
+        // Troca os professores
+        std::swap(e1->professor, e2->professor);
+
+        // Tenta reinserir os eventos
+        auto ok_e1 = reinsere_alocacoes(*viz, posicoes_e1, e1, camada_e1);
+        if (!ok_e1) {
+            continue;
+        }
+        auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
+        if (ok_e2) {
+            return viz;
+        }
+    }
+
+    return std::make_unique<Solucao>(sol);
 }
 
 std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
@@ -3375,4 +3422,24 @@ bool Resolucao::reinsere_alocacoes(
     }
 
     return true;
+}
+
+std::pair<int, ProfessorDisciplina*> Resolucao::get_notnull_aloc(
+    const Solucao& sol
+) const
+{
+    ProfessorDisciplina* aloc{nullptr};
+    int pos{};
+    while (!aloc) {
+        pos = Util::randomBetween(0, sol.horario->matriz.size());
+        aloc = sol.horario->at(pos);
+    }
+    return {pos, aloc};
+}
+
+bool Resolucao::is_professor_habilitado(const Disciplina& disc, Professor* prof) const
+{
+    const auto& hablitados = disc.professoresCapacitados;
+    return std::find(begin(hablitados), end(hablitados), prof) 
+        != end(hablitados);
 }

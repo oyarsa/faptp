@@ -264,6 +264,8 @@ private:
     bool reinsere_alocacoes(
         Solucao& sol, const std::vector<std::pair<int, int>>& posicoes_aloc,
         ProfessorDisciplina* aloc, int camada) const;
+    std::pair<int, ProfessorDisciplina*> get_notnull_aloc(const Solucao& sol) const;
+    bool is_professor_habilitado(const Disciplina& disc, Professor* prof) const;
 
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;
