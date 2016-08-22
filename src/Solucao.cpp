@@ -1,6 +1,8 @@
 #include <numeric>
 #include <functional>
 
+#include <gsl.h>
+
 #include "Solucao.h"
 #include "Aleatorio.h"
 
@@ -69,13 +71,25 @@ void Solucao::insertGrade(Grade* grade)
     alvoInsercao = grade;
 }
 
-double Solucao::getFO()
+void Solucao::calculaFO()
+{
+    fo = std::accumulate(begin(grades), end(grades), 0, [](int acc, auto el) {
+        return acc + gsl::narrow_cast<int>(el.second->getFO());
+    });
+}
+
+int Solucao::getFO()
 {
     if (fo == -1) {
-        fo = std::accumulate(begin(grades), end(grades), 0.0,
-                             [](double acc, const std::pair<std::string, Grade*>& par) {
-                                 return acc + static_cast<int>(par.second->getFO());
-                             });
+        calculaFO();
+    }
+    return fo;
+}
+
+int Solucao::getFO() const
+{
+    if (fo == -1) {
+        throw std::runtime_error{"FO não calculada"};
     }
     return fo;
 }

@@ -2322,7 +2322,7 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
         auto hash = std::to_string(individuo->getHash());
         log << std::left << std::setw(8) << individuo->getFO()
                 << " " << hash << "\n";
-        printf("%-8g %s\n", individuo->getFO(),
+        printf("%-8d %s\n", individuo->getFO(),
                hash.c_str());
         freq[individuo->getHash()]++;
     }
@@ -2650,7 +2650,7 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         //puts("Nova melhor solucao!");
         log << "Nova melhor solucao!\n";
         char str[101];
-        sprintf(str, "%-8g %u\n", best.getFO(), best.getHash());
+        sprintf(str, "%-8d %u\n", best.getFO(), best.getHash());
         //puts(str);
         log << str;
     }
@@ -3383,6 +3383,8 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     std::vector<ProfessorDisciplina*> eventos(num_disc_per, nullptr);
 
     for (auto j = 0; j < num_disc_per; j++) {
+        // Escolhe aleatoriamente uma posição (dia, bloco) que ainda não
+        // foi adicionada ao conjunto
         bool inserido{false};
         int dia{};
         int bloco{};
@@ -3394,10 +3396,12 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
             tie(std::ignore, inserido) = posicoes.emplace(dia, bloco);
         } while (!inserido);
 
+        // Salva o evento alocado nessa posição e a limpa
         eventos[j] = sol.horario->at(dia, bloco, camada);
         viz->horario->clearSlot(dia, bloco, camada);
     }
 
+    // Gera novas soluções a partir das permutações eventos
     std::vector<std::unique_ptr<Solucao>> vizinhos{};
     vizinhos.reserve(Util::factorial(num_disc_per));
 
@@ -3419,10 +3423,12 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
         } else {
             vizinhos.push_back(std::make_unique<Solucao>(sol));
         }
+        vizinhos.back()->calculaFO();
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
+    // O resultado é a melhor solução dentre as permutações
     auto& best = *std::max_element(begin(vizinhos), end(vizinhos), 
-                     [](std::unique_ptr<Solucao>& v1, std::unique_ptr<Solucao>& v2) {
+                     [](const auto& v1, const auto& v2) {
         return v1->getFO() < v2->getFO();
     });
     return std::move(best);

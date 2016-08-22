@@ -18,7 +18,9 @@ public:
 
     void insertGrade(Grade* grade);
 
-    double getFO();
+    void calculaFO();
+    int getFO();
+    int getFO() const;
 
     std::size_t getHash();
     std::unordered_map<int, std::string> camada_periodo;
@@ -32,7 +34,7 @@ private:
     int perfisTamanho;
 
     int gradesLength;
-    double fo = -1;
+    int fo = -1;
 
     void init();
 };
