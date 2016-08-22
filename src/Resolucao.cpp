@@ -3309,30 +3309,14 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         auto novo_prof = Util::randomChoice(professores_capacitados);
 
         // Remove todas as ocorrências da alocãção, guardando suas posições
-        int camada {};
-        tie(std::ignore, std::ignore, camada) = viz->horario->getCoords(aloc_pos);
-        std::vector<std::pair<int, int>> posicoes_aloc {};
-
-        for (auto d = 0; d < dias_semana_util; d++) {
-            for (auto b = 0; b < blocosTamanho; b++) {
-                if (viz->horario->at(d, b, camada) == aloc) {
-                    posicoes_aloc.emplace_back(d, b);
-                    viz->horario->clearSlot(d, b, camada);
-                }
-            }
-        }
+        int camada{};
+        tie(std::ignore, std::ignore, camada) = sol.horario->getCoords(aloc_pos);
+        auto posicoes_aloc = remove_aloc_memorizando(*viz, aloc, camada);
 
         // Modifica a alocação para o novo professor
         aloc->professor = novo_prof;
         // Reinsere com a nova alocação
-        bool ok {true};
-
-        for (const auto& p : posicoes_aloc) {
-            ok = viz->horario->insert(p.first, p.second, camada, aloc);
-            if (!ok) {
-                break;
-            }
-        }
+        auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
         if (ok) {
             return viz;
         }
@@ -3356,3 +3340,39 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     return {};
 }
 
+std::vector<std::pair<int, int>> Resolucao::remove_aloc_memorizando(
+    Solucao& sol,
+    ProfessorDisciplina* aloc,
+    int camada
+) const
+{
+    std::vector<std::pair<int, int>> posicoes_aloc{};
+
+    for (auto d = 0; d < dias_semana_util; d++) {
+        for (auto b = 0; b < blocosTamanho; b++) {
+            if (sol.horario->at(d, b, camada) == aloc) {
+                posicoes_aloc.emplace_back(d, b);
+                sol.horario->clearSlot(d, b, camada);
+            }
+        }
+    }
+
+    return posicoes_aloc;
+}
+
+bool Resolucao::reinsere_alocacoes(
+    Solucao& sol, 
+    const std::vector<std::pair<int, int>>& posicoes_aloc, 
+    ProfessorDisciplina* aloc, 
+    int camada
+) const
+{
+    for (const auto& p : posicoes_aloc) {
+        auto ok = sol.horario->insert(p.first, p.second, camada, aloc);
+        if (!ok) {
+            return false;
+        }
+    }
+
+    return true;
+}

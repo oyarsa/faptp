@@ -47,6 +47,11 @@ private:
     std::array<Resolucao::Vizinhanca, 100> chances_vizinhancas_;
 };
 
+inline Resolucao& SA::res()
+{
+    return res_;
+}
+
 inline double SA::alfa() const
 {
     return alfa_;

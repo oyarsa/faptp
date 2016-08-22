@@ -258,6 +258,13 @@ private:
     std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
+    // Helpers dos movimentos de resource
+    std::vector<std::pair<int, int>> remove_aloc_memorizando(
+        Solucao& sol, ProfessorDisciplina* aloc, int camada) const;
+    bool reinsere_alocacoes(
+        Solucao& sol, const std::vector<std::pair<int, int>>& posicoes_aloc,
+        ProfessorDisciplina* aloc, int camada) const;
+
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;
     Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,

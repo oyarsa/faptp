@@ -60,4 +60,3 @@ Resolucao::Vizinhanca SA::escolher_vizinhanca() const
 {
     return Util::randomChoice(chances_vizinhancas_);
 }
-
