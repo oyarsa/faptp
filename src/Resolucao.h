@@ -259,12 +259,25 @@ private:
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
     // Helpers dos movimentos de resource
+
+    // Remove as instâncias de `aloc` na camada `camada` da solução `sol`,
+    // salvando os lugares em pares (dia, bloco)
     std::vector<std::pair<int, int>> remove_aloc_memorizando(
         Solucao& sol, ProfessorDisciplina* aloc, int camada) const;
+
+    // Reinsere um ProfessorDisciplina `aloc` na camada `camada` da solução
+    // `sol`, nas posições registradas por `posicoes_aloc`
     bool reinsere_alocacoes(
         Solucao& sol, const std::vector<std::pair<int, int>>& posicoes_aloc,
         ProfessorDisciplina* aloc, int camada) const;
-    std::pair<int, ProfessorDisciplina*> get_notnull_aloc(const Solucao& sol) const;
+
+    // Retorna uma par (posição, alocação), onde a posição é gerada aleatoriamente,
+    // a alocação é aquela presente nessa posição na matriz da solução `sol` 
+    // e não é nula
+    std::pair<int, ProfessorDisciplina*> get_random_notnull_aloc(
+        const Solucao& sol) const;
+
+    // Verifica se o professor `prof` consta na lista de habilitados de `disc`
     bool is_professor_habilitado(const Disciplina& disc, Professor* prof) const;
 
     std::vector<ProfessorDisciplina*>

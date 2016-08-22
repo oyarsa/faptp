@@ -77,8 +77,9 @@ void Horario::clearSlot(int pDia, int pBloco, int pCamada)
 {
     auto pos = getPosition(pDia, pBloco, pCamada);
     auto profdisc = matriz[pos];
-    if (!profdisc)
+    if (!profdisc) {
         return;
+    }
     creditos_alocados_[profdisc->disciplina->id]--;
     Representacao::clearSlot(pDia, pBloco, pCamada);
 }

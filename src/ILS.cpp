@@ -113,4 +113,3 @@ Resolucao& ILS::res()
 {
     return res_;
 }
-

@@ -137,7 +137,7 @@ void Representacao::clearDisciplina(ProfessorDisciplina* pProfessorDisciplina, i
 
 void Representacao::clearSlot(int pDia, int pBloco, int pCamada)
 {
-    int position = getPosition(pDia, pBloco, pCamada);
+    auto position = getPosition(pDia, pBloco, pCamada);
 
     matriz[position] = nullptr;
 }
