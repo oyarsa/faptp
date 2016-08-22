@@ -5,27 +5,25 @@
 #include "Horario.h"
 #include "Semana.h"
 
-Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {
-}
+Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}
 
-Horario::~Horario() {
-}
+Horario::~Horario() {}
 
-Horario::Horario(const Horario& outro) 
-    : Representacao(outro), discCamada(outro.discCamada), 
-	creditos_alocados_(outro.creditos_alocados_), hash_(0)
+Horario::Horario(const Horario& outro)
+    : Representacao(outro), discCamada(outro.discCamada),
+      creditos_alocados_(outro.creditos_alocados_), hash_(0) {}
+
+Horario& Horario::operator=(const Horario& outro)
 {
-}
-
-Horario& Horario::operator=(const Horario& outro) {
     Representacao::operator=(outro);
-	creditos_alocados_ = outro.creditos_alocados_;
-	hash_ = 0;
-	discCamada = outro.discCamada;
-	return *this;
+    creditos_alocados_ = outro.creditos_alocados_;
+    hash_ = 0;
+    discCamada = outro.discCamada;
+    return *this;
 }
 
-bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) {
+bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId)
+{
     int positionCamada {};
 
     for (int i = 0; i < camadasTamanho; i++) {
@@ -46,27 +44,29 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professo
     return false;
 }
 
-bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
+{
     return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force)
+{
     int position = getPosition(pDia, pBloco, pCamada);
     bool professorAlocado = false;
-	auto disc = pProfessorDisciplina->disciplina;
+    auto disc = pProfessorDisciplina->disciplina;
 
     if (verbose)
         std::cout << "(" << position << ")" << std::endl;
 
-	if (creditos_alocados_[disc->id] >= disc->cargaHoraria) {
-		return false;
-	}
+    if (creditos_alocados_[disc->id] >= disc->cargaHoraria) {
+        return false;
+    }
 
     if (!matriz[position] || force) {
         professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
-                pProfessorDisciplina->professor->getId());
+                                                   pProfessorDisciplina->professor->getId());
         if (!professorAlocado || force) {
-			creditos_alocados_[disc->id]++;
+            creditos_alocados_[disc->id]++;
             return Representacao::insert(pDia, pBloco, pCamada, pProfessorDisciplina, force);
         }
     }
@@ -75,36 +75,38 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
 
 void Horario::clearSlot(int pDia, int pBloco, int pCamada)
 {
-	auto pos = getPosition(pDia, pBloco, pCamada);
-	auto profdisc = matriz[pos];
-	if (!profdisc) return;
-	creditos_alocados_[profdisc->disciplina->id]--;
-	Representacao::clearSlot(pDia, pBloco, pCamada);
+    auto pos = getPosition(pDia, pBloco, pCamada);
+    auto profdisc = matriz[pos];
+    if (!profdisc)
+        return;
+    creditos_alocados_[profdisc->disciplina->id]--;
+    Representacao::clearSlot(pDia, pBloco, pCamada);
 }
 
 void Horario::clearCamada(int camada)
 {
-	for (auto d = 0; d < dias_semana_util; d++) {
-		for (auto b = 0; b < blocosTamanho; b++) {
-			clearSlot(d, b, camada);
-		}
-	}
+    for (auto d = 0; d < dias_semana_util; d++) {
+        for (auto b = 0; b < blocosTamanho; b++) {
+            clearSlot(d, b, camada);
+        }
+    }
 }
 
-std::size_t Horario::getHash() 
+std::size_t Horario::getHash()
 {
-	if (hash_ != 0) {
-		return hash_;
-	}
-	auto oss = std::ostringstream{};
+    if (hash_ != 0) {
+        return hash_;
+    }
+    auto oss = std::ostringstream {};
 
-	for (const auto& pd : matriz) {
-		if (pd) {
-			oss << pd->disciplina->id + pd->professor->id;
-		} else {
-			oss << "00";
-		}
-	}
-	hash_ = Util::hash_string(oss.str());
-	return hash_;
+    for (const auto& pd : matriz) {
+        if (pd) {
+            oss << pd->disciplina->id + pd->professor->id;
+        } else {
+            oss << "00";
+        }
+    }
+    hash_ = Util::hash_string(oss.str());
+    return hash_;
 }
+

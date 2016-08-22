@@ -13,7 +13,8 @@
 #include "Semana.h"
 #include <ctime>
 
-std::string Output::getDir() {
+std::string Output::getDir()
+{
     return "output/" + timestamp();
 }
 
@@ -24,20 +25,22 @@ std::string Output::timestamp()
     time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());
     time_str.erase(remove(time_str.begin(), time_str.end(), '\n'), time_str.end());
     time_str.erase(remove(time_str.begin(), time_str.end(), ':'), time_str.end());
-	return time_str;
+    return time_str;
 }
 
-void Output::write(Solucao *pSolucao) {
+void Output::write(Solucao* pSolucao)
+{
     write(pSolucao, getDir());
 }
 
-void Output::write(Solucao *pSolucao, const std::string& savePath) {
+void Output::write(Solucao* pSolucao, const std::string& savePath)
+{
     // Criando o diretorio de saida
-	Util::create_folder(savePath);
-    std::stringstream saida{};
-	const std::array<std::string, dias_semana_total> diasDaSemana {
-		"Segunda", "Terca", "Quarta", "Quinta",
-		"Sexta", "Sabado", "Domingo"};
+    Util::create_folder(savePath);
+    std::stringstream saida {};
+    const std::array<std::string, dias_semana_total> diasDaSemana {
+            "Segunda", "Terca", "Quarta", "Quinta",
+            "Sexta", "Sabado", "Domingo"};
 
     saida << std::nounitbuf;
     saida << "<!DOCTYPE html>\n"
@@ -59,7 +62,7 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
 
     saida << "<hr /> <h3>Horario</h3>\n";
     for (int i = 0; i < pSolucao->camadasTamanho; i++) {
-		saida << "<center><h1>" << pSolucao->camada_periodo[i] << "</h1></center>";
+        saida << "<center><h1>" << pSolucao->camada_periodo[i] << "</h1></center>";
         saida << "<table align='center' class='horario'>\n";
 
         saida << "<tr>";
@@ -74,12 +77,12 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
             for (int k = 0; k < dias_semana_util; k++) {
                 auto pd = pSolucao->horario->at(k, j, i);
                 if (pd) {
-					saida << "<td>"<< pd->getDisciplina()->getNome() << "<br>"
-						<< "<i>" << pd->getProfessor()->getNome() << "</i>"
-						<< "</td>";
-				} else {
-					saida << "<td>" << " -- " << "</td>";
-				}
+                    saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
+                            << "<i>" << pd->getProfessor()->getNome() << "</i>"
+                            << "</td>";
+                } else {
+                    saida << "<td>" << " -- " << "</td>";
+                }
             }
             saida << "</tr>";
         }
@@ -93,8 +96,8 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
         double fo = gradeAtual->getFO();
 
         saida << "<table align='center' class='grade'>\n";
-        saida << "<tr><th colspan=\"" << dias_semana_util << "\">" << "Aluno: " 
-			<< gradeAtual->aluno->id << " FO: (" << fo << ")</th></tr>\n";
+        saida << "<tr><th colspan=\"" << dias_semana_util << "\">" << "Aluno: "
+                << gradeAtual->aluno->id << " FO: (" << fo << ")</th></tr>\n";
 
         saida << "<tr>";
         for (const auto& dia : diasDaSemana) {
@@ -108,11 +111,11 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
             for (int k = 0; k < dias_semana_util; k++) {
                 auto pd = gradeAtual->at(k, j, 0);
                 if (pd) {
-					saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
-						<< "<b>" << pd->getDisciplina()->getId() << "</b>"
-						<< "</td>";
+                    saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
+                            << "<b>" << pd->getDisciplina()->getId() << "</b>"
+                            << "</td>";
                 } else {
-					saida << "<td> -- </td>";
+                    saida << "<td> -- </td>";
                 }
             }
             saida << "</tr>";
@@ -124,7 +127,7 @@ void Output::write(Solucao *pSolucao, const std::string& savePath) {
     saida << "</body>\n"
             << "</html>\n";
 
-	std::ofstream arquivoSaida{savePath + "/horario.html"};
+    std::ofstream arquivoSaida {savePath + "/horario.html"};
     arquivoSaida << std::nounitbuf << saida.str() << "\n";
 }
 

@@ -6,7 +6,8 @@
 #include "Horario.h"
 #include "Grade.h"
 
-class Solucao {
+class Solucao
+{
     friend class Resolucao;
     friend class Output;
 public:
@@ -19,19 +20,19 @@ public:
 
     double getFO();
 
-	std::size_t getHash();
-	std::unordered_map<int, std::string> camada_periodo;
+    std::size_t getHash();
+    std::unordered_map<int, std::string> camada_periodo;
 private:
-    Horario *horario;
+    Horario* horario;
     std::unordered_map<std::string, Grade*> grades;
-    
+
     int id;
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
 
     int gradesLength;
-	double fo = -1;
+    double fo = -1;
 
     void init();
 };

@@ -8,7 +8,8 @@
 #include "Util.h"
 #include "Semana.h"
 
-class Representacao {
+class Representacao
+{
     friend class Resolucao;
 public:
     Representacao(int pBlocosTamanho, int pCamadasTamanho);
@@ -24,10 +25,10 @@ public:
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
-	// Bloco, dia, camada
+    // Bloco, dia, camada
     void get3DMatrix(int pLinear, int triDimensional[3]);
-	// Bloco, dia, camada
-	std::tuple<int, int, int> getCoords(int pLinear) const;
+    // Bloco, dia, camada
+    std::tuple<int, int, int> getCoords(int pLinear) const;
 
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
 
@@ -35,8 +36,8 @@ public:
     int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
 
     std::vector<int> getAllEmpty(int camada);
-    void clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada);
-	virtual void clearSlot(int pDia, int pBloco, int pCamda);
+    void clearDisciplina(ProfessorDisciplina* pProfessorDisciplina, int camada);
+    virtual void clearSlot(int pDia, int pBloco, int pCamda);
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
@@ -49,14 +50,14 @@ protected:
     std::vector<std::string> blocos;
     std::vector<std::string> camadas;
 
-    std::vector< ProfessorDisciplina* > matriz;
+    std::vector<ProfessorDisciplina*> matriz;
 
     void initMatriz();
 };
 
 inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
 {
-	return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * dias_semana_util));
+    return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * dias_semana_util));
 }
 
 #endif /* REPRESENTACAO_H */

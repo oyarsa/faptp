@@ -12,11 +12,12 @@
 
 #include "Solucao.h"
 
-class Output {
+class Output
+{
 public:
-	static std::string timestamp();
-    static void write(Solucao *solucao);
-	static void write(Solucao *solucao, const std::string& savePath);
+    static std::string timestamp();
+    static void write(Solucao* solucao);
+    static void write(Solucao* solucao, const std::string& savePath);
 private:
     static std::string getDir();
 };

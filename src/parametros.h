@@ -6,10 +6,10 @@
  */
 
 #ifndef PARAMETROS_H
-#define	PARAMETROS_H
+#define    PARAMETROS_H
 
 extern bool verbose;
 extern bool experimento;
 
-#endif	/* PARAMETROS_H */
+#endif /* PARAMETROS_H */
 

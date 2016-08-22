@@ -6,7 +6,8 @@
 #include "Algorithms.h"
 #include "Semana.h"
 
-Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
+Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho)
+{
     blocosTamanho = pBlocosTamanho;
     camadasTamanho = pCamadasTamanho;
 
@@ -14,15 +15,15 @@ Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho) {
 }
 
 Representacao::Representacao(const Representacao& outro)
-: blocosTamanho(outro.blocosTamanho)
-, camadasTamanho(outro.camadasTamanho)
-, size(outro.size)
-, blocos(outro.blocos)
-, camadas(outro.camadas)
-, matriz(outro.matriz) {
-}
+    : blocosTamanho(outro.blocosTamanho)
+      , camadasTamanho(outro.camadasTamanho)
+      , size(outro.size)
+      , blocos(outro.blocos)
+      , camadas(outro.camadas)
+      , matriz(outro.matriz) {}
 
-Representacao& Representacao::operator=(const Representacao& outro) {
+Representacao& Representacao::operator=(const Representacao& outro)
+{
     blocosTamanho = outro.blocosTamanho;
     camadasTamanho = outro.camadasTamanho;
     size = outro.size;
@@ -33,28 +34,32 @@ Representacao& Representacao::operator=(const Representacao& outro) {
     return *this;
 }
 
-Representacao::~Representacao() {
-}
+Representacao::~Representacao() {}
 
-void Representacao::initMatriz() {
+void Representacao::initMatriz()
+{
     size = (camadasTamanho * blocosTamanho * dias_semana_util);
 
     matriz.resize(size, nullptr);
 }
 
-ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) {
+ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada)
+{
     return at(getPosition(pDia, pBloco, pCamada));
 }
 
-ProfessorDisciplina* Representacao::at(int position) {
+ProfessorDisciplina* Representacao::at(int position)
+{
     return matriz[position];
 }
 
-bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) {
+bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
+{
     return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) {
+bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force)
+{
     int position = getPosition(pDia, pBloco, pCamada);
 
     matriz[position] = pProfessorDisciplina;
@@ -62,29 +67,33 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
     return true;
 }
 
-void Representacao::get3DMatrix(int pLinear, int triDimensional[3]) {
+void Representacao::get3DMatrix(int pLinear, int triDimensional[3])
+{
     Util::get3DMatrix(pLinear, triDimensional, dias_semana_util, blocosTamanho, camadasTamanho);
 }
 
 std::tuple<int, int, int> Representacao::getCoords(int pLinear) const
 {
-	int coord[3];
-	Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
+    int coord[3];
+    Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
 
-	return std::make_tuple(coord[0], coord[1], coord[2]);
+    return std::make_tuple(coord[0], coord[1], coord[2]);
 }
 
-std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina) {
+std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina)
+{
     std::vector<ProfessorDisciplina*>::iterator xIter = find_if(iter, iterEnd, HorarioFindDisciplina(pDisciplina));
 
     return xIter;
 }
 
-int Representacao::getFirstDisciplina(Disciplina* pDisciplina) {
+int Representacao::getFirstDisciplina(Disciplina* pDisciplina)
+{
     return getFirstDisciplina(pDisciplina, matriz);
 }
 
-int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz) {
+int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz)
+{
     int x;
     std::vector<ProfessorDisciplina*>::iterator mIter = pMatriz.begin();
     std::vector<ProfessorDisciplina*>::iterator mIterEnd = pMatriz.end();
@@ -95,7 +104,8 @@ int Representacao::getFirstDisciplina(Disciplina* pDisciplina, std::vector<Profe
     return x;
 }
 
-std::vector<int> Representacao::getAllEmpty(int camada) {
+std::vector<int> Representacao::getAllEmpty(int camada)
+{
     int position = 0;
     std::vector<int> empties;
 
@@ -111,7 +121,8 @@ std::vector<int> Representacao::getAllEmpty(int camada) {
     return empties;
 }
 
-void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, int camada) {
+void Representacao::clearDisciplina(ProfessorDisciplina* pProfessorDisciplina, int camada)
+{
     int position = -1;
 
     for (int d = 0; d < dias_semana_util; d++) {
@@ -126,12 +137,13 @@ void Representacao::clearDisciplina(ProfessorDisciplina *pProfessorDisciplina, i
 
 void Representacao::clearSlot(int pDia, int pBloco, int pCamada)
 {
-	int position = getPosition(pDia, pBloco, pCamada);
+    int position = getPosition(pDia, pBloco, pCamada);
 
-	matriz[position] = nullptr;
+    matriz[position] = nullptr;
 }
 
-int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound) {
+int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound)
+{
     int x = -1;
 
     if (iterFound != iterEnd) {
@@ -140,3 +152,4 @@ int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iter
 
     return x;
 }
+

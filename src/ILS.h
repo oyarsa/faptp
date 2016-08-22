@@ -7,92 +7,93 @@
 class ILS
 {
 public:
-	ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter, 
-		long long timeout);
+    ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
+        long long timeout);
 
-	std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
+    std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
 
-	Resolucao& res();
+    Resolucao& res();
 
-	int num_iter() const;
-	void set_num_iter(int num_iter);
+    int num_iter() const;
+    void set_num_iter(int num_iter);
 
-	int p_max() const;
-	void set_p_max(int p_max);
+    int p_max() const;
+    void set_p_max(int p_max);
 
-	int p0() const;
-	void set_p0(int p0);
+    int p0() const;
+    void set_p0(int p0);
 
-	int max_iter() const;
-	void set_max_iter(int max_iter);
+    int max_iter() const;
+    void set_max_iter(int max_iter);
 
-	long long timeout() const;
-	void set_timeout(long long timeout);
+    long long timeout() const;
+    void set_timeout(long long timeout);
 
 private:
-	std::unique_ptr<Solucao> gerar_vizinho(Resolucao::Vizinhanca vizinhanca, 
-										   const Solucao& solucao) const;
-	std::unique_ptr<Solucao> descent_phase(const Solucao& solucao) const;
+    std::unique_ptr<Solucao> gerar_vizinho(Resolucao::Vizinhanca vizinhanca,
+                                           const Solucao& solucao) const;
+    std::unique_ptr<Solucao> descent_phase(const Solucao& solucao) const;
 
-	Resolucao::Vizinhanca escolher_vizinhanca(
-		const std::unordered_set<Resolucao::Vizinhanca>& movimentos) const;
-	std::unique_ptr<Solucao> perturbacao(const Solucao& solucao) const;
+    Resolucao::Vizinhanca escolher_vizinhanca(
+        const std::unordered_set<Resolucao::Vizinhanca>& movimentos) const;
+    std::unique_ptr<Solucao> perturbacao(const Solucao& solucao) const;
 
-	Resolucao& res_;
-	int        num_iter_;
-	int        p_max_;
-	int        p0_;
-	int        max_iter_;
-	long long  timeout_;
+    Resolucao& res_;
+    int num_iter_;
+    int p_max_;
+    int p0_;
+    int max_iter_;
+    long long timeout_;
 };
 
 
 inline int ILS::num_iter() const
 {
-	return num_iter_;
+    return num_iter_;
 }
 
 inline void ILS::set_num_iter(int num_iter)
 {
-	num_iter_ = num_iter;
+    num_iter_ = num_iter;
 }
 
 inline int ILS::p_max() const
 {
-	return p_max_;
+    return p_max_;
 }
 
 inline void ILS::set_p_max(int p_max)
 {
-	p_max_ = p_max;
+    p_max_ = p_max;
 }
 
 inline int ILS::p0() const
 {
-	return p0_;
+    return p0_;
 }
 
 inline void ILS::set_p0(int p0)
 {
-	p0_ = p0;
+    p0_ = p0;
 }
 
 inline int ILS::max_iter() const
 {
-	return max_iter_;
+    return max_iter_;
 }
 
 inline void ILS::set_max_iter(int max_iter)
 {
-	max_iter_ = max_iter;
+    max_iter_ = max_iter;
 }
 
 inline long long ILS::timeout() const
 {
-	return timeout_;
+    return timeout_;
 }
 
 inline void ILS::set_timeout(long long timeout)
 {
-	timeout_ = timeout;
+    timeout_ = timeout;
 }
+

@@ -4,25 +4,25 @@
 #include "Util.h"
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
-	: Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, UUID::GenerateUuid(), 
-				 pTurma, pCapacidade, pPeriodoMinimo) {}
+    : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, UUID::GenerateUuid(),
+                 pTurma, pCapacidade, pPeriodoMinimo) {}
 
-Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo) 
+Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
     : id(pId),
-	  turma(pTurma),
-	  nome(pNome),
-	  periodo(pPeriodo),
-	  periodoMinimo(pPeriodoMinimo),
-	  curso (pCurso),
-	  cargaHoraria(pCargaHoraria),
-	  aulasSemana(cargaHoraria),
-	  capacidade(pCapacidade),
-	  alocados(0),
-	  ofertada(true),
-	  preRequisitos(),
-	  coRequisitos(),
-	  equivalentes(),
-	  professoresCapacitados() {}
+      turma(pTurma),
+      nome(pNome),
+      periodo(pPeriodo),
+      periodoMinimo(pPeriodoMinimo),
+      curso(pCurso),
+      cargaHoraria(pCargaHoraria),
+      aulasSemana(cargaHoraria),
+      capacidade(pCapacidade),
+      alocados(0),
+      ofertada(true),
+      preRequisitos(),
+      coRequisitos(),
+      equivalentes(),
+      professoresCapacitados() {}
 
 const std::string& Disciplina::getId() const
 {
@@ -34,7 +34,8 @@ const std::string& Disciplina::getNome() const
     return nome;
 }
 
-void Disciplina::setNome(const std::string& pNome) {
+void Disciplina::setNome(const std::string& pNome)
+{
     nome = pNome;
 }
 
@@ -43,7 +44,8 @@ const std::string& Disciplina::getPeriodo()
     return periodo;
 }
 
-void Disciplina::setPeriodo(const std::string& pPeriodo) {
+void Disciplina::setPeriodo(const std::string& pPeriodo)
+{
     periodo = pPeriodo;
 }
 
@@ -52,57 +54,68 @@ const std::string& Disciplina::getCurso()
     return curso;
 }
 
-void Disciplina::setCurso(const std::string& pCurso) {
+void Disciplina::setCurso(const std::string& pCurso)
+{
     curso = pCurso;
 }
 
-int Disciplina::getCargaHoraria() const {
+int Disciplina::getCargaHoraria() const
+{
     return cargaHoraria;
 }
 
-void Disciplina::setCargaHoraria(int pCargaHoraria) {
+void Disciplina::setCargaHoraria(int pCargaHoraria)
+{
     cargaHoraria = pCargaHoraria;
 }
 
-int Disciplina::getAulasSemana() {
+int Disciplina::getAulasSemana()
+{
     return aulasSemana;
 }
 
-int Disciplina::getCreditos() {
+int Disciplina::getCreditos()
+{
     return getAulasSemana();
 }
 
-void Disciplina::addPreRequisito(const std::string& pDisciplina) {
+void Disciplina::addPreRequisito(const std::string& pDisciplina)
+{
     preRequisitos.insert(pDisciplina);
 }
 
-bool Disciplina::isPreRequisito(const std::string& pDisciplina) {
-	return preRequisitos.find(pDisciplina) != end(preRequisitos);
+bool Disciplina::isPreRequisito(const std::string& pDisciplina)
+{
+    return preRequisitos.find(pDisciplina) != end(preRequisitos);
 }
 
-void Disciplina::addProfessorCapacitado(Professor *professor) {
-	Util::insert_sorted(professoresCapacitados, professor, 
-						[](Professor *a, Professor *b) {
-		return a->getNumDisponibilidade() < b->getNumDisponibilidade();
-	});
+void Disciplina::addProfessorCapacitado(Professor* professor)
+{
+    Util::insert_sorted(professoresCapacitados, professor,
+                        [](Professor* a, Professor* b) {
+                            return a->getNumDisponibilidade() < b->getNumDisponibilidade();
+                        });
 }
 
 int Disciplina::periodoNum() const
 {
-	if (periodo == "") return 0;
+    if (periodo == "")
+        return 0;
 
-	static auto pos = periodo.find('-');
-	static auto per_num = std::stoi(periodo.substr(0, pos));
+    static auto pos = periodo.find('-');
+    static auto per_num = std::stoi(periodo.substr(0, pos));
 
-	return per_num;
+    return per_num;
 }
 
 int Disciplina::periodoMinimoNum() const
 {
-	if (periodoMinimo == "") return 0;
+    if (periodoMinimo == "")
+        return 0;
 
-	static auto pos = periodoMinimo.find('-');
-	static auto permin_num = std::stoi(periodoMinimo.substr(0, pos));
+    static auto pos = periodoMinimo.find('-');
+    static auto permin_num = std::stoi(periodoMinimo.substr(0, pos));
 
-	return permin_num;
+    return permin_num;
 }
+

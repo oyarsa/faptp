@@ -1,5 +1,5 @@
 #ifndef PROFESSOR_H
-#define	PROFESSOR_H
+#define    PROFESSOR_H
 
 #include <string>
 #include <cstring>
@@ -8,47 +8,48 @@
 
 #include "UUID.h"
 
-class Professor {
-  friend class Representacao;
-  friend class Grade;
-  friend class Horario;
-  friend class Solucao;
-  friend class Resolucao;
+class Professor
+{
+    friend class Representacao;
+    friend class Grade;
+    friend class Horario;
+    friend class Solucao;
+    friend class Resolucao;
 public:
-  Professor(std::string pNome);
-  Professor(std::string pNome, std::string pId);
+    Professor(std::string pNome);
+    Professor(std::string pNome, std::string pId);
 
-  std::string getId();
+    std::string getId();
 
-  std::string getNome();
-  
-  int getNumDisponibilidade() const;
-  void setNome(std::string pNome);
+    std::string getNome();
 
-  void setCreditoMaximo(int pCreditoMaximo);
-  
-  void setDiaDisponivel(unsigned int dia, int bloco);
-  void unsetDiaDisponivel(unsigned int dia, int bloco);
-  bool isDiaDisponivel(unsigned int dia, int bloco);
+    int getNumDisponibilidade() const;
+    void setNome(std::string pNome);
 
-  void addCompetencia(std::string pDisciplina, double pPeso);
-  bool haveCompetencia(std::string pDisciplina);
+    void setCreditoMaximo(int pCreditoMaximo);
+
+    void setDiaDisponivel(unsigned int dia, int bloco);
+    void unsetDiaDisponivel(unsigned int dia, int bloco);
+    bool isDiaDisponivel(unsigned int dia, int bloco);
+
+    void addCompetencia(std::string pDisciplina, double pPeso);
+    bool haveCompetencia(std::string pDisciplina);
 private:
-  std::string id;
+    std::string id;
 
-  std::string nome;
-  int creditoMaximo;
+    std::string nome;
+    int creditoMaximo;
 
-  std::vector<std::vector<bool>> diasDisponiveis;
-  int numDisponibilidade;
-  
-  std::map<std::string, double> competencias;
+    std::vector<std::vector<bool>> diasDisponiveis;
+    int numDisponibilidade;
 
-  void init(std::string pNome, std::string pId);
+    std::map<std::string, double> competencias;
 
-  bool isDiaValido(unsigned int dia);
-  void setDiaDisponivel(unsigned int dia, int bloco, bool value);
+    void init(std::string pNome, std::string pId);
+
+    bool isDiaValido(unsigned int dia);
+    void setDiaDisponivel(unsigned int dia, int bloco, bool value);
 };
 
-#endif	/* PROFESSOR_H */
+#endif /* PROFESSOR_H */
 

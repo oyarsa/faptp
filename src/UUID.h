@@ -6,15 +6,16 @@
  */
 
 #ifndef UUID_H
-#define	UUID_H
+#define    UUID_H
 
 #include <string>
 
-class UUID {
+class UUID
+{
 public:
-  UUID() = default;
-	static std::string GenerateUuid();
+    UUID() = default;
+    static std::string GenerateUuid();
 };
 
-#endif	/* UUID_H */
+#endif /* UUID_H */
 
