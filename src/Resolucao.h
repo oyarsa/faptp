@@ -282,6 +282,10 @@ private:
     // Verifica se o professor `prof` consta na lista de habilitados de `disc`
     bool is_professor_habilitado(const Disciplina& disc, Professor* prof) const;
 
+    std::unique_ptr<Solucao> swap_timeslots(
+        const Solucao& sol, const std::tuple<int, int, int>& e1, 
+        const std::tuple<int, int, int>& e2) const;
+
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;
     Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,

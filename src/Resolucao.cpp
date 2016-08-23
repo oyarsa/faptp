@@ -3424,6 +3424,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
             vizinhos.push_back(std::make_unique<Solucao>(sol));
         }
         vizinhos.back()->calculaFO();
+
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
     // O resultado é a melhor solução dentre as permutações
@@ -3434,9 +3435,100 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     return std::move(best);
 }
 
+std::unique_ptr<Solucao> Resolucao::swap_timeslots(
+    const Solucao& sol, 
+    const std::tuple<int, int, int>& e1, 
+    const std::tuple<int, int, int>& e2
+) const
+{
+    int d_e1{};
+    int b_e1{};
+    int k_e1{};
+    std::tie(d_e1, b_e1, k_e1) = e1;
+
+    int d_e2{};
+    int b_e2{};
+    int k_e2{};
+    std::tie(d_e2, b_e2, k_e2) = e2;
+
+    auto viz = std::make_unique<Solucao>(sol);
+
+    auto e11 = sol.horario->at(d_e1, b_e1, k_e1);
+    auto e12 = sol.horario->at(d_e1, b_e1 + 1, k_e1);
+    viz->horario->clearSlot(d_e1, b_e1, k_e1);
+    viz->horario->clearSlot(d_e1, b_e1 + 1, k_e1);
+
+    auto e21 = sol.horario->at(d_e2, b_e2, k_e2);
+    auto e22 = sol.horario->at(d_e2, b_e2 + 1, k_e2);
+    viz->horario->clearSlot(d_e2, b_e2, k_e2);
+    viz->horario->clearSlot(d_e2, b_e2 + 1, k_e2);
+
+    auto ok_e11 = viz->horario->insert(d_e2, b_e2, k_e1, e11);
+    auto ok_e12 = viz->horario->insert(d_e2, b_e2 + 1, k_e1, e12);
+    auto ok_e21 = viz->horario->insert(d_e1, b_e1, k_e2, e21);
+    auto ok_e22 = viz->horario->insert(d_e1, b_e1 + 1, k_e2, e22);
+
+    if (ok_e11 && ok_e12 && ok_e21 && ok_e22) {
+        return viz;
+    } else {
+        return std::make_unique<Solucao>(sol);
+    }
+}
+
 std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 {
-    return {};
+    // Seleciona dois timeslots t1 = (d1, b1) e t2 = (d2, b2)
+    auto d_e1 = Util::randomBetween(0, dias_semana_util);
+    auto b_e1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+
+    int d_e2{};
+    int b_e2{};
+    std::tie(d_e2, b_e2) = [&] {
+        int d{};
+        int b{};
+
+        do {
+            d = Util::randomBetween(0, dias_semana_util);
+            b = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        } while (d == d_e1 && b == b_e1);
+        
+        return std::make_pair(d, b);
+    }();
+
+    // As aulas de t1 e t2 são listadas
+    std::vector<std::vector<std::pair<bool, int>>> grafo(
+        camadasTamanho, std::vector<std::pair<bool, int>>(camadasTamanho, {false, 0})
+    );
+    for (auto i = 0; i < camadasTamanho; i++) {
+        for (auto j = 0; j < camadasTamanho; j++) {
+            auto e11 = sol.horario->at(d_e1, b_e1, i);
+            auto e12 = sol.horario->at(d_e1, b_e1 + 1, i);
+            auto e21 = sol.horario->at(d_e2, b_e2, j);
+            auto e22 = sol.horario->at(d_e2, b_e2 + 1, j);
+
+            if (e11 && e21 && e11->getProfessor() == e21->getProfessor()
+                || e11 && e22 && e11->getProfessor() == e22->getProfessor()
+                || e12 && e21 && e12->getProfessor() == e21->getProfessor()
+                || e12 && e22 && e12->getProfessor() == e22->getProfessor()
+                || e11 && e21 && e11->getDisciplina()->getPeriodo() 
+                    == e21->getDisciplina()->getPeriodo())
+            {
+                auto viz = swap_timeslots(sol, {d_e1, b_e1, i}, {d_e2, b_e2, j});
+                auto delta_fo = viz->getFO() - sol.getFO();
+                grafo[i][j] = {true, delta_fo};
+            }
+        }
+    }
+
+    // Forma-se um grafo em que as arestas indicam que as aulas compartilham
+    // recursos (classe ou professor)
+    // O peso de cada aresta é a diferença da FO para quando as aulas trocam
+    // de timeslot
+
+    // Encontra cadeia com menor custo
+
+    // Troca os timeslots das aulas pertencentes à cadeia
+
 }
 
 std::vector<std::pair<int, int>> Resolucao::remove_aloc_memorizando(
