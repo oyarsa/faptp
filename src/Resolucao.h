@@ -282,9 +282,23 @@ private:
     // Verifica se o professor `prof` consta na lista de habilitados de `disc`
     bool is_professor_habilitado(const Disciplina& disc, Professor* prof) const;
 
+    // Encontra um sub-grafo conexo em um grafo
+    std::vector<std::vector<int>> encontra_subgrafos_conexos(
+        const std::vector<std::vector<int>>& grafo
+    ) const;
+
+    std::vector<int> dfs(
+        const std::vector<std::vector<int>>& grafo,
+        int no_inicial,
+        std::vector<bool>& visitados
+    ) const;
+
     std::unique_ptr<Solucao> swap_timeslots(
-        const Solucao& sol, const std::tuple<int, int, int>& e1, 
-        const std::tuple<int, int, int>& e2) const;
+        const Solucao& sol,
+        const std::tuple<int, int>& t1,
+        const std::tuple<int, int>& t2,
+        const std::vector<int>& cadeia
+    ) const;
 
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;

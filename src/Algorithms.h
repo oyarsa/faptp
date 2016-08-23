@@ -117,20 +117,6 @@ struct DisciplinasRemoveDisciplinas
     }
 };
 
-//inline void RemoveDisciplinasNome(std::unordered_set<std::string>& hashset, 
-//                                  std::vector<Disciplina*>& disciplinas)
-//{
-//    for (auto it = std::begin(hashset); it != std::end(hashset); ++it) {
-//        auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
-//                                  [&](Disciplina* d) {
-//            return d->getNome() == *it;
-//        });
-//        if (found != std::end(disciplinas)) {
-//            hashset.erase(it);
-//        }
-//    }
-//}
-
 template <typename Container>
 void RemoveDisciplinasNome(Container& c,
                            std::vector<Disciplina*>& disciplinas)
@@ -165,6 +151,41 @@ struct SolucaoComparaMaior
         return lhs->getFO() > rhs->getFO();
     }
 };
+
+namespace std
+{
+
+template<>
+struct less<unique_ptr<Solucao>>
+{
+    bool operator()(const unique_ptr<Solucao>& lhs, const unique_ptr<Solucao>& rhs) const
+    {
+        if (!lhs) {
+            return true;
+        }
+        if (!rhs) {
+            return false;
+        }
+        return lhs->getFO() < rhs->getFO();
+    }
+};
+
+template<>
+struct less<Solucao*>
+{
+    bool operator()(const Solucao* lhs, const Solucao* rhs) const
+    {
+        if (!lhs) {
+            return true;
+        }
+        if (!rhs) {
+            return false;
+        }
+        return lhs->getFO() < rhs->getFO();
+    }
+};
+
+}
 
 inline bool pd_equals(ProfessorDisciplina* lhs, ProfessorDisciplina* rhs)
 {

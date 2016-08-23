@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iterator>
 #include <iomanip>
+#include <stack>
 #include <set>
 
 #include <gsl.h>
@@ -3428,51 +3429,8 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
     // O resultado é a melhor solução dentre as permutações
-    auto& best = *std::max_element(begin(vizinhos), end(vizinhos), 
-                     [](const auto& v1, const auto& v2) {
-        return v1->getFO() < v2->getFO();
-    });
-    return std::move(best);
-}
-
-std::unique_ptr<Solucao> Resolucao::swap_timeslots(
-    const Solucao& sol, 
-    const std::tuple<int, int, int>& e1, 
-    const std::tuple<int, int, int>& e2
-) const
-{
-    int d_e1{};
-    int b_e1{};
-    int k_e1{};
-    std::tie(d_e1, b_e1, k_e1) = e1;
-
-    int d_e2{};
-    int b_e2{};
-    int k_e2{};
-    std::tie(d_e2, b_e2, k_e2) = e2;
-
-    auto viz = std::make_unique<Solucao>(sol);
-
-    auto e11 = sol.horario->at(d_e1, b_e1, k_e1);
-    auto e12 = sol.horario->at(d_e1, b_e1 + 1, k_e1);
-    viz->horario->clearSlot(d_e1, b_e1, k_e1);
-    viz->horario->clearSlot(d_e1, b_e1 + 1, k_e1);
-
-    auto e21 = sol.horario->at(d_e2, b_e2, k_e2);
-    auto e22 = sol.horario->at(d_e2, b_e2 + 1, k_e2);
-    viz->horario->clearSlot(d_e2, b_e2, k_e2);
-    viz->horario->clearSlot(d_e2, b_e2 + 1, k_e2);
-
-    auto ok_e11 = viz->horario->insert(d_e2, b_e2, k_e1, e11);
-    auto ok_e12 = viz->horario->insert(d_e2, b_e2 + 1, k_e1, e12);
-    auto ok_e21 = viz->horario->insert(d_e1, b_e1, k_e2, e21);
-    auto ok_e22 = viz->horario->insert(d_e1, b_e1 + 1, k_e2, e22);
-
-    if (ok_e11 && ok_e12 && ok_e21 && ok_e22) {
-        return viz;
-    } else {
-        return std::make_unique<Solucao>(sol);
-    }
+    auto& best = *std::max_element(begin(vizinhos), end(vizinhos), std::less<>{});
+    return move(best);
 }
 
 std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
@@ -3495,10 +3453,16 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
         return std::make_pair(d, b);
     }();
 
-    // As aulas de t1 e t2 são listadas
-    std::vector<std::vector<std::pair<bool, int>>> grafo(
-        camadasTamanho, std::vector<std::pair<bool, int>>(camadasTamanho, {false, 0})
-    );
+    // Grafo de conflitos entre as disciplinas de t1 e t2
+    // A representação escolhida foi a lista de adjcências
+    // Os índices são inteiros de [0, 2 * camadasTamanho), 
+    // onde os eventos de t1 são representados em [0, camadasTamaho)
+    // e os de t2 em [camdasTamanho, 2 * camadasTamaho)
+    std::vector<std::vector<int>> grafo(2 * camadasTamanho, std::vector<int>{});
+
+    // A aresta é traçada entre eventos de timeslots diferentes (formando um
+    // grafo bipartido), e apenas se os eventos compartilharem algum recurso
+    // (se forem do mesmo período ou mesmo professor)
     for (auto i = 0; i < camadasTamanho; i++) {
         for (auto j = 0; j < camadasTamanho; j++) {
             auto e11 = sol.horario->at(d_e1, b_e1, i);
@@ -3511,24 +3475,28 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
                 || e12 && e21 && e12->getProfessor() == e21->getProfessor()
                 || e12 && e22 && e12->getProfessor() == e22->getProfessor()
                 || e11 && e21 && e11->getDisciplina()->getPeriodo() 
-                    == e21->getDisciplina()->getPeriodo())
-            {
-                auto viz = swap_timeslots(sol, {d_e1, b_e1, i}, {d_e2, b_e2, j});
-                auto delta_fo = viz->getFO() - sol.getFO();
-                grafo[i][j] = {true, delta_fo};
+                    == e21->getDisciplina()->getPeriodo()) {
+                grafo[i].push_back(camadasTamanho + j);
+                grafo[camadasTamanho + j].push_back(i);
             }
         }
     }
 
-    // Forma-se um grafo em que as arestas indicam que as aulas compartilham
-    // recursos (classe ou professor)
-    // O peso de cada aresta é a diferença da FO para quando as aulas trocam
-    // de timeslot
+    // Encontra as cadeias no grafo (subgrafos conexos)
+    auto cadeias = encontra_subgrafos_conexos(grafo);
 
-    // Encontra cadeia com menor custo
+    // Encontra as soluções a partir das trocas de cada cadeia
+    std::vector<std::unique_ptr<Solucao>> solucoes{};
 
-    // Troca os timeslots das aulas pertencentes à cadeia
+    for (const auto& c : cadeias) {
+        auto s = swap_timeslots(sol, {d_e1, b_e1}, {d_e2, b_e2}, c);
+        s->calculaFO();
+        solucoes.push_back(move(s));
+    }
 
+    // Encontra solução com melhor FO
+    auto& best = *max_element(begin(solucoes), end(solucoes), std::less<>{});
+    return move(best);
 }
 
 std::vector<std::pair<int, int>> Resolucao::remove_aloc_memorizando(
@@ -3588,4 +3556,100 @@ bool Resolucao::is_professor_habilitado(
 {
     const auto& capacitados = disc.professoresCapacitados;
     return std::find(begin(capacitados), end(capacitados), prof) != end(capacitados);
+}
+
+std::vector<std::vector<int>> Resolucao::encontra_subgrafos_conexos(
+    const std::vector<std::vector<int>>& grafo
+) const
+{
+    std::vector<std::vector<int>> subgrafos{};
+    std::vector<bool> visitados(grafo.size(), false);
+
+    for (auto i = 0u; i < grafo.size(); i++) {
+        subgrafos.push_back(dfs(grafo, i, visitados));
+    }
+
+    return subgrafos;
+}
+
+std::vector<int> Resolucao::dfs(
+    const std::vector<std::vector<int>>& grafo, 
+    int no_inicial,
+    std::vector<bool>& visitados
+) const
+{
+    std::stack<int> s{};
+    s.push(no_inicial);
+
+    std::vector<int> caminho{};
+
+    while (!s.empty()) {
+        auto cur = s.top();
+        s.pop();
+
+        caminho.push_back(cur);
+
+        for (auto adj : grafo[cur]) {
+            if (!visitados[adj]) {
+                s.push(adj);
+                visitados[adj] = true;
+            }
+        }
+    }
+
+    return caminho;
+}
+
+std::unique_ptr<Solucao> Resolucao::swap_timeslots(
+    const Solucao& sol, 
+    const std::tuple<int, int>& t1,
+    const std::tuple<int, int>& t2,
+    const std::vector<int>& cadeia
+) const
+{
+    int d_e1{};
+    int b_e1{};
+    std::tie(d_e1, b_e1) = t1;
+
+    int d_e2{};
+    int b_e2{};
+    std::tie(d_e2, b_e2) = t2;
+
+    auto viz = std::make_unique<Solucao>(sol);
+    std::vector<std::pair<int, ProfessorDisciplina*>> alocs{};
+
+    // Remove os eventos dos slots atuais
+    for (auto e : cadeia) {
+        if (e < camadasTamanho) {
+            alocs.emplace_back(e, viz->horario->at(d_e1, b_e1, e));
+            viz->horario->clearSlot(d_e1, b_e1, e);
+        } else {
+            alocs.emplace_back(e, viz->horario->at(d_e2, b_e2, e - camadasTamanho));
+            viz->horario->clearSlot(d_e2, b_e2, e - camadasTamanho);
+        }
+    }
+
+    // Reinsere no timeslot invertido
+    bool ok{false};
+    for (const auto& p : alocs) {
+        int e{};
+        ProfessorDisciplina* aloc{nullptr};
+        std::tie(e, aloc) = p;
+
+        if (e < camadasTamanho) {
+            ok = viz->horario->insert(d_e2, b_e2, e, aloc);
+        } else {
+            ok = viz->horario->insert(d_e1, b_e1, e - camadasTamanho, aloc);
+        }
+
+        if (!ok) {
+            break;
+        }
+    }
+
+    if (ok) {
+        return viz;
+    } else {
+        return std::make_unique<Solucao>(sol);
+    }
 }
