@@ -12,6 +12,7 @@ ILS::ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
 
 std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
 {
+    printf("ILS - Solucao inicial: %d\n", s_inicial.getFO());
     auto s_atual = descent_phase(s_inicial);
     auto s_best = std::make_unique<Solucao>(*s_atual);
 
@@ -32,6 +33,7 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
         if (s_viz->getFO() > s_best->getFO()) {
             s_atual = std::move(s_viz);
             s_best = std::make_unique<Solucao>(*s_atual);
+            printf("Melhoria: %d\n", s_best->getFO());
 
             iter = 0;
             p_size = p0_;
@@ -47,6 +49,8 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
             }
         }
     }
+
+    printf("Fim ILS: %d\n", s_best->getFO());
 
     return s_best;
 }

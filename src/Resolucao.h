@@ -190,7 +190,7 @@ private:
     std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& pop,
                                                      Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
-    bool swapBlocos(Solucao& sol, int posX1, int posX2) const;
+    bool swapSlots(Solucao& sol, int posX1, int posX2) const;
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
     double gerarGradeTipoGrasp2(Solucao* sol) const;
@@ -302,6 +302,9 @@ private:
         const std::tuple<int, int>& t2,
         const std::vector<int>& cadeia
     ) const;
+
+    bool swap_blocos(Solucao& sol, const std::tuple<int, int> & t1, 
+                     const std::tuple<int, int> & t2, int camada) const;
 
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;

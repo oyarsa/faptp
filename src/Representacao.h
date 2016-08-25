@@ -57,7 +57,7 @@ protected:
 
 inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
 {
-    return (pBloco + (pDia * blocosTamanho) + (pCamada * blocosTamanho * dias_semana_util));
+    return pBloco + pDia * blocosTamanho + pCamada * blocosTamanho * dias_semana_util;
 }
 
 #endif /* REPRESENTACAO_H */
