@@ -17,10 +17,10 @@ class Grade : public Representacao
     friend class Output;
 public:
     Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
-          std::vector<Disciplina*>& pDisciplinasCurso,
-          std::unordered_map<std::string, int>& pDiscToIndex);
+          const std::vector<Disciplina*>& pDisciplinasCurso,
+          const std::unordered_map<std::string, int>& pDiscToIndex);
     Grade(const Grade& outro);
-    Grade& operator=(const Grade& outro);
+    Grade& operator=(const Grade&) = delete;
     virtual ~Grade();
 
     bool insert2(Disciplina* pDisciplina);
@@ -42,8 +42,8 @@ private:
     ProfessorDisciplina* professorDisciplinaTemp;
     std::vector<Disciplina*> disciplinasAdicionadas;
 
-    std::vector<Disciplina*>& disciplinasCurso;
-    std::unordered_map<std::string, int>& discToIndex;
+    const std::vector<Disciplina*>& disciplinasCurso;
+    const std::unordered_map<std::string, int>& discToIndex;
 
     //! Guarda a função objetiva dessa grade, vale 0 se ainda não foi definida
     double fo;

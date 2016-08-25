@@ -7,8 +7,8 @@
 #include "Semana.h"
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
-             std::vector<Disciplina*>& pDisciplinasCurso,
-             std::unordered_map<std::string, int>& pDiscToIndex)
+             const std::vector<Disciplina*>& pDisciplinasCurso,
+             const std::unordered_map<std::string, int>& pDiscToIndex)
     : Representacao(pBlocosTamanho, 1)
       , aluno(pAlunoPerfil)
       , horario(pHorario)
@@ -35,25 +35,9 @@ Grade::Grade(const Grade& outro)
       , discToIndex(outro.discToIndex)
       , fo(outro.fo) {}
 
-Grade& Grade::operator=(const Grade& outro)
-{
-    Representacao::operator=(outro);
-    aluno = outro.aluno;
-    horario = outro.horario;
-    professorDisciplinas = outro.professorDisciplinas;
-    problemas = outro.problemas;
-    professorDisciplinaTemp = nullptr;
-    disciplinasCurso = outro.disciplinasCurso;
-    discToIndex = outro.discToIndex;
-    disciplinasAdicionadas = outro.disciplinasAdicionadas;
-    fo = outro.fo;
-
-    return *this;
-}
-
 Disciplina* Grade::getDisciplina(std::string pNomeDisciplina)
 {
-    return disciplinasCurso[discToIndex[pNomeDisciplina]];
+    return disciplinasCurso[discToIndex.at(pNomeDisciplina)];
 }
 
 Grade::~Grade()

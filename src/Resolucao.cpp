@@ -1011,7 +1011,7 @@ Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
     //puts("Constr");
-    //printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
+    //printf("pais: %g %gradeCache\n", solucaoPai1->fo, solucaoPai2->fo);
     std::vector<Solucao*> filhos;
     std::vector<ProfessorDisciplina*> matrizBackup;
 
@@ -1183,7 +1183,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
     //puts("subsbloco");
-    //printf("pais: %g %g\n", solucaoPai1->fo, solucaoPai2->fo);
+    //printf("pais: %g %gradeCache\n", solucaoPai1->fo, solucaoPai2->fo);
     int dia, bloco, camada;
     std::size_t pos;
     auto filho1 = new Solucao(*solucaoPai1);
@@ -1377,20 +1377,20 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
     };
 
     // Verifica se conseguiu terminar o cruzamento. Se não, volta para o fallback
-    if (insertBlocoComp(filho1->horario, blocos2Comp) &&
-        insertBlocoIncom(filho1->horario, blocos2Incomp, iso2Incomp) &&
-        insertIsoComp(filho1->horario, iso2Comp) &&
-        insertIsoIncom(filho1->horario, iso2Incomp)) {
+    if (insertBlocoComp(filho1->horario.get(), blocos2Comp) &&
+        insertBlocoIncom(filho1->horario.get(), blocos2Incomp, iso2Incomp) &&
+        insertIsoComp(filho1->horario.get(), iso2Comp) &&
+        insertIsoIncom(filho1->horario.get(), iso2Incomp)) {
         delete fallback1;
     } else {
         delete filho1;
         filho1 = fallback1;
     }
 
-    if (insertBlocoComp(filho2->horario, blocos1Comp) &&
-        insertBlocoIncom(filho2->horario, blocos1Incomp, iso2Incomp) &&
-        insertIsoComp(filho2->horario, iso1Comp) &&
-        insertIsoIncom(filho2->horario, iso1Incomp)) {
+    if (insertBlocoComp(filho2->horario.get(), blocos1Comp) &&
+        insertBlocoIncom(filho2->horario.get(), blocos1Incomp, iso2Incomp) &&
+        insertIsoComp(filho2->horario.get(), iso1Comp) &&
+        insertIsoIncom(filho2->horario.get(), iso1Incomp)) {
         delete fallback2;
     } else {
         delete filho2;
@@ -1598,65 +1598,58 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
     return nullptr;
 }
 
-double Resolucao::gerarGradeTipoGrasp2(Solucao* sol)
+double Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
 {
-    auto total = 0;
-    std::unordered_map<long long, Grade*> gradesGeradas;
+    std::unordered_map<long long, Grade*> gradesGeradas{};
 
     for (auto& par : alunoPerfis) {
         auto aluno = par.second;
 
-        Grade* novaGrade = nullptr;
-        if (gradesGeradas[aluno->getHash()]) {
-            novaGrade = new Grade(*gradesGeradas[aluno->getHash()]);
+        Grade* novaGrade{nullptr};
+        if (auto& gradeCache = gradesGeradas[aluno->getHash()]) {
+            novaGrade = new Grade(*gradeCache);
             novaGrade->aluno = aluno;
         } else {
             novaGrade = GRASP(aluno, sol);
-            gradesGeradas[aluno->getHash()] = novaGrade;
+            gradeCache = novaGrade;
         }
 
-        //printf("Aluno: %s\nDiscs: ", aluno->id.c_str());
-        //for (auto& disc : novaGrade->disciplinasAdicionadas) {
-        //    printf("%s ", disc->nome.c_str());
-        //}
-        //puts("\n");
-
-        total += static_cast<int>(novaGrade->getFO());
         sol->insertGrade(novaGrade);
     }
-    sol->fo = total;
 
-    return total;
+    sol->calculaFO();
+    return sol->getFO();
 }
 
-double Resolucao::gerarGrade()
+double Resolucao::gerarGrade() const
 {
     return gerarGrade(solucao);
 }
 
-double Resolucao::gerarGrade(Solucao* pSolucao)
+double Resolucao::gerarGrade(Solucao* pSolucao) const
 {
     for (auto& par : pSolucao->grades) {
         delete par.second;
     }
+
     pSolucao->grades.clear();
     pSolucao->gradesLength = 0;
+    return gerarGradeTipoGrasp2(pSolucao);
 
+    /*
     switch (gradeTipoConstrucao) {
-        case Configuracao::TipoGrade::guloso:
-            return gerarGradeTipoGuloso(pSolucao);
-
         case Configuracao::TipoGrade::grasp:
             return gerarGradeTipoGrasp2(pSolucao);
-
+        case Configuracao::TipoGrade::guloso:
+            return gerarGradeTipoGuloso(pSolucao);
         case Configuracao::TipoGrade::combinatorio:
             return gerarGradeTipoCombinacaoConstrutiva(pSolucao);
-
         case Configuracao::TipoGrade::modelo:
             return gerarGradeTipoModelo(pSolucao);
     }
 
     return 0;
+    */
 }
 
 double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
@@ -1667,7 +1660,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
     auto apIter = alunoPerfis.begin();
     auto apIterEnd = alunoPerfis.end();
 
-    horario = pSolucao->horario;
+    horario = pSolucao->horario.get();
 
     for (; apIter != apIterEnd; ++apIter) {
         if (verbose)
@@ -1754,7 +1747,7 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
     auto apIter = alunoPerfis.begin();
     auto apIterEnd = alunoPerfis.end();
 
-    horario = pSolucao->horario;
+    horario = pSolucao->horario.get();
 
     for (; apIter != apIterEnd; ++apIter) {
         if (verbose)
@@ -1825,7 +1818,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao)
     auto apIterEnd = alunoPerfis.end();
     AlunoPerfil* alunoPerfil {nullptr};
 
-    horario = pSolucao->horario;
+    horario = pSolucao->horario.get();
 
     for (; apIter != apIterEnd; ++apIter) {
 
@@ -1989,7 +1982,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
 double Resolucao::gerarGradeTipoGrasp()
 {
-    return gerarGradeTipoGrasp(solucao);
+    return gerarGradeTipoGrasp2(solucao);
 }
 
 double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
@@ -2056,7 +2049,7 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
     return pSolucao->getFO();
 }
 
-int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante)
+int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const
 {
     auto bestFIT = apRestante.front()->cargaHoraria;
     auto worstFIT = apRestante.back()->cargaHoraria;
@@ -2564,6 +2557,7 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull()
     while (!s) {
         s = std::move(gerarSolucaoAleatoria());
     }
+    gerarGrade(s.get());
     return s;
 }
 
@@ -2663,14 +2657,15 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(
     auto s = gerarSolucaoAleatoriaNotNull();
     auto s_sa = sa.gerar_horario(*s);
     auto s_ils = ils.gerar_horario(*s_sa);
+    s_ils->calculaFO();
     return s_ils;
 }
 
 std::unique_ptr<Grade>
-Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* sol)
+Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* sol) const
 {
     auto novaGrade = std::make_unique<Grade>(
-        blocosTamanho, alunoPerfil, sol->horario, disciplinas, disciplinasIndex);
+        blocosTamanho, alunoPerfil, sol->horario.get(), disciplinas, disciplinasIndex);
     auto horariosMax = (dias_semana_util - 2) * blocosTamanho;
     auto adicionados = 0;
     auto restantes = alunoPerfil->restanteOrd;
@@ -2689,7 +2684,7 @@ Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* sol)
     return novaGrade;
 }
 
-std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade)
+std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
 {
     auto currGrade = std::make_unique<Grade>(grade);
     currGrade->fo = -1;
@@ -2718,25 +2713,12 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade)
 
         restantes.erase(std::remove(begin(restantes), end(restantes), current),
                         end(restantes));
-
-        /*if (current == discremovida || discJaAdicionada) {
-            restantes.erase(std::remove(begin(restantes), end(restantes), current),
-                            end(restantes));
-            continue;
-        }
-
-        if (currGrade->insert(current)) {
-            break;
-        }
-
-        restantes.erase(std::remove(begin(restantes), end(restantes), current),
-                        end(restantes));*/
     }
 
     return currGrade;
 }
 
-void Resolucao::buscaLocal(std::unique_ptr<Grade>& grade)
+void Resolucao::buscaLocal(std::unique_ptr<Grade>& grade) const
 {
     for (auto i = 0; i < gradeGraspVizinhos; i++) {
         auto vizinho = vizinhoGrasp(*grade);
@@ -2746,7 +2728,7 @@ void Resolucao::buscaLocal(std::unique_ptr<Grade>& grade)
     }
 }
 
-Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol)
+Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol) const
 {
     auto best = gradeAleatoria(alunoPerfil, sol);
     auto ultimaMelhoriaIter = -1;
@@ -2766,15 +2748,15 @@ Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol)
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa {*this, 0.97, 1, 10'000, 5, timeout, {
+    SA sa {*this, 0.97, 1, 10, 5, timeout, {
             {Vizinhanca::ES, 25},
             {Vizinhanca::EM, 43},
             {Vizinhanca::RS, 20},
             {Vizinhanca::RM, 10},
             {Vizinhanca::KM, 2}
-            }};
+    }};
 
-    ILS ils {*this, 10'000, 10, 1, 10, timeout};
+    ILS ils {*this, 10, 10, 1, 10, timeout};
 
     return gerarHorarioSA_ILS(sa, ils);
 }
@@ -2853,7 +2835,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
 Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
 {
     //puts("\n\nordem");
-    //printf("pais: %g %g\n", pai1.fo, pai2.fo);
+    //printf("pais: %g %gradeCache\n", pai1.fo, pai2.fo);
 
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -2927,7 +2909,7 @@ bool Resolucao::insereSubTour(
 Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
 {
     //puts("\n\nPMX");
-    //printf("pais: %g %g\n", pai1.fo, pai2.fo);
+    //printf("pais: %g %gradeCache\n", pai1.fo, pai2.fo);
 
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -3187,7 +3169,7 @@ Solucao* Resolucao::crossoverCiclo(const Solucao& pai1, const Solucao& pai2)
 }
 
 Disciplina*
-Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes)
+Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 {
     auto distancia = getIntervaloAlfaGrasp(restantes);
     auto rand = aleatorio::randomInt() % distancia;
@@ -3225,6 +3207,7 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
         auto e2 = viz->horario->getPosition(diaX2, blocoX2, camada);
 
         if (swapBlocos(*viz, e1, e2) && swapBlocos(*viz, e1 + 1, e2 + 1)) {
+            gerarGrade(viz.get());
             return viz;
         }
     }
@@ -3262,10 +3245,11 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
                     continue;
                 }
 
-                auto ok_e1 = viz->horario->insert(d, b, camada, e1);
-                auto ok_e2 = viz->horario->insert(d, b + 1, camada, e2);
+                auto ok_e1 = !e1 || viz->horario->insert(d, b, camada, e1);
+                auto ok_e2 = !e2 || viz->horario->insert(d, b + 1, camada, e2);
 
                 if (ok_e1 && ok_e2) {
+                    gerarGrade(viz.get());
                     return viz;
                 }
             }
@@ -3307,6 +3291,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Reinsere com a nova alocação
         auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
         if (ok) {
+            gerarGrade(viz.get());
             return viz;
         }
     }
@@ -3361,6 +3346,7 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
         auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
         if (ok_e2) {
+            gerarGrade(viz.get());
             return viz;
         }
     }
@@ -3424,7 +3410,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
         } else {
             vizinhos.push_back(std::make_unique<Solucao>(sol));
         }
-        vizinhos.back()->calculaFO();
+        gerarGrade(vizinhos.back().get());
 
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
@@ -3490,7 +3476,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 
     for (const auto& c : cadeias) {
         auto s = swap_timeslots(sol, {d_e1, b_e1}, {d_e2, b_e2}, c);
-        s->calculaFO();
+        gerarGrade(s.get());
         solucoes.push_back(move(s));
     }
 
@@ -3635,6 +3621,10 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
         int e{};
         ProfessorDisciplina* aloc{nullptr};
         std::tie(e, aloc) = p;
+
+        if (!aloc) {
+            continue;
+        }
 
         if (e < camadasTamanho) {
             ok = viz->horario->insert(d_e2, b_e2, e, aloc);

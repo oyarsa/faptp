@@ -6,55 +6,37 @@
 #include "Solucao.h"
 #include "Aleatorio.h"
 
-Solucao::Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho)
-{
-    blocosTamanho = pBlocosTamanho;
-    camadasTamanho = pCamadasTamanho;
-    perfisTamanho = pPerfisTamanho;
-    id = aleatorio::randomInt();
-    init();
-}
+Solucao::Solucao(
+    int pBlocosTamanho, 
+    int pCamadasTamanho, 
+    int pPerfisTamanho
+)
+    : id(aleatorio::randomInt())
+    , blocosTamanho(pBlocosTamanho)
+    , camadasTamanho(pCamadasTamanho)
+    , perfisTamanho(pPerfisTamanho)
+    , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
+    , grades()
+    , gradesLength(0) {}
 
 Solucao::Solucao(const Solucao& outro)
     : camada_periodo(outro.camada_periodo)
-      , horario(new Horario(*(outro.horario)))
       , id(aleatorio::randomInt())
       , blocosTamanho(outro.blocosTamanho)
       , camadasTamanho(outro.camadasTamanho)
       , perfisTamanho(outro.perfisTamanho)
-      , gradesLength(0)
-      , fo(-1) {}
-
-Solucao& Solucao::operator=(const Solucao& outro)
+      , horario(std::make_unique<Horario>(*outro.horario))
+      , grades()
+      , gradesLength(outro.gradesLength)
+      , fo(outro.fo)
 {
-    camada_periodo = outro.camada_periodo;
-    horario = new Horario(*(outro.horario));
-    id = aleatorio::randomInt();
-    blocosTamanho = outro.blocosTamanho;
-    camadasTamanho = outro.camadasTamanho;
-    perfisTamanho = outro.perfisTamanho;
-    gradesLength = outro.gradesLength;
-    fo = -1;
-
-    for (const auto& par : outro.grades) {
-        grades[par.first] = new Grade(*(par.second));
+    for (auto& par : outro.grades) {
+        grades[par.first] = new Grade(*par.second);
     }
-
-    return *this;
-}
-
-
-void Solucao::init()
-{
-    horario = new Horario(blocosTamanho, camadasTamanho);
-    fo = -1;
-    gradesLength = 0;
 }
 
 Solucao::~Solucao()
 {
-    delete horario;
-
     for (auto& par : grades) {
         delete par.second;
     }

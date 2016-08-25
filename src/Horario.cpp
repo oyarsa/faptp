@@ -46,6 +46,9 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professo
 
 bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
 {
+    if (!pProfessorDisciplina) {
+        return true;
+    }
     return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 

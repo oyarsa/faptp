@@ -20,7 +20,7 @@ std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
     auto reheats = 0;
     auto tempoInicial = Util::now();
 
-    while (reheats < max_reheats_ && Util::chronoDiff(Util::now(), tempoInicial)) {
+    while (reheats < max_reheats_ && Util::chronoDiff(Util::now(), tempoInicial) < timeout_) {
         for (auto i = 0; i < max_iter_; i++) {
             auto s_viz = gerar_vizinho(*s_atual);
             auto delta = s_viz->getFO() - s_atual->getFO();

@@ -12,6 +12,25 @@
 #include "src/Configuracao.h"
 #include "src/Util.h"
 
+/*
+ * PARÂMETROS DE CONFIGURAÇÃO *
+ * input.all.json ->
+ *      camadasTamanho : 33
+ *      perfilTamanho : 1392
+ * input.json (impreciso, mas funciona) ->
+ *      camadasTamaho : 4
+ *      perfilTamanho : 10
+ */
+
+struct Entrada
+{
+    int camadasTamanho;
+    int perfilTamanho;
+};
+
+constexpr Entrada input_all_json{33, 1392};
+constexpr Entrada input_json{4, 10};
+
 void semArgumentos()
 {
     experimento = false;
@@ -298,9 +317,28 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
     }
 }
 
+void teste_sa_ils()
+{
+    Resolucao r{Configuracao()
+        .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+        .tentativasMutacao(4)
+    };
+
+    auto s = r.gerarHorarioSA_ILS(10);
+
+    auto fo = s->getFO();
+    std::cout << "\nResultado:" << fo << "\n";
+
+    auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
+    Output::write(s.get(), savePath);
+}
+
 int main(int argc, char* argv[])
 {
     verbose = false;
+    experimento = false;
     if (argc == 3) {
         // Primeiro argumento é a entrada, o segundo é o arquivo de configuração
         //novo_experimento_cli(argv[1], argv[2]);
@@ -313,7 +351,8 @@ int main(int argc, char* argv[])
             std::cout << "ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec\n";
         }
     } else {
-        semArgumentos();
+        //semArgumentos();
+        teste_sa_ils();
     }
 }
 

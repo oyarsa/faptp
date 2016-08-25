@@ -54,7 +54,7 @@ public:
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(const SA& sa, const ILS& ils);
 
-    double gerarGrade();
+    double gerarGrade() const;
 
     void showResult();
 
@@ -193,8 +193,8 @@ private:
     bool swapBlocos(Solucao& sol, int posX1, int posX2) const;
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
-    double gerarGradeTipoGrasp2(Solucao* sol);
-    double gerarGrade(Solucao* pSolucao);
+    double gerarGradeTipoGrasp2(Solucao* sol) const;
+    double gerarGrade(Solucao* pSolucao) const;
 
     double gerarGradeTipoGuloso(Solucao*& pSolucao);
 
@@ -209,12 +209,14 @@ private:
     void gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao);
+    [[deprecated("Use gerarGradeTipoGrasp2")]]
     double gerarGradeTipoGrasp();
+    [[deprecated("Use gerarGradeTipoGrasp2")]]
     double gerarGradeTipoGrasp(Solucao*& pSolucao);
 
     double gerarGradeTipoModelo(Solucao* pSolucao);
 
-    int getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante);
+    int getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const;
 
     void showResult(Solucao* pSolucao);
 
@@ -245,10 +247,11 @@ private:
     // Verifica se a nova população possui uma solução melhor que a anterior
     void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& pop, int iteracaoAtual);
 
-    std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil, Solucao* solucao);
-    std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade);
-    void buscaLocal(std::unique_ptr<Grade>& grade);
-    Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao);
+    std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil, 
+                                          Solucao* solucao) const;
+    std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade) const;
+    void buscaLocal(std::unique_ptr<Grade>& grade) const;
+    Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao) const;
 
     // Operadores de vizinhança
     std::unique_ptr<Solucao> event_swap(const Solucao& sol) const;
@@ -314,7 +317,7 @@ private:
     Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
                                   int camadaCruz);
     Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
-    Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes);
+    Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes) const;
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
     std::vector<Solucao*> populacao;

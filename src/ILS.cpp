@@ -66,7 +66,7 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     }
 }
 
-std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
+ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
 {
     const std::unordered_set<Resolucao::Vizinhanca> movimentos {
             Resolucao::Vizinhanca::ES,
@@ -85,8 +85,10 @@ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
         auto vizinho = gerar_vizinho(vizinhanca, *best);
 
         if (vizinho->getFO() >= best->getFO()) {
-            best = std::move(vizinho);
-            movimentos_restantes = movimentos;
+            if (vizinho->getFO() > best->getFO()) {
+                movimentos_restantes = movimentos;
+            }
+            best = move(vizinho);
         }
     }
 

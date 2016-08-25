@@ -13,7 +13,6 @@ class Solucao
 public:
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
     Solucao(const Solucao& outro);
-    Solucao& operator=(const Solucao& outro);
     virtual ~Solucao();
 
     void insertGrade(Grade* grade);
@@ -25,18 +24,16 @@ public:
     std::size_t getHash();
     std::unordered_map<int, std::string> camada_periodo;
 private:
-    Horario* horario;
-    std::unordered_map<std::string, Grade*> grades;
-
     int id;
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
 
+    std::unique_ptr<Horario> horario;
+    std::unordered_map<std::string, Grade*> grades;
+
     int gradesLength;
     int fo = -1;
-
-    void init();
 };
 
 #endif /* SOLUCAO_H */
