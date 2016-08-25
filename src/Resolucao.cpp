@@ -1536,7 +1536,7 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
         auto blocoX2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
         auto x2 = mut->horario->getPosition(diaX2, blocoX2, camadaX);
 
-        if (swapBlocos(*mut, x1, x2) && swapBlocos(*mut, x1 + 1, x2 + 1)) {
+        if (swapSlots(*mut, x1, x2) && swapSlots(*mut, x1 + 1, x2 + 1)) {
             gerarGrade(mut.get());
             return mut.release();
         }
@@ -1545,7 +1545,39 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
     return nullptr;
 }
 
-bool Resolucao::swapBlocos(Solucao& sol, int posX1, int posX2) const
+bool Resolucao::swap_blocos(
+    Solucao& sol, 
+    const std::tuple<int, int>& t1, 
+    const std::tuple<int, int>& t2, 
+    int camada
+) const
+{
+    int d_e1{}, b_e1{};
+    std::tie(d_e1, b_e1) = t1;
+
+    int d_e2{}, b_e2{};
+    std::tie(d_e2, b_e2) = t2;
+
+    auto e11 = sol.horario->at(d_e1, b_e1, camada);
+    sol.horario->clearSlot(d_e1, b_e1, camada);
+    auto e12 = sol.horario->at(d_e1, b_e1 + 1, camada);
+    sol.horario->clearSlot(d_e1, b_e1 + 1, camada);
+
+    auto e21 = sol.horario->at(d_e2, b_e2, camada);
+    sol.horario->clearSlot(d_e2, b_e2, camada);
+    auto e22 = sol.horario->at(d_e2, b_e2 + 1, camada);
+    sol.horario->clearSlot(d_e2, b_e2 + 1, camada);
+
+    auto ok_e11 = sol.horario->insert(d_e2, b_e2, camada, e11);
+    auto ok_e12 = sol.horario->insert(d_e2, b_e2 + 1, camada, e12);
+
+    auto ok_e21 = sol.horario->insert(d_e1, b_e1, camada, e21);
+    auto ok_e22 = sol.horario->insert(d_e1, b_e1 + 1, camada, e22);
+
+    return ok_e11 && ok_e12 && ok_e21 && ok_e22;
+}
+
+bool Resolucao::swapSlots(Solucao& sol, int posX1, int posX2) const
 {
     int diaX1, blocoX1, diaX2, blocoX2, camadaX;
     std::tie(diaX1, blocoX1, camadaX) = sol.horario->getCoords(posX1);
@@ -2748,7 +2780,7 @@ Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol) const
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa {*this, 0.97, 1, 10, 5, timeout, {
+    SA sa {*this, 0.97, 1, 100, 5, timeout, {
             {Vizinhanca::ES, 25},
             {Vizinhanca::EM, 43},
             {Vizinhanca::RS, 20},
@@ -2756,7 +2788,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
             {Vizinhanca::KM, 2}
     }};
 
-    ILS ils {*this, 10, 10, 1, 10, timeout};
+    ILS ils {*this, 10, 100, 1, 100, timeout};
 
     return gerarHorarioSA_ILS(sa, ils);
 }
@@ -3198,20 +3230,20 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
 
         auto camada = Util::randomBetween(0, camadasTamanho);
 
-        auto diaX1 = Util::randomBetween(0, dias_semana_util);
-        auto blocoX1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
-        auto e1 = viz->horario->getPosition(diaX1, blocoX1, camada);
+        auto d_e1 = Util::randomBetween(0, dias_semana_util);
+        auto b_e1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
-        auto diaX2 = Util::randomBetween(0, dias_semana_util);
-        auto blocoX2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
-        auto e2 = viz->horario->getPosition(diaX2, blocoX2, camada);
+        auto d_e2 = Util::randomBetween(0, dias_semana_util);
+        auto b_e2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
-        if (swapBlocos(*viz, e1, e2) && swapBlocos(*viz, e1 + 1, e2 + 1)) {
+        if (swap_blocos(*viz, {d_e1, b_e1}, {d_e2, b_e2}, camada)) {
             gerarGrade(viz.get());
+            puts("nice es");
             return viz;
         }
     }
 
+    puts("ops es");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3249,6 +3281,7 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
                 auto ok_e2 = !e2 || viz->horario->insert(d, b + 1, camada, e2);
 
                 if (ok_e1 && ok_e2) {
+                    puts("nice em");
                     gerarGrade(viz.get());
                     return viz;
                 }
@@ -3256,6 +3289,7 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
         }
     }
 
+    puts("ops em");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3291,11 +3325,13 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Reinsere com a nova alocação
         auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
         if (ok) {
+            puts("nice rm");
             gerarGrade(viz.get());
             return viz;
         }
     }
 
+    puts("ops rm");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3346,11 +3382,13 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
         auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
         if (ok_e2) {
+            puts("nice rs");
             gerarGrade(viz.get());
             return viz;
         }
     }
 
+    puts("ops rs");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3416,6 +3454,11 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 
     // O resultado é a melhor solução dentre as permutações
     auto& best = *std::max_element(begin(vizinhos), end(vizinhos), std::less<>{});
+    if (best->getFO() > sol.getFO()) {
+        puts("nice pr");
+    } else {
+        puts("ops pr");
+    }
     return move(best);
 }
 
@@ -3482,6 +3525,11 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 
     // Encontra solução com melhor FO
     auto& best = *max_element(begin(solucoes), end(solucoes), std::less<>{});
+    if (best->getFO() > sol.getFO()) {
+        puts("nice km");
+    } else {
+        puts("ops km");
+    }
     return move(best);
 }
 

@@ -46,8 +46,8 @@ void semArgumentos()
             .mutacaoProbabilidade(15) // %
             .graspNumVizinhos(2)
             .graspAlfa(20) // %
-            .camadaTamanho(33)
-            .perfilTamanho(1392)
+            .camadaTamanho(input_all_json.camadasTamanho)
+            .perfilTamanho(input_all_json.perfilTamanho)
             .numTorneioPopulacao(4)
             .tentativasMutacao(4)
             .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
@@ -319,6 +319,8 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
 
 void teste_sa_ils()
 {
+    auto antes = Util::now();
+
     Resolucao r{Configuracao()
         .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
         .camadaTamanho(input_all_json.camadasTamanho)
@@ -326,10 +328,13 @@ void teste_sa_ils()
         .tentativasMutacao(4)
     };
 
-    auto s = r.gerarHorarioSA_ILS(10);
+    auto s = r.gerarHorarioSA_ILS(1000);
 
     auto fo = s->getFO();
+    auto tempo = Util::chronoDiff(Util::now(), antes);
+
     std::cout << "\nResultado:" << fo << "\n";
+    std::cout << "Tempo: " << tempo << "\n";
 
     auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
     Output::write(s.get(), savePath);

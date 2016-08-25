@@ -13,6 +13,7 @@ SA::SA(Resolucao& res, double alfa, double t0, int max_iter, int max_reheats,
 
 std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
 {
+    printf("Solucao inicial: %d\n", s_inicial.getFO());
     auto s_atual = std::make_unique<Solucao>(s_inicial);
     auto s_best = std::make_unique<Solucao>(s_inicial);
 
@@ -30,6 +31,7 @@ std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
 
                 if (s_atual->getFO() > s_best->getFO()) {
                     s_best = std::make_unique<Solucao>(*s_atual);
+                    printf("Melhoria: %d\n", s_best->getFO());
                 }
             }
         }
@@ -40,6 +42,8 @@ std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
             t = t0_;
         }
     }
+
+    printf("Fim SA: %d\n", s_best->getFO());
 
     return s_best;
 }
@@ -52,7 +56,7 @@ std::unique_ptr<Solucao> SA::gerar_vizinho(const Solucao& solucao) const
         case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);
         case Resolucao::Vizinhanca::RM: return res_.resource_move(solucao);
         case Resolucao::Vizinhanca::KM: return res_.kempe_move(solucao);
-        default: return nullptr;
+        default: return std::make_unique<Solucao>(solucao);
     }
 }
 
