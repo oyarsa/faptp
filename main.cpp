@@ -328,7 +328,7 @@ void teste_sa_ils()
         .tentativasMutacao(4)
     };
 
-    auto s = r.gerarHorarioSA_ILS(1000);
+    auto s = r.gerarHorarioSA_ILS(60'000);
 
     auto fo = s->getFO();
     auto tempo = Util::chronoDiff(Util::now(), antes);

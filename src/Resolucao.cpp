@@ -1666,22 +1666,8 @@ double Resolucao::gerarGrade(Solucao* pSolucao) const
 
     pSolucao->grades.clear();
     pSolucao->gradesLength = 0;
+
     return gerarGradeTipoGrasp2(pSolucao);
-
-    /*
-    switch (gradeTipoConstrucao) {
-        case Configuracao::TipoGrade::grasp:
-            return gerarGradeTipoGrasp2(pSolucao);
-        case Configuracao::TipoGrade::guloso:
-            return gerarGradeTipoGuloso(pSolucao);
-        case Configuracao::TipoGrade::combinatorio:
-            return gerarGradeTipoCombinacaoConstrutiva(pSolucao);
-        case Configuracao::TipoGrade::modelo:
-            return gerarGradeTipoModelo(pSolucao);
-    }
-
-    return 0;
-    */
 }
 
 double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
@@ -2780,7 +2766,7 @@ Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol) const
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa {*this, 0.97, 1, 100, 5, timeout, {
+    SA sa {*this, 0.97, 1, 10'000, 5, timeout, {
             {Vizinhanca::ES, 25},
             {Vizinhanca::EM, 43},
             {Vizinhanca::RS, 20},
@@ -2788,7 +2774,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
             {Vizinhanca::KM, 2}
     }};
 
-    ILS ils {*this, 10, 100, 1, 100, timeout};
+    ILS ils {*this, 10'000, 10, 1, 10, timeout};
 
     return gerarHorarioSA_ILS(sa, ils);
 }
@@ -3243,7 +3229,7 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
         }
     }
 
-    puts("ops es");
+    //puts("ops es");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3289,7 +3275,7 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
         }
     }
 
-    puts("ops em");
+//    puts("ops em");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3331,7 +3317,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         }
     }
 
-    puts("ops rm");
+    //puts("ops rm");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3388,7 +3374,7 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
     }
 
-    puts("ops rs");
+    //puts("ops rs");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3457,7 +3443,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     if (best->getFO() > sol.getFO()) {
         puts("nice pr");
     } else {
-        puts("ops pr");
+//        puts("ops pr");
     }
     return move(best);
 }
@@ -3528,7 +3514,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     if (best->getFO() > sol.getFO()) {
         puts("nice km");
     } else {
-        puts("ops km");
+        //puts("ops km");
     }
     return move(best);
 }
@@ -3600,7 +3586,9 @@ std::vector<std::vector<int>> Resolucao::encontra_subgrafos_conexos(
     std::vector<bool> visitados(grafo.size(), false);
 
     for (auto i = 0u; i < grafo.size(); i++) {
-        subgrafos.push_back(dfs(grafo, i, visitados));
+        if (!visitados[i]) {
+            subgrafos.push_back(dfs(grafo, i, visitados));
+        }
     }
 
     return subgrafos;
@@ -3614,6 +3602,7 @@ std::vector<int> Resolucao::dfs(
 {
     std::stack<int> s{};
     s.push(no_inicial);
+    visitados[no_inicial];
 
     std::vector<int> caminho{};
 

@@ -108,7 +108,7 @@ Resolucao::Vizinhanca ILS::escolher_vizinhanca(
 
 std::unique_ptr<Solucao> ILS::perturbacao(const Solucao& solucao) const
 {
-    if (Util::randomDouble() <= 0.5) {
+    if (Util::randomDouble() < 0.5) {
         return res_.permute_resources(solucao);
     } else {
         return res_.kempe_move(solucao);
