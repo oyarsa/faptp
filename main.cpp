@@ -340,6 +340,29 @@ void teste_sa_ils()
     Output::write(s.get(), savePath);
 }
 
+void teste_wdju()
+{
+    auto antes = Util::now();
+
+    Resolucao r{Configuracao()
+        .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+        .tentativasMutacao(4)
+    };
+
+    auto s = r.gerarHorarioWDJU(60'000);
+
+    auto fo = s->getFO();
+    auto tempo = Util::chronoDiff(Util::now(), antes);
+
+    std::cout << "\nResultado:" << fo << "\n";
+    std::cout << "Tempo: " << tempo << "\n";
+
+    auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
+    Output::write(s.get(), savePath);
+}
+
 int main(int argc, char* argv[])
 {
     verbose = false;
@@ -357,7 +380,8 @@ int main(int argc, char* argv[])
         }
     } else {
         //semArgumentos();
-        teste_sa_ils();
+        //teste_sa_ils();
+        teste_wdju();
     }
 }
 

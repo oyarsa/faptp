@@ -1,4 +1,5 @@
 library(plyr)
+library(ggplot2)
 
 le.arquivos <- function(caminho) {
   arquivos <- list.files(caminho, pattern = ".*.txt")
@@ -30,22 +31,35 @@ res <- result[result$type == T,]
 mean(res$Media.Tempo)
 
 r3 <- result[c(1:5, 1150:1154, 2300:2304),]
+r3$Media.FO <- r3$Media.FO * 0.9848133397522868
+r3$Max.FO <- r3$Max.FO * 0.9848133397522868
+r3$Min.FO <- r3$Min.FO * 0.9848133397522868
 #r3 <- frames[frames$ID.Algoritmo %in% r2$ID.Algoritmo,]
 r3$ID.Algoritmo <- gsub("\\.", "\n", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("AI", "ag_max_it=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("TM", "probMutacao=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("NI", "PopTam=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("PC", "pCruz=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("Xo", "op_cruz=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("NM", "ntMut=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("NT", "tor_tam=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("GI", "grasp_max_it=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("GV", "num_vizinhos=", r3$ID.Algoritmo)
+r3$ID.Algoritmo <- gsub("GA", "alfa=", r3$ID.Algoritmo)
 r3$ID.Algoritmo <- factor(r3$ID.Algoritmo, levels = r3$ID.Algoritmo)
 
 ggplot(r3, aes(x = ID.Algoritmo, y = Media.FO)) +
   geom_point(size = 2) +
   geom_errorbar(aes(ymin = Min.FO, ymax = Max.FO))
 
-ggplot(aes(y=FO, x=factor(ID.Algoritmo)), data=r3) + geom_boxplot()
+#ggplot(aes(y=FO, x=factor(ID.Algoritmo)), data=r3) + geom_boxplot()
 
 ggplot(r3, aes(x = ID.Algoritmo, y = Media.Tempo)) + 
   geom_point(size = 2) + 
   geom_errorbar(aes(ymin = Min.Tempo, ymax = Max.Tempo))
 
-ggplot(aes(y=Tempo.total, x=factor(ID.Algoritmo)), data=r3) 
-  + geom_boxplot()
+#ggplot(aes(y=Tempo.total, x=factor(ID.Algoritmo)), data=r3) 
+#  + geom_boxplot()
 
 r3$nivel <- rep(1:3, each=5)
 agrupado <- ddply(r3, ~nivel, summarise, 

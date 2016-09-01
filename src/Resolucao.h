@@ -27,6 +27,7 @@ class Resolucao
 public:
     friend class ILS;
     friend class SA;
+    friend class WDJU;
 
     enum class Vizinhanca
     {
@@ -53,6 +54,9 @@ public:
 
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(const SA& sa, const ILS& ils);
+
+    std::unique_ptr<Solucao> gerarHorarioWDJU(long long timeout);
+    std::unique_ptr<Solucao> gerarHorarioWDJU(const WDJU& wdju);
 
     double gerarGrade() const;
 

@@ -25,6 +25,7 @@
 #include "Output.h"
 #include "SA.h"
 #include "ILS.h"
+#include "WDJU.h"
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
@@ -2371,7 +2372,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 
 bool Resolucao::
 gerarCamada(Solucao* sol, int camada, std::vector<Disciplina*> discs,
-            std::unordered_map<std::string, int>& creditos_alocados_prof)
+            std::unordered_map<std::string, int>& creditos_alocados_prof) 
 {
     auto num_discs = discs.size();
     auto num_disc_visitadas = 0u;
@@ -2400,7 +2401,7 @@ bool Resolucao::geraProfessorDisciplina(
     Disciplina* disc,
     int camada,
     std::unordered_map<std::string, int>& creditos_alocados_prof
-)
+) 
 {
     auto& profs = disc->professoresCapacitados;
     auto num_profs = profs.size();
@@ -2428,7 +2429,11 @@ bool Resolucao::geraProfessorDisciplina(
     return success;
 }
 
-bool Resolucao::geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada)
+bool Resolucao::geraAlocacao(
+    Solucao* sol, 
+    Disciplina* disc, 
+    Professor* prof, 
+    int camada)
 {
     //puts("aloc");
     //printf("camada: %d\n", camada);
@@ -2508,7 +2513,7 @@ bool Resolucao::geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, in
     return succ;
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria()
+std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria() 
 {
     auto solucaoRnd = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
                                                 perfisTamanho);
@@ -2569,7 +2574,7 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias2(int numSolucoes)
     return solucoes;
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull()
+std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull() 
 {
     std::unique_ptr<Solucao> s {};
     while (!s) {
@@ -2926,9 +2931,6 @@ bool Resolucao::insereSubTour(
 
 Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
 {
-    //puts("\n\nPMX");
-    //printf("pais: %g %gradeCache\n", pai1.fo, pai2.fo);
-
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
 
@@ -2941,22 +2943,15 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
             return n;
         }();
 
-        // int camada;
-        // do {
-        //     camada = Util::randomBetween(0, camadasTamanho);
-        // } while (camadas_visitadas[camada]);
-
         num_camadas_visitadas++;
         camadas_visitadas[camada] = true;
 
         auto filho = crossoverPMXCamada(pai1, pai2, camada);
         if (filho) {
-            //printf("filho: %g\n", filho->getFO());
             return filho;
         }
     }
 
-    //printf("Nenhum filho\n");
     return nullptr;
 }
 
@@ -3679,4 +3674,17 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
     } else {
         return std::make_unique<Solucao>(sol);
     }
+}
+
+
+std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(long long timeout)
+{
+    WDJU wdju{*this, timeout, 1'000, 0.2};
+    return gerarHorarioWDJU(wdju);
+}
+
+std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(const WDJU& wdju) 
+{
+    auto s_inicial = gerarSolucaoAleatoriaNotNull();
+    return wdju.gerar_horario(*s_inicial);
 }
