@@ -14,12 +14,12 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
     int jump_height{0};
     double jump_factor{0.05};
 
-    auto comeco = Util::now();
     auto s_best = std::make_unique<Solucao>(solucao);
     auto s_atual = std::make_unique<Solucao>(solucao);
     std::vector<double> history{};
     auto iter = 0;
 
+    auto comeco = Util::now();
     while (Util::chronoDiff(Util::now(), comeco) < timeout_) {
         auto viz = gerar_vizinho(*s_atual);
         if (viz->getFO() > s_atual->getFO() - jump_height) {
@@ -27,10 +27,13 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
             jump_height--;
             s_atual = move(viz);
 
-            if (viz->getFO() > s_best->getFO()) {
+            if (s_atual->getFO() > s_best->getFO()) {
+                printf("Melhoria: %d\n", s_atual->getFO());
+
                 s_best = std::make_unique<Solucao>(*s_atual);
-                jump_height = 0;
+
                 history.push_back(jump_factor);
+                jump_height = 0;
                 jump_factor = next_jump(history);
             }
         } else {

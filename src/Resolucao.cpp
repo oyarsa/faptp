@@ -292,12 +292,13 @@ void Resolucao::carregarAlunoPerfis()
 
         std::vector<Disciplina*> aprovadas;
         const auto& restantes = alunoPerfil->restante;
-        std::remove_copy_if(begin(disciplinas), end(disciplinas), std::back_inserter(aprovadas),
-                            [&restantes](Disciplina* d) {
-                                return find_if(begin(restantes), end(restantes), [&d](const std::string& x) {
-                                                   return x == d->id;
-                                               }) != end(restantes);
-                            });
+        std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
+            [&restantes](Disciplina* d) {
+                return find_if(begin(restantes), end(restantes), 
+                    [&d](const std::string& x) {
+                        return x == d->id;
+                }) != end(restantes);
+        });
 
         auto& aprovadasNomes = alunoPerfil->aprovadas;
 

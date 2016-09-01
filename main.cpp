@@ -351,7 +351,7 @@ void teste_wdju()
         .tentativasMutacao(4)
     };
 
-    auto s = r.gerarHorarioWDJU(60'000);
+    auto s = r.gerarHorarioWDJU(1000);
 
     auto fo = s->getFO();
     auto tempo = Util::chronoDiff(Util::now(), antes);
