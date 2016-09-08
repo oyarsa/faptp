@@ -189,10 +189,12 @@ struct less<Solucao*>
 
 inline bool pd_equals(ProfessorDisciplina* lhs, ProfessorDisciplina* rhs)
 {
-    if (lhs == rhs)
+    if (lhs == rhs) {
         return true;
-    if (!lhs || !rhs)
+    }
+    if (!lhs || !rhs) {
         return false;
+    }
     return lhs->getDisciplina() == rhs->getDisciplina();
 }
 

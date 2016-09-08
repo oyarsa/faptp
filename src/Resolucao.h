@@ -322,8 +322,8 @@ private:
     Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
                                 int camadaCruz);
     Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
-                                  int camadaCruz);
-    Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2);
+                                  int camadaCruz) const;
+    Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2) const;
     Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes) const;
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;

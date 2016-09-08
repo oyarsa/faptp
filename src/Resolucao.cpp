@@ -3055,7 +3055,7 @@ Solucao* Resolucao::crossoverCicloCamada(
     const Solucao& pai1,
     const Solucao& pai2, 
     int camadaCruz
-)
+) const
 {
     auto tam_camada = dias_semana_util * blocosTamanho;
     std::vector<int> pos_visitados(tam_camada);
@@ -3066,18 +3066,21 @@ Solucao* Resolucao::crossoverCicloCamada(
     // Enquanto houverem posições não visitadas
     while (num_visitados < tam_camada) {
         // Escolhe aleatoriamente um ponto em pai1
-        int ponto;
-        do {
-            ponto = Util::randomBetween(0, tam_camada);
-        } while (pos_visitados[ponto]);
+        auto ponto = [&] {
+            int x;
+            do {
+                x = Util::randomBetween(0, tam_camada);
+            } while (pos_visitados[x]);
+            return x;
+        }();
 
         // Marca como vistado no novo ciclo
         pos_visitados[ponto] = ++num_ciclos;
         num_visitados++;
         // Encontra o valor referenciado
-        auto valor_inicial = pai1.horario->matriz[comeco_camada + ponto];
+        auto valor_inicial = pai1.horario->at(comeco_camada + ponto);
         // Enncontra o respectivo no outro pai
-        auto valpai2 = pai2.horario->matriz[comeco_camada + ponto];
+        auto valpai2 = pai2.horario->at(comeco_camada + ponto);
 
         // Se forem iguais, nem começa a procurar um ciclo
         if (pd_equals(valor_inicial, valpai2)) {
@@ -3094,7 +3097,7 @@ Solucao* Resolucao::crossoverCicloCamada(
                     continue;
                 }
 
-                auto curr_pd = pai1.horario->matriz[i + comeco_camada];
+                auto curr_pd = pai1.horario->at(comeco_camada + i);
                 if (pd_equals(curr_pd, valpai2)) {
                     ponto = i;
                     found = true;
@@ -3111,7 +3114,7 @@ Solucao* Resolucao::crossoverCicloCamada(
             num_visitados++;
 
             // Continua rodando até achar no pai2 um igual ao valor inicial do pai1
-        } while (pai2.horario->matriz[comeco_camada + ponto] != valor_inicial);
+        } while (pai2.horario->at(comeco_camada + ponto) != valor_inicial);
     }
 
     // Gera máscara inicial
@@ -3147,7 +3150,8 @@ Solucao* Resolucao::crossoverCicloCamada(
                 break;
         }
 
-        if (pd && !filho->horario->insert(dia, bloco, camada, pd)) {
+        auto ok = filho->horario->insert(dia, bloco, camada, pd);
+        if (!ok) {
             return nullptr;
         }
     }
@@ -3156,18 +3160,21 @@ Solucao* Resolucao::crossoverCicloCamada(
     return filho.release();
 }
 
-Solucao* Resolucao::crossoverCiclo(const Solucao& pai1, const Solucao& pai2)
+Solucao* Resolucao::crossoverCiclo(
+    const Solucao& pai1,
+    const Solucao& pai2
+) const
 {
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
 
     while (num_camadas_visitadas < camadasTamanho) {
         const auto camada = [&] {
-            int n {};
+            int x;
             do {
-                n = Util::randomBetween(0, camadasTamanho);
-            } while (camadas_visitadas[n]);
-            return n;
+                x = Util::randomBetween(0, camadasTamanho);
+            } while (camadas_visitadas[x]);
+            return x;
         }();
 
         num_camadas_visitadas++;
@@ -3680,7 +3687,7 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(long long timeout)
 {
-    WDJU wdju{*this, timeout, 1'000, 0.2};
+    WDJU wdju{*this, timeout, 10, 0.01};
     return gerarHorarioWDJU(wdju);
 }
 
