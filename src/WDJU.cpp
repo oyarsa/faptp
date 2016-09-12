@@ -12,7 +12,7 @@ WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
 std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
 {
     int jump_height{0};
-    double jump_factor{0.05};
+    double jump_factor{0.005};
 
     auto s_best = std::make_unique<Solucao>(solucao);
     auto s_atual = std::make_unique<Solucao>(solucao);
@@ -22,6 +22,8 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
     auto comeco = Util::now();
     while (Util::chronoDiff(Util::now(), comeco) < timeout_) {
         auto viz = gerar_vizinho(*s_atual);
+        printf("Jump: %d\n", jump_height);
+        printf("Fo: %d\n", viz->getFO());
         if (viz->getFO() > s_atual->getFO() - jump_height) {
             iter = 0;
             jump_height--;
@@ -52,7 +54,7 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
 double WDJU::next_jump(const std::vector<double>& history) const
 {
     if (history.empty() || Util::randomDouble() < 0.5) {
-        return 1 + Util::randomDouble() * (max_jump_factor_ - 1);
+        return Util::randomDouble() * max_jump_factor_;
     } else {
         return Util::randomChoice(history);
     }

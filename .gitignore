@@ -12,7 +12,7 @@ experimento/
 teste/
 *.DS_Store
 *.TMP
-.vscode/*
+**/.vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
