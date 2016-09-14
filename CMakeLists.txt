@@ -12,6 +12,7 @@ endif()
 
 
 set(FAPTP_FILES
+    src/main.cpp
     src/Aleatorio.cpp
     src/Aleatorio.h
     src/AlunoPerfil.cpp
@@ -73,7 +74,7 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4100 -D_CRT_SECURE_NO_WARNINGS")
 endif()
 
-add_executable(faptp ${FAPTP_FILES} main.cpp)
+add_executable(faptp ${FAPTP_FILES})
 if (MODELO)
   target_link_libraries(faptp modelo-grade-lib)
 endif()

@@ -1,0 +1,333 @@
+{
+    "alunoperfis":
+            [
+                {
+                    "id": "NOVO",
+                    "periodo": 1,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A1",
+                                "B",
+                                "C",
+                                "D",
+                                "A2",
+                                "E",
+                                "F"
+                            ],
+                    "turma": "A"
+                },
+                {
+                    "cursadas":
+                            [
+                                "B",
+                                "C",
+                                "D"
+                            ],
+                    "id": "PAU",
+                    "periodo": 2,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A1",
+                                "A2",
+                                "E",
+                                "F"
+                            ],
+                    "turma": "A"
+                },
+                {
+                    "cursadas":
+                            [
+                                "A1",
+                                "B",
+                                "C",
+                                "D"
+                            ],
+                    "id": "PASSOU",
+                    "periodo": 4,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A2",
+                                "E",
+                                "F"
+                            ],
+                    "turma": "B"
+                },
+                {
+                    "cursadas":
+                            [
+                                "C",
+                                "D",
+                                "E",
+                                "F"
+                            ],
+                    "id": "GRADE",
+                    "periodo": 3,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A1",
+                                "B",
+                                "A2"
+                            ],
+                    "turma": "A"
+                },
+                {
+                    "cursadas":
+                            [
+                                "A1",
+                                "B",
+                                "C",
+                                "D",
+                                "F"
+                            ],
+                    "id": "GRADE_PARCIAL",
+                    "periodo": 3,
+                    "peso": 1,
+                    "restantes":
+                            [
+                                "A2",
+                                "E"
+                            ],
+                    "turma": "B"
+                }
+            ],
+    "disciplinas":
+            [
+                {
+                    "capacidade": 10,
+                    "carga": 2,
+                    "curso": "C",
+                    "id": "A1",
+                    "nome": "A1",
+                    "periodo": 1,
+                    "turma": "B",
+                    "periodominimo" : 1
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 1,
+                    "curso": "C",
+                    "id": "B",
+                    "nome": "B",
+                    "periodo": 1,
+                    "turma": "A",
+                    "periodominimo" : 1
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 1,
+                    "curso": "C",
+                    "id": "C",
+                    "nome": "C",
+                    "periodo": 1,
+                    "turma": "B",
+                    "periodominimo" : 1
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 1,
+                    "curso": "C",
+                    "id": "D",
+                    "nome": "D",
+                    "periodo": 1,
+                    "turma": "B",
+                    "periodominimo" : 1
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 2,
+                    "curso": "C",
+                    "id": "A2",
+                    "nome": "A2",
+                    "periodo": 2,
+                    "prerequisitos":
+                            [
+                                "A1"
+                            ],
+                    "turma": "B",
+                    "periodominimo" : 2
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 2,
+                    "curso": "C",
+                    "equivalentes":
+                            [
+                                "F"
+                            ],
+                    "id": "E",
+                    "nome": "E",
+                    "periodo": 1,
+                    "turma": "A",
+                    "periodominimo" : 1
+                },
+                {
+                    "capacidade": 10,
+                    "carga": 2,
+                    "curso": "C",
+                    "id": "F",
+                    "nome": "F",
+                    "periodo": 2,
+                    "turma": "A",
+                    "periodominimo" : 2
+                }
+            ],
+    "professores":
+            [
+                {
+                    "competencias":
+                            [
+                                "A1",
+                                "A2"
+                            ],
+                    "disponibilidade": [
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0]
+                    ],
+                    "id": "P1",
+                    "nome": "P1"
+                },
+                {
+                    "competencias":
+                            [
+                                "B",
+                                "E",
+                                "F"
+                            ],
+                    "disponibilidade": [
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0]
+                    ],
+                    "id": "P2",
+                    "nome": "P2"
+                },
+                {
+                    "competencias":
+                            [
+                                "C",
+                                "D"
+                            ],
+                    "disponibilidade": [
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 0, 0]
+                    ],
+                    "id": "P3",
+                    "nome": "P3"
+                }
+            ],
+    "professordisciplinas": [
+        {
+            "id": "A1",
+            "professor": "P1",
+            "disciplina": "A1"
+        },
+        {
+            "id": "A2",
+            "professor": "P1",
+            "disciplina": "A2"
+        },
+        {
+            "id": "B",
+            "professor": "P2",
+            "disciplina": "B"
+        },
+        {
+            "id": "E",
+            "professor": "P2",
+            "disciplina": "E"
+        },
+        {
+            "id": "F",
+            "professor": "P2",
+            "disciplina": "F"
+        },
+        {
+            "id": "C",
+            "professor": "P3",
+            "disciplina": "C"
+        },
+        {
+            "id": "D",
+            "professor": "P3",
+            "disciplina": "D"
+        }
+    ],
+    "horario":
+            [
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "A1",
+                    "semana": 0
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "E",
+                    "semana": 0
+                },
+                {
+                    "camada": 0,
+                    "horario": 1,
+                    "professordisciplina": "B",
+                    "semana": 0
+                },
+                {
+                    "camada": 1,
+                    "horario": 1,
+                    "professordisciplina": "A2",
+                    "semana": 0
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "C",
+                    "semana": 2
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "E",
+                    "semana": 2
+                },
+                {
+                    "camada": 0,
+                    "horario": 1,
+                    "professordisciplina": "A1",
+                    "semana": 2
+                },
+                {
+                    "camada": 1,
+                    "horario": 1,
+                    "professordisciplina": "F",
+                    "semana": 2
+                },
+                {
+                    "camada": 0,
+                    "horario": 0,
+                    "professordisciplina": "D",
+                    "semana": 4
+                },
+                {
+                    "camada": 1,
+                    "horario": 0,
+                    "professordisciplina": "F",
+                    "semana": 4
+                },
+                {
+                    "camada": 1,
+                    "horario": 1,
+                    "professordisciplina": "A2",
+                    "semana": 4
+                }
+            ]
+}
