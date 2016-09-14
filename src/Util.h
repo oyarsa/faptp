@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include <gsl.h>
+#include "includes/gsl/gsl"
 
 namespace Util
 {

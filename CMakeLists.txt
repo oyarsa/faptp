@@ -50,6 +50,8 @@ set(FAPTP_FILES
     src/ILS.h
     src/WDJU.cpp
     src/WDJU.h
+    src/HySST.cpp
+    src/HySST.h
     )
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
