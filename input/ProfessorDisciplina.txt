@@ -1,7 +1,0 @@
-A1;P1;A1
-A2;P1;A2
-B;P2;B
-E;P2;E
-F;P2;F
-C;P3;C
-D;P3;D
