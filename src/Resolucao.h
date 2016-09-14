@@ -22,12 +22,15 @@
 #include "Aleatorio.h"
 #include "Configuracao.h"
 
+// forwardar declaration dos algoritmos: dependência circular entre eles
+// a Resolução (bad design, eu sei)
+class WDJU;
+class ILS;
+class SA;
+
 class Resolucao
 {
 public:
-    friend class ILS;
-    friend class SA;
-    friend class WDJU;
 
     enum class Vizinhanca
     {
@@ -75,6 +78,15 @@ public:
     // Converte a matriz tridimensional do horário em uma matriz bidimensional
     // de binários para o modelo
     std::vector<std::vector<char>> converteHorario(Solucao* pSolucao) const;
+
+    // Operadores de vizinhança
+    std::unique_ptr<Solucao> event_swap(const Solucao& sol) const;
+    std::unique_ptr<Solucao> event_move(const Solucao& sol) const;
+    std::unique_ptr<Solucao> resource_swap(const Solucao& sol) const;
+    std::unique_ptr<Solucao> resource_move(const Solucao& sol) const;
+    std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
+    std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
+
     /*
      Parâmetros da execução da solução
      */
@@ -256,14 +268,7 @@ private:
     std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade) const;
     void buscaLocal(std::unique_ptr<Grade>& grade) const;
     Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao) const;
-
-    // Operadores de vizinhança
-    std::unique_ptr<Solucao> event_swap(const Solucao& sol) const;
-    std::unique_ptr<Solucao> event_move(const Solucao& sol) const;
-    std::unique_ptr<Solucao> resource_swap(const Solucao& sol) const;
-    std::unique_ptr<Solucao> resource_move(const Solucao& sol) const;
-    std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
-    std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
+;
 
     /*
      * Helpers dos movimentos de resource

@@ -1,5 +1,5 @@
 #include "WDJU.h"
-#include <gsl_util.h>
+#include "includes/gsl/gsl"
 
 
 WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit, 

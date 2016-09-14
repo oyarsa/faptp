@@ -1,7 +1,7 @@
 #include <random>
 #include <chrono>
 
-#include <gsl.h>
+#include "includes/gsl/gsl"
 
 #include "Aleatorio.h"
 
