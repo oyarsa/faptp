@@ -38,10 +38,4 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
 - O projeto inclui muitas instâncias que violam as Guidelines. Modificações para conformar essas
   instâncias são bem-vindas. Commits que incluam códigos que não sigam as Guidelines estão sujeitos a discussão.
 
-## Resultados de Experimentos
-Vários experimentos já foram efetuados nesse projeto, mas os resultados foram
-movidos para outro repositório: https://github.com/oyarsa/experimentos-ic
-Os scripts para geração de configurações, análises estatíticas e geração de gráficos
-estão na pasta scripts/
-
 Copyright 2016 Italo Silva, Saulo Campos, Pedro Mázala  
