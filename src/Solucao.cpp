@@ -1,7 +1,7 @@
 #include <numeric>
 #include <functional>
 
-#include <gsl.h>
+#include "includes/gsl/gsl"
 
 #include "Solucao.h"
 #include "Aleatorio.h"
