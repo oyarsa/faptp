@@ -29,7 +29,7 @@ private:
     const int              max_level_;
     const std::vector<int> thresholds_;
 
-    const std::vector<Resolucao::Vizinhanca> heuristicas_mutacionais_{
+    const std::array<Resolucao::Vizinhanca, 6> heuristicas_mutacionais_{
         Resolucao::Vizinhanca::ES,
         Resolucao::Vizinhanca::EM,
         Resolucao::Vizinhanca::RS,
