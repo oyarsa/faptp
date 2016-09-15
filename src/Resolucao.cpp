@@ -26,6 +26,7 @@
 #include "SA.h"
 #include "ILS.h"
 #include "WDJU.h"
+#include "HySST.h"
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
@@ -3695,4 +3696,21 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(const WDJU& wdju)
 {
     auto s_inicial = gerarSolucaoAleatoriaNotNull();
     return wdju.gerar_horario(*s_inicial);
+}
+
+
+std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
+    long long tempo_total, 
+    long long tempo_mu, 
+    long long tempo_hc
+)
+{
+    HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5};
+    return gerarHorarioHySST(hysst);
+}
+
+std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(const HySST& hysst)
+{
+    auto s_inicial = gerarSolucaoAleatoriaNotNull();
+    return hysst.gerar_horario(*s_inicial);
 }

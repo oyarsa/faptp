@@ -6,8 +6,9 @@
 class HySST
 {
 public:
-    HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
-          long long tempo_hill, int max_level, int t_start, int t_step);
+    HySST(const Resolucao& res, long long tempo_total, 
+                    long long tempo_mutation, long long tempo_hill, 
+                    int max_level, int t_start, int t_step);
 
     std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
 

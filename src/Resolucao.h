@@ -27,6 +27,7 @@
 class WDJU;
 class ILS;
 class SA;
+class HySST;
 
 class Resolucao
 {
@@ -60,6 +61,10 @@ public:
 
     std::unique_ptr<Solucao> gerarHorarioWDJU(long long timeout);
     std::unique_ptr<Solucao> gerarHorarioWDJU(const WDJU& wdju);
+
+    std::unique_ptr<Solucao> gerarHorarioHySST(
+        long long tempo_total, long long tempo_mu, long long tempo_hc);
+    std::unique_ptr<Solucao> gerarHorarioHySST(const HySST& HySST);
 
     double gerarGrade() const;
 
