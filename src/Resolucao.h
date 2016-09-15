@@ -40,7 +40,9 @@ public:
         RS,
         RM,
         PR,
-        KM
+        KM,
+        HC_FI,
+        HC_EC
     };
 
     Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,

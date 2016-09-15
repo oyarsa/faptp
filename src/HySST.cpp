@@ -3,13 +3,15 @@
 #include "Resolucao.h"
 
 HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
-             long long tempo_hill, int max_level, int t_start, int t_step)
+             long long tempo_hill, int max_level, int t_start, int t_step,
+             int it_hc)
     : res_(res),
       tempo_total_(tempo_total),
       tempo_mutation_(tempo_mutation),
       tempo_hill_(tempo_hill),
       max_level_(max_level),
-      thresholds_(gen_thresholds(max_level, t_start, t_step)) {}
+      thresholds_(gen_thresholds(max_level, t_start, t_step)), 
+      it_hc_(it_hc) {}
 
 std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
 {
@@ -116,7 +118,34 @@ std::unique_ptr<Solucao> HySST::aplicar_heuristica(Resolucao::Vizinhanca llh,
         case Resolucao::Vizinhanca::EM: return res_.event_move(solucao);
         case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);
         case Resolucao::Vizinhanca::RM: return res_.resource_move(solucao);
-        case Resolucao::Vizinhanca::KM: return res_.kempe_move(solucao);
+        case Resolucao::Vizinhanca::HC_FI: return first_improvement(solucao);
+        case Resolucao::Vizinhanca::HC_EC: return ejection_chains(solucao);
         default: return std::make_unique<Solucao>(solucao);
     }
+}
+
+std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
+{
+    auto s = std::make_unique<Solucao>(solucao);
+
+    for (auto it = 0; it < it_hc_;) {
+        auto s_viz = [&] {
+            if (Util::randomDouble() < 0.5) {
+                return res_.permute_resources(*s);
+            } else {
+                return res_.kempe_move(*s);
+            }
+        }();
+
+        if (s_viz->getFO() > s->getFO()) {
+            s = std::move(s_viz);
+        }
+    }
+
+    return s;
+}
+
+std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
+{
+    return nullptr;
 }
