@@ -22,14 +22,15 @@ Horario& Horario::operator=(const Horario& outro)
     return *this;
 }
 
-bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId)
+bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) const
 {
     int positionCamada {};
 
     for (int i = 0; i < camadasTamanho; i++) {
 
         positionCamada = getPosition(pDia, pBloco, i);
-        if (matriz[positionCamada] != NULL && matriz[positionCamada]->professor->getId() == professorId) {
+        if (matriz[positionCamada] 
+            && matriz[positionCamada]->professor->getId() == professorId) {
 
             if (verbose) {
                 std::cout << "\nColisao[" << professorId << " || "
@@ -50,6 +51,31 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
         return true;
     }
     return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
+}
+
+
+bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) const
+{
+    if (!pd) {
+        return true;
+    }
+
+    auto pos = getPosition(dia, bloco, camada);
+    auto disc = pd->disciplina;
+
+    auto creditos = creditos_alocados_.find(disc->id);
+    if (creditos != end(creditos_alocados_) && creditos->second >= disc->cargaHoraria) {
+        return false;
+    }
+
+    if (!matriz[pos]) {
+        auto isProfAloc = colisaoProfessorAlocado(dia, bloco, pd->professor->getId());
+        if (!isProfAloc) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force)
