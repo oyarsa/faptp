@@ -3705,7 +3705,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
     long long tempo_hc
 )
 {
-    HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5};
+    HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5, 10};
     return gerarHorarioHySST(hysst);
 }
 
