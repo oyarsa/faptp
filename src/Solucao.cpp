@@ -42,6 +42,11 @@ Solucao::~Solucao()
     }
 }
 
+std::unique_ptr<Solucao> Solucao::clone() const
+{
+    return std::make_unique<Solucao>(*this);
+}
+
 void Solucao::insertGrade(Grade* grade)
 {
     auto& alvoInsercao = grades[grade->aluno->id];

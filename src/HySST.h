@@ -2,6 +2,9 @@
 
 #include "Resolucao.h"
 #include <algorithm>
+#include <optional/optional.hpp>
+
+using std::experimental::optional;
 
 class HySST
 {
@@ -23,7 +26,17 @@ private:
     std::unique_ptr<Solucao> aplicar_heuristica(Resolucao::Vizinhanca llh, 
                                                 const Solucao& solucao) const;
     std::unique_ptr<Solucao> first_improvement(const Solucao& solucao) const;
+
     std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
+    optional<std::tuple<int, int, int>> ejection_move(Solucao& solucao,
+                                           std::tuple<int, int, int > place) const;
+    std::tuple<int, int, int> pick_place(const Solucao& solucao) const;
+    optional<std::tuple<int, int, int>> 
+        pick_event_and_move(Solucao& solucao, std::tuple<int, int, int> slot) const;
+    std::vector<ProfessorDisciplina*> list_all_liebhabers(
+        const Solucao& solucao, std::tuple<int, int, int> slot) const;
+    optional<std::tuple<int, int, int>> choose_and_move(
+        Solucao& solucao, const std::vector<ProfessorDisciplina*>& liebhabers) const;
 
     const Resolucao&       res_;
     const long long        tempo_total_;

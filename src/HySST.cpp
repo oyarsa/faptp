@@ -2,6 +2,8 @@
 
 #include "Resolucao.h"
 
+using std::experimental::nullopt;
+
 HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
              long long tempo_hill, int max_level, int t_start, int t_step,
              int it_hc)
@@ -147,5 +149,62 @@ std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
 
 std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
 {
-    return nullptr;
+    auto s = std::make_unique<Solucao>(solucao);
+    auto slot = pick_place(*s);
+
+    for (auto i = 0; i < it_hc_; i++) {
+        auto cur = s->clone();
+        if (auto next = ejection_move(*cur, slot)) {
+            slot = *next;
+            s = move(cur);
+        } else {
+            slot = pick_place(*s);
+        }
+    }
+
+    return s;
+}
+
+optional<std::tuple<int, int, int>> HySST::ejection_move(
+    Solucao& solucao, 
+    std::tuple<int, int, int> place
+) const
+{
+    auto slot = pick_event_and_move(solucao, place);
+    if (!slot) {
+        return nullopt;
+    }
+
+    auto liebhabers = list_all_liebhabers(solucao, *slot);
+    return choose_and_move(solucao, liebhabers);
+}
+
+
+std::tuple<int, int, int> HySST::pick_place(const Solucao& solucao) const
+{
+    
+}
+
+optional<std::tuple<int, int, int>> HySST::pick_event_and_move(
+    Solucao& solucao, 
+    std::tuple<int, int, int> slot
+) const
+{
+    
+}
+
+std::vector<ProfessorDisciplina*> HySST::list_all_liebhabers(
+    const Solucao& solucao, 
+    std::tuple<int, int, int> slot
+) const
+{
+    
+}
+
+optional<std::tuple<int, int, int>> HySST::choose_and_move(
+    Solucao& solucao, 
+    const std::vector<ProfessorDisciplina*>& liebhabers
+) const
+{
+    
 }

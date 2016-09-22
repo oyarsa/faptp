@@ -11,10 +11,12 @@ class Solucao
     friend class Resolucao;
     friend class Output;
 public:
+
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
     Solucao(const Solucao& outro);
     virtual ~Solucao();
 
+    std::unique_ptr<Solucao> clone() const;
     void insertGrade(Grade* grade);
 
     void calculaFO();
