@@ -23,8 +23,12 @@ public:
     int getFO();
     int getFO() const;
 
+    const Horario& getHorario() const;
+    Horario& getHorario();
+
     std::size_t getHash();
     std::unordered_map<int, std::string> camada_periodo;
+    std::unordered_map<std::string, ProfessorDisciplina*> alocacoes;
 private:
     int id;
     int blocosTamanho;

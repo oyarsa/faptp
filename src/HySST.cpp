@@ -3,6 +3,7 @@
 #include "Resolucao.h"
 
 using std::experimental::nullopt;
+using std::experimental::make_optional;
 
 HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
              long long tempo_hill, int max_level, int t_start, int t_step,
@@ -182,7 +183,27 @@ optional<std::tuple<int, int, int>> HySST::ejection_move(
 
 std::tuple<int, int, int> HySST::pick_place(const Solucao& solucao) const
 {
-    
+    auto num_slots_percorridos = 0u;
+    auto num_slots = solucao.getHorario().getMatriz().size() / 2;
+    std::vector<bool> slots_percorridos(num_slots, false);
+
+    while (num_slots_percorridos < num_slots) {
+        auto slot = [&] {
+            int s;
+            do {
+                s = Util::randomBetween(0, num_slots);
+            } while (slots_percorridos[s]);
+            return s;
+        }();
+        num_slots_percorridos++;
+        slots_percorridos[slot] = true;
+
+        if (!solucao.getHorario().at(2*slot) && !solucao.getHorario().at(2*slot+1)) {
+            return solucao.getHorario().getCoords(2*slot);
+        }
+    }
+
+    return {0, 0, 0};
 }
 
 optional<std::tuple<int, int, int>> HySST::pick_event_and_move(
@@ -190,7 +211,25 @@ optional<std::tuple<int, int, int>> HySST::pick_event_and_move(
     std::tuple<int, int, int> slot
 ) const
 {
-    
+    auto horario = solucao.getHorario();
+
+    int dia, bloco, camada;
+    std::tie(dia, bloco, camada) = slot;
+
+    auto novo_dia = Util::randomBetween(0, dias_semana_util);
+    auto novo_bloco = Util::randomBetween(0, res_.getBlocosTamanho());
+
+    auto pd1 = horario.at(novo_dia, novo_bloco, camada);
+    auto pd2 = horario.at(novo_dia, novo_bloco+1, camada);
+    horario.clearSlot(novo_dia, novo_bloco, camada);
+    horario.clearSlot(novo_dia, novo_bloco+1, camada);
+
+    if (horario.insert(dia, bloco, camada, pd1) 
+        && horario.insert(dia, bloco+1, camada, pd2)) {
+        return std::make_tuple(novo_dia, novo_bloco, camada);
+    } else {
+        return nullopt;
+    }
 }
 
 std::vector<ProfessorDisciplina*> HySST::list_all_liebhabers(
@@ -198,7 +237,23 @@ std::vector<ProfessorDisciplina*> HySST::list_all_liebhabers(
     std::tuple<int, int, int> slot
 ) const
 {
-    
+    int dia, bloco, camada;
+    std::tie(dia, bloco, camada) = slot;
+
+    auto periodo = solucao.camada_periodo.at(camada);
+    auto disciplinas = res_.getPeriodoXDisciplinas().at(periodo);
+
+    std::vector<ProfessorDisciplina*> liebhabers;
+
+    for (auto d : disciplinas) {
+        auto pd = solucao.alocacoes.at(d->getId());
+        auto factivel =solucao.getHorario().isViable(dia, bloco, camada, pd);
+        if (factivel) {
+            liebhabers.push_back(pd);
+        }
+    }
+
+    return liebhabers;
 }
 
 optional<std::tuple<int, int, int>> HySST::choose_and_move(
@@ -206,5 +261,5 @@ optional<std::tuple<int, int, int>> HySST::choose_and_move(
     const std::vector<ProfessorDisciplina*>& liebhabers
 ) const
 {
-    
+    return {};
 }

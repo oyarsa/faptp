@@ -54,6 +54,10 @@ public:
     double start();
     double start(bool input);
 
+    int getBlocosTamanho() const;
+    const std::map<std::string, std::vector<Disciplina*>>&
+        getPeriodoXDisciplinas() const;
+
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();
     Solucao* gerarHorarioAG3();

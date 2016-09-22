@@ -326,6 +326,16 @@ double Resolucao::start(bool input)
     return gerarHorarioAG()->getFO();
 }
 
+int Resolucao::getBlocosTamanho() const
+{
+    return blocosTamanho;
+}
+
+const std::map<std::string, std::vector<Disciplina*>>& Resolucao::getPeriodoXDisciplinas() const
+{
+    return periodoXdisciplina;
+}
+
 void Resolucao::carregarSolucao()
 {
     const auto& jsonHorario = jsonRoot["horario"];
@@ -2506,11 +2516,9 @@ bool Resolucao::geraAlocacao(
     }
 
     auto succ = creditos_alocados_disc == disc->cargaHoraria;
-    if (!succ) {
-        //puts("Problema Aloc");
-        //printf("cred: %d aloc: %d\n", disc->cargaHoraria, creditos_alocados_disc);
+    if (succ) {
+        sol->alocacoes[disc->getId()] = pd;
     }
-    //puts("");
 
     return succ;
 }

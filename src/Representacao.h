@@ -19,8 +19,10 @@ public:
 
     int getPosition(int pDia, int pBloco, int pCamada) const;
 
-    ProfessorDisciplina* at(int pDia, int pBloco, int pCamada);
-    ProfessorDisciplina* at(int position);
+    ProfessorDisciplina* at(int pDia, int pBloco, int pCamada) const;
+    ProfessorDisciplina* at(int position) const;
+
+    const std::vector<ProfessorDisciplina*>& getMatriz() const;
 
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);

@@ -43,14 +43,19 @@ void Representacao::initMatriz()
     matriz.resize(size, nullptr);
 }
 
-ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada)
+ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) const
 {
     return at(getPosition(pDia, pBloco, pCamada));
 }
 
-ProfessorDisciplina* Representacao::at(int position)
+ProfessorDisciplina* Representacao::at(int position) const
 {
     return matriz[position];
+}
+
+const std::vector<ProfessorDisciplina*>& Representacao::getMatriz() const
+{
+    return matriz;
 }
 
 bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)

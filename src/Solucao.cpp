@@ -81,6 +81,16 @@ int Solucao::getFO() const
     return fo;
 }
 
+const Horario& Solucao::getHorario() const
+{
+    return *horario;
+}
+
+Horario& Solucao::getHorario()
+{
+    return *horario;
+}
+
 std::size_t Solucao::getHash()
 {
     return horario->getHash();
