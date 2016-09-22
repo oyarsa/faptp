@@ -10,8 +10,16 @@ if (MODELO)
     add_definitions(-DIL_STD -DMODELO)
 endif()
 
+include_directories(include)
+
+set(FAPTP_LIBS
+    include/json/json.h
+    include/gsl/gsl
+    include/optional/optional.hpp
+    )
 
 set(FAPTP_FILES
+    include/jsoncpp.cpp
     src/main.cpp
     src/Aleatorio.cpp
     src/Aleatorio.h
@@ -42,7 +50,6 @@ set(FAPTP_FILES
     src/UUID.h
     src/parametros.cpp
     src/parametros.h
-    src/includes/jsoncpp.cpp
     src/Algorithms.h
     src/Configuracao.h
     src/SA.cpp

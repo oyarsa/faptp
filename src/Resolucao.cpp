@@ -9,7 +9,7 @@
 #include <stack>
 #include <set>
 
-#include "includes/gsl/gsl"
+#include "gsl/gsl"
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>

@@ -11,7 +11,7 @@
     #include <modelo-grade/curso.h>
 #endif
 
-#include "includes/json/json.h"
+#include "json/json.h"
 
 #include "Algorithms.h"
 #include "Professor.h"
