@@ -1,6 +1,7 @@
 #include "HySST.h"
 
 #include "Resolucao.h"
+#include "Timer.h"
 
 using std::experimental::nullopt;
 using std::experimental::make_optional;
@@ -18,19 +19,18 @@ HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutati
 
 std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
 {
-    auto t_inicio = Util::now();
+    auto t_total = Timer();
     auto s_atual = std::make_unique<Solucao>(s_inicial);
     auto s_best = std::make_unique<Solucao>(s_inicial);
     auto level = 0;
 
-    while (Util::chronoDiff(Util::now(), t_inicio) < tempo_total_) {
+    while (t_total.elapsed() < tempo_total_) {
         auto s_stage_best = std::make_unique<Solucao>(*s_atual);
         auto s_stage_start = std::make_unique<Solucao>(*s_atual);
         auto eps = thresholds_[level];
 
-        auto t_mu_inicio = Util::now();
-        while (Util::chronoDiff(Util::now(), t_mu_inicio) < tempo_mutation_
-               && Util::chronoDiff(Util::now(), t_inicio) < tempo_total_) {
+        auto t_mu = Timer();
+        while (t_mu.elapsed() < tempo_mutation_ && t_total.elapsed() < tempo_total_) {
             auto llh = Util::randomChoice(heuristicas_mutacionais_);
             auto s_viz = aplicar_heuristica(llh, *s_atual);
 
@@ -45,10 +45,9 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
             }
         }
 
-        auto t_hc_inicio = Util::now();
+        auto t_hc = Timer();
         if (s_stage_best->getFO() <= s_stage_start->getFO()) {
-            while (Util::chronoDiff(Util::now(), t_hc_inicio) < tempo_hill_
-                   && Util::chronoDiff(Util::now(), t_inicio) < tempo_total_) {
+            while (t_hc.elapsed() < tempo_hill_ && t_total.elapsed() < tempo_total_) {
                 auto llh = Util::randomChoice(heuristicas_hill_);
                 auto s_viz = aplicar_heuristica(llh, *s_atual);
 

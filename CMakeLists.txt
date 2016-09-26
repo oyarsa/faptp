@@ -60,6 +60,7 @@ set(FAPTP_FILES
     src/WDJU.h
     src/HySST.cpp
     src/HySST.h
+    src/Timer.h
     )
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
