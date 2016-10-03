@@ -14,7 +14,8 @@ public:
     Horario& operator=(const Horario& outro);
     virtual ~Horario();
 
-    bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId);
+    bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) const;
+    bool isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) const;
 
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) override;
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) override;

@@ -1,7 +1,7 @@
 #include <numeric>
 #include <functional>
 
-#include <gsl.h>
+#include "gsl/gsl"
 
 #include "Solucao.h"
 #include "Aleatorio.h"
@@ -42,6 +42,11 @@ Solucao::~Solucao()
     }
 }
 
+std::unique_ptr<Solucao> Solucao::clone() const
+{
+    return std::make_unique<Solucao>(*this);
+}
+
 void Solucao::insertGrade(Grade* grade)
 {
     auto& alvoInsercao = grades[grade->aluno->id];
@@ -74,6 +79,16 @@ int Solucao::getFO() const
         throw std::runtime_error{"FO não calculada"};
     }
     return fo;
+}
+
+const Horario& Solucao::getHorario() const
+{
+    return *horario;
+}
+
+Horario& Solucao::getHorario()
+{
+    return *horario;
 }
 
 std::size_t Solucao::getHash()

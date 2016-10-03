@@ -11,7 +11,7 @@
     #include <modelo-grade/curso.h>
 #endif
 
-#include "includes/json/json.h"
+#include "json/json.h"
 
 #include "Algorithms.h"
 #include "Professor.h"
@@ -27,6 +27,7 @@
 class WDJU;
 class ILS;
 class SA;
+class HySST;
 
 class Resolucao
 {
@@ -39,7 +40,9 @@ public:
         RS,
         RM,
         PR,
-        KM
+        KM,
+        HC_FI,
+        HC_EC
     };
 
     Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,
@@ -51,6 +54,10 @@ public:
     double start();
     double start(bool input);
 
+    int getBlocosTamanho() const;
+    const std::map<std::string, std::vector<Disciplina*>>&
+        getPeriodoXDisciplinas() const;
+
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();
     Solucao* gerarHorarioAG3();
@@ -60,6 +67,10 @@ public:
 
     std::unique_ptr<Solucao> gerarHorarioWDJU(long long timeout);
     std::unique_ptr<Solucao> gerarHorarioWDJU(const WDJU& wdju);
+
+    std::unique_ptr<Solucao> gerarHorarioHySST(
+        long long tempo_total, long long tempo_mu, long long tempo_hc);
+    std::unique_ptr<Solucao> gerarHorarioHySST(const HySST& HySST);
 
     double gerarGrade() const;
 
