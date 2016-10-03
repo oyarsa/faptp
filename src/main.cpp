@@ -11,6 +11,7 @@
 #include "Output.h"
 #include "Configuracao.h"
 #include "Util.h"
+#include "Timer.h"
 
 /*
  * PARÂMETROS DE CONFIGURAÇÃO *
@@ -36,7 +37,7 @@ void semArgumentos()
     experimento = false;
 
     Resolucao r {Configuracao()
-            .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+            .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
             .populacaoInicial(20)
             .porcentagemCruzamentos(30) // %
             .numMaximoIteracoesSemEvolucaoGRASP(15)
@@ -86,7 +87,7 @@ void semArgumentos()
 void teste()
 {
     Resolucao r {Configuracao()
-            .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+            .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
             .populacaoInicial(1)
             .numIteracoes(0)
             .porcentagemSolucoesAleatorias(0) // %
@@ -322,7 +323,7 @@ void teste_sa_ils()
     auto antes = Util::now();
 
     Resolucao r{Configuracao()
-        .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+        .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
         .camadaTamanho(input_all_json.camadasTamanho)
         .perfilTamanho(input_all_json.perfilTamanho)
         .tentativasMutacao(4)
@@ -345,7 +346,7 @@ void teste_wdju()
     auto antes = Util::now();
 
     Resolucao r{Configuracao()
-        .arquivoEntrada(Util::join_path({"res"}, "input.all.json"))
+        .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
         .camadaTamanho(input_all_json.camadasTamanho)
         .perfilTamanho(input_all_json.perfilTamanho)
         .tentativasMutacao(4)
@@ -355,6 +356,28 @@ void teste_wdju()
 
     auto fo = s->getFO();
     auto tempo = Util::chronoDiff(Util::now(), antes);
+
+    std::cout << "\nResultado:" << fo << "\n";
+    std::cout << "Tempo: " << tempo << "\n";
+
+    auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
+    Output::write(s.get(), savePath);
+}
+
+void teste_hysst()
+{
+    Timer t;
+    Resolucao r{Configuracao()
+        .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+        .tentativasMutacao(4)
+    };
+
+    auto s = r.gerarHorarioHySST(30'000, 100, 100);
+
+    auto fo = s->getFO();
+    auto tempo = t.elapsed();
 
     std::cout << "\nResultado:" << fo << "\n";
     std::cout << "Tempo: " << tempo << "\n";
@@ -381,7 +404,8 @@ int main(int argc, char* argv[])
     } else {
         //semArgumentos();
         //teste_sa_ils();
-        teste_wdju();
+        //teste_wdju();
+        teste_hysst();
     }
 }
 

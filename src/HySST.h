@@ -26,15 +26,25 @@ private:
     using Event = std::pair<Time_slot, ProfessorDisciplina*>;
 
     static std::vector<int> gen_thresholds(int max_level, int t_start, int t_step);
+
+    Resolucao::Vizinhanca choose_hill() const;
+
+    Resolucao::Vizinhanca choose_mut() const;
+
     std::unique_ptr<Solucao> aplicar_heuristica(Resolucao::Vizinhanca llh, 
                                                 const Solucao& solucao) const;
     std::unique_ptr<Solucao> first_improvement(const Solucao& solucao) const;
 
     std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
+
     ex::optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
+
     Time_slot pick_place(const Solucao& solucao) const;
+
     ex::optional<Time_slot> pick_event_and_move(Solucao& solucao, Time_slot slot) const;
+
     std::vector<Event> list_all_liebhabers(const Solucao& solucao, Time_slot slot) const;
+
     ex::optional<Time_slot> choose_and_move(
         Solucao& solucao, const std::vector<Event>& liebhabers, 
         Time_slot dest) const;

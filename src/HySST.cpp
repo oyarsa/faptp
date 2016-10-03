@@ -28,13 +28,14 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
 
         auto t_mu = Timer();
         while (t_mu.elapsed() < tempo_mutation_ && t_total.elapsed() < tempo_total_) {
-            auto llh = Util::randomChoice(heuristicas_mutacionais_);
+            auto llh = choose_mut();
             auto s_viz = aplicar_heuristica(llh, *s_atual);
 
-            if (s_viz->getFO() > s_stage_best->getFO()) {
+            if (s_viz->getFO() > s_best->getFO()) {
                 s_best = std::make_unique<Solucao>(*s_viz);
+                printf("Nova melhor (mut): %d\n", s_best->getFO());
             }
-            if (s_viz->getFO() + eps > s_best->getFO()) {
+            if (s_viz->getFO() + eps > s_stage_best->getFO()) {
                 s_stage_best = std::make_unique<Solucao>(*s_viz);
             }
             if (s_viz->getFO() + eps > s_atual->getFO()) {
@@ -45,14 +46,17 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
         auto t_hc = Timer();
         if (s_stage_best->getFO() <= s_stage_start->getFO()) {
             while (t_hc.elapsed() < tempo_hill_ && t_total.elapsed() < tempo_total_) {
-                auto llh = Util::randomChoice(heuristicas_hill_);
+
+                auto llh = choose_hill();
                 auto s_viz = aplicar_heuristica(llh, *s_atual);
 
                 if (s_viz->getFO() > s_stage_best->getFO()) {
                     s_best = std::make_unique<Solucao>(*s_viz);
+                    printf("Nova melhor stage (hill): %d\n", s_best->getFO());
                 }
                 if (s_viz->getFO() > s_best->getFO()) {
                     s_stage_best = std::make_unique<Solucao>(*s_viz);
+                    printf("Nova melhor (hill): %d\n", s_best->getFO());
                 }
                 s_atual = std::move(s_viz);
             }
@@ -127,7 +131,7 @@ std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
 {
     auto s = std::make_unique<Solucao>(solucao);
 
-    for (auto it = 0; it < it_hc_;) {
+    for (auto i = 0; i < it_hc_; i++) {
         auto s_viz = [&] {
             if (Util::randomDouble() < 0.5) {
                 return res_.permute_resources(*s);
@@ -214,7 +218,7 @@ ex::optional<HySST::Time_slot> HySST::pick_event_and_move(
     std::tie(dia, bloco, camada) = slot;
 
     auto novo_dia = Util::randomBetween(0, dias_semana_util);
-    auto novo_bloco = Util::randomBetween(0, res_.getBlocosTamanho());
+    auto novo_bloco = 2 * Util::randomBetween(0, res_.getBlocosTamanho()/2);
 
     auto pd1 = horario.at(novo_dia, novo_bloco, camada);
     auto pd2 = horario.at(novo_dia, novo_bloco+1, camada);
@@ -279,4 +283,23 @@ ex::optional<HySST::Time_slot> HySST::choose_and_move(
     } else {
         return ex::nullopt;
     }
+}
+
+
+Resolucao::Vizinhanca HySST::choose_hill() const
+{
+    /* First Improvement possui performance muito ruim
+    auto llh = Util::randomChoice(heuristicas_hill_);
+    if (llh == Resolucao::Vizinhanca::HC_FI) {
+    puts("first");
+    } else {
+    puts("ejec");
+    }
+    */
+    return Resolucao::Vizinhanca::HC_EC;
+}
+
+Resolucao::Vizinhanca HySST::choose_mut() const
+{
+    return Util::randomChoice(heuristicas_mutacionais_);
 }

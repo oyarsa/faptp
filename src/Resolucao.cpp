@@ -3236,7 +3236,6 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
 
         if (swap_blocos(*viz, {d_e1, b_e1}, {d_e2, b_e2}, camada)) {
             gerarGrade(viz.get());
-            puts("nice es");
             return viz;
         }
     }
@@ -3279,7 +3278,6 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
                 auto ok_e2 = !e2 || viz->horario->insert(d, b + 1, camada, e2);
 
                 if (ok_e1 && ok_e2) {
-                    puts("nice em");
                     gerarGrade(viz.get());
                     return viz;
                 }
@@ -3323,7 +3321,6 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Reinsere com a nova alocação
         auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
         if (ok) {
-            puts("nice rm");
             gerarGrade(viz.get());
             return viz;
         }
@@ -3380,7 +3377,6 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
         auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
         if (ok_e2) {
-            puts("nice rs");
             gerarGrade(viz.get());
             return viz;
         }
@@ -3393,8 +3389,8 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
 std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 {
     // Número máximo de disciplinas por restrições de tempo 
-    // (7! = 5040, grande o suficiente)
-    constexpr auto max_per = 7;
+    // (5! = 120, grande o suficiente)
+    constexpr auto max_per = 5;
     const auto aulas_semana = blocosTamanho * dias_semana_util;
 
     auto num_disc_per = std::min(max_per, Util::randomBetween(
@@ -3452,11 +3448,6 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 
     // O resultado é a melhor solução dentre as permutações
     auto& best = *std::max_element(begin(vizinhos), end(vizinhos), std::less<>{});
-    if (best->getFO() > sol.getFO()) {
-        puts("nice pr");
-    } else {
-//        puts("ops pr");
-    }
     return move(best);
 }
 
@@ -3466,8 +3457,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     auto d_e1 = Util::randomBetween(0, dias_semana_util);
     auto b_e1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
-    int d_e2{};
-    int b_e2{};
+    int d_e2, b_e2;
     std::tie(d_e2, b_e2) = [&] {
         int d{};
         int b{};
@@ -3523,11 +3513,6 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 
     // Encontra solução com melhor FO
     auto& best = *max_element(begin(solucoes), end(solucoes), std::less<>{});
-    if (best->getFO() > sol.getFO()) {
-        puts("nice km");
-    } else {
-        //puts("ops km");
-    }
     return move(best);
 }
 
@@ -3713,7 +3698,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
     long long tempo_hc
 )
 {
-    HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5, 10};
+    HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5, 5};
     return gerarHorarioHySST(hysst);
 }
 
