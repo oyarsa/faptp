@@ -176,11 +176,12 @@ ex::optional<HySST::Time_slot> HySST::ejection_move(
     return choose_and_move(solucao, liebhabers, *slot);
 }
 
-
 HySST::Time_slot HySST::pick_place(const Solucao& solucao) const
 {
+    const auto& horario = solucao.getHorario();
+
     auto num_slots_percorridos = 0u;
-    auto num_slots = solucao.getHorario().getMatriz().size() / 2;
+    auto num_slots = horario.getMatriz().size() / 2;
     std::vector<bool> slots_percorridos(num_slots, false);
 
     while (num_slots_percorridos < num_slots) {
@@ -194,8 +195,8 @@ HySST::Time_slot HySST::pick_place(const Solucao& solucao) const
         num_slots_percorridos++;
         slots_percorridos[slot] = true;
 
-        if (!solucao.getHorario().at(2*slot) && !solucao.getHorario().at(2*slot+1)) {
-            return solucao.getHorario().getCoords(2*slot);
+        if (!horario.at(2*slot) && !horario.at(2*slot+1)) {
+            return horario.getCoords(2*slot);
         }
     }
 
