@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <optional/optional.hpp>
 
-using std::experimental::optional;
+namespace ex = std::experimental;
 
 class HySST
 {
@@ -22,21 +22,22 @@ public:
     int max_level() const;
 
 private:
+    using Time_slot = std::tuple<int, int, int>;
+    using Event = std::pair<Time_slot, ProfessorDisciplina*>;
+
     static std::vector<int> gen_thresholds(int max_level, int t_start, int t_step);
     std::unique_ptr<Solucao> aplicar_heuristica(Resolucao::Vizinhanca llh, 
                                                 const Solucao& solucao) const;
     std::unique_ptr<Solucao> first_improvement(const Solucao& solucao) const;
 
     std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
-    optional<std::tuple<int, int, int>> ejection_move(Solucao& solucao,
-                                           std::tuple<int, int, int > place) const;
-    std::tuple<int, int, int> pick_place(const Solucao& solucao) const;
-    optional<std::tuple<int, int, int>> 
-        pick_event_and_move(Solucao& solucao, std::tuple<int, int, int> slot) const;
-    std::vector<ProfessorDisciplina*> list_all_liebhabers(
-        const Solucao& solucao, std::tuple<int, int, int> slot) const;
-    optional<std::tuple<int, int, int>> choose_and_move(
-        Solucao& solucao, const std::vector<ProfessorDisciplina*>& liebhabers) const;
+    ex::optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
+    Time_slot pick_place(const Solucao& solucao) const;
+    ex::optional<Time_slot> pick_event_and_move(Solucao& solucao, Time_slot slot) const;
+    std::vector<Event> list_all_liebhabers(const Solucao& solucao, Time_slot slot) const;
+    ex::optional<Time_slot> choose_and_move(
+        Solucao& solucao, const std::vector<Event>& liebhabers, 
+        Time_slot dest) const;
 
     const Resolucao&       res_;
     const long long        tempo_total_;

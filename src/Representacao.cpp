@@ -158,3 +158,8 @@ int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iter
     return x;
 }
 
+
+int Representacao::getBlocosTamanho() const
+{
+    return blocosTamanho;
+}

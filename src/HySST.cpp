@@ -3,9 +3,6 @@
 #include "Resolucao.h"
 #include "Timer.h"
 
-using std::experimental::nullopt;
-using std::experimental::make_optional;
-
 HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
              long long tempo_hill, int max_level, int t_start, int t_step,
              int it_hc)
@@ -149,7 +146,7 @@ std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
 
 std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
 {
-    auto s = std::make_unique<Solucao>(solucao);
+    auto s = solucao.clone();
     auto slot = pick_place(*s);
 
     for (auto i = 0; i < it_hc_; i++) {
@@ -165,22 +162,22 @@ std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
     return s;
 }
 
-optional<std::tuple<int, int, int>> HySST::ejection_move(
+ex::optional<HySST::Time_slot> HySST::ejection_move(
     Solucao& solucao, 
-    std::tuple<int, int, int> place
+    Time_slot place
 ) const
 {
     auto slot = pick_event_and_move(solucao, place);
     if (!slot) {
-        return nullopt;
+        return ex::nullopt;
     }
 
     auto liebhabers = list_all_liebhabers(solucao, *slot);
-    return choose_and_move(solucao, liebhabers);
+    return choose_and_move(solucao, liebhabers, *slot);
 }
 
 
-std::tuple<int, int, int> HySST::pick_place(const Solucao& solucao) const
+HySST::Time_slot HySST::pick_place(const Solucao& solucao) const
 {
     auto num_slots_percorridos = 0u;
     auto num_slots = solucao.getHorario().getMatriz().size() / 2;
@@ -205,12 +202,12 @@ std::tuple<int, int, int> HySST::pick_place(const Solucao& solucao) const
     return {0, 0, 0};
 }
 
-optional<std::tuple<int, int, int>> HySST::pick_event_and_move(
+ex::optional<HySST::Time_slot> HySST::pick_event_and_move(
     Solucao& solucao, 
-    std::tuple<int, int, int> slot
+    Time_slot slot
 ) const
 {
-    auto horario = solucao.getHorario();
+    auto& horario = solucao.getHorario();
 
     int dia, bloco, camada;
     std::tie(dia, bloco, camada) = slot;
@@ -227,38 +224,58 @@ optional<std::tuple<int, int, int>> HySST::pick_event_and_move(
         && horario.insert(dia, bloco+1, camada, pd2)) {
         return std::make_tuple(novo_dia, novo_bloco, camada);
     } else {
-        return nullopt;
+        return ex::nullopt;
     }
 }
 
-std::vector<ProfessorDisciplina*> HySST::list_all_liebhabers(
+std::vector<HySST::Event> HySST::list_all_liebhabers(
     const Solucao& solucao, 
-    std::tuple<int, int, int> slot
+    Time_slot slot
 ) const
 {
     int dia, bloco, camada;
     std::tie(dia, bloco, camada) = slot;
 
+    std::vector<Event> liebhabers;
+
     auto periodo = solucao.camada_periodo.at(camada);
     auto disciplinas = res_.getPeriodoXDisciplinas().at(periodo);
+    auto horario = solucao.getHorario();
 
-    std::vector<ProfessorDisciplina*> liebhabers;
-
-    for (auto d : disciplinas) {
-        auto pd = solucao.alocacoes.at(d->getId());
-        auto factivel =solucao.getHorario().isViable(dia, bloco, camada, pd);
-        if (factivel) {
-            liebhabers.push_back(pd);
+    for (auto d = 0; d < dias_semana_util; d++) {
+        for (auto b = 0; b < horario.getBlocosTamanho(); b++) {
+            auto pd = horario.at(d, b, camada);
+            horario.clearSlot(d, b, camada);
+            if (horario.isViable(dia, bloco, camada, pd)) {
+                liebhabers.push_back({{d, b, camada}, pd});
+            }
+            horario.insert(d, b, camada, pd);
         }
     }
 
     return liebhabers;
 }
 
-optional<std::tuple<int, int, int>> HySST::choose_and_move(
+ex::optional<HySST::Time_slot> HySST::choose_and_move(
     Solucao& solucao, 
-    const std::vector<ProfessorDisciplina*>& liebhabers
+    const std::vector<Event>& liebhabers,
+    Time_slot dest
 ) const
 {
-    return {};
+    ProfessorDisciplina* pd;
+    int d_og, b_og, c_og;
+    Time_slot slot;
+    std::tie(slot, pd) = Util::randomChoice(liebhabers);
+    std::tie(b_og, d_og, c_og) = slot;
+
+    int d_dest, b_dest, c_dest;
+    std::tie(d_dest, b_dest, c_dest) = dest;
+
+    auto& horario = solucao.getHorario();
+    horario.clearSlot(d_og, b_og, c_og);
+    if (horario.insert(d_dest, b_dest, c_dest, pd)) {
+        return std::make_tuple(d_og, b_og, c_og);
+    } else {
+        return ex::nullopt;
+    }
 }

@@ -43,6 +43,8 @@ public:
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);
 
+    int getBlocosTamanho() const;
+
 protected:
     int blocosTamanho;
     int camadasTamanho;
