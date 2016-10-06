@@ -11,13 +11,11 @@
 class SA
 {
 public:
-    SA(Resolucao& res, double alfa, double t0, int max_iter,
+    SA(const Resolucao& res, double alfa, double t0, int max_iter,
        int max_reheats, long long timeout,
        const std::vector<std::pair<Resolucao::Vizinhanca, int>>& chances);
 
     std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
-
-    Resolucao& res();
 
     double alfa() const;
     void set_alfa(double alfa);
@@ -38,7 +36,7 @@ private:
     std::unique_ptr<Solucao> gerar_vizinho(const Solucao& solucao) const;
     Resolucao::Vizinhanca escolher_vizinhanca() const;
 
-    Resolucao& res_;
+    const Resolucao& res_;
     double alfa_;
     double t0_;
     int max_iter_;
@@ -46,11 +44,6 @@ private:
     long long timeout_;
     std::array<Resolucao::Vizinhanca, 100> chances_vizinhancas_;
 };
-
-inline Resolucao& SA::res()
-{
-    return res_;
-}
 
 inline double SA::alfa() const
 {

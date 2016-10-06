@@ -3,16 +3,15 @@
 
 #include "Solucao.h"
 #include "Resolucao.h"
+#include "Timer.h"
 
 class ILS
 {
 public:
-    ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
+    ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
         long long timeout);
 
     std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
-
-    Resolucao& res();
 
     int num_iter() const;
     void set_num_iter(int num_iter);
@@ -38,12 +37,13 @@ private:
         const std::unordered_set<Resolucao::Vizinhanca>& movimentos) const;
     std::unique_ptr<Solucao> perturbacao(const Solucao& solucao) const;
 
-    Resolucao& res_;
+    const Resolucao& res_;
     int num_iter_;
     int p_max_;
     int p0_;
     int max_iter_;
     long long timeout_;
+    Timer t;
 };
 
 

@@ -33,7 +33,6 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
 
             if (s_viz->getFO() > s_best->getFO()) {
                 s_best = std::make_unique<Solucao>(*s_viz);
-                printf("Nova melhor (mut): %d\n", s_best->getFO());
             }
             if (s_viz->getFO() + eps > s_stage_best->getFO()) {
                 s_stage_best = std::make_unique<Solucao>(*s_viz);
@@ -52,11 +51,9 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
 
                 if (s_viz->getFO() > s_stage_best->getFO()) {
                     s_best = std::make_unique<Solucao>(*s_viz);
-                    printf("Nova melhor stage (hill): %d\n", s_best->getFO());
                 }
                 if (s_viz->getFO() > s_best->getFO()) {
                     s_stage_best = std::make_unique<Solucao>(*s_viz);
-                    printf("Nova melhor (hill): %d\n", s_best->getFO());
                 }
                 s_atual = std::move(s_viz);
             }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <ios>
 #include <ctime>
 #include <string>
 #include <chrono>
@@ -318,9 +319,72 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
     }
 }
 
+template <typename F>
+std::string teste_tempo_iter(int num_exec, F f)
+{
+    std::ostringstream oss;
+
+    for (auto i = 0; i < num_exec; i++) {
+        Resolucao r{Configuracao()
+            .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
+            .camadaTamanho(input_all_json.camadasTamanho)
+            .perfilTamanho(input_all_json.perfilTamanho)
+            .tentativasMutacao(4)
+        };
+
+        std::cout << "i: " << i;
+        oss << "i: " << i;
+
+        Timer t;
+        auto s = f(r);
+
+        std::cout << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
+        oss << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
+    }
+    std::cout << "\n";
+    oss << "\n";
+    
+    return oss.str();
+}
+
+void teste_tempo()
+{
+    constexpr auto timeout = 30 * 1000; //ms
+    constexpr auto num_exec = 3;
+
+    std::ostringstream oss;
+    oss << std::string(25, '=') << "\n";
+    oss << "Tempo: " << timeout << "\n";
+    oss << "Num exec: " << num_exec << "\n\n";
+
+    std::cout << "SA-ILS\n";
+    oss << "SA-ILS\n";
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        return r.gerarHorarioSA_ILS(timeout);
+    });
+
+    std::cout << "HySST\n";
+    oss << "HySST\n";
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        return r.gerarHorarioHySST(timeout, 100, 100);
+    });
+
+    std::cout << "WDJU\n";
+    oss << "WDJU\n";
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        return r.gerarHorarioWDJU(timeout);
+    });
+
+    std::ofstream out;
+    out.open("tempos.txt", std::ios::out | std::ios::app);
+    out << oss.str() << std::endl;
+
+    throw;
+}
+
 void teste_sa_ils()
 {
-    auto antes = Util::now();
+    Timer t;
 
     Resolucao r{Configuracao()
         .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
@@ -329,16 +393,15 @@ void teste_sa_ils()
         .tentativasMutacao(4)
     };
 
-    auto s = r.gerarHorarioSA_ILS(60'000);
+    auto s = r.gerarHorarioSA_ILS(10'000);
 
-    auto fo = s->getFO();
-    auto tempo = Util::chronoDiff(Util::now(), antes);
+    std::cout << "\nResultado:" << s->getFO() << "\n";
+    std::cout << "Tempo: " << t.elapsed() << "\n";
 
-    std::cout << "\nResultado:" << fo << "\n";
-    std::cout << "Tempo: " << tempo << "\n";
-
+    /*
     auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
     Output::write(s.get(), savePath);
+    */
 }
 
 void teste_wdju()
@@ -405,7 +468,9 @@ int main(int argc, char* argv[])
         //semArgumentos();
         //teste_sa_ils();
         //teste_wdju();
-        teste_hysst();
+        //teste_hysst();
+
+        teste_tempo();
     }
 }
 

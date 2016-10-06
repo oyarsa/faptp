@@ -1,6 +1,6 @@
 #include "WDJU.h"
 #include "gsl/gsl"
-
+#include "Timer.h"
 
 WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit, 
            double jump_factor) 
@@ -18,20 +18,16 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
     auto s_atual = std::make_unique<Solucao>(solucao);
     std::vector<double> history{};
     auto iter = 0;
+    Timer t;
 
-    auto comeco = Util::now();
-    while (Util::chronoDiff(Util::now(), comeco) < timeout_) {
+    while (t.elapsed() < timeout_) {
         auto viz = gerar_vizinho(*s_atual);
-        printf("Jump: %d\n", jump_height);
-        printf("Fo: %d\n", viz->getFO());
         if (viz->getFO() > s_atual->getFO() - jump_height) {
             iter = 0;
             jump_height--;
             s_atual = move(viz);
 
             if (s_atual->getFO() > s_best->getFO()) {
-                printf("Melhoria: %d\n", s_atual->getFO());
-
                 s_best = std::make_unique<Solucao>(*s_atual);
 
                 history.push_back(jump_factor);

@@ -1,7 +1,7 @@
 #include "ILS.h"
 #include "Resolucao.h"
 
-ILS::ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
+ILS::ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
          long long timeout)
     : res_(res),
       num_iter_(num_iter),
@@ -12,19 +12,15 @@ ILS::ILS(Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
 
 std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
 {
-    printf("ILS - Solucao inicial: %d\n", s_inicial.getFO());
     auto s_atual = descent_phase(s_inicial);
     auto s_best = std::make_unique<Solucao>(*s_atual);
 
     auto p_size = p0_;
     auto iter = 0;
-    auto tempoInicial = Util::now();
 
-    for (auto i = 0;
-         i < num_iter_ && Util::chronoDiff(Util::now(), tempoInicial) < timeout_;
-         i++) {
+     for (auto i = 0; i < num_iter_ && t.elapsed() < timeout_; i++) {
 
-        for (auto j = 0; j < p_size; j++) {
+        for (auto j = 0; j < p_size && t.elapsed() < timeout_; j++) {
             s_atual = perturbacao(*s_atual);
         }
 
@@ -33,7 +29,6 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
         if (s_viz->getFO() > s_best->getFO()) {
             s_atual = std::move(s_viz);
             s_best = std::make_unique<Solucao>(*s_atual);
-            printf("Melhoria: %d\n", s_best->getFO());
 
             iter = 0;
             p_size = p0_;
@@ -49,8 +44,6 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
             }
         }
     }
-
-    printf("Fim ILS: %d\n", s_best->getFO());
 
     return s_best;
 }
@@ -83,7 +76,7 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     auto best = std::make_unique<Solucao>(solucao);
     auto movimentos_restantes = movimentos;
 
-    while (!movimentos_restantes.empty()) {
+    while (!movimentos_restantes.empty() && t.elapsed() < timeout_) {
         auto vizinhanca = escolher_vizinhanca(movimentos_restantes);
         movimentos_restantes.erase(vizinhanca);
         auto vizinho = gerar_vizinho(vizinhanca, *best);
@@ -113,9 +106,4 @@ std::unique_ptr<Solucao> ILS::perturbacao(const Solucao& solucao) const
     } else {
         return res_.kempe_move(solucao);
     }
-}
-
-Resolucao& ILS::res()
-{
-    return res_;
 }
