@@ -125,6 +125,8 @@ struct hash_pair
     }
 };
 
+std::string dateTime();
+
 };
 
 #endif /* UTIL_H */

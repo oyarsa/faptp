@@ -13,13 +13,15 @@ public:
           long long tempo_mutation, long long tempo_hill, 
           int max_level, int t_start, int t_step, int it_hc);
 
-    std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
+    std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial);
 
     const Resolucao& res() const;
     long long tempo_total() const;
     long long tempo_mutation() const;
     long long tempo_hill() const;
     int max_level() const;
+    long long tempo_fo() const;
+    int maior_fo() const;
 
 private:
     using Time_slot = std::tuple<int, int, int>;
@@ -56,6 +58,8 @@ private:
     const int              max_level_;
     const std::vector<int> thresholds_;
     const int              it_hc_;
+    int                    maior_fo_;
+    long long              tempo_fo_;
 
     const std::array<Resolucao::Vizinhanca, 6> heuristicas_mutacionais_{
         Resolucao::Vizinhanca::ES,

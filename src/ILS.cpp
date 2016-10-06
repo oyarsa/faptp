@@ -8,9 +8,11 @@ ILS::ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
       p_max_(p_max),
       p0_(p0),
       max_iter_(max_iter),
-      timeout_(timeout) {}
+      timeout_(timeout),
+      tempo_fo_(), 
+      maior_fo_() {}
 
-std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
+std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) 
 {
     auto s_atual = descent_phase(s_inicial);
     auto s_best = std::make_unique<Solucao>(*s_atual);
@@ -18,9 +20,12 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
     auto p_size = p0_;
     auto iter = 0;
 
-     for (auto i = 0; i < num_iter_ && t.elapsed() < timeout_; i++) {
+    maior_fo_ = s_best->getFO();
+    tempo_fo_ = t_.elapsed();
 
-        for (auto j = 0; j < p_size && t.elapsed() < timeout_; j++) {
+     for (auto i = 0; i < num_iter_ && t_.elapsed() < timeout_; i++) {
+
+        for (auto j = 0; j < p_size && t_.elapsed() < timeout_; j++) {
             s_atual = perturbacao(*s_atual);
         }
 
@@ -28,10 +33,13 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
 
         if (s_viz->getFO() > s_best->getFO()) {
             s_atual = std::move(s_viz);
-            s_best = std::make_unique<Solucao>(*s_atual);
+            s_best = s_atual->clone();
 
             iter = 0;
             p_size = p0_;
+
+            maior_fo_ = s_best->getFO();
+            tempo_fo_ = t_.elapsed();
         } else {
             s_atual = std::make_unique<Solucao>(*s_best);
             iter++;
@@ -46,6 +54,16 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) const
     }
 
     return s_best;
+}
+
+long long ILS::tempo_fo() const
+{
+    return tempo_fo_;
+}
+
+int ILS::maior_fo() const
+{
+    return maior_fo_;
 }
 
 std::unique_ptr<Solucao> ILS::gerar_vizinho(
@@ -76,7 +94,7 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     auto best = std::make_unique<Solucao>(solucao);
     auto movimentos_restantes = movimentos;
 
-    while (!movimentos_restantes.empty() && t.elapsed() < timeout_) {
+    while (!movimentos_restantes.empty() && t_.elapsed() < timeout_) {
         auto vizinhanca = escolher_vizinhanca(movimentos_restantes);
         movimentos_restantes.erase(vizinhanca);
         auto vizinho = gerar_vizinho(vizinhanca, *best);

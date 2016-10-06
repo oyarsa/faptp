@@ -2684,13 +2684,15 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
     }
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(
-    const SA& sa, const ILS& ils)
+std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(SA& sa, ILS& ils)
 {
     auto s = gerarSolucaoAleatoriaNotNull();
     auto s_sa = sa.gerar_horario(*s);
     auto s_ils = ils.gerar_horario(*s_sa);
-    s_ils->calculaFO();
+
+    foAlvo = ils.maior_fo();
+    tempoAlvo = ils.tempo_fo();
+
     return s_ils;
 }
 
@@ -3685,12 +3687,17 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(long long timeout)
     return gerarHorarioWDJU(wdju);
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(const WDJU& wdju) 
+std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(WDJU& wdju) 
 {
     auto s_inicial = gerarSolucaoAleatoriaNotNull();
-    return wdju.gerar_horario(*s_inicial);
-}
 
+    auto s = wdju.gerar_horario(*s_inicial);
+
+    foAlvo = wdju.maior_fo();
+    tempoAlvo = wdju.tempo_fo();
+
+    return s;
+}
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
     long long tempo_total, 
@@ -3702,8 +3709,14 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
     return gerarHorarioHySST(hysst);
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(const HySST& hysst)
+std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(HySST& hysst)
 {
     auto s_inicial = gerarSolucaoAleatoriaNotNull();
-    return hysst.gerar_horario(*s_inicial);
+
+    auto s = hysst.gerar_horario(*s_inicial);
+
+    foAlvo = hysst.maior_fo();
+    tempoAlvo = hysst.tempo_fo();
+
+    return s;
 }

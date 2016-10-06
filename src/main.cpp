@@ -339,7 +339,9 @@ std::string teste_tempo_iter(int num_exec, F f)
         auto s = f(r);
 
         std::cout << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
+        std::cout << "\t" << "fo_alvo: " << r.foAlvo << " - tempo_alvo: " << r.tempoAlvo << "\n";
         oss << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
+        oss << "\t" << "fo_alvo: " << r.foAlvo << " - tempo_alvo: " << r.tempoAlvo << "\n";
     }
     std::cout << "\n";
     oss << "\n";
@@ -354,8 +356,9 @@ void teste_tempo()
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
-    oss << "Tempo: " << timeout << "\n";
-    oss << "Num exec: " << num_exec << "\n\n";
+    oss << "Data: " << Util::dateTime() << "\n";
+    oss << "Tempo maximo: " << timeout << "\n";
+    oss << "Numero de execucoes: " << num_exec << "\n\n";
 
     std::cout << "SA-ILS\n";
     oss << "SA-ILS\n";

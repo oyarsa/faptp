@@ -63,14 +63,14 @@ public:
     Solucao* gerarHorarioAG3();
 
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
-    std::unique_ptr<Solucao> gerarHorarioSA_ILS(const SA& sa, const ILS& ils);
+    std::unique_ptr<Solucao> gerarHorarioSA_ILS(SA& sa, ILS& ils);
 
     std::unique_ptr<Solucao> gerarHorarioWDJU(long long timeout);
-    std::unique_ptr<Solucao> gerarHorarioWDJU(const WDJU& wdju);
+    std::unique_ptr<Solucao> gerarHorarioWDJU(WDJU& wdju);
 
     std::unique_ptr<Solucao> gerarHorarioHySST(
         long long tempo_total, long long tempo_mu, long long tempo_hc);
-    std::unique_ptr<Solucao> gerarHorarioHySST(const HySST& HySST);
+    std::unique_ptr<Solucao> gerarHorarioHySST(HySST& HySST);
 
     double gerarGrade() const;
 

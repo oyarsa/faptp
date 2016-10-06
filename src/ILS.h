@@ -11,7 +11,7 @@ public:
     ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
         long long timeout);
 
-    std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial) const;
+    std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial);
 
     int num_iter() const;
     void set_num_iter(int num_iter);
@@ -28,6 +28,9 @@ public:
     long long timeout() const;
     void set_timeout(long long timeout);
 
+    long long tempo_fo() const;
+    int maior_fo() const;
+
 private:
     std::unique_ptr<Solucao> gerar_vizinho(Resolucao::Vizinhanca vizinhanca,
                                            const Solucao& solucao) const;
@@ -43,7 +46,9 @@ private:
     int p0_;
     int max_iter_;
     long long timeout_;
-    Timer t;
+    Timer t_;
+    long long tempo_fo_;
+    int maior_fo_;
 };
 
 
@@ -96,4 +101,5 @@ inline void ILS::set_timeout(long long timeout)
 {
     timeout_ = timeout;
 }
+
 

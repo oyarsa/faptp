@@ -1,6 +1,7 @@
 #include <sstream>
 #include <utility>
 #include <stdexcept>
+#include <iomanip>
 
 #include "Util.h"
 #include "Aleatorio.h"
@@ -119,5 +120,14 @@ std::size_t Util::hash_string(const std::string& str)
 {
     static std::hash<std::string> hasher;
     return hasher(str);
+}
+
+std::string Util::dateTime()
+{
+    std::ostringstream oss;
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    return oss.str();
 }
 

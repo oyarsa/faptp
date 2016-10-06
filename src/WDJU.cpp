@@ -7,18 +7,24 @@ WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
     : res_(res),
       timeout_(timeout),
       stagnation_limit_(stagnation_limit),
-      max_jump_factor_(jump_factor) {}
+      max_jump_factor_(jump_factor),
+      tempo_fo_(), 
+      maior_fo_() {}
 
-std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
+std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) 
 {
     int jump_height{0};
     double jump_factor{0.005};
 
     auto s_best = std::make_unique<Solucao>(solucao);
     auto s_atual = std::make_unique<Solucao>(solucao);
+
     std::vector<double> history{};
     auto iter = 0;
     Timer t;
+
+    maior_fo_ = s_best->getFO();
+    tempo_fo_ = t.elapsed();
 
     while (t.elapsed() < timeout_) {
         auto viz = gerar_vizinho(*s_atual);
@@ -33,6 +39,9 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao) const
                 history.push_back(jump_factor);
                 jump_height = 0;
                 jump_factor = next_jump(history);
+
+                maior_fo_ = s_best->getFO();
+                tempo_fo_ = t.elapsed();
             }
         } else {
             iter++;
@@ -74,4 +83,14 @@ std::unique_ptr<Solucao> WDJU::gerar_vizinho(const Solucao& solucao) const
     case Resolucao::Vizinhanca::KM: return res_.kempe_move(solucao);
     default: return std::make_unique<Solucao>(solucao);
     }
+}
+
+long long WDJU::tempo_fo() const
+{
+    return tempo_fo_;
+}
+
+int WDJU::maior_fo() const
+{
+    return maior_fo_;
 }

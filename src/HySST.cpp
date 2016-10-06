@@ -12,14 +12,19 @@ HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutati
       tempo_hill_(tempo_hill),
       max_level_(max_level),
       thresholds_(gen_thresholds(max_level, t_start, t_step)), 
-      it_hc_(it_hc) {}
+      it_hc_(it_hc),
+      maior_fo_(),
+      tempo_fo_() {}
 
-std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
+std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) 
 {
     auto t_total = Timer();
     auto s_atual = std::make_unique<Solucao>(s_inicial);
     auto s_best = std::make_unique<Solucao>(s_inicial);
     auto level = 0;
+
+    maior_fo_ = s_best->getFO();
+    tempo_fo_ = t_total.elapsed();
 
     while (t_total.elapsed() < tempo_total_) {
         auto s_stage_best = std::make_unique<Solucao>(*s_atual);
@@ -32,13 +37,15 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
             auto s_viz = aplicar_heuristica(llh, *s_atual);
 
             if (s_viz->getFO() > s_best->getFO()) {
-                s_best = std::make_unique<Solucao>(*s_viz);
+                s_best = s_viz->clone();
+                maior_fo_ = s_best->getFO();
+                tempo_fo_ = t_total.elapsed();
             }
             if (s_viz->getFO() + eps > s_stage_best->getFO()) {
-                s_stage_best = std::make_unique<Solucao>(*s_viz);
+                s_stage_best = s_viz->clone();
             }
             if (s_viz->getFO() + eps > s_atual->getFO()) {
-                s_atual = std::make_unique<Solucao>(*s_viz);
+                s_atual = s_viz->clone();
             }
         }
 
@@ -50,10 +57,12 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) const
                 auto s_viz = aplicar_heuristica(llh, *s_atual);
 
                 if (s_viz->getFO() > s_stage_best->getFO()) {
-                    s_best = std::make_unique<Solucao>(*s_viz);
+                    s_stage_best = s_viz->clone();
                 }
                 if (s_viz->getFO() > s_best->getFO()) {
-                    s_stage_best = std::make_unique<Solucao>(*s_viz);
+                    s_best = s_viz->clone();
+                    maior_fo_ = s_best->getFO();
+                    tempo_fo_ = t_total.elapsed();
                 }
                 s_atual = std::move(s_viz);
             }
@@ -299,4 +308,14 @@ Resolucao::Vizinhanca HySST::choose_hill() const
 Resolucao::Vizinhanca HySST::choose_mut() const
 {
     return Util::randomChoice(heuristicas_mutacionais_);
+}
+
+long long HySST::tempo_fo() const
+{
+    return tempo_fo_;
+}
+
+int HySST::maior_fo() const
+{
+    return maior_fo_;
 }
