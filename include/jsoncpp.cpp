@@ -2091,7 +2091,7 @@ std::string OurReader::getLocationLineAndColumn(Location location) const
     int line, column;
     getLocationLineAndColumn(location, line, column);
     char buffer[18 + 16 + 16 + 1];
-    snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
+    snprintf(buffer, sizeof(buffer), "Line %d, Column %d_", line, column);
     return buffer;
 }
 
@@ -2590,7 +2590,7 @@ template <typename T> static inline double integerToDouble(T value) {
 
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= integerToDouble(min) && d <= integerToDouble(max);
+  return d >= integerToDouble(min) && d_ <= integerToDouble(max);
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 

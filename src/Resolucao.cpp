@@ -1,4 +1,6 @@
-﻿#include <fstream>
+﻿#include "Resolucao.h"
+
+#include <fstream>
 #include <numeric>
 #include <iostream>
 #include <unordered_map>
@@ -9,7 +11,7 @@
 #include <stack>
 #include <set>
 
-#include "gsl/gsl"
+#include <gsl/gsl>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -17,7 +19,11 @@
 #endif
 
 #include "parametros.h"
-#include "Resolucao.h"
+#include "Professor.h"
+#include "Disciplina.h"
+#include "ProfessorDisciplina.h"
+#include "AlunoPerfil.h"
+#include "Solucao.h"
 #include "Algorithms.h"
 #include "Util.h"
 #include "Semana.h"
@@ -2257,13 +2263,13 @@ void Resolucao::logExperimentos()
     puts(str);
 
     for (auto i = 0; i < numcruz; i++) {
-        sprintf(str, "C%d: tempo total: %llu iguais: %d melhores: %d", i + 1,
+        sprintf(str, "C%d: tempo total: %llu iguais: %d_ melhores: %d_", i + 1,
                 tempoTotalCruz[i], contadorIguaisCruz[i], contadorMelhoresCruz[i]);
         log << str << "\n";
         puts(str);
     }
     for (auto i = 0; i < 2; i++) {
-        sprintf(str, "M%d: tempo total: %llu iguais: %d melhores: %d", i + 1,
+        sprintf(str, "M%d: tempo total: %llu iguais: %d_ melhores: %d_", i + 1,
                 tempoTotalMut[i], contadorIguaisMut[i], contadorMelhoresMut[i]);
         log << str << "\n";
         puts(str);

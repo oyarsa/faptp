@@ -1,10 +1,11 @@
 #ifndef RESOLUCAO_H
 #define RESOLUCAO_H
 
-#include <map>
-#include <vector>
 #include <memory>
-#include <set>
+#include <chrono>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #ifdef MODELO
     #include <modelo-grade/aluno.h>
@@ -12,18 +13,16 @@
 #endif
 
 #include "json/json.h"
-
-#include "Algorithms.h"
-#include "Professor.h"
-#include "Disciplina.h"
-#include "ProfessorDisciplina.h"
-#include "AlunoPerfil.h"
-#include "Solucao.h"
-#include "Aleatorio.h"
 #include "Configuracao.h"
 
-// forwardar declaration dos algoritmos: dependência circular entre eles
-// a Resolução (bad design, eu sei)
+class Professor;
+
+class Disciplina;
+class ProfessorDisciplina;
+class AlunoPerfil;
+class Solucao;
+class Grade;
+
 class WDJU;
 class ILS;
 class SA;

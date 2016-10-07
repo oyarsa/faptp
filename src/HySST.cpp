@@ -1,45 +1,110 @@
 #include "HySST.h"
 
+#include <optional/optional.hpp>
+#include <array>
+
 #include "Resolucao.h"
+#include "Solucao.h"
 #include "Timer.h"
 
-HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation,
+namespace ex = std::experimental;
+
+// Implementação
+
+struct HySST::Impl
+{
+    Impl(const Resolucao& res, long long tempo_total,
+          long long tempo_mutation, long long tempo_hill,
+          int max_level, int t_start, int t_step, int it_hc);
+
+    using Time_slot = std::tuple<int, int, int>;
+    using Event = std::pair<Time_slot, ProfessorDisciplina*>;
+
+    static std::vector<int> gen_thresholds(int max_level, int t_start, int t_step);
+
+    Resolucao::Vizinhanca choose_hill() const;
+
+    Resolucao::Vizinhanca choose_mut() const;
+
+    std::unique_ptr<Solucao> aplicar_heuristica(Resolucao::Vizinhanca llh, 
+                                                const Solucao& solucao) const;
+    std::unique_ptr<Solucao> first_improvement(const Solucao& solucao) const;
+
+    std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
+
+    ex::optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
+
+    Time_slot pick_place(const Solucao& solucao) const;
+
+    ex::optional<Time_slot> pick_event_and_move(Solucao& solucao, Time_slot slot) const;
+
+    std::vector<Event> list_all_liebhabers(const Solucao& solucao, Time_slot slot) const;
+
+    ex::optional<Time_slot> choose_and_move(
+        Solucao& solucao, const std::vector<Event>& liebhabers, 
+        Time_slot dest) const;
+
+    const Resolucao&       res;
+    const long long        tempo_total;
+    const long long        tempo_mutation;
+    const long long        tempo_hill;
+    const int              max_level;
+    const std::vector<int> thresholds;
+    const int              it_hc;
+    int                    maior_fo;
+    long long              tempo_fo;
+
+    const std::array<Resolucao::Vizinhanca, 6> heuristicas_mutacionais{
+        Resolucao::Vizinhanca::ES,
+        Resolucao::Vizinhanca::EM,
+        Resolucao::Vizinhanca::RS,
+        Resolucao::Vizinhanca::RM
+    };
+
+    const std::vector<Resolucao::Vizinhanca> heuristicas_hill{
+        Resolucao::Vizinhanca::HC_FI,
+        Resolucao::Vizinhanca::HC_EC
+    };
+};
+
+HySST::Impl::Impl(const Resolucao& res, long long tempo_total, long long tempo_mutation,
              long long tempo_hill, int max_level, int t_start, int t_step,
              int it_hc)
-    : res_(res),
-      tempo_total_(tempo_total),
-      tempo_mutation_(tempo_mutation),
-      tempo_hill_(tempo_hill),
-      max_level_(max_level),
-      thresholds_(gen_thresholds(max_level, t_start, t_step)), 
-      it_hc_(it_hc),
-      maior_fo_(),
-      tempo_fo_() {}
+    : res(res),
+      tempo_total(tempo_total),
+      tempo_mutation(tempo_mutation),
+      tempo_hill(tempo_hill),
+      max_level(max_level),
+      thresholds(gen_thresholds(max_level, t_start, t_step)), 
+      it_hc(it_hc),
+      maior_fo(),
+      tempo_fo() {}
 
-std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial) 
+
+std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial)
 {
     auto t_total = Timer();
-    auto s_atual = std::make_unique<Solucao>(s_inicial);
-    auto s_best = std::make_unique<Solucao>(s_inicial);
+    auto s_atual = s_inicial.clone();
+    auto s_best = s_inicial.clone();
     auto level = 0;
 
-    maior_fo_ = s_best->getFO();
-    tempo_fo_ = t_total.elapsed();
+    d_->maior_fo = s_best->getFO();
+    d_->tempo_fo = t_total.elapsed();
 
-    while (t_total.elapsed() < tempo_total_) {
-        auto s_stage_best = std::make_unique<Solucao>(*s_atual);
-        auto s_stage_start = std::make_unique<Solucao>(*s_atual);
-        auto eps = thresholds_[level];
+    while (t_total.elapsed() < d_->tempo_total) {
+        auto s_stage_best = s_atual->clone();
+        auto s_stage_start = s_atual->clone();
+        auto eps = d_->thresholds[level];
 
         auto t_mu = Timer();
-        while (t_mu.elapsed() < tempo_mutation_ && t_total.elapsed() < tempo_total_) {
-            auto llh = choose_mut();
-            auto s_viz = aplicar_heuristica(llh, *s_atual);
+        while (t_mu.elapsed() < d_->tempo_mutation && t_total.elapsed() < d_->tempo_total) {
+            auto llh = d_->choose_mut();
+            auto s_viz = d_->aplicar_heuristica(llh, *s_atual);
 
             if (s_viz->getFO() > s_best->getFO()) {
                 s_best = s_viz->clone();
-                maior_fo_ = s_best->getFO();
-                tempo_fo_ = t_total.elapsed();
+                d_->maior_fo = s_best->getFO();
+                d_->tempo_fo = t_total.elapsed();
             }
             if (s_viz->getFO() + eps > s_stage_best->getFO()) {
                 s_stage_best = s_viz->clone();
@@ -51,25 +116,25 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial)
 
         auto t_hc = Timer();
         if (s_stage_best->getFO() <= s_stage_start->getFO()) {
-            while (t_hc.elapsed() < tempo_hill_ && t_total.elapsed() < tempo_total_) {
+            while (t_hc.elapsed() < d_->tempo_hill && t_total.elapsed() < d_->tempo_total) {
 
-                auto llh = choose_hill();
-                auto s_viz = aplicar_heuristica(llh, *s_atual);
+                auto llh = d_->choose_hill();
+                auto s_viz = d_->aplicar_heuristica(llh, *s_atual);
 
                 if (s_viz->getFO() > s_stage_best->getFO()) {
                     s_stage_best = s_viz->clone();
                 }
                 if (s_viz->getFO() > s_best->getFO()) {
                     s_best = s_viz->clone();
-                    maior_fo_ = s_best->getFO();
-                    tempo_fo_ = t_total.elapsed();
+                    d_->maior_fo = s_best->getFO();
+                    d_->tempo_fo = t_total.elapsed();
                 }
                 s_atual = std::move(s_viz);
             }
         }
 
         if (s_stage_best->getFO() <= s_stage_start->getFO()) {
-            if (level == max_level_ - 1) {
+            if (level == d_->max_level - 1) {
                 s_atual = std::move(s_stage_start);
                 level = 0;
             } else {
@@ -81,32 +146,7 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial)
     return s_best;
 }
 
-const Resolucao& HySST::res() const
-{
-    return res_;
-}
-
-long long HySST::tempo_total() const
-{
-    return tempo_total_;
-}
-
-long long HySST::tempo_mutation() const
-{
-    return tempo_mutation_;
-}
-
-long long HySST::tempo_hill() const
-{
-    return tempo_hill_;
-}
-
-int HySST::max_level() const
-{
-    return max_level_;
-}
-
-std::vector<int> HySST::gen_thresholds(int max_level, int t_start, int t_step)
+std::vector<int> HySST::Impl::gen_thresholds(int max_level, int t_start, int t_step)
 {
     std::vector<int> thresholds(max_level);
     auto curr_t = t_start;
@@ -119,30 +159,34 @@ std::vector<int> HySST::gen_thresholds(int max_level, int t_start, int t_step)
     return thresholds;
 }
 
-std::unique_ptr<Solucao> HySST::aplicar_heuristica(Resolucao::Vizinhanca llh, 
-                                                   const Solucao& solucao) const
+std::unique_ptr<Solucao> HySST::Impl::aplicar_heuristica(
+    Resolucao::Vizinhanca llh, 
+    const Solucao& solucao
+) const
 {
     switch (llh) {
-        case Resolucao::Vizinhanca::ES: return res_.event_swap(solucao);
-        case Resolucao::Vizinhanca::EM: return res_.event_move(solucao);
-        case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);
-        case Resolucao::Vizinhanca::RM: return res_.resource_move(solucao);
+        case Resolucao::Vizinhanca::ES: return res.event_swap(solucao);
+        case Resolucao::Vizinhanca::EM: return res.event_move(solucao);
+        case Resolucao::Vizinhanca::RS: return res.resource_swap(solucao);
+        case Resolucao::Vizinhanca::RM: return res.resource_move(solucao);
         case Resolucao::Vizinhanca::HC_FI: return first_improvement(solucao);
         case Resolucao::Vizinhanca::HC_EC: return ejection_chains(solucao);
-        default: return std::make_unique<Solucao>(solucao);
+        default: return solucao.clone();
     }
 }
 
-std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
+std::unique_ptr<Solucao> HySST::Impl::first_improvement(
+    const Solucao& solucao
+) const
 {
-    auto s = std::make_unique<Solucao>(solucao);
+    auto s = solucao.clone();
 
-    for (auto i = 0; i < it_hc_; i++) {
+    for (auto i = 0; i < it_hc; i++) {
         auto s_viz = [&] {
             if (Util::randomDouble() < 0.5) {
-                return res_.permute_resources(*s);
+                return res.permute_resources(*s);
             } else {
-                return res_.kempe_move(*s);
+                return res.kempe_move(*s);
             }
         }();
 
@@ -154,12 +198,12 @@ std::unique_ptr<Solucao> HySST::first_improvement(const Solucao& solucao) const
     return s;
 }
 
-std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
+std::unique_ptr<Solucao> HySST::Impl::ejection_chains(const Solucao& solucao) const
 {
     auto s = solucao.clone();
     auto slot = pick_place(*s);
 
-    for (auto i = 0; i < it_hc_; i++) {
+    for (auto i = 0; i < it_hc; i++) {
         auto cur = s->clone();
         if (auto next = ejection_move(*cur, slot)) {
             slot = *next;
@@ -172,7 +216,7 @@ std::unique_ptr<Solucao> HySST::ejection_chains(const Solucao& solucao) const
     return s;
 }
 
-ex::optional<HySST::Time_slot> HySST::ejection_move(
+ex::optional<HySST::Impl::Time_slot> HySST::Impl::ejection_move(
     Solucao& solucao, 
     Time_slot place
 ) const
@@ -186,7 +230,7 @@ ex::optional<HySST::Time_slot> HySST::ejection_move(
     return choose_and_move(solucao, liebhabers, *slot);
 }
 
-HySST::Time_slot HySST::pick_place(const Solucao& solucao) const
+HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
 {
     const auto& horario = solucao.getHorario();
 
@@ -213,7 +257,7 @@ HySST::Time_slot HySST::pick_place(const Solucao& solucao) const
     return {0, 0, 0};
 }
 
-ex::optional<HySST::Time_slot> HySST::pick_event_and_move(
+ex::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
     Solucao& solucao, 
     Time_slot slot
 ) const
@@ -224,7 +268,7 @@ ex::optional<HySST::Time_slot> HySST::pick_event_and_move(
     std::tie(dia, bloco, camada) = slot;
 
     auto novo_dia = Util::randomBetween(0, dias_semana_util);
-    auto novo_bloco = 2 * Util::randomBetween(0, res_.getBlocosTamanho()/2);
+    auto novo_bloco = 2 * Util::randomBetween(0, res.getBlocosTamanho()/2);
 
     auto pd1 = horario.at(novo_dia, novo_bloco, camada);
     auto pd2 = horario.at(novo_dia, novo_bloco+1, camada);
@@ -239,7 +283,7 @@ ex::optional<HySST::Time_slot> HySST::pick_event_and_move(
     }
 }
 
-std::vector<HySST::Event> HySST::list_all_liebhabers(
+std::vector<HySST::Impl::Event> HySST::Impl::list_all_liebhabers(
     const Solucao& solucao, 
     Time_slot slot
 ) const
@@ -250,13 +294,14 @@ std::vector<HySST::Event> HySST::list_all_liebhabers(
     std::vector<Event> liebhabers;
 
     auto periodo = solucao.camada_periodo.at(camada);
-    auto disciplinas = res_.getPeriodoXDisciplinas().at(periodo);
+    auto disciplinas = res.getPeriodoXDisciplinas().at(periodo);
     auto horario = solucao.getHorario();
 
     for (auto d = 0; d < dias_semana_util; d++) {
         for (auto b = 0; b < horario.getBlocosTamanho(); b++) {
             auto pd = horario.at(d, b, camada);
             horario.clearSlot(d, b, camada);
+
             if (horario.isViable(dia, bloco, camada, pd)) {
                 liebhabers.push_back({{d, b, camada}, pd});
             }
@@ -267,7 +312,7 @@ std::vector<HySST::Event> HySST::list_all_liebhabers(
     return liebhabers;
 }
 
-ex::optional<HySST::Time_slot> HySST::choose_and_move(
+ex::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     Solucao& solucao, 
     const std::vector<Event>& liebhabers,
     Time_slot dest
@@ -292,10 +337,10 @@ ex::optional<HySST::Time_slot> HySST::choose_and_move(
 }
 
 
-Resolucao::Vizinhanca HySST::choose_hill() const
+Resolucao::Vizinhanca HySST::Impl::choose_hill() const
 {
     /* First Improvement possui performance muito ruim
-    auto llh = Util::randomChoice(heuristicas_hill_);
+    auto llh = Util::randomChoice(heuristicas_hill);
     if (llh == Resolucao::Vizinhanca::HC_FI) {
     puts("first");
     } else {
@@ -305,17 +350,25 @@ Resolucao::Vizinhanca HySST::choose_hill() const
     return Resolucao::Vizinhanca::HC_EC;
 }
 
-Resolucao::Vizinhanca HySST::choose_mut() const
+Resolucao::Vizinhanca HySST::Impl::choose_mut() const
 {
-    return Util::randomChoice(heuristicas_mutacionais_);
+    return Util::randomChoice(heuristicas_mutacionais);
 }
+
+// Interface
+
+HySST::HySST(const Resolucao& res, long long tempo_total, long long tempo_mutation, long long tempo_hill, int max_level, int t_start, int t_step, int it_hc) 
+    : d_{std::make_unique<Impl>(res, tempo_total, tempo_mutation, tempo_hill, 
+                                max_level, t_start, t_step, it_hc)} {}
+
+HySST::~HySST() {}
 
 long long HySST::tempo_fo() const
 {
-    return tempo_fo_;
+    return d_->tempo_fo;
 }
 
 int HySST::maior_fo() const
 {
-    return maior_fo_;
+    return d_->maior_fo;
 }
