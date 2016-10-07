@@ -14,17 +14,17 @@ ILS::ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
 
 std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial) 
 {
+    t_.reset();
+    maior_fo_ = s_inicial.getFO();
+    tempo_fo_ = t_.elapsed();
+
     auto s_atual = descent_phase(s_inicial);
     auto s_best = std::make_unique<Solucao>(*s_atual);
 
     auto p_size = p0_;
     auto iter = 0;
 
-    maior_fo_ = s_best->getFO();
-    tempo_fo_ = t_.elapsed();
-
      for (auto i = 0; i < num_iter_ && t_.elapsed() < timeout_; i++) {
-
         for (auto j = 0; j < p_size && t_.elapsed() < timeout_; j++) {
             s_atual = perturbacao(*s_atual);
         }
@@ -81,7 +81,7 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     }
 }
 
- std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
+ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao)
 {
     const std::unordered_set<Resolucao::Vizinhanca> movimentos {
             Resolucao::Vizinhanca::ES,
@@ -102,6 +102,8 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
         if (vizinho->getFO() >= best->getFO()) {
             if (vizinho->getFO() > best->getFO()) {
                 movimentos_restantes = movimentos;
+                maior_fo_ = vizinho->getFO();
+                tempo_fo_ = t_.elapsed();
             }
             best = move(vizinho);
         }

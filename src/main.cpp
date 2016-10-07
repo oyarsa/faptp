@@ -352,7 +352,7 @@ std::string teste_tempo_iter(int num_exec, F f)
 void teste_tempo()
 {
     constexpr auto timeout = 30 * 1000; //ms
-    constexpr auto num_exec = 3;
+    constexpr auto num_exec = 5;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -378,9 +378,9 @@ void teste_tempo()
         return r.gerarHorarioWDJU(timeout);
     });
 
-    std::ofstream out;
+    /*std::ofstream out;
     out.open("tempos.txt", std::ios::out | std::ios::app);
-    out << oss.str() << std::endl;
+    out << oss.str() << std::endl;*/
 
     throw;
 }

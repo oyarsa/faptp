@@ -127,7 +127,7 @@ std::string Util::dateTime()
     std::ostringstream oss;
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
-    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    oss << std::put_time(&tm, "%d-%m-%Y %H:%M:%S");
     return oss.str();
 }
 

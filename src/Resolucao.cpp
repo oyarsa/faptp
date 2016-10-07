@@ -2783,7 +2783,7 @@ Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol) const
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa {*this, 0.97, 1, 10'000, 5, timeout, {
+    SA sa {*this, 0.97, 1, 10'000, 5, timeout/2, {
             {Vizinhanca::ES, 25},
             {Vizinhanca::EM, 43},
             {Vizinhanca::RS, 20},
@@ -2791,7 +2791,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
             {Vizinhanca::KM, 2}
     }};
 
-    ILS ils {*this, 10'000, 10, 1, 10, timeout};
+    ILS ils {*this, 10'000, 10, 1, 10, timeout/2};
 
     return gerarHorarioSA_ILS(sa, ils);
 }
