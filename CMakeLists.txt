@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
 project(faPTP)
+cmake_minimum_required(VERSION 2.8)
 
 set(MODELO FALSE)
 
@@ -10,58 +9,60 @@ if (MODELO)
     add_definitions(-DIL_STD -DMODELO)
 endif()
 
-include_directories(include)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-set(FAPTP_LIBS
-    include/json/json.h
-    include/gsl/gsl
-    include/optional/optional.hpp
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set(FAPTP_INCLUDE
+    include/faptp/Aleatorio.h
+    include/faptp/AlunoPerfil.h
+    include/faptp/Disciplina.h
+    include/faptp/Grade.h
+    include/faptp/Horario.h
+    include/faptp/Output.h
+    include/faptp/Professor.h
+    include/faptp/ProfessorDisciplina.h
+    include/faptp/Representacao.h
+    include/faptp/Resolucao.h
+    include/faptp/Semana.h
+    include/faptp/Solucao.h
+    include/faptp/Util.h
+    include/faptp/UUID.h
+    include/faptp/parametros.h
+    include/faptp/Algorithms.h
+    include/faptp/Configuracao.h
+    include/faptp/SA.h
+    include/faptp/ILS.h
+    include/faptp/WDJU.h
+    include/faptp/HySST.h
+    include/faptp/Timer.h
+    )
+
+set(FAPTP_SOURCE
+    src/faptp/Aleatorio.cpp
+    src/faptp/AlunoPerfil.cpp
+    src/faptp/Disciplina.cpp
+    src/faptp/Grade.cpp
+    src/faptp/Horario.cpp
+    src/faptp/Output.cpp
+    src/faptp/Professor.cpp
+    src/faptp/ProfessorDisciplina.cpp
+    src/faptp/Representacao.cpp
+    src/faptp/Resolucao.cpp
+    src/faptp/Solucao.cpp
+    src/faptp/Util.cpp
+    src/faptp/UUID.cpp
+    src/faptp/parametros.cpp
+    src/faptp/SA.cpp
+    src/faptp/ILS.cpp
+    src/faptp/WDJU.cpp
+    src/faptp/HySST.cpp
     )
 
 set(FAPTP_FILES
-    include/jsoncpp.cpp
-    src/main.cpp
-    src/Aleatorio.cpp
-    src/Aleatorio.h
-    src/AlunoPerfil.cpp
-    src/AlunoPerfil.h
-    src/Disciplina.cpp
-    src/Disciplina.h
-    src/Grade.cpp
-    src/Grade.h
-    src/Horario.cpp
-    src/Horario.h
-    src/Output.cpp
-    src/Output.h
-    src/Professor.cpp
-    src/Professor.h
-    src/ProfessorDisciplina.cpp
-    src/ProfessorDisciplina.h
-    src/Representacao.cpp
-    src/Representacao.h
-    src/Resolucao.cpp
-    src/Resolucao.h
-    src/Semana.h
-    src/Solucao.cpp
-    src/Solucao.h
-    src/Util.cpp
-    src/Util.h
-    src/UUID.cpp
-    src/UUID.h
-    src/parametros.cpp
-    src/parametros.h
-    src/Algorithms.h
-    src/Configuracao.h
-    src/SA.cpp
-    src/SA.h
-    src/ILS.cpp
-    src/ILS.h
-    src/WDJU.cpp
-    src/WDJU.h
-    src/HySST.cpp
-    src/HySST.h
-    src/Timer.h
-    )
+    ${FAPTP_INCLUDE}
+    ${FAPTP_SOURCE})
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
@@ -82,7 +83,12 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4100 -D_CRT_SECURE_NO_WARNINGS")
 endif()
 
-add_executable(faptp ${FAPTP_FILES})
+add_library(faptp ${FAPTP_FILES})
+target_link_libraries(faptp ${CONAN_LIBS})
+
+add_executable(faptp-app src/faptp-app/main.cpp)
+target_link_libraries(faptp-app faptp)
+
 if (MODELO)
   target_link_libraries(faptp modelo-grade-lib)
 endif()
