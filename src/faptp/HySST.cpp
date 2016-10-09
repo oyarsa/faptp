@@ -241,7 +241,7 @@ HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
         auto slot = [&] {
             int s;
             do {
-                s = Util::randomBetween(0, num_slots);
+                s = Util::randomBetween(0, gsl::narrow_cast<int>(num_slots));
             } while (slots_percorridos[s]);
             return s;
         }();
@@ -359,6 +359,11 @@ Resolucao::Vizinhanca HySST::Impl::choose_mut() const
 HySST::HySST(Resolucao& res, long long tempo_total, long long tempo_mutation, long long tempo_hill, int max_level, int t_start, int t_step, int it_hc)
     : d_{std::make_unique<Impl>(res, tempo_total, tempo_mutation, tempo_hill,
                                 max_level, t_start, t_step, it_hc)} {}
+
+
+HySST::HySST(const HySST& outro) : d_{std::make_unique<Impl>(*outro.d_)} {}
+
+HySST::HySST(HySST&& outro) : d_{std::move(outro.d_)} {}
 
 HySST::~HySST() {}
 

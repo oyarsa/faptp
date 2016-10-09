@@ -12,7 +12,7 @@ namespace Util
 {
 int getPosition(int y, int x, int z, int Y, int Z);
 // Bloco, dia, camada
-void get3DMatrix(int pLinear, int triDimensional[3], int X, int Y, int Z);
+void get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, int Z);
 
 std::vector<std::string>& strSplit(const std::string& s, char delim, std::vector<std::string>& elems);
 std::vector<std::string> strSplit(const std::string& s, char delim);
@@ -83,7 +83,7 @@ inline int fast_floor(double x)
 template <typename Container>
 auto& randomChoice(Container& c)
 {
-    auto n = randomBetween(0, c.size());
+    auto n = randomBetween(0, gsl::narrow_cast<int>(c.size()));
     auto it = begin(c);
     std::advance(it, n);
     return *it;

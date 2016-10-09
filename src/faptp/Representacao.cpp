@@ -72,12 +72,12 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
     return true;
 }
 
-void Representacao::get3DMatrix(int pLinear, int triDimensional[3])
+void Representacao::get3DMatrix(std::size_t pLinear, int triDimensional[3])
 {
     Util::get3DMatrix(pLinear, triDimensional, dias_semana_util, blocosTamanho, camadasTamanho);
 }
 
-std::tuple<int, int, int> Representacao::getCoords(int pLinear) const
+std::tuple<int, int, int> Representacao::getCoords(std::size_t pLinear) const
 {
     int coord[3];
     Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
@@ -152,7 +152,7 @@ int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iter
     int x = -1;
 
     if (iterFound != iterEnd) {
-        x = iterFound - iter;
+        x = gsl::narrow_cast<int>(iterFound - iter);
     }
 
     return x;

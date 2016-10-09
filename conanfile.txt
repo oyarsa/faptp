@@ -2,7 +2,6 @@
 boost/1.61.0@lasote/vcpkg
 gsl/0.0.1@KindDragon/stable
 jsoncpp/1.7.7@theirix/stable
-range-v3/0.0.0-1@lasote/vcpkg
 
 [generators]
 cmake

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <faptp/parametros.h>
 #include <faptp/Horario.h>
 #include <faptp/Semana.h>
 
@@ -30,14 +29,7 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professo
 
         positionCamada = getPosition(pDia, pBloco, i);
         if (matriz[positionCamada]
-            && matriz[positionCamada]->professor->getId() == professorId) {
-
-            if (verbose) {
-                std::cout << "\nColisao[" << professorId << " || "
-                        << matriz[positionCamada]->professor->id << "](" << positionCamada
-                        << "): " << i << " " << pDia << " " << pBloco
-                        << std::endl;
-            }
+                && matriz[positionCamada]->professor->getId() == professorId) {
             return true;
         }
     }
@@ -83,9 +75,6 @@ bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pPr
     int position = getPosition(pDia, pBloco, pCamada);
     bool professorAlocado = false;
     auto disc = pProfessorDisciplina->disciplina;
-
-    if (verbose)
-        std::cout << "(" << position << ")" << std::endl;
 
     if (creditos_alocados_[disc->id] >= disc->cargaHoraria) {
         return false;

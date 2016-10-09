@@ -29,7 +29,6 @@ set(FAPTP_INCLUDE
     include/faptp/Solucao.h
     include/faptp/Util.h
     include/faptp/UUID.h
-    include/faptp/parametros.h
     include/faptp/Algorithms.h
     include/faptp/Configuracao.h
     include/faptp/SA.h
@@ -53,7 +52,6 @@ set(FAPTP_SOURCE
     src/faptp/Solucao.cpp
     src/faptp/Util.cpp
     src/faptp/UUID.cpp
-    src/faptp/parametros.cpp
     src/faptp/SA.cpp
     src/faptp/ILS.cpp
     src/faptp/WDJU.cpp

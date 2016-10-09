@@ -18,7 +18,6 @@
     #include <modelo-grade/modelo_solver.h>
 #endif
 
-#include <faptp/parametros.h>
 #include <faptp/Professor.h>
 #include <faptp/Disciplina.h>
 #include <faptp/ProfessorDisciplina.h>
@@ -358,14 +357,11 @@ void Resolucao::carregarSolucao()
         dia = jsonHorario[i]["semana"].asInt();
         camada = jsonHorario[i]["camada"].asInt();
 
-        ProfessorDisciplina* professorDisciplina = professorDisciplinas[jsonHorario[i]["professordisciplina"].asString()];
-        if (verbose)
-            std::cout << "D:" << dia << " - B:" << bloco << " - C:" << camada << " - PDSP:" << professorDisciplina->disciplina->nome << "  - P:";
+        ProfessorDisciplina* professorDisciplina 
+            = professorDisciplinas[jsonHorario[i]["professordisciplina"].asString()];
         solucaoLeitura->horario->insert(dia, bloco, camada, professorDisciplina);
     }
 
-    if (verbose)
-        std::cout << "-----------------------------------------" << std::endl;
     solucao = solucaoLeitura;
 }
 
@@ -399,7 +395,7 @@ void Resolucao::atualizarDisciplinasIndex()
     // }
 
     for (size_t i = 0; i < disciplinas.size(); i++) {
-        disciplinasIndex[disciplinas[i]->id] = i;
+        disciplinasIndex[disciplinas[i]->id] = gsl::narrow_cast<int>(i);
     }
 }
 
@@ -1153,10 +1149,6 @@ int Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) cons
                 continue;
             }
 
-            if (verbose) {
-                std::cout << "Problemas no cruzamento tipo simples\n";
-            }
-
             delete filho;
             filho = fallback;
             return 0;
@@ -1204,7 +1196,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
     //puts("subsbloco");
     //printf("pais: %g %gradeCache\n", solucaoPai1->fo, solucaoPai2->fo);
     int dia, bloco, camada;
-    std::size_t pos;
     auto filho1 = new Solucao(*solucaoPai1);
     auto filho2 = new Solucao(*solucaoPai2);
     auto& mat1 = filho1->horario->matriz;
@@ -1214,7 +1205,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 
     // Escolhe posição de cruzamento. Se estiver no meio um bloco tenta de novo
     do {
-        pos = aleatorio::randomInt() % mat1.size();
+        auto pos = aleatorio::randomInt() % mat1.size();
         int coord[3];
         filho1->horario->get3DMatrix(pos, coord);
         dia = coord[1];
@@ -1700,8 +1691,6 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
     horario = pSolucao->horario.get();
 
     for (; apIter != apIterEnd; ++apIter) {
-        if (verbose)
-            std::cout << apIter->first << std::endl;
         auto alunoPerfil = alunoPerfis[apIter->first];
 
         apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
@@ -1737,9 +1726,6 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep
     for (auto it = current; it != std::end(disciplinasRestantes); ++it) {
         currentGrade = new Grade(*pGrade);
 
-        if (verbose)
-            std::cout << "Nivel: " << (deep) << " Disciplina: " << *it << ")\n";
-
         viavel = currentGrade->insert(getDisciplinaByName(*it));
         if (viavel) {
 
@@ -1756,13 +1742,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep
             if (deep == 0) {
                 //std::cout << "----------------------------" << std::endl;
             }
-        } else {
-            if (verbose)
-                std::cout << "[inviavel]" << std::endl;
         }
-    }
-    if (deep == 0) {
-        //std::cout << "############################" << std::endl;
     }
 
     return bestGrade;
@@ -1787,15 +1767,14 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
     horario = pSolucao->horario.get();
 
     for (; apIter != apIterEnd; ++apIter) {
-        if (verbose)
-            std::cout << "[" << apIter->first << "]" << std::endl;
         auto alunoPerfil = alunoPerfis[apIter->first];
 
         auto apRestante = alunoPerfil->restante;
 
-        apGrade = gerarGradeTipoCombinacaoConstrutiva(new Grade(
-                                                          blocosTamanho, alunoPerfil, horario,
-                                                          disciplinas, disciplinasIndex), apRestante.size());
+        apGrade = gerarGradeTipoCombinacaoConstrutiva(
+            new Grade(blocosTamanho, alunoPerfil, horario,
+                      disciplinas, disciplinasIndex), 
+            gsl::narrow_cast<int>(apRestante.size()));
 
         pSolucao->insertGrade(apGrade);
 
@@ -1859,8 +1838,6 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao)
 
     for (; apIter != apIterEnd; ++apIter) {
 
-        if (verbose)
-            std::cout << apIter->first << std::endl;
         alunoPerfil = alunoPerfis[apIter->first];
 
         apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas,
@@ -1884,7 +1861,6 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
     std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar;
 
     int random {};
-    int disciplinasSize {};
     int disciplinasRemoveMax {};
     int disciplinasRemoveRand {};
     double bestFO {};
@@ -1898,15 +1874,12 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
         auto apIter = alunoPerfis.begin();
         auto apIterEnd = alunoPerfis.end();
 
-        if (verbose)
-            std::cout << "------NGH" << i << std::endl;
-
         for (; apIter != apIterEnd; ++apIter) {
             alunoPerfil = alunoPerfis[apIter->first];
 
             grade = currentSolucao->grades[alunoPerfil->id];
 
-            disciplinasSize = grade->disciplinasAdicionadas.size();
+            auto disciplinasSize = grade->disciplinasAdicionadas.size();
             disciplinasRemoveMax = static_cast<int>(ceil(disciplinasSize * 1));
             disciplinasRemoveRand = Util::randomBetween(1, disciplinasRemoveMax);
 
@@ -1914,7 +1887,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
                 ProfessorDisciplina* professorDisciplinaRemovido = NULL;
 
                 disciplinasSize = grade->disciplinasAdicionadas.size();
-                random = Util::randomBetween(0, disciplinasSize);
+                random = Util::randomBetween(0, gsl::narrow_cast<int>(disciplinasSize));
                 grade->remove2(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
 
                 // Se houve uma remo��o
@@ -1926,16 +1899,11 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
             gerarGradeTipoGraspConstrucao(grade, professorDisciplinasIgnorar);
         }
         currentFO = currentSolucao->getFO();
-        if (verbose)
-            std::cout << std::endl << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
 
         if (bestFO < currentFO) {
             delete bestSolucao;
             bestSolucao = currentSolucao;
             bestFO = currentFO;
-
-            if (verbose)
-                std::cout << "------NGH new best: " << bestFO << std::endl;
             i = 0;
         } else {
             delete currentSolucao;
@@ -1958,8 +1926,6 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
     Grade* bestGrade {nullptr};
     Grade* currentGrade {nullptr};
 
-    int random {};
-
     double bestFO {};
     double currentFO {};
 
@@ -1975,14 +1941,12 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
             currentSolucao = new Solucao(*pSolucao);
             currentGrade = currentSolucao->grades[alunoPerfil->id];
 
-            if (verbose)
-                std::cout << std::endl << "------NGH" << i << std::endl;
-
             disciplinasRemovidas.clear();
             auto disciplinasRestantes = alunoPerfil->restante;
 
             for (int j = 0; j < (i + 1); j++) {
-                random = Util::randomBetween(0, currentGrade->disciplinasAdicionadas.size());
+                auto random = Util::randomBetween(0, 
+                    gsl::narrow_cast<int>(currentGrade->disciplinasAdicionadas.size()));
                 if (random == -1) {
                     break;
                 }
@@ -1998,15 +1962,10 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
             bestFO = bestGrade->getFO();
             currentFO = currentGrade->getFO();
-            if (verbose)
-                std::cout << "------NGH" << i << ": L(" << bestFO << ") < C(" << currentFO << ")" << std::endl;
             if (bestFO < currentFO) {
                 delete bestSolucao;
                 bestSolucao = currentSolucao;
                 bestFO = currentFO;
-
-                if (verbose)
-                    std::cout << "------NGH new best: " << bestFO << std::endl;
                 i = 0;
             } else {
                 delete currentSolucao;
@@ -2033,18 +1992,12 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
     clock_t t0 {};
     double diff {0};
 
-    if (verbose)
-        std::cout << "HORARIO (Solucao) :" << std::endl;
-
     int iteracoes = 0;
     while (diff <= gradeGraspTempoConstrucao) {
         currentSolucao = new Solucao(*pSolucao);
 
         t0 = clock();
         gerarGradeTipoGraspConstrucao(currentSolucao);
-
-        if (verbose)
-            std::cout << "----FIT: " << currentSolucao->getFO() << std::endl;
 
         temp = currentSolucao;
 
@@ -2059,9 +2012,6 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
         if (temp->id != currentSolucao->id)
             delete temp;
 
-        if (verbose)
-            std::cout << "----FIT(NGH):" << currentSolucao->getFO() << std::endl;
-
         diff += Util::timeDiff(clock(), t0);
 
         currentFO = currentSolucao->getFO();
@@ -2070,18 +2020,12 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
             pSolucao = currentSolucao;
             bestFO = currentFO;
             diff = 0;
-
-            if (verbose)
-                std::cout << "----NGH is the new best (gerarGradeTipoGrasp)" << std::endl;
         } else {
             delete currentSolucao;
         }
-        if (verbose)
-            std::cout << "-------------------------------------------------" << std::endl;
 
         iteracoes++;
     }
-    //std::cout << iteracoes << std::endl;
 
     return pSolucao->getFO();
 }
@@ -2098,7 +2042,7 @@ int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante)
                                    return d->cargaHoraria >= accept;
                                });
 
-    return std::distance(begin(apRestante), it);
+    return gsl::narrow_cast<int>(std::distance(begin(apRestante), it));
 }
 
 void Resolucao::showResult()
@@ -2134,7 +2078,7 @@ void Resolucao::teste()
     while (!sol) {
         sol = std::move(gerarSolucaoAleatoria());
     }
-    printf("hash: %u\n", sol->getHash());
+    printf("hash: %zu\n", sol->getHash());
 
     // bench grasp
     auto n = 5;
@@ -2366,7 +2310,7 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
         auto porc = par.second * 1. / pop.size() * 100;
         log << std::left << std::setw(11) << std::left << par.first
                 << std::setw(5) << par.second << porc << "\n";
-        printf("%-11u %-5d %g\n", par.first, par.second, porc);
+        printf("%-11zu %-5d %g\n", par.first, par.second, porc);
     }
 
     log << "\n\n";
@@ -2684,7 +2628,7 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         //puts("Nova melhor solucao!");
         log << "Nova melhor solucao!\n";
         char str[101];
-        sprintf(str, "%-8d %u\n", best.getFO(), best.getHash());
+        sprintf(str, "%-8d %zu\n", best.getFO(), best.getHash());
         //puts(str);
         log << str;
     }
@@ -3036,7 +2980,8 @@ Solucao* Resolucao::crossoverPMXCamada(
                                          });
             // Se o índice ainda faz parte do ponto de crossover, executa
             // para o novo valor.
-            idxPai2 = std::distance(begin(pai2.horario->matriz), pdPai2It);
+            idxPai2 = gsl::narrow_cast<int>(std::distance(
+                begin(pai2.horario->matriz), pdPai2It));
         }
         std::tie(bloco, dia, camada) = filho->horario->getCoords(idxPai2);
 
@@ -3566,9 +3511,9 @@ std::pair<int, ProfessorDisciplina*> Resolucao::get_random_notnull_aloc(
 ) const
 {
     ProfessorDisciplina* aloc{nullptr};
-    int pos{};
+    int pos;
     while (!aloc) {
-        pos = Util::randomBetween(0, sol.horario->matriz.size());
+        pos = Util::randomBetween(0, gsl::narrow_cast<int>(sol.horario->matriz.size()));
         aloc = sol.horario->at(pos);
     }
     return {pos, aloc};

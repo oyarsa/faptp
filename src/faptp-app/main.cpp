@@ -7,7 +7,6 @@
 #include <string>
 #include <chrono>
 
-#include <faptp/parametros.h>
 #include <faptp/Resolucao.h>
 #include <faptp/Output.h>
 #include <faptp/Configuracao.h>
@@ -35,8 +34,6 @@ constexpr Entrada input_json{4, 10};
 
 void semArgumentos()
 {
-    experimento = false;
-
     Resolucao r {Configuracao()
             .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
             .populacaoInicial(20)
@@ -121,8 +118,6 @@ novo_experimento(const std::string& input, const std::string& id,
                  int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
                  int exec_i)
 {
-    experimento = false;
-
     auto timenow = Output::timestamp();
     auto execstr = "Exec" + std::to_string(exec_i);
 
@@ -264,7 +259,6 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
 
 void novo_experimento_cli_fase2(const std::string& input, const std::string& file)
 {
-    experimento = true;
     std::ifstream config {file};
 
     // comentário do topo
@@ -445,7 +439,7 @@ void teste_hysst()
     auto fo = s->getFO();
     auto tempo = t.elapsed();
 
-    std::cout << "\nResultado:" << fo << "\n";
+    std::cout << "Resultado:" << fo << "\n";
     std::cout << "Tempo: " << tempo << "\n";
 
     auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
@@ -454,8 +448,6 @@ void teste_hysst()
 
 int main(int argc, char* argv[])
 {
-    verbose = false;
-    experimento = false;
     if (argc == 3) {
         // Primeiro argumento é a entrada, o segundo é o arquivo de configuração
         //novo_experimento_cli(argv[1], argv[2]);
@@ -470,8 +462,8 @@ int main(int argc, char* argv[])
     } else {
         //semArgumentos();
         //teste_sa_ils();
-        teste_wdju();
-        //teste_hysst();
+        //teste_wdju();
+        teste_hysst();
 
         //teste_tempo();
     }

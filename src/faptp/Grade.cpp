@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <unordered_map>
 
-#include <faptp/parametros.h>
 #include <faptp/Grade.h>
 #include <faptp/Resolucao.h>
 #include <faptp/Semana.h>
@@ -49,10 +48,6 @@ bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 {
     auto success = aluno->getPeriodoNum() >= pDisciplina->periodoMinimoNum();
 
-    if (!success && verbose) {
-        std::cout << "---INVALIDO[" << pDisciplina->nome << "] PERIDOMIN\n";
-    }
-
     return success;
 }
 
@@ -66,12 +61,10 @@ bool Grade::discRepetida(const Disciplina* pDisciplina)
                                   return d == pDisciplina;
                               });
     if (found != end(disciplinasAdicionadas)) {
-        if (verbose)
-            std::cout << "---INVIAVEL[" << pDisciplina->nome << "] EQUIV REPETE\n";
         return true;
     }
     // Percorre as disciplinas cursadas do aluno e verifica se o nome de pDisciplina
-    // � equivalente a alguma. Se sim, ela � uma disciplina repetida e n�o pode
+    // é equivalente a alguma. Se sim, ela � uma disciplina repetida e n�o pode
     // ser inserida
     return !aluno->isRestante(pDisciplina->getId());
 }
@@ -106,11 +99,6 @@ bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
         viavel = false;
     }
 
-    if (!viavel) {
-        if (verbose)
-            std::cout << "Nao tem os pre requisitos" << std::endl;
-    }
-
     return viavel;
 }
 
@@ -125,16 +113,11 @@ bool Grade::havePreRequisitos(const Disciplina* const pDisciplina)
     for (const auto& preRequisito : pDisciplinaPreRequisitos) {
         // Se não foi encontrado, retorna falso
         if (disciplinasAprovadas.find(preRequisito) == end(disciplinasAprovadas)) {
-            if (verbose)
-                std::cout << "---INVIAVEL[" << pDisciplina->nome << "] PREREQ [" << preRequisito << "]\n";
             viavel = false;
             break;
         }
     }
 
-    if (!viavel && verbose) {
-        std::cout << "Nao tem os pre requisitos" << std::endl;
-    }
     return viavel;
 }
 
@@ -154,9 +137,6 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
             // Se o slot não for nulo é porque já tem alguém lá. Logo,
             // há uma colisão
             if (matriz[currPosGrade]) {
-                if (verbose)
-                    std::cout << "---INVIAVEL[" << pDisciplina->nome << "] COLISAO [" << i << "," << j << "]\n";
-
                 return false;
             }
 
@@ -168,14 +148,11 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
 
 bool Grade::isViable(const Disciplina* pDisciplina, int pCamada)
 {
-    if (verbose && !pDisciplina->ofertada)
-        std::cout << "---INVIAVEL[" << pDisciplina->nome << "] N OFERT\n";
-    return
-            pDisciplina->ofertada &&
-            !discRepetida(pDisciplina) &&
-            havePreRequisitos(pDisciplina) &&
-            checkCollision(pDisciplina, pCamada) &&
-            hasPeriodoMinimo(pDisciplina);
+    return pDisciplina->ofertada &&
+           !discRepetida(pDisciplina) &&
+           havePreRequisitos(pDisciplina) &&
+           checkCollision(pDisciplina, pCamada) &&
+           hasPeriodoMinimo(pDisciplina);
 }
 
 void Grade::add(Disciplina* pDisciplina, int pCamada)
@@ -188,9 +165,6 @@ void Grade::add(Disciplina* pDisciplina, int pCamada)
             auto currPd = horario->matriz[currPosHorario];
 
             if (currPd && currPd->disciplina == pDisciplina) {
-                if (verbose)
-                    std::cout << currPosHorario << ", ";
-
                 matriz[currPosGrade] = currPd;
             }
 
@@ -234,11 +208,7 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
 
             viavel = isViable(pDisciplina, camada);
             if (viavel) {
-                if (verbose)
-                    std::cout << "----ADD: " << pDisciplina->id << "[";
                 add(pDisciplina, camada);
-                if (verbose)
-                    std::cout << "]" << std::endl;
             }
             if (viavel || force) {
                 if (professorDisciplinaTemp != nullptr) {
@@ -297,9 +267,6 @@ Disciplina* Grade::remove2(Disciplina* pDisciplina, ProfessorDisciplina* & pProf
     int x = getFirstDisciplina(pDisciplina, matriz);
 
     pProfessorDisciplina = NULL;
-
-    if (verbose)
-        std::cout << "----REM: " << pDisciplina->id << std::endl;
 
     problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 

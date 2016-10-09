@@ -28,9 +28,9 @@ public:
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
 
     // Bloco, dia, camada
-    void get3DMatrix(int pLinear, int triDimensional[3]);
+    void get3DMatrix(std::size_t pLinear, int triDimensional[3]);
     // Bloco, dia, camada
-    std::tuple<int, int, int> getCoords(int pLinear) const;
+    std::tuple<int, int, int> getCoords(std::size_t pLinear) const;
 
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
 

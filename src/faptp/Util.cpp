@@ -11,23 +11,17 @@ int Util::getPosition(int y, int x, int z, int Y, int Z)
     return (x + (y * Y) + (z * Y * Z));
 }
 
-void Util::get3DMatrix(int pLinear, int triDimensional[3], int X, int Y, int Z)
+void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, int Z)
 {
-    int x {};
-    int y {};
-    int z {};
-    int tamanho {X * Y * Z};
+    auto tamanho = X * Y * Z;
 
-    // Dia
-    x = ((pLinear % tamanho) / Y) % X;
-    // Bloco
-    y = ((pLinear % tamanho) % Y);
-    // Camada
-    z = pLinear / (X * Y);
+    auto dia = ((pLinear % tamanho) / Y) % X;
+    auto bloco = ((pLinear % tamanho) % Y);
+    auto camada = pLinear / (X * Y);
 
-    triDimensional[0] = y; // Bloco
-    triDimensional[1] = x; // Dia
-    triDimensional[2] = z; // Camada
+    triDimensional[0] = gsl::narrow_cast<int>(bloco); 
+    triDimensional[1] = gsl::narrow_cast<int>(dia);
+    triDimensional[2] = gsl::narrow_cast<int>(camada);
 }
 
 std::vector<std::string>& Util::strSplit(const std::string& s, char delim, std::vector<std::string>& elems)

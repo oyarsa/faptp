@@ -12,6 +12,10 @@ public:
           long long tempo_mutation, long long tempo_hill, 
           int max_level, int t_start, int t_step, int it_hc);
 
+    HySST(const HySST& outro);
+
+    HySST(HySST&& outro);
+
     ~HySST();
 
     std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial);
