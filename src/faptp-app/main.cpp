@@ -426,6 +426,8 @@ void teste_wdju()
 
 void teste_hysst()
 {
+    std::cout << "HySST\n";
+
     Timer t;
     Resolucao r{Configuracao()
         .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
@@ -468,4 +470,3 @@ int main(int argc, char* argv[])
         //teste_tempo();
     }
 }
-
