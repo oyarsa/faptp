@@ -2,7 +2,7 @@
 #include <utility>
 #include <stdexcept>
 #include <iomanip>
-
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <faptp/Util.h>
 #include <faptp/Aleatorio.h>
 
@@ -118,10 +118,10 @@ std::size_t Util::hash_string(const std::string& str)
 
 std::string Util::dateTime()
 {
+    auto facet = new boost::posix_time::time_facet("%d-%m-%Y %H:%M:%S");
     std::ostringstream oss;
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    oss << std::put_time(&tm, "%d-%m-%Y %H:%M:%S");
+    oss.imbue(std::locale(oss.getloc(), facet));
+    oss << boost::posix_time::second_clock::local_time();
     return oss.str();
 }
 

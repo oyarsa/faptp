@@ -3,12 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <ios>
-#include <ctime>
 #include <string>
 #include <chrono>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <faptp/Resolucao.h>
 #include <faptp/Output.h>
 #include <faptp/Configuracao.h>
@@ -471,14 +467,4 @@ int main(int argc, char* argv[])
 
         //teste_tempo();
     }
-
-    boost::posix_time::time_facet* facet =
-        new boost::posix_time::time_facet("%d-%m-%Y %H:%M:%S");
-    std::ostringstream oss;
-    oss.imbue(std::locale(oss.getloc(), facet));
-    oss << boost::posix_time::second_clock::local_time();
-    auto d = oss.str();
-    std::cout << d << "\n";
-
-
 }
