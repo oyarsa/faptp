@@ -1,18 +1,3 @@
-nbproject/private/
 _build/
-nbbuild/
-dist/
-nbdist/
-nbactions.xml
-nb-configuration.xml
-.nb-gradle/
-testes/
 experimento/
-<<<<<<< HEAD
 teste/
-*.DS_Store
-*.TMP
-**/.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
