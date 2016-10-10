@@ -129,10 +129,10 @@ struct hash_pair
 std::string dateTime();
 
 template <typename T>
-void log_and_print(std::ostream& log, const T& t)
+void logprint(std::ostream& log, const T& t)
 {
-    log << t << "\n";
-    std::cout << "\n";
+    log << t;
+    std::cout << t;
 }
 
 };

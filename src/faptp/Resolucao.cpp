@@ -2199,23 +2199,23 @@ Resolucao::converteHorario(Solucao* pSolucao) const
 void Resolucao::logExperimentos()
 {
     using boost::format;
-    using Util::log_and_print;
+    using Util::logprint;
 
-    log_and_print(log, format("Tempo total selecao: %d") % tempoTotalSelec);
-    log_and_print(log, format("Tempo total elitismo: %d") % tempoTotalElit);
+    logprint(log, format("Tempo total selecao: %d") % tempoTotalSelec);
+    logprint(log, format("Tempo total elitismo: %d") % tempoTotalElit);
 
     for (auto i = 0; i < numcruz; i++) {
-        log_and_print(log, format("C%d: tempo total: %llu iguais: %d melhores: %d")
+        logprint(log, format("C%d: tempo total: %llu iguais: %d melhores: %d")
                       % (i + 1) % tempoTotalCruz[i] % contadorIguaisCruz[i] 
                       % contadorMelhoresCruz[i]);
     }
     for (auto i = 0; i < numcruz; i++) {
-        log_and_print(log, format("M%d: tempo total: %llu iguais: %d melhores: %d")
+        logprint(log, format("M%d: tempo total: %llu iguais: %d melhores: %d")
                       % (i + 1) % tempoTotalMut[i] % contadorIguaisMut[i]
                       % contadorMelhoresMut[i]);
     }
 
-    log_and_print(log, "\n");
+    logprint(log, "\n");
 }
 
 Solucao*

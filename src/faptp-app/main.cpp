@@ -5,6 +5,7 @@
 #include <ios>
 #include <string>
 #include <chrono>
+#include <boost/format.hpp>
 #include <faptp/Resolucao.h>
 #include <faptp/Output.h>
 #include <faptp/Configuracao.h>
@@ -314,6 +315,9 @@ void novo_experimento_cli_fase2(const std::string& input, const std::string& fil
 template <typename F>
 std::string teste_tempo_iter(int num_exec, F f)
 {
+    using Util::logprint;
+    using boost::format;
+
     std::ostringstream oss;
 
     for (auto i = 0; i < num_exec; i++) {
@@ -324,19 +328,16 @@ std::string teste_tempo_iter(int num_exec, F f)
             .tentativasMutacao(4)
         };
 
-        std::cout << "i: " << i;
-        oss << "i: " << i;
+        logprint(oss, format("i: %d") % i);
 
         Timer t;
         auto s = f(r);
 
-        std::cout << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
-        std::cout << "\t" << "fo_alvo: " << r.foAlvo << " - tempo_alvo: " << r.tempoAlvo << "\n";
-        oss << " - fo: " << s->getFO() << " - t: " << t.elapsed() << "\n";
-        oss << "\t" << "fo_alvo: " << r.foAlvo << " - tempo_alvo: " << r.tempoAlvo << "\n";
+        logprint(oss, format(" - fo: %d - t: %lld\n") % s->getFO() % t.elapsed());
+        logprint(oss, format("\t fo_alvo: %d - tempo_alvo: %lld\n") % r.foAlvo % r.tempoAlvo);
     }
-    std::cout << "\n";
-    oss << "\n";
+
+    logprint(oss, "\n");
 
     return oss.str();
 }
@@ -352,29 +353,24 @@ void teste_tempo()
     oss << "Tempo maximo: " << timeout << "\n";
     oss << "Numero de execucoes: " << num_exec << "\n\n";
 
-    std::cout << "SA-ILS\n";
-    oss << "SA-ILS\n";
+    Util::logprint(oss, "SA-ILS\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioSA_ILS(timeout);
     });
 
-    std::cout << "HySST\n";
-    oss << "HySST\n";
+    Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioHySST(timeout, 100, 100);
     });
 
-    std::cout << "WDJU\n";
-    oss << "WDJU\n";
+    Util::logprint(oss, "WDJU\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioWDJU(timeout);
     });
 
-    /*std::ofstream out;
+    std::ofstream out;
     out.open("tempos.txt", std::ios::out | std::ios::app);
-    out << oss.str() << std::endl;*/
-
-    throw;
+    out << oss.str() << std::endl;
 }
 
 void teste_sa_ils()
@@ -465,6 +461,8 @@ int main(int argc, char* argv[])
         //teste_wdju();
         //teste_hysst();
 
-        //teste_tempo();
+        teste_tempo();
     }
+
+    throw;
 }
