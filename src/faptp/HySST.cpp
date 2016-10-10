@@ -28,7 +28,7 @@ struct HySST::Impl
                                                 const Solucao& solucao);
     std::unique_ptr<Solucao> first_improvement(const Solucao& solucao) const;
 
-    std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao);
+    std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
 
     boost::optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
 
@@ -196,15 +196,15 @@ std::unique_ptr<Solucao> HySST::Impl::first_improvement(
     return s;
 }
 
-std::unique_ptr<Solucao> HySST::Impl::ejection_chains(const Solucao& solucao)
+std::unique_ptr<Solucao> HySST::Impl::ejection_chains(const Solucao& solucao) const
 {
     auto s = solucao.clone();
     auto slot = pick_place(*s);
 
     for (auto i = 0; i < it_hc; i++) {
         auto cur = s->clone();
-        if (auto nboostt = ejection_move(*cur, slot)) {
-            slot = *nboostt;
+        if (auto next = ejection_move(*cur, slot)) {
+            slot = *next;
             s = move(cur);
         } else {
             slot = pick_place(*s);
@@ -356,10 +356,12 @@ Resolucao::Vizinhanca HySST::Impl::choose_mut() const
 
 // Interface
 
-HySST::HySST(Resolucao& res, long long tempo_total, long long tempo_mutation, long long tempo_hill, int max_level, int t_start, int t_step, int it_hc)
-    : d_{std::make_unique<Impl>(res, tempo_total, tempo_mutation, tempo_hill,
-                                max_level, t_start, t_step, it_hc)} {}
-
+HySST::HySST(Resolucao& res, long long tempo_total, long long tempo_mutation, 
+             long long tempo_hill, int max_level, int t_start, 
+             int t_step, int it_hc)
+    : d_{std::make_unique<Impl>(
+        res, tempo_total, tempo_mutation, tempo_hill,
+        max_level, t_start, t_step, it_hc)} {}
 
 HySST::HySST(const HySST& outro) : d_{std::make_unique<Impl>(*outro.d_)} {}
 

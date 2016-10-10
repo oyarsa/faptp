@@ -2625,16 +2625,41 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
     }
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(SA& sa, ILS& ils)
+std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(SA& sa, ILS& ils, long long timeout)
 {
     auto s = gerarSolucaoAleatoriaNotNull();
-    auto s_sa = sa.gerar_horario(*s);
-    auto s_ils = ils.gerar_horario(*s_sa);
+    Timer t;
+    tempoAlvo = t.elapsed();
+
+    while (t.elapsed() < timeout) {
+        auto s_sa = sa.gerar_horario(*s);
+        auto tempo = t.elapsed();
+        auto s_ils = ils.gerar_horario(*s_sa);
+
+        if (s_ils->getFO() > s->getFO()) {
+            s = move(s_ils);
+            tempoAlvo = tempo + ils.tempo_fo();
+        }
+    }
 
     foAlvo = ils.maior_fo();
-    tempoAlvo = ils.tempo_fo();
 
-    return s_ils;
+    return s;
+}
+
+std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
+{
+    SA sa{*this, 0.97, 1, 10'000, 500, timeout / 100,{
+        {Vizinhanca::ES, 25},
+        {Vizinhanca::EM, 43},
+        {Vizinhanca::RS, 20},
+        {Vizinhanca::RM, 10},
+        {Vizinhanca::KM, 2}
+    }};
+
+    ILS ils{*this, 10'000, 10, 1, 10, timeout / 100};
+
+    return gerarHorarioSA_ILS(sa, ils, timeout);
 }
 
 std::unique_ptr<Grade>
@@ -2720,21 +2745,6 @@ Grade* Resolucao::GRASP(AlunoPerfil* alunoPerfil, Solucao* sol) const
     }
 
     return best.release();
-}
-
-std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
-{
-    SA sa {*this, 0.97, 1, 10'000, 5, timeout/2, {
-            {Vizinhanca::ES, 25},
-            {Vizinhanca::EM, 43},
-            {Vizinhanca::RS, 20},
-            {Vizinhanca::RM, 10},
-            {Vizinhanca::KM, 2}
-    }};
-
-    ILS ils {*this, 10'000, 10, 1, 10, timeout/2};
-
-    return gerarHorarioSA_ILS(sa, ils);
 }
 
 std::vector<ProfessorDisciplina*>

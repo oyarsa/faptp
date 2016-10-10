@@ -19,7 +19,7 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial)
     tempo_fo_ = t_.elapsed();
 
     auto s_atual = descent_phase(s_inicial);
-    auto s_best = std::make_unique<Solucao>(*s_atual);
+    auto s_best = s_atual->clone();
 
     auto p_size = p0_;
     auto iter = 0;
@@ -41,7 +41,7 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial)
             maior_fo_ = s_best->getFO();
             tempo_fo_ = t_.elapsed();
         } else {
-            s_atual = std::make_unique<Solucao>(*s_best);
+            s_atual = s_best->clone();
             iter++;
         }
 
@@ -81,35 +81,28 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     }
 }
 
- std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao)
-{
-    const std::unordered_set<Resolucao::Vizinhanca> movimentos {
+ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
+ {
+    static const std::unordered_set<Resolucao::Vizinhanca> movimentos{
             Resolucao::Vizinhanca::ES,
             Resolucao::Vizinhanca::EM,
             Resolucao::Vizinhanca::RS,
-            Resolucao::Vizinhanca::RM,
-            Resolucao::Vizinhanca::KM
+            Resolucao::Vizinhanca::RM
     };
 
-    auto best = std::make_unique<Solucao>(solucao);
-    auto movimentos_restantes = movimentos;
+    auto s_best = solucao.clone();
+    auto iter = 0;
 
-    while (!movimentos_restantes.empty() && t_.elapsed() < timeout_) {
-        auto vizinhanca = escolher_vizinhanca(movimentos_restantes);
-        movimentos_restantes.erase(vizinhanca);
-        auto vizinho = gerar_vizinho(vizinhanca, *best);
-
-        if (vizinho->getFO() >= best->getFO()) {
-            if (vizinho->getFO() > best->getFO()) {
-                movimentos_restantes = movimentos;
-                maior_fo_ = vizinho->getFO();
-                tempo_fo_ = t_.elapsed();
-            }
-            best = move(vizinho);
+    while (iter < max_iter_ && t_.elapsed() < timeout_) {
+        iter++;
+        auto s_viz = gerar_vizinho(escolher_vizinhanca(movimentos), *s_best);
+        if (s_viz->getFO() >= s_best->getFO()) {
+            iter = 0;
+            s_best = move(s_viz);
         }
     }
 
-    return best;
+    return s_best;
 }
 
 Resolucao::Vizinhanca ILS::escolher_vizinhanca(

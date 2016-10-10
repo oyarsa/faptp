@@ -14,30 +14,38 @@ SA::SA(const Resolucao& res, double alfa, double t0, int max_iter, int max_rehea
 
 std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
 {
-    auto s_atual = std::make_unique<Solucao>(s_inicial);
-    auto s_best = std::make_unique<Solucao>(s_inicial);
+    auto s_atual = s_inicial.clone();
+    auto s_best = s_atual->clone();
 
     auto temp = t0_;
     auto reheats = 0;
-    auto tempoInicial = Util::now();
+    auto iter_t = 0;
+    auto eps = 0.01;
     Timer t;
 
     while (reheats < max_reheats_ && t.elapsed() < timeout_) {
-        for (auto i = 0; i < max_iter_ && t.elapsed() < timeout_; i++) {
+        while (iter_t < max_iter_ && t.elapsed() < timeout_) {
+            iter_t++;
             auto s_viz = gerar_vizinho(*s_atual);
             auto delta = s_viz->getFO() - s_atual->getFO();
 
-            if (delta > 0 || Util::randomDouble() < std::exp(-delta / temp)) {
-                s_atual = std::move(s_viz);
+            if (delta > 0) {
+                s_atual = move(s_viz);
 
                 if (s_atual->getFO() > s_best->getFO()) {
-                    s_best = std::make_unique<Solucao>(*s_atual);
+                    s_best = s_atual->clone();
+                }
+            } else {
+                auto x = Util::randomDouble();
+                if (x < std::exp(-delta/temp)) {
+                    s_atual = move(s_viz);
                 }
             }
         }
 
         temp *= alfa_;
-        if (temp < 0.1) {
+        iter_t = 0;
+        if (temp < eps) {
             reheats++;
             temp = t0_;
         }

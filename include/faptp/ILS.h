@@ -34,7 +34,7 @@ public:
 private:
     std::unique_ptr<Solucao> gerar_vizinho(Resolucao::Vizinhanca vizinhanca,
                                            const Solucao& solucao) const;
-    std::unique_ptr<Solucao> descent_phase(const Solucao& solucao);
+    std::unique_ptr<Solucao> descent_phase(const Solucao& solucao) const;
 
     Resolucao::Vizinhanca escolher_vizinhanca(
         const std::unordered_set<Resolucao::Vizinhanca>& movimentos) const;

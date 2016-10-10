@@ -328,7 +328,7 @@ std::string teste_tempo_iter(int num_exec, F f)
             .tentativasMutacao(4)
         };
 
-        logprint(oss, format("i: %d") % i);
+        logprint(oss, format("i: %d") % (i+1));
 
         Timer t;
         auto s = f(r);
@@ -344,7 +344,8 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    constexpr auto timeout = 30 * 1000; //ms
+    constexpr auto timeout_sec = 31;
+    constexpr auto timeout = timeout_sec * 1000; //ms
     constexpr auto num_exec = 5;
 
     std::ostringstream oss;
@@ -369,7 +370,8 @@ void teste_tempo()
     });
 
     std::ofstream out;
-    out.open("tempos.txt", std::ios::out | std::ios::app);
+    out.open((boost::format("resultados%d.txt") % timeout_sec).str(), 
+             std::ios::out | std::ios::app);
     out << oss.str() << std::endl;
 }
 

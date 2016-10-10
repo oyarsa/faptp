@@ -64,7 +64,7 @@ public:
     Solucao* gerarHorarioAG3();
 
     std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
-    std::unique_ptr<Solucao> gerarHorarioSA_ILS(SA& sa, ILS& ils);
+    std::unique_ptr<Solucao> gerarHorarioSA_ILS(SA& sa, ILS& ils, long long timeout);
 
     std::unique_ptr<Solucao> gerarHorarioWDJU(long long timeout);
     std::unique_ptr<Solucao> gerarHorarioWDJU(WDJU& wdju);
