@@ -12,6 +12,7 @@
 #include <set>
 
 #include <gsl/gsl>
+#include <boost/format.hpp>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -2197,30 +2198,24 @@ Resolucao::converteHorario(Solucao* pSolucao) const
 
 void Resolucao::logExperimentos()
 {
-    char str[101];
-    sprintf(str, "Tempo total selecao: %llu", tempoTotalSelec);
-    log << str << "\n";
-    puts(str);
+    using boost::format;
+    using Util::log_and_print;
 
-    sprintf(str, "Tempo total elitismo: %llu", tempoTotalElit);
-    log << str << "\n";
-    puts(str);
+    log_and_print(log, format("Tempo total selecao: %d") % tempoTotalSelec);
+    log_and_print(log, format("Tempo total elitismo: %d") % tempoTotalElit);
 
     for (auto i = 0; i < numcruz; i++) {
-        sprintf(str, "C%d: tempo total: %llu iguais: %d_ melhores: %d_", i + 1,
-                tempoTotalCruz[i], contadorIguaisCruz[i], contadorMelhoresCruz[i]);
-        log << str << "\n";
-        puts(str);
+        log_and_print(log, format("C%d: tempo total: %llu iguais: %d melhores: %d")
+                      % (i + 1) % tempoTotalCruz[i] % contadorIguaisCruz[i] 
+                      % contadorMelhoresCruz[i]);
     }
-    for (auto i = 0; i < 2; i++) {
-        sprintf(str, "M%d: tempo total: %llu iguais: %d_ melhores: %d_", i + 1,
-                tempoTotalMut[i], contadorIguaisMut[i], contadorMelhoresMut[i]);
-        log << str << "\n";
-        puts(str);
+    for (auto i = 0; i < numcruz; i++) {
+        log_and_print(log, format("M%d: tempo total: %llu iguais: %d melhores: %d")
+                      % (i + 1) % tempoTotalMut[i] % contadorIguaisMut[i]
+                      % contadorMelhoresMut[i]);
     }
 
-    log << "\n\n";
-    puts("\n");
+    log_and_print(log, "\n");
 }
 
 Solucao*
@@ -2625,12 +2620,8 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         iteracaoAlvo = iteracaoAtual;
         tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(),
                                      tempoInicio);
-        //puts("Nova melhor solucao!");
         log << "Nova melhor solucao!\n";
-        char str[101];
-        sprintf(str, "%-8d %zu\n", best.getFO(), best.getHash());
-        //puts(str);
-        log << str;
+        log << boost::format("%-8d %u\n") % best.getFO() % best.getHash();
     }
 }
 

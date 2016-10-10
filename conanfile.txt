@@ -1,7 +1,11 @@
 [requires]
-boost/1.61.0@lasote/vcpkg
+Boost/1.60.0@lasote/stable
 gsl/0.0.1@KindDragon/stable
 jsoncpp/1.7.7@theirix/stable
 
 [generators]
 cmake
+
+[imports]
+bin, *.dll -> ./bin
+lib, *.dylib* -> ./bin

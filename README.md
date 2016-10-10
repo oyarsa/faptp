@@ -41,10 +41,13 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
   
 ## Dependências
 - C++14 (testado com Visual C++ 2015 Update 2)
-- Guidelines Support Library (testado com a implementação da Microsoft, não incluso no repositório)
-- JsonCpp (incluso no repositório em src/includes)
+- Bibliotecas: 
+	- Guidelines Support Library (testado com a implementação da Microsoft)
+	- JsonCpp
+	- Boost
+	* O gerenciador de pacotes Conan é utilizado, com as dependências descritas em conanfile.txt
 - Se o modelo matemático for utilizado (configurar com MODELO = True no CMakeLists.txt), uma instalação
-  do CPLEX é necessária
+  do CPLEX é necessária, assim como uma copia do repositório ModeloGrade na mesma pasta do faPTP
 
 ## Orientações
 - O código é escrito em C++14. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.

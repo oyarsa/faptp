@@ -43,7 +43,7 @@ std::vector<std::string> Util::strSplit(const std::string& s, char delim)
 
 double Util::timeDiff(clock_t tf, clock_t t0)
 {
-    return ((((float) tf - (float) t0) / 1000000.0F) * 1000);
+    return (tf - t0) / 1000000.0 * 1000;
 }
 
 long long Util::chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t_end,
@@ -61,7 +61,7 @@ std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()
 int Util::randomBetween(int min, int max)
 {
     if (max < min) {
-        throw std::logic_error("Minimo maior que maximo em randomBetween");
+        throw std::logic_error{"Minimo maior que maximo em randomBetween"};
     }
 
     if (max == min) {

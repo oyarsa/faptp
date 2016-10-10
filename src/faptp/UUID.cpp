@@ -13,7 +13,6 @@
 
 #include <faptp/UUID.h>
 
-[[suppress(bounds.1)]]
 std::string UUID::GenerateUuid()
 {
     const int UUID_LENGTH = 40;
