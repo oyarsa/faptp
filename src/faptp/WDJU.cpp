@@ -15,13 +15,13 @@ WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
 
 std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao)
 {
-    int jump_height{0};
-    double jump_factor{0.005};
-
-    auto s_best = std::make_unique<Solucao>(solucao);
-    auto s_atual = std::make_unique<Solucao>(solucao);
-
+    auto jump_height = 0;
     std::vector<double> history{};
+    auto jump_factor = next_jump(history);
+
+    auto s_best = solucao.clone();
+    auto s_atual = solucao.clone();
+
     auto iter = 0;
     Timer t;
 
@@ -29,18 +29,18 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao)
     tempo_fo_ = t.elapsed();
 
     while (t.elapsed() < timeout_) {
-        auto viz = gerar_vizinho(*s_atual);
-        if (viz->getFO() > s_atual->getFO() - jump_height) {
+        auto s_viz = gerar_vizinho(*s_atual);
+
+        if (s_viz->getFO() >= s_atual->getFO() - jump_height) {
             iter = 0;
             jump_height--;
-            s_atual = move(viz);
+            s_atual = move(s_viz);
 
             if (s_atual->getFO() > s_best->getFO()) {
-                s_best = std::make_unique<Solucao>(*s_atual);
+                s_best = s_atual->clone();
 
                 history.push_back(jump_factor);
-                jump_height = 0;
-                jump_factor = next_jump(history);
+                jump_factor = 1;
 
                 maior_fo_ = s_best->getFO();
                 tempo_fo_ = t.elapsed();
@@ -73,8 +73,7 @@ std::unique_ptr<Solucao> WDJU::gerar_vizinho(const Solucao& solucao) const
         Resolucao::Vizinhanca::ES,
         Resolucao::Vizinhanca::EM,
         Resolucao::Vizinhanca::RS,
-        Resolucao::Vizinhanca::RM,
-        Resolucao::Vizinhanca::KM
+        Resolucao::Vizinhanca::RM
     };
 
     switch (Util::randomChoice(movimentos)) {
@@ -82,7 +81,6 @@ std::unique_ptr<Solucao> WDJU::gerar_vizinho(const Solucao& solucao) const
     case Resolucao::Vizinhanca::EM: return res_.event_move(solucao);
     case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);
     case Resolucao::Vizinhanca::RM: return res_.resource_move(solucao);
-    case Resolucao::Vizinhanca::KM: return res_.kempe_move(solucao);
     default: return std::make_unique<Solucao>(solucao);
     }
 }

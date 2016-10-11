@@ -24,7 +24,7 @@ std::unique_ptr<Solucao> ILS::gerar_horario(const Solucao& s_inicial)
     auto p_size = p0_;
     auto iter = 0;
 
-     for (auto i = 0; i < num_iter_ && t_.elapsed() < timeout_; i++) {
+    for (auto i = 0; i < num_iter_ && t_.elapsed() < timeout_; i++) {
         for (auto j = 0; j < p_size && t_.elapsed() < timeout_; j++) {
             s_atual = perturbacao(*s_atual);
         }
@@ -81,9 +81,9 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
     }
 }
 
- std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
- {
-    static const std::unordered_set<Resolucao::Vizinhanca> movimentos{
+std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
+{
+    static const std::unordered_set<Resolucao::Vizinhanca> movimentos {
             Resolucao::Vizinhanca::ES,
             Resolucao::Vizinhanca::EM,
             Resolucao::Vizinhanca::RS,
@@ -120,3 +120,4 @@ std::unique_ptr<Solucao> ILS::perturbacao(const Solucao& solucao) const
         return res_.kempe_move(solucao);
     }
 }
+

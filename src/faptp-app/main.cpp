@@ -344,29 +344,29 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    constexpr auto timeout_sec = 31;
-    constexpr auto timeout = timeout_sec * 1000; //ms
-    constexpr auto num_exec = 5;
+    const auto timeout_sec = 120;
+    const auto timeout_ms = timeout_sec * 1000;
+    const auto num_exec = 10;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
     oss << "Data: " << Util::dateTime() << "\n";
-    oss << "Tempo maximo: " << timeout << "\n";
+    oss << "Tempo maximo: " << timeout_ms << "\n";
     oss << "Numero de execucoes: " << num_exec << "\n\n";
 
     Util::logprint(oss, "SA-ILS\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-        return r.gerarHorarioSA_ILS(timeout);
+        return r.gerarHorarioSA_ILS(timeout_ms);
     });
 
     Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-        return r.gerarHorarioHySST(timeout, 100, 100);
+        return r.gerarHorarioHySST(timeout_ms, 100, 100);
     });
 
     Util::logprint(oss, "WDJU\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-        return r.gerarHorarioWDJU(timeout);
+        return r.gerarHorarioWDJU(timeout_ms);
     });
 
     std::ofstream out;

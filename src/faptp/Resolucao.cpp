@@ -2649,7 +2649,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(SA& sa, ILS& ils, long lo
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa{*this, 0.97, 1, 10'000, 500, timeout / 100,{
+    SA sa{*this, 0.97, 1, 100, 500, timeout / 100, {
         {Vizinhanca::ES, 25},
         {Vizinhanca::EM, 43},
         {Vizinhanca::RS, 20},
@@ -3635,7 +3635,7 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioWDJU(long long timeout)
 {
-    WDJU wdju{*this, timeout, 10, 0.01};
+    WDJU wdju{*this, timeout, 30, 0.001};
     return gerarHorarioWDJU(wdju);
 }
 
