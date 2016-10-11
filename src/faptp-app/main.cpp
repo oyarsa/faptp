@@ -82,7 +82,7 @@ void semArgumentos()
 }
 
 std::pair<long long, int>
-novo_experimento(const std::string& input, const std::string& id,
+experimento_ag(const std::string& input, const std::string& id,
                  int n_indiv, int taxa_mut, int p_cruz,
                  const std::string& oper_cruz, int grasp_iter, 
                  int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
@@ -98,6 +98,8 @@ novo_experimento(const std::string& input, const std::string& id,
             return Configuracao::TipoCruzamento::ciclo;
         } else if (oper_cruz == "OX") {
             return Configuracao::TipoCruzamento::ordem;
+        } else {
+            return Configuracao::TipoCruzamento::pmx;
         }
     }();
 
@@ -125,15 +127,15 @@ novo_experimento(const std::string& input, const std::string& id,
     return {tempo, fo};
 }
 
-void novo_experimento_cli(const std::string& input, const std::string& file)
+void experimento_ag_cli(const std::string& input, const std::string& file)
 {
-    std::ifstream config {file};
-
     // comentário do topo
     // formato entrada:
     // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec
     // formato saida:
     // ID,NExec,Tempo,Fo
+
+    std::ifstream config {file};
 
     std::string id, cruz_oper;
     int taxa_mut, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
@@ -153,7 +155,7 @@ void novo_experimento_cli(const std::string& input, const std::string& file)
         for (auto i = 0; i < n_exec; i++) {
             long long tempo;
             int fo;
-            std::tie(tempo, fo) = novo_experimento(
+            std::tie(tempo, fo) = experimento_ag(
                 input, id, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
                 grasp_nviz, grasp_alfa, n_tour, n_mut, i);
 
@@ -225,11 +227,88 @@ void teste_tempo()
     out << oss.str() << std::endl;
 }
 
+void experimento_sa_ils_cli(const std::string& input, const std::string& file)
+{
+    // comentário do topo
+    // formato entrada:
+    // ID TODO NExec
+    // formato saida:
+    // ID,NExec,Tempo,Fo
+
+}
+
+std::pair<long long, int> experimento_hysst(
+    const std::string cs, std::string id, int max_level, int t_start, 
+    int t_step, int it_hc, int it_mut, int i)
+{
+    return{0,0};
+}
+
+void experimento_hysst_cli(const std::string& input, const std::string& file)
+{
+    // comentário do topo
+    // formato entrada:
+    // ID MaxLevel TStart TStep IterHc IterMut NExec
+    // formato saida:
+    // ID,NExec,Tempo,Fo
+
+    std::ifstream config{file};
+
+    std::string id;
+    int max_level, t_start, t_step, it_hc, it_mut, n_exec;
+
+    while (config >> id >> max_level >> t_start >> t_step >> it_hc >> it_mut >> n_exec) {
+        auto path = Util::join_path({"experimento"});
+        Util::create_folder(path);
+
+        auto filename = path + id + ".txt";
+
+        std::cout << "\n\nID: " << id << "\n";
+
+        for (auto i = 0; i < n_exec; i++) {
+            long long tempo;
+            int fo;
+            std::tie(tempo, fo) = experimento_hysst(
+                input, id, max_level, t_start, t_step, it_hc, it_mut, i);
+
+            std::ofstream out{filename};
+            out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+        }
+    }
+
+}
+
+void experimento_wdju_cli(const std::string& input, const std::string& file)
+{
+    // comentário do topo
+    // formato entrada:
+    // ID TODO NExec
+    // formato saida:
+    // ID,NExec,Tempo,Fo
+
+}
+
 int main(int argc, char* argv[])
 {
-    if (argc == 3) {
+    if (argc == 4) {
+        // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
+        // segundo é o arquivo de entrada, terceiro é o de configuração
+        if (argv[1] == "-ag") {
+            experimento_ag_cli(argv[2], argv[3]);
+        } else if (argv[1] == "-sa_ils") {
+            experimento_sa_ils_cli(argv[2], argv[3]);
+        } else if (argv[1] == "-hysst") {
+            experimento_hysst_cli(argv[2], argv[3]);
+        } else if (argv[1] == "-wdju") {
+            experimento_wdju_cli(argv[2], argv[3]);
+        } else {
+            std::cout << "Algoritmo inválido\n";
+        }
+
+    } if (argc == 3) {
         // Primeiro argumento é a entrada, o segundo é o arquivo de configuração
-        //novo_experimento_cli(argv[1], argv[2]);
+        //experimento_ag_cli(argv[1], argv[2]);
         semArgumentos();
     } else if (argc == 2) {
         std::string flag = argv[1];
