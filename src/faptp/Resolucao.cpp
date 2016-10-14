@@ -2649,13 +2649,39 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(SA& sa, ILS& ils, long lo
 
 std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 {
-    SA sa{*this, 0.97, 1, 100, 500, timeout / 100, {
+    auto a = std::vector<std::pair<Vizinhanca, int>> {
         {Vizinhanca::ES, 25},
         {Vizinhanca::EM, 43},
         {Vizinhanca::RS, 20},
         {Vizinhanca::RM, 10},
         {Vizinhanca::KM, 2}
-    }};
+    };
+
+    auto b = std::vector<std::pair<Vizinhanca, int>>{
+        {Vizinhanca::ES, 35},
+        {Vizinhanca::EM, 43},
+        {Vizinhanca::RS, 10},
+        {Vizinhanca::RM, 5},
+        {Vizinhanca::KM, 7}
+    };
+
+    auto c = std::vector<std::pair<Vizinhanca, int>>{
+        {Vizinhanca::ES, 40},
+        {Vizinhanca::EM, 45},
+        {Vizinhanca::RS, 5},
+        {Vizinhanca::RM, 5},
+        {Vizinhanca::KM, 5}
+    };
+
+    auto d = std::vector<std::pair<Vizinhanca, int>>{
+        {Vizinhanca::ES, 45},
+        {Vizinhanca::EM, 45},
+        {Vizinhanca::RS, 0},
+        {Vizinhanca::RM, 0},
+        {Vizinhanca::KM, 10}
+    };
+
+    SA sa{*this, 0.97, 1, 100, 500, timeout / 100, d};
 
     ILS ils{*this, 10'000, 10, 1, 10, timeout / 100};
 

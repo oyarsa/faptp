@@ -11,6 +11,8 @@
 #include <faptp/Configuracao.h>
 #include <faptp/Util.h>
 #include <faptp/Timer.h>
+#include <faptp/SA.h>
+#include <faptp/ILS.h>
 
 /*
  * PARÂMETROS DE CONFIGURAÇÃO *
@@ -196,9 +198,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 120;
+    const auto timeout_sec = 60;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 10;
+    const auto num_exec = 5;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -211,7 +213,7 @@ void teste_tempo()
         return r.gerarHorarioSA_ILS(timeout_ms);
     });
 
-    Util::logprint(oss, "HySST\n");
+   /* Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioHySST(timeout_ms, 100, 100);
     });
@@ -220,28 +222,66 @@ void teste_tempo()
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioWDJU(timeout_ms);
     });
-
+*/
     std::ofstream out;
     out.open((boost::format("resultados%d.txt") % timeout_sec).str(), 
              std::ios::out | std::ios::app);
     out << oss.str() << std::endl;
 }
 
+std::pair<long long, int> experimento_sa_ils(
+    const std::string& input, const std::string& id, 
+    int frac_time, int alfa, int t0, int sa_iter, 
+    int sa_reaq, int sa_chances, int ils_iter, int ils_pmax, int ils_p0, int i)
+{
+    // TODO
+    return {0, 0};
+}
+
 void experimento_sa_ils_cli(const std::string& input, const std::string& file)
 {
     // comentário do topo
     // formato entrada:
-    // ID TODO NExec
+    // ID FracTime Alfa t0 SAiter SAreaq SAchances ILSiter ILSpmax ILSp0 NExec
     // formato saida:
     // ID,NExec,Tempo,Fo
 
+    std::ifstream config{file};
+
+    std::string id;
+    int frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax,
+        ils_p0, n_exec;
+
+    while (config >> id >> frac_time >> alfa >> t0 >> sa_iter >> sa_reaq 
+           >> sa_chances >> ils_iter >> ils_pmax >> ils_p0 >> n_exec) {
+
+        auto path = Util::join_path({"experimento"});
+        Util::create_folder(path);
+
+        auto filename = path + id + ".txt";
+
+        std::cout << "\n\nID: " << id << "\n";
+
+        for (auto i = 0; i < n_exec; i++) {
+            long long tempo;
+            int fo;
+            std::tie(tempo, fo) = experimento_sa_ils(
+                input, id, frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, 
+                ils_iter, ils_pmax, ils_p0, i);
+
+            std::ofstream out{filename};
+            out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+        }
+    }
 }
 
 std::pair<long long, int> experimento_hysst(
     const std::string cs, std::string id, int max_level, int t_start, 
     int t_step, int it_hc, int it_mut, int i)
 {
-    return{0,0};
+    // TODO
+    return {0,0};
 }
 
 void experimento_hysst_cli(const std::string& input, const std::string& file)
