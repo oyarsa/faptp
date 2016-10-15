@@ -50,7 +50,7 @@ Resolucao::Resolucao(const Configuracao& c)
       , gradeGraspVizinhos(c.numVizinhos_)
       , gradeGraspTempoConstrucao(c.graspTempo_)
       , porcentagemSolucoesAleatorias(c.porcSolucoesAleatorias_)
-      , numMaximoIteracoesSemEvolucaoAG(c.numMaxIterSemEvoAG_)
+      , maxIterSemEvolAG(c.numMaxIterSemEvoAG_)
       , maxIterSemEvoGrasp(c.numMaxIterSemEvoGRASP_)
       , blocosTamanho(c.blocoTam_)
       , camadasTamanho(c.camadaTam_)
@@ -63,6 +63,7 @@ Resolucao::Resolucao(const Configuracao& c)
       , professorDisciplinas()
       , solucao(nullptr)
       , jsonRoot()
+      , timeout(c.timeout_)
 #ifdef MODELO
       , curso(nullptr)
       , alunos()
@@ -562,20 +563,19 @@ Solucao* Resolucao::gerarHorarioAG()
     foAlvo = populacao[0]->getFO();
     iteracaoAlvo = -1;
     tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
+    Timer t;
+    auto iter = 0;
 
-    constexpr auto uma_hora = 60 /* min */ * 60 /* sec */ * 1000 /* ms */;
-
-    for (auto i = 0;
-         i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG
-         && Util::chronoDiff(Util::now(), tempoInicio) < uma_hora;
-         i++) {
-        ultimaIteracao = i;
-        logPopulacao(populacao, i);
+    while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
+        ultimaIteracao = iter;
+        logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);
         gerarHorarioAGSobrevivenciaElitismo(populacao);
-        gerarHorarioAGVerificaEvolucao(populacao, i);
+        gerarHorarioAGVerificaEvolucao(populacao, iter);
+
+        iter++;
     }
 
     // Captura a melhor solução da população, deletando o resto
@@ -603,7 +603,7 @@ Solucao* Resolucao::gerarHorarioAG2()
     tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
 
     //for (auto i = 0; i < horarioIteracao; i++) {
-    for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+    for (auto i = 0; i - iteracaoAlvo <= maxIterSemEvolAG; i++) {
         ultimaIteracao = i;
         logPopulacao(populacao, i);
 
@@ -700,7 +700,7 @@ Solucao* Resolucao::gerarHorarioAG3()
     iteracaoAlvo = -1;
     tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
 
-    for (auto i = 0; i - iteracaoAlvo <= numMaximoIteracoesSemEvolucaoAG; i++) {
+    for (auto i = 0; i - iteracaoAlvo <= maxIterSemEvolAG; i++) {
         ultimaIteracao = i;
         logPopulacao(populacao, i);
 
@@ -2681,7 +2681,7 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
         {Vizinhanca::KM, 10}
     };
 
-    SA sa{*this, 0.97, 1, 100, 500, timeout / 100, d};
+    SA sa{*this, 0.97, 1, 100, 500, timeout / 100, a};
 
     ILS ils{*this, 10'000, 10, 1, 10, timeout / 100};
 

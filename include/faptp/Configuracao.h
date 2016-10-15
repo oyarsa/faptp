@@ -62,6 +62,7 @@ public:
     Configuracao& tempoLimiteModelo(double tempo);
     Configuracao& numMaximoIteracoesSemEvolucaoAG(int n);
     Configuracao& numMaximoIteracoesSemEvolucaoGRASP(int n);
+    Configuracao& timeout(long long t);
 private:
     friend class Resolucao;
     std::string filename_ = "input.json";
@@ -86,6 +87,7 @@ private:
     double tempoLimMod_ = 0;
     int numMaxIterSemEvoAG_ = 5;
     int numMaxIterSemEvoGRASP_ = 5;
+    long long timeout_ = 60'000;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -220,3 +222,8 @@ inline Configuracao& Configuracao::numMaximoIteracoesSemEvolucaoGRASP(int n)
     return *this;
 }
 
+inline Configuracao& Configuracao::timeout(long long t)
+{
+    timeout_ = t;
+    return *this;
+}

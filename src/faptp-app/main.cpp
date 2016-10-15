@@ -12,6 +12,8 @@
 #include <faptp/Util.h>
 #include <faptp/Timer.h>
 #include <faptp/SA.h>
+#include <faptp/WDJU.h>
+#include <faptp/HySST.h>
 #include <faptp/ILS.h>
 
 /*
@@ -32,6 +34,9 @@ struct Entrada
 
 constexpr Entrada input_all_json{33, 1392};
 constexpr Entrada input_json{4, 10};
+
+// número de iterações grande para o algoritmo se encerrar por tempo
+constexpr auto inf = static_cast<int>(1e9);
 
 void semArgumentos()
 {
@@ -84,15 +89,12 @@ void semArgumentos()
 }
 
 std::pair<long long, int>
-experimento_ag(const std::string& input, const std::string& id,
+experimento_ag(const std::string& input,
                  int n_indiv, int taxa_mut, int p_cruz,
                  const std::string& oper_cruz, int grasp_iter, 
                  int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
-                 int exec_i)
+                 long long timeout)
 {
-    // número de iterações grande para o algoritmo se encerrar por tempo
-    const auto inf = gsl::narrow_cast<int>(1e9); 
-
     auto cruzamento = [&] {
         if (oper_cruz == "PMX") {
             return Configuracao::TipoCruzamento::pmx;
@@ -106,19 +108,20 @@ experimento_ag(const std::string& input, const std::string& id,
     }();
 
     Resolucao r {Configuracao()
-            .arquivoEntrada(input)
-            .populacaoInicial(n_indiv)
-            .porcentagemCruzamentos(p_cruz) // %
-            .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
-            .numMaximoIteracoesSemEvolucaoAG(inf)
-            .tipoCruzamento(cruzamento)
-            .mutacaoProbabilidade(taxa_mut) // %
-            .graspNumVizinhos(grasp_nviz)
-            .graspAlfa(grasp_alfa) // %
-            .camadaTamanho(input_all_json.camadasTamanho)
-            .perfilTamanho(input_all_json.perfilTamanho)
-            .numTorneioPopulacao(n_tour)
-            .tentativasMutacao(n_mut)
+        .arquivoEntrada(input)
+        .populacaoInicial(n_indiv)
+        .porcentagemCruzamentos(p_cruz) // %
+        .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
+        .numMaximoIteracoesSemEvolucaoAG(inf)
+        .tipoCruzamento(cruzamento)
+        .mutacaoProbabilidade(taxa_mut) // %
+        .graspNumVizinhos(grasp_nviz)
+        .graspAlfa(grasp_alfa) // %
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+        .numTorneioPopulacao(n_tour)
+        .tentativasMutacao(n_mut)
+        .timeout(timeout)
     };
 
     Timer t;
@@ -129,7 +132,7 @@ experimento_ag(const std::string& input, const std::string& id,
     return {tempo, fo};
 }
 
-void experimento_ag_cli(const std::string& input, const std::string& file)
+void experimento_ag_cli(const std::string& input, const std::string& file, long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -153,16 +156,16 @@ void experimento_ag_cli(const std::string& input, const std::string& file)
         auto filename = path + id + ".txt";
 
         std::cout << "\n\nID: " << id << "\n";
+        std::ofstream out {filename};
+        out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
             long long tempo;
             int fo;
             std::tie(tempo, fo) = experimento_ag(
-                input, id, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
-                grasp_nviz, grasp_alfa, n_tour, n_mut, i);
+                input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
+                grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
 
-            std::ofstream out {filename};
-            out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
         }
     }
@@ -230,15 +233,53 @@ void teste_tempo()
 }
 
 std::pair<long long, int> experimento_sa_ils(
-    const std::string& input, const std::string& id, 
-    int frac_time, int alfa, int t0, int sa_iter, 
-    int sa_reaq, int sa_chances, int ils_iter, int ils_pmax, int ils_p0, int i)
+    const std::string& input,
+    int frac_time, double alfa, double t0, int sa_iter, 
+    int sa_reaq, int sa_chances, int ils_iter, int ils_pmax, int ils_p0,
+    long long timeout)
 {
-    // TODO
-    return {0, 0};
+    static const auto a = std::vector<std::pair<Resolucao::Vizinhanca, int>>{
+        {Resolucao::Vizinhanca::ES, 25},
+        {Resolucao::Vizinhanca::EM, 43},
+        {Resolucao::Vizinhanca::RS, 20},
+        {Resolucao::Vizinhanca::RM, 10},
+        {Resolucao::Vizinhanca::KM, 2}
+    };
+
+    static const auto b = std::vector<std::pair<Resolucao::Vizinhanca, int>>{
+        {Resolucao::Vizinhanca::ES, 35},
+        {Resolucao::Vizinhanca::EM, 43},
+        {Resolucao::Vizinhanca::RS, 10},
+        {Resolucao::Vizinhanca::RM, 5},
+        {Resolucao::Vizinhanca::KM, 7}
+    };
+
+    const auto& escolhido = [&] {
+        if (sa_chances == 0) {
+            return a;
+        } else {
+            return b;
+        }
+    }();
+
+    Resolucao r{Configuracao()
+        .arquivoEntrada(input)
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+    };
+
+    Timer t;
+    SA sa{r, alfa, t0, sa_iter, sa_reaq, timeout/frac_time, escolhido};
+    ILS ils{r, inf, ils_pmax, ils_p0, ils_iter, timeout/frac_time};
+    auto s = r.gerarHorarioSA_ILS(sa, ils, timeout);
+    auto fo = s->getFO();
+    auto tempo = t.elapsed();
+
+    return {tempo, fo};
 }
 
-void experimento_sa_ils_cli(const std::string& input, const std::string& file)
+void experimento_sa_ils_cli(const std::string& input, const std::string& file, 
+                            long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -249,8 +290,9 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file)
     std::ifstream config{file};
 
     std::string id;
-    int frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax,
+    int frac_time, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax,
         ils_p0, n_exec;
+    double alfa, t0; 
 
     while (config >> id >> frac_time >> alfa >> t0 >> sa_iter >> sa_reaq 
            >> sa_chances >> ils_iter >> ils_pmax >> ils_p0 >> n_exec) {
@@ -260,31 +302,46 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file)
 
         auto filename = path + id + ".txt";
 
-        std::cout << "\n\nID: " << id << "\n";
+        std::cout << "ID: " << id << "\n\n";
+        std::ofstream out{filename};
+        out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
             long long tempo;
             int fo;
             std::tie(tempo, fo) = experimento_sa_ils(
-                input, id, frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, 
-                ils_iter, ils_pmax, ils_p0, i);
+                input, frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, 
+                ils_iter, ils_pmax, ils_p0, timeout);
 
-            std::ofstream out{filename};
-            out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
         }
+
+        std::cout << "\n";
     }
 }
 
 std::pair<long long, int> experimento_hysst(
-    const std::string cs, std::string id, int max_level, int t_start, 
-    int t_step, int it_hc, int it_mut, int i)
+    const std::string& input, int max_level, int t_start, 
+    int t_step, int it_hc, int it_mut, long long timeout)
 {
-    // TODO
-    return {0,0};
+    Resolucao r{Configuracao()
+        .arquivoEntrada(input)
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+        .tentativasMutacao(it_mut)
+    };
+
+    Timer t;
+    HySST hysst{r, timeout, 100, 100, max_level, t_start, t_step, it_hc};
+    auto s = r.gerarHorarioHySST(hysst);
+    auto fo = s->getFO();
+    auto tempo = t.elapsed();
+
+    return {tempo, fo};
 }
 
-void experimento_hysst_cli(const std::string& input, const std::string& file)
+void experimento_hysst_cli(const std::string& input, const std::string& file,
+                           long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -303,50 +360,102 @@ void experimento_hysst_cli(const std::string& input, const std::string& file)
 
         auto filename = path + id + ".txt";
 
-        std::cout << "\n\nID: " << id << "\n";
+        std::cout << "ID: " << id << "\n\n";
+        std::ofstream out{filename};
+        out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
             long long tempo;
             int fo;
             std::tie(tempo, fo) = experimento_hysst(
-                input, id, max_level, t_start, t_step, it_hc, it_mut, i);
+                input, max_level, t_start, t_step, it_hc, it_mut, timeout);
 
-            std::ofstream out{filename};
-            out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
         }
+
+        std::cout << "\n";
     }
 
 }
 
-void experimento_wdju_cli(const std::string& input, const std::string& file)
+std::pair<long long, int> experimento_wdju(
+    const std::string& input, 
+    int stag_limit, double jump_factor, long long timeout)
+{
+    Resolucao r{Configuracao()
+        .arquivoEntrada(input)
+        .camadaTamanho(input_all_json.camadasTamanho)
+        .perfilTamanho(input_all_json.perfilTamanho)
+    };
+
+    Timer t;
+    WDJU wdju{r, timeout, stag_limit, jump_factor};
+    auto s = r.gerarHorarioWDJU(wdju);
+    auto fo = s->getFO();
+    auto tempo = t.elapsed();
+
+    return {tempo, fo};
+}
+
+void experimento_wdju_cli(const std::string& input, const std::string& file,
+                          long long timeout)
 {
     // comentário do topo
     // formato entrada:
-    // ID TODO NExec
+    // ID StagLimit JumpFactor NExec
     // formato saida:
     // ID,NExec,Tempo,Fo
 
+    std::ifstream config{file};
+
+    std::string id;
+    int stag_limit, n_exec;
+    double jump_factor;
+
+    while (config >> id >> stag_limit >> jump_factor >> n_exec) {
+        auto path = Util::join_path({"experimento"});
+        Util::create_folder(path);
+
+        auto filename = path + id + ".txt";
+
+        std::cout << "ID: " << id << "\n\n";
+        std::ofstream out{filename};
+        out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+
+        for (auto i = 0; i < n_exec; i++) {
+            long long tempo;
+            int fo;
+            std::tie(tempo, fo) = experimento_wdju(
+                input, stag_limit, jump_factor, timeout);
+
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+        }
+
+        std::cout << "\n";
+    }
 }
 
 int main(int argc, char* argv[])
 {
+    const auto timeout = 10'000;
+
     if (argc == 4) {
+        std::string algo = argv[1];
         // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
         // segundo é o arquivo de entrada, terceiro é o de configuração
-        if (argv[1] == "-ag") {
-            experimento_ag_cli(argv[2], argv[3]);
-        } else if (argv[1] == "-sa_ils") {
-            experimento_sa_ils_cli(argv[2], argv[3]);
-        } else if (argv[1] == "-hysst") {
-            experimento_hysst_cli(argv[2], argv[3]);
-        } else if (argv[1] == "-wdju") {
-            experimento_wdju_cli(argv[2], argv[3]);
+        if (algo == "-ag") {
+            experimento_ag_cli(argv[2], argv[3], timeout);
+        } else if (algo == "-sa_ils") {
+            experimento_sa_ils_cli(argv[2], argv[3], timeout);
+        } else if (algo == "-hysst") {
+            experimento_hysst_cli(argv[2], argv[3], timeout);
+        } else if (algo == "-wdju") {
+            experimento_wdju_cli(argv[2], argv[3], timeout);
         } else {
-            std::cout << "Algoritmo inválido\n";
+            std::cout << "Algoritmo invalido\n";
         }
 
-    } if (argc == 3) {
+    } else if (argc == 3) {
         // Primeiro argumento é a entrada, o segundo é o arquivo de configuração
         //experimento_ag_cli(argv[1], argv[2]);
         semArgumentos();
@@ -362,6 +471,4 @@ int main(int argc, char* argv[])
 
         teste_tempo();
     }
-
-    throw;
 }

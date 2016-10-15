@@ -150,7 +150,7 @@ public:
     double porcentagemSolucoesAleatorias;
 
     // Número de iterações máximo que o AG continuará sem evoluir a solução
-    int numMaximoIteracoesSemEvolucaoAG;
+    int maxIterSemEvolAG;
     int ultimaIteracao;
     // Número de iterações máximo que o GRASP continuará sem evoluir a grade
     int maxIterSemEvoGrasp;
@@ -184,6 +184,7 @@ private:
 #endif
     std::chrono::high_resolution_clock::time_point tempoInicio;
     std::ostringstream log;
+    long long timeout;
 
     void carregarDados();
     void carregarDadosProfessores();
