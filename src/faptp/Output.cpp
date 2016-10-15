@@ -8,30 +8,9 @@
 #include <sstream>
 #include <array>
 #include <fstream>
-#include <ctime>
 
 #include <faptp/Output.h>
 #include <faptp/Semana.h>
-
-std::string Output::getDir()
-{
-    return "output/" + timestamp();
-}
-
-std::string Output::timestamp()
-{
-    auto current_time = time(nullptr);
-    std::string time_str = ctime(&current_time);
-    time_str.erase(remove(time_str.begin(), time_str.end(), ' '), time_str.end());
-    time_str.erase(remove(time_str.begin(), time_str.end(), '\n'), time_str.end());
-    time_str.erase(remove(time_str.begin(), time_str.end(), ':'), time_str.end());
-    return time_str;
-}
-
-void Output::write(Solucao* pSolucao)
-{
-    write(pSolucao, getDir());
-}
 
 void Output::write(Solucao* pSolucao, const std::string& savePath)
 {

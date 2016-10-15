@@ -1,10 +1,11 @@
 import itertools
+import math
 import os
 
 # Configuração do script
-diretorio_saida = 'config'
+diretorio_saida = 'config_hysst'
 num_maq = 40
-num_exec = 10
+num_exec = 2
 
 # Conjunto de parâmetros
 max_level = [5, 15, 30]
@@ -32,7 +33,7 @@ def grouper(iterable, n, fillvalue=None):
 
 
 def make_id(config):
-    return '.'.join(x + str(y) for x, y, in zip(param_cod, config))
+    return 'Hy-' + '.'.join(x + str(y) for x, y, in zip(param_cod, config))
 
 
 def config_str(config):
@@ -46,14 +47,14 @@ completos = files = [f[:-4] for f in os.listdir('.') if f.endswith('.txt')]
 configs = [c for c in configs_todas if c.split()[0] not in completos]
 
 print("Numero configs: ", len(configs))
-num_configs = int(len(configs) / num_maq)
+num_configs = math.ceil(len(configs) / num_maq)
 
 print('Configurações por máquina: ', num_configs)
 grupos = grouper(configs, num_configs)
 
 os.makedirs(diretorio_saida, exist_ok=True)
 
-for i, configs in enumerate(grupos):
+for i, configs in enumerate(grupos, 1):
     for config in configs:
         if not config:
             continue

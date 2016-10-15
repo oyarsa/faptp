@@ -15,11 +15,7 @@
 class Output
 {
 public:
-    static std::string timestamp();
-    static void write(Solucao* solucao);
     static void write(Solucao* solucao, const std::string& savePath);
-private:
-    static std::string getDir();
 };
 
 #endif /* OUTPUT_H */

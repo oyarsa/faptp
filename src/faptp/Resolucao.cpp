@@ -568,7 +568,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
         ultimaIteracao = iter;
-        logPopulacao(populacao, iter);
+        //logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);

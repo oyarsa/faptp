@@ -155,7 +155,7 @@ void experimento_ag_cli(const std::string& input, const std::string& file, long 
 
         auto filename = path + id + ".txt";
 
-        std::cout << "\n\nID: " << id << "\n";
+        std::cout << "ID: " << id << "\n\n";
         std::ofstream out {filename};
         out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
@@ -168,6 +168,8 @@ void experimento_ag_cli(const std::string& input, const std::string& file, long 
 
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
         }
+
+        std::cout << "\n";
     }
 }
 
