@@ -5,6 +5,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <faptp/Util.h>
 #include <faptp/Aleatorio.h>
+#include <windows.h>
 
 int Util::getPosition(int y, int x, int z, int Y, int Z)
 {
@@ -116,7 +117,7 @@ std::size_t Util::hash_string(const std::string& str)
     return hasher(str);
 }
 
-std::string Util::dateTime()
+std::string Util::date_time()
 {
     auto facet = new boost::posix_time::time_facet("%d-%m-%Y %H:%M:%S");
     std::ostringstream oss;
@@ -125,3 +126,11 @@ std::string Util::dateTime()
     return oss.str();
 }
 
+std::string Util::get_computer_name()
+{
+    char buf[MAX_COMPUTERNAME_LENGTH + 1];
+    unsigned long len;
+    GetComputerName(buf, &len);
+
+    return buf;
+}

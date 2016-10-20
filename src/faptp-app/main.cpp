@@ -5,7 +5,12 @@
 #include <ios>
 #include <string>
 #include <chrono>
+#include <deque>
+#include <thread>
+
 #include <boost/format.hpp>
+#include <cpr/cpr.h>
+
 #include <faptp/Resolucao.h>
 #include <faptp/Output.h>
 #include <faptp/Configuracao.h>
@@ -35,8 +40,49 @@ struct Entrada
 constexpr Entrada input_all_json{33, 1392};
 constexpr Entrada input_json{4, 10};
 
+int num_tentativas_upload = 3;
+int segundos_espera = 10;
+
 // número de iterações grande para o algoritmo se encerrar por tempo
 constexpr auto inf = static_cast<int>(1e9);
+
+void upload_result(const std::string& id, const std::string& resultado, 
+                   int num_config, const std::string& servidor)
+{
+    for (auto i = 0; i < num_tentativas_upload; i++) {
+        std::this_thread::sleep_for(std::chrono::seconds(segundos_espera * i));
+
+        auto r = cpr::Post(cpr::Url{servidor},
+                           cpr::Payload{{"result", resultado},
+                                        {"nome", id}});
+
+        if (r.error.code == cpr::ErrorCode::OK) {
+            std::cout << num_config << ") "  << id << ": enviado com sucesso\n\n";
+            return;
+        } else {
+            std::cout << num_config << ") tentativa " << i+1 << " falhou: "
+                << r.error.message << "\n\n";
+        }
+    }
+
+    std::cout << num_config << ") Erro ao enviar " << id << ". Salvo em 'falhas/'\n";
+
+    auto path = Util::join_path({"falhas"});
+    Util::create_folder(path);
+    auto filename = path + id + ".txt";
+
+    std::ofstream out_file{filename};
+    out_file << resultado;
+}
+
+std::string get_auto_file_name()
+{
+    auto pc_name = Util::get_computer_name();
+    auto pos = pc_name.find('-') + 1;
+    auto pc_num = std::stoi(pc_name.substr(pos));
+
+    return std::to_string(pc_num) + ".txt";
+}
 
 void semArgumentos()
 {
@@ -90,10 +136,10 @@ void semArgumentos()
 
 std::pair<long long, int>
 experimento_ag(const std::string& input,
-                 int n_indiv, int taxa_mut, int p_cruz,
-                 const std::string& oper_cruz, int grasp_iter, 
-                 int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
-                 long long timeout)
+               int n_indiv, int taxa_mut, int p_cruz,
+               const std::string& oper_cruz, int grasp_iter, 
+               int grasp_nviz, int grasp_alfa, int n_tour, int n_mut,
+               long long timeout)
 {
     auto cruzamento = [&] {
         if (oper_cruz == "PMX") {
@@ -132,7 +178,8 @@ experimento_ag(const std::string& input,
     return {tempo, fo};
 }
 
-void experimento_ag_cli(const std::string& input, const std::string& file, long long timeout)
+void experimento_ag_cli(const std::string& input, const std::string& file, 
+                        long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -166,7 +213,8 @@ void experimento_ag_cli(const std::string& input, const std::string& file, long 
                 input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
                 grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
 
-            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
+                           % id % i % tempo % fo);
         }
 
         std::cout << "\n";
@@ -191,9 +239,11 @@ std::string teste_tempo_iter(int num_exec, F f)
         Timer t;
         auto s = f(r);
 
-        Util::logprint(oss, boost::format(" - fo: %d - t: %lld\n") % s->getFO() % t.elapsed());
+        Util::logprint(oss, boost::format(" - fo: %d - t: %lld\n") 
+                       % s->getFO() % t.elapsed());
         Util::logprint(oss, 
-            boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n") % r.foAlvo % r.tempoAlvo);
+            boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n") 
+                          % r.foAlvo % r.tempoAlvo);
     }
 
     Util::logprint(oss, "\n");
@@ -209,7 +259,7 @@ void teste_tempo()
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
-    oss << "Data: " << Util::dateTime() << "\n";
+    oss << "Data: " << Util::date_time() << "\n";
     oss << "Tempo maximo: " << timeout_ms << "\n";
     oss << "Numero de execucoes: " << num_exec << "\n\n";
 
@@ -281,7 +331,7 @@ std::pair<long long, int> experimento_sa_ils(
 }
 
 void experimento_sa_ils_cli(const std::string& input, const std::string& file, 
-                            long long timeout)
+                            const std::string& servidor, long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -289,24 +339,30 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file,
     // formato saida:
     // ID,NExec,Tempo,Fo
 
-    std::ifstream config{file};
+    std::string conf_file;
+
+    if (file == "auto") {
+        conf_file = get_auto_file_name();
+    } else {
+        conf_file = file;
+    }
+
+    std::ifstream config{conf_file};
+    std::deque<std::thread> threads;
 
     std::string id;
-    int frac_time, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax,
-        ils_p0, n_exec;
+    int frac_time, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax;
+    int ils_p0, n_exec;
     double alfa, t0; 
+    auto num_config = 1;
 
     while (config >> id >> frac_time >> alfa >> t0 >> sa_iter >> sa_reaq 
            >> sa_chances >> ils_iter >> ils_pmax >> ils_p0 >> n_exec) {
 
-        auto path = Util::join_path({"experimento"});
-        Util::create_folder(path);
 
-        auto filename = path + id + ".txt";
-
-        std::cout << "ID: " << id << "\n\n";
-        std::ofstream out{filename};
-        out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+        std::cout << num_config << ") Executando ID: " << id << "\n\n";
+        std::ostringstream out_str;
+        out_str << "ID Algoritmo, Numero execucao, Tempo total, FO\r\n";
 
         for (auto i = 0; i < n_exec; i++) {
             long long tempo;
@@ -315,10 +371,17 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file,
                 input, frac_time, alfa, t0, sa_iter, sa_reaq, sa_chances, 
                 ils_iter, ils_pmax, ils_p0, timeout);
 
-            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+            Util::logprint(out_str, boost::format("%s,%d,%lld,%d\r\n") 
+                           % id % i % tempo % fo);
         }
-
         std::cout << "\n";
+
+        threads.emplace_back(upload_result, id, out_str.str(), num_config, servidor);
+        num_config++;
+    }
+
+    for (auto& t : threads) {
+        t.join();
     }
 }
 
@@ -356,7 +419,8 @@ void experimento_hysst_cli(const std::string& input, const std::string& file,
     std::string id;
     int max_level, t_start, t_step, it_hc, it_mut, n_exec;
 
-    while (config >> id >> max_level >> t_start >> t_step >> it_hc >> it_mut >> n_exec) {
+    while (config >> id >> max_level >> t_start >> t_step >> it_hc 
+           >> it_mut >> n_exec) {
         auto path = Util::join_path({"experimento"});
         Util::create_folder(path);
 
@@ -372,7 +436,8 @@ void experimento_hysst_cli(const std::string& input, const std::string& file,
             std::tie(tempo, fo) = experimento_hysst(
                 input, max_level, t_start, t_step, it_hc, it_mut, timeout);
 
-            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
+                           % id % i % tempo % fo);
         }
 
         std::cout << "\n";
@@ -430,7 +495,8 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
             std::tie(tempo, fo) = experimento_wdju(
                 input, stag_limit, jump_factor, timeout);
 
-            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+            Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
+                           % id % i % tempo % fo);
         }
 
         std::cout << "\n";
@@ -439,16 +505,16 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
 
 int main(int argc, char* argv[])
 {
-    const auto timeout = 10'000;
-
-    if (argc == 4) {
+    const auto timeout = 50;
+    
+    if (argc == 5) {
         std::string algo = argv[1];
         // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
         // segundo é o arquivo de entrada, terceiro é o de configuração
         if (algo == "-ag") {
             experimento_ag_cli(argv[2], argv[3], timeout);
         } else if (algo == "-sa_ils") {
-            experimento_sa_ils_cli(argv[2], argv[3], timeout);
+            experimento_sa_ils_cli(argv[2], argv[3], argv[4], timeout);
         } else if (algo == "-hysst") {
             experimento_hysst_cli(argv[2], argv[3], timeout);
         } else if (algo == "-wdju") {
@@ -464,13 +530,17 @@ int main(int argc, char* argv[])
     } else if (argc == 2) {
         std::string flag = argv[1];
         if (flag == "-h" || flag == "--help") {
-            std::cout << "Primeiro argumento é a entrada, o segundo é o arquivo de configuração\n";
+            std::cout << "Primeiro argumento é a entrada, o segundo " 
+                << "é o arquivo de configuração\n";
             std::cout << "Formato da config:\n";
-            std::cout << "ID AGIter NIndiv %Cruz NMut NTour GRASPIter GRASPNVzi GRASPAlfa NExec\n";
+            std::cout << "ID AGIter NIndiv %Cruz NMut NTour GRASPIter " 
+                << "GRASPNVzi GRASPAlfa NExec\n";
         }
     } else {
         //semArgumentos();
 
         teste_tempo();
     }
+
+    //upload_result("asdasdas", "1231");
 }

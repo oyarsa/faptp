@@ -126,7 +126,7 @@ struct hash_pair
     }
 };
 
-std::string dateTime();
+std::string date_time();
 
 template <typename T>
 void logprint(std::ostream& log, const T& t)
@@ -135,7 +135,9 @@ void logprint(std::ostream& log, const T& t)
     std::cout << t;
 }
 
-};
+std::string get_computer_name();
+
+} // namespace Util
 
 #endif /* UTIL_H */
 
