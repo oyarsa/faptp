@@ -40,8 +40,8 @@ struct Entrada
 constexpr Entrada input_all_json{33, 1392};
 constexpr Entrada input_json{4, 10};
 
-int num_tentativas_upload = 3;
-int segundos_espera = 10;
+int num_tentativas_upload = 15;
+int segundos_espera = 30;
 
 // número de iterações grande para o algoritmo se encerrar por tempo
 constexpr auto inf = static_cast<int>(1e9);
@@ -81,7 +81,9 @@ std::string get_auto_file_name()
     auto pos = pc_name.find('-') + 1;
     auto pc_num = std::stoi(pc_name.substr(pos));
 
-    return std::to_string(pc_num) + ".txt";
+    auto filename = std::to_string(pc_num) + ".txt";
+
+    return Util::join_path({"config"}, filename);
 }
 
 void semArgumentos()
@@ -347,6 +349,8 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file,
         conf_file = file;
     }
 
+    std::cout << "Arquivo: " << conf_file << "\n\n";
+
     std::ifstream config{conf_file};
     std::deque<std::thread> threads;
 
@@ -505,7 +509,7 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
 
 int main(int argc, char* argv[])
 {
-    const auto timeout = 50;
+    const auto timeout = 60'000;
     
     if (argc == 5) {
         std::string algo = argv[1];

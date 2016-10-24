@@ -87,3 +87,7 @@ bool Professor::haveCompetencia(std::string pDisciplina)
     return competencias.count(pDisciplina) > 0;
 }
 
+int Professor::preferenciaAulas() const
+{
+    return 20;
+}

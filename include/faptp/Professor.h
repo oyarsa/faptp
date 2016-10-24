@@ -34,6 +34,8 @@ public:
 
     void addCompetencia(std::string pDisciplina, double pPeso);
     bool haveCompetencia(std::string pDisciplina);
+
+    int preferenciaAulas() const;
 private:
     std::string id;
 
