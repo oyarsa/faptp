@@ -73,8 +73,8 @@ public:
         long long tempo_total, long long tempo_mu, long long tempo_hc);
     std::unique_ptr<Solucao> gerarHorarioHySST(HySST& HySST);
 
-    double gerarGrade() const;
-    double gerarGrade(Solucao* pSolucao) const;
+    void gerarGrade() const;
+    void gerarGrade(Solucao* pSolucao) const;
 
     void showResult();
 
@@ -100,9 +100,11 @@ public:
     std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
+    const std::unordered_map<std::string, Professor*>& getProfessores() const;
+    const std::vector<Disciplina*>& getDisciplinas() const;
     /*
-     Parâmetros da execução da solução
-     */
+         Parâmetros da execução da solução
+         */
     // Horário população inicial
     int horarioPopulacaoInicial;
     int horarioProfessorColisaoMax = 2;
@@ -121,6 +123,8 @@ public:
     Configuracao::TipoCruzamento horarioTipoCruzamento;
     // Operador de mutação selecionado
     Configuracao::TipoMutacao horarioTipoMutacao;
+    // FO utilizada
+    Configuracao::TipoFo horarioTipoFo;
 
     int horarioIteracao;
 
@@ -223,7 +227,7 @@ private:
     bool swapSlots(Solucao& sol, int posX1, int posX2) const;
     Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
 
-    double gerarGradeTipoGrasp2(Solucao* sol) const;
+    void gerarGradeTipoGrasp2(Solucao* sol) const;
 
     double gerarGradeTipoGuloso(Solucao*& pSolucao);
 
@@ -239,9 +243,9 @@ private:
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao);
     [[deprecated("Use gerarGradeTipoGrasp2")]]
-    double gerarGradeTipoGrasp();
+    void gerarGradeTipoGrasp();
     [[deprecated("Use gerarGradeTipoGrasp2")]]
-    double gerarGradeTipoGrasp(Solucao*& pSolucao);
+    void gerarGradeTipoGrasp(Solucao*& pSolucao);
 
     double gerarGradeTipoModelo(Solucao* pSolucao);
 
@@ -339,6 +343,11 @@ private:
     Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
     Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
                                 int camadaCruz);
+    std::tuple<std::unordered_map<ProfessorDisciplina*, std::vector<int>>,
+        std::vector<int>, std::vector<int>>
+        crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
+    std::vector<int> crossoverPMXSwap(const std::vector<int>& pai1,
+                                      const std::vector<int>& pai2) const;
     Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
                                   int camadaCruz) const;
     Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2) const;

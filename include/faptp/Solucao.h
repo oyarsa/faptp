@@ -5,14 +5,15 @@
 
 #include "Horario.h"
 #include "Grade.h"
+#include "Configuracao.h"
 
 class Solucao
 {
     friend class Resolucao;
     friend class Output;
 public:
-
-    Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho);
+    Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, 
+            const Resolucao& res, Configuracao::TipoFo tipo_fo);
     Solucao(const Solucao& outro);
     virtual ~Solucao();
 
@@ -20,8 +21,12 @@ public:
     void insertGrade(Grade* grade);
 
     void calculaFO();
+    int calculaFOSomaCarga();
+    int calculaFOSoftConstraints() const;
     int getFO();
     int getFO() const;
+
+    std::unordered_map<std::string, int> reportarViolacoes() const;
 
     const Horario& getHorario() const;
     Horario& getHorario();
@@ -40,6 +45,8 @@ private:
 
     int gradesLength;
     int fo = -1;
+    const Resolucao& res;
+    Configuracao::TipoFo tipo_fo;
 };
 
 #endif /* SOLUCAO_H */

@@ -39,6 +39,12 @@ public:
         substitui_professor
     };
 
+    enum class TipoFo
+    {
+        Soma_carga,
+        Soft_constraints
+    };
+
     Configuracao() = default;
     Configuracao& arquivoEntrada(const std::string& filename);
     Configuracao& blocoTamanho(int n);
@@ -63,6 +69,7 @@ public:
     Configuracao& numMaximoIteracoesSemEvolucaoAG(int n);
     Configuracao& numMaximoIteracoesSemEvolucaoGRASP(int n);
     Configuracao& timeout(long long t);
+    Configuracao& tipoFo(TipoFo tipo);
 private:
     friend class Resolucao;
     std::string filename_ = "input.json";
@@ -88,6 +95,7 @@ private:
     int numMaxIterSemEvoAG_ = 5;
     int numMaxIterSemEvoGRASP_ = 5;
     long long timeout_ = 60'000;
+    TipoFo tipoFo_ = TipoFo::Soma_carga;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -225,5 +233,11 @@ inline Configuracao& Configuracao::numMaximoIteracoesSemEvolucaoGRASP(int n)
 inline Configuracao& Configuracao::timeout(long long t)
 {
     timeout_ = t;
+    return *this;
+}
+
+inline Configuracao& Configuracao::tipoFo(TipoFo tipo)
+{
+    tipoFo_ = tipo;
     return *this;
 }

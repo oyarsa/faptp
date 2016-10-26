@@ -91,10 +91,10 @@ void semArgumentos()
     Resolucao r {Configuracao()
             .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
             .populacaoInicial(20)
-            .porcentagemCruzamentos(30) // %
+            .porcentagemCruzamentos(80) // %
             .numMaximoIteracoesSemEvolucaoGRASP(15)
-            .numMaximoIteracoesSemEvolucaoAG(20)
-            .tipoCruzamento(Configuracao::TipoCruzamento::ciclo)
+            .numMaximoIteracoesSemEvolucaoAG(200)
+            .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
             .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
             .mutacaoProbabilidade(15) // %
             .graspNumVizinhos(2)
@@ -105,6 +105,7 @@ void semArgumentos()
             .tentativasMutacao(4)
             .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
             .tipoConstrucao(Configuracao::TipoGrade::grasp)
+            .tipoFo(Configuracao::TipoFo::Soft_constraints)
             };
 
     std::cout << "Montando horarios [AG + Modelo]...\n";
@@ -223,6 +224,14 @@ void experimento_ag_cli(const std::string& input, const std::string& file,
     }
 }
 
+void print_violacoes(const std::unordered_map<std::string, int>& m)
+{
+    for (auto& p : m) {
+        std::cout << p.first << " = " << p.second << "\n";
+    }
+    std::cout << "\n";
+}
+
 template <typename F>
 std::string teste_tempo_iter(int num_exec, F f)
 {
@@ -234,6 +243,7 @@ std::string teste_tempo_iter(int num_exec, F f)
             .camadaTamanho(input_all_json.camadasTamanho)
             .perfilTamanho(input_all_json.perfilTamanho)
             .tentativasMutacao(4)
+            .tipoFo(Configuracao::TipoFo::Soft_constraints)
         };
 
         Util::logprint(oss, boost::format("i: %d") % (i+1));
@@ -243,9 +253,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
         Util::logprint(oss, boost::format(" - fo: %d - t: %lld\n") 
                        % s->getFO() % t.elapsed());
-        Util::logprint(oss, 
-            boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n") 
-                          % r.foAlvo % r.tempoAlvo);
+        Util::logprint(oss, boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n")
+                       % r.foAlvo % r.tempoAlvo);
+        print_violacoes(s->reportarViolacoes());
     }
 
     Util::logprint(oss, "\n");
@@ -255,7 +265,7 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 60;
+    const auto timeout_sec = 30;
     const auto timeout_ms = timeout_sec * 1000;
     const auto num_exec = 5;
 
@@ -270,7 +280,7 @@ void teste_tempo()
         return r.gerarHorarioSA_ILS(timeout_ms);
     });
 
-   /* Util::logprint(oss, "HySST\n");
+    Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioHySST(timeout_ms, 100, 100);
     });
@@ -279,7 +289,7 @@ void teste_tempo()
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioWDJU(timeout_ms);
     });
-*/
+
     std::ofstream out;
     out.open((boost::format("resultados%d.txt") % timeout_sec).str(), 
              std::ios::out | std::ios::app);
@@ -541,9 +551,9 @@ int main(int argc, char* argv[])
                 << "GRASPNVzi GRASPAlfa NExec\n";
         }
     } else {
-        //semArgumentos();
+        semArgumentos();
 
-        teste_tempo();
+        //teste_tempo();
     }
 
     //upload_result("asdasdas", "1231");

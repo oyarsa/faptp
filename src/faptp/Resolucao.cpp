@@ -64,6 +64,7 @@ Resolucao::Resolucao(const Configuracao& c)
       , solucao(nullptr)
       , jsonRoot()
       , timeout(c.timeout_)
+      , horarioTipoFo(c.tipoFo_)
 #ifdef MODELO
       , curso(nullptr)
       , alunos()
@@ -327,7 +328,8 @@ double Resolucao::start(bool input)
 {
     if (input) {
         carregarSolucao();
-        return gerarGrade();
+        gerarGrade();
+        return solucao->getFO();
     }
 
     return gerarHorarioAG()->getFO();
@@ -349,7 +351,8 @@ void Resolucao::carregarSolucao()
 
     carregarDadosProfessorDisciplinas();
 
-    Solucao* solucaoLeitura = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+    Solucao* solucaoLeitura = new Solucao(blocosTamanho, camadasTamanho,
+                                          perfisTamanho, *this, horarioTipoFo);
     int bloco {};
     int dia {};
     int camada {};
@@ -568,7 +571,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
         ultimaIteracao = iter;
-        //logPopulacao(populacao, iter);
+        logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);
@@ -818,7 +821,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
      * antes dos outros professores
      */
     while (static_cast<int>(solucoesAG.size()) != horarioPopulacaoInicial) {
-        Solucao* solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, perfisTamanho);
+        Solucao* solucaoLocal = new Solucao(blocosTamanho, camadasTamanho, 
+                                            perfisTamanho, *this, horarioTipoFo);
         int i = 0;
 
         creditosUtilizadosProfessor.clear();
@@ -964,7 +968,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
         }
 
         auto t1 = Util::now();
-        gerarGrade(solucaoLocal);
+        solucaoLocal->calculaFO();
         auto tend = Util::chronoDiff(Util::now(), t1);
         std::cout << "t: " << tend << "\n";
         //gerarGradeTipoGrasp(solucaoLocal, false);
@@ -1117,7 +1121,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(Soluc
                 }
             }
         }
-        gerarGrade(filho);
+        filho->calculaFO();
         //printf("filho: %g\n", filho->getFO());
         filhos.push_back(filho);
         numFilhos++;
@@ -1177,13 +1181,13 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
     success2 += cruzaCamada(filho2, pai1, camadaCruz);
 
     if (success1 > 0) {
-        gerarGrade(filho1);
+        filho1->calculaFO();
         solucoes.push_back(filho1);
     } else {
         delete filho1;
     }
     if (success2 > 0) {
-        gerarGrade(filho2);
+        filho2->calculaFO();
         solucoes.push_back(filho2);
     } else {
         delete filho2;
@@ -1408,8 +1412,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
         filho2 = fallback2;
     }
 
-    gerarGrade(filho1);
-    gerarGrade(filho2);
+    filho1->calculaFO();
+    filho2->calculaFO();
     //printf("filho: %g\n", filho1->fo);
     //printf("filho: %g\n\n", filho2->fo);
     return {filho1, filho2};
@@ -1548,7 +1552,7 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
         auto x2 = mut->horario->getPosition(diaX2, blocoX2, camadaX);
 
         if (swapSlots(*mut, x1, x2) && swapSlots(*mut, x1 + 1, x2 + 1)) {
-            gerarGrade(mut.get());
+            mut->calculaFO();
             return mut.release();
         }
     }
@@ -1641,7 +1645,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
     return nullptr;
 }
 
-double Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
+void Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
 {
     std::unordered_map<long long, Grade*> gradesGeradas{};
 
@@ -1659,17 +1663,14 @@ double Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
 
         sol->insertGrade(novaGrade);
     }
-
-    sol->calculaFO();
-    return sol->getFO();
 }
 
-double Resolucao::gerarGrade() const
+void Resolucao::gerarGrade() const
 {
-    return gerarGrade(solucao);
+    gerarGrade(solucao);
 }
 
-double Resolucao::gerarGrade(Solucao* pSolucao) const
+void Resolucao::gerarGrade(Solucao* pSolucao) const
 {
     for (auto& par : pSolucao->grades) {
         delete par.second;
@@ -1678,7 +1679,7 @@ double Resolucao::gerarGrade(Solucao* pSolucao) const
     pSolucao->grades.clear();
     pSolucao->gradesLength = 0;
 
-    return gerarGradeTipoGrasp2(pSolucao);
+    gerarGradeTipoGrasp2(pSolucao);
 }
 
 double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
@@ -1977,12 +1978,12 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
     return bestSolucao;
 }
 
-double Resolucao::gerarGradeTipoGrasp()
+void Resolucao::gerarGradeTipoGrasp()
 {
-    return gerarGradeTipoGrasp2(solucao);
+    gerarGradeTipoGrasp2(solucao);
 }
 
-double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
+void Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 {
     Solucao* currentSolucao {nullptr};
     Solucao* temp {nullptr};
@@ -2027,8 +2028,6 @@ double Resolucao::gerarGradeTipoGrasp(Solucao*& pSolucao)
 
         iteracoes++;
     }
-
-    return pSolucao->getFO();
 }
 
 int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const
@@ -2085,12 +2084,12 @@ void Resolucao::teste()
     auto n = 5;
     auto t_grasp = 0ll;
     auto fo_grasp = 0.0;
-    auto max_fo_grasp = 0.0;
-    auto min_fo_grasp = std::numeric_limits<double>::max();
+    auto max_fo_grasp = 0;
+    auto min_fo_grasp = std::numeric_limits<int>::max();
     gradeTipoConstrucao = Configuracao::TipoGrade::grasp;
     for (auto i = 0; i < n; i++) {
         auto begin = Util::now();
-        auto curr_fo = gerarGrade(sol.get());
+        auto curr_fo = sol->getFO();
 
         max_fo_grasp = std::max(curr_fo, max_fo_grasp);
         min_fo_grasp = std::min(curr_fo, min_fo_grasp);
@@ -2114,7 +2113,7 @@ void Resolucao::teste()
     //bench modelo
     gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
     auto t1 = Util::now();
-    auto r = gerarGrade(sol.get());
+    auto r = sol->getFO();
     auto t2 = Util::now();
     auto t = Util::chronoDiff(t2, t1);
     std::cout << "Tempo mod: " << t << "\n";
@@ -2471,7 +2470,7 @@ bool Resolucao::geraAlocacao(
 std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria()
 {
     auto solucaoRnd = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
-                                                perfisTamanho);
+                                                perfisTamanho, *this, horarioTipoFo);
     std::unordered_map<std::string, int> creditos_alocados_prof;
 
     auto num_periodos = periodoXdisciplina.size();
@@ -2513,7 +2512,7 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
         while (!currSolucao) {
             currSolucao = std::move(gerarSolucaoAleatoria());
         }
-        gerarGrade(currSolucao.get());
+        currSolucao->calculaFO();
         solucoes.push_back(currSolucao.release());
     }
     //puts("\n");
@@ -2535,7 +2534,7 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull()
     while (!s) {
         s = std::move(gerarSolucaoAleatoria());
     }
-    gerarGrade(s.get());
+    s->calculaFO();
     return s;
 }
 
@@ -2840,7 +2839,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
         }
     }
 
-    gerarGrade(filho.get());
+    filho->calculaFO();
     return filho.release();
 }
 
@@ -2860,11 +2859,6 @@ Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
             } while (camadas_visitadas[n]);
             return n;
         }();
-
-        // int camada {};
-        // do {
-        //     camada = Util::randomBetween(0, camadasTamanho);
-        // } while (camadas_visitadas[camada]);
 
         num_camadas_visitadas++;
         camadas_visitadas[camada] = true;
@@ -2997,9 +2991,13 @@ Solucao* Resolucao::crossoverPMXCamada(
 
         auto idxPai2 = i;
         // Enquanto idxPai2 estiver no ponto de crossover
-        while (xbegin <= idxPai2 && idxPai2 < xbegin) {
+        while (xbegin <= idxPai2 && idxPai2 < xend) {
+            printf("%d\n", idxPai2);
+            auto pdPai2 = pai2.horario->at(idxPai2);
+            printf("pai2:%s\n", !pdPai2 ? "null" : pdPai2->getDisciplina()->getId().c_str());
             // Localiza o valor dessa posição no pai 1
-            auto pdPai1 = pai1.horario->matriz[idxPai2];
+            auto pdPai1 = pai1.horario->at(idxPai2);
+            printf("pai1:%s\n", !pdPai1 ? "null" : pdPai1->getDisciplina()->getId().c_str());
             // Localiza o mesmo valor no pai 2
             auto pdPai2It = std::find_if(comeco_camada_it, fim_camada_it,
                                          [&pdPai1](ProfessorDisciplina* pd) {
@@ -3036,7 +3034,7 @@ Solucao* Resolucao::crossoverPMXCamada(
         }
     }
 
-    gerarGrade(filho.get());
+    filho->calculaFO();
     return filho.release();
 }
 
@@ -3073,7 +3071,7 @@ Solucao* Resolucao::crossoverCicloCamada(
 
         // Se forem iguais, nem começa a procurar um ciclo
         if (pd_equals(valor_inicial, valpai2)) {
-            break;
+            continue;
         }
 
         do {
@@ -3145,7 +3143,7 @@ Solucao* Resolucao::crossoverCicloCamada(
         }
     }
 
-    gerarGrade(filho.get());
+    filho->calculaFO();
     return filho.release();
 }
 
@@ -3215,7 +3213,7 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
         auto b_e2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
         if (swap_blocos(*viz, {d_e1, b_e1}, {d_e2, b_e2}, camada)) {
-            gerarGrade(viz.get());
+            viz->calculaFO();
             return viz;
         }
     }
@@ -3258,7 +3256,7 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
                 auto ok_e2 = !e2 || viz->horario->insert(d, b + 1, camada, e2);
 
                 if (ok_e1 && ok_e2) {
-                    gerarGrade(viz.get());
+                    viz->calculaFO();
                     return viz;
                 }
             }
@@ -3301,7 +3299,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Reinsere com a nova alocação
         auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
         if (ok) {
-            gerarGrade(viz.get());
+            viz->calculaFO();
             return viz;
         }
     }
@@ -3357,7 +3355,7 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
         auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
         if (ok_e2) {
-            gerarGrade(viz.get());
+            viz->getFO();
             return viz;
         }
     }
@@ -3422,7 +3420,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
         } else {
             vizinhos.push_back(std::make_unique<Solucao>(sol));
         }
-        gerarGrade(vizinhos.back().get());
+        vizinhos.back()->calculaFO();
 
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
@@ -3487,13 +3485,23 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 
     for (const auto& c : cadeias) {
         auto s = swap_timeslots(sol, {d_e1, b_e1}, {d_e2, b_e2}, c);
-        gerarGrade(s.get());
+        s->calculaFO();
         solucoes.push_back(move(s));
     }
 
     // Encontra solução com melhor FO
     auto& best = *max_element(begin(solucoes), end(solucoes), std::less<>{});
     return move(best);
+}
+
+const std::unordered_map<std::string, Professor*>& Resolucao::getProfessores() const
+{
+    return professores;
+}
+
+const std::vector<Disciplina*>& Resolucao::getDisciplinas() const
+{
+    return disciplinas;
 }
 
 std::vector<std::pair<int, int>> Resolucao::remove_aloc_memorizando(

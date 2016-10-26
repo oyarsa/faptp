@@ -186,7 +186,7 @@ bool Horario::isProfDia(
     return false;
 }
 
- bool Horario::intervalosTrabalhoProf(const std::string& professor) const
+int Horario::intervalosTrabalhoProf(const std::string& professor) const
 {
      auto intervalos = 0;
      auto contando = false;
@@ -396,7 +396,7 @@ int Horario::preferenciasProfessor(const std::string& professor) const
                 }
 
                 percorrido[disc] = true;
-                num += isProfPref(professor, disc);
+                num += !isProfPref(professor, disc);
             }
         }
     }
@@ -423,7 +423,7 @@ int Horario::aulasProfessor(const std::string& professor, int preferencia) const
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho; b++) {
                 auto pd = at(d, b, c);
-                if (pd && pd->getProfessor()->getId() != professor) {
+                if (pd && pd->getProfessor()->getId() == professor) {
                     num++;
                 }
             }

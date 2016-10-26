@@ -211,7 +211,7 @@ std::unique_ptr<Solucao> HySST::Impl::ejection_chains(const Solucao& solucao) co
         }
     }
 
-    res.gerarGrade(s.get());
+    s->calculaFO();
     return s;
 }
 
