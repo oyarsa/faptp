@@ -86,6 +86,14 @@ std::string get_auto_file_name()
     return Util::join_path({"config"}, filename);
 }
 
+void print_violacoes(const std::unordered_map<std::string, int>& m)
+{
+    for (auto& p : m) {
+        std::cout << p.first << " = " << p.second << "\n";
+    }
+    std::cout << "\n";
+}
+
 void semArgumentos()
 {
     Resolucao r {Configuracao()
@@ -93,8 +101,8 @@ void semArgumentos()
             .populacaoInicial(20)
             .porcentagemCruzamentos(80) // %
             .numMaximoIteracoesSemEvolucaoGRASP(15)
-            .numMaximoIteracoesSemEvolucaoAG(200)
-            .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+            .numMaximoIteracoesSemEvolucaoAG(20)
+            .tipoCruzamento(Configuracao::TipoCruzamento::ordem)
             .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
             .mutacaoProbabilidade(15) // %
             .graspNumVizinhos(2)
@@ -106,6 +114,7 @@ void semArgumentos()
             .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
             .tipoConstrucao(Configuracao::TipoGrade::grasp)
             .tipoFo(Configuracao::TipoFo::Soft_constraints)
+            .timeout(1e9)
             };
 
     std::cout << "Montando horarios [AG + Modelo]...\n";
@@ -135,6 +144,8 @@ void semArgumentos()
     //r.logExperimentos();
     out << oss.str();
     out << r.getLog();
+
+    print_violacoes(r.getSolucao()->reportarViolacoes());
 }
 
 std::pair<long long, int>
@@ -222,14 +233,6 @@ void experimento_ag_cli(const std::string& input, const std::string& file,
 
         std::cout << "\n";
     }
-}
-
-void print_violacoes(const std::unordered_map<std::string, int>& m)
-{
-    for (auto& p : m) {
-        std::cout << p.first << " = " << p.second << "\n";
-    }
-    std::cout << "\n";
 }
 
 template <typename F>

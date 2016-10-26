@@ -343,11 +343,13 @@ private:
     Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
     Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
                                 int camadaCruz);
-    std::tuple<std::unordered_map<ProfessorDisciplina*, std::vector<int>>,
-        std::vector<int>, std::vector<int>>
+    std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>>
         crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
+    std::vector<std::string> inverterPMXRepr(
+        const std::unordered_map<std::string, std::vector<int>>& mapping) const;
     std::vector<int> crossoverPMXSwap(const std::vector<int>& pai1,
-                                      const std::vector<int>& pai2) const;
+                                      const std::vector<int>& pai2,
+                                      int xbegin, int xend) const;
     Solucao* crossoverCicloCamada(const Solucao& pai1, const Solucao& pai2,
                                   int camadaCruz) const;
     Solucao* crossoverCiclo(const Solucao& pai1, const Solucao& pai2) const;

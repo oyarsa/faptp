@@ -571,7 +571,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
         ultimaIteracao = iter;
-        logPopulacao(populacao, iter);
+        //logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);
@@ -1475,7 +1475,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*>& po
     std::vector<Solucao*> genesX;
 
     for (auto j = 0u; j < pop.size(); j++) {
-        auto porcentagem = aleatorio::randomInt() % 100 / 100.0;
+        auto porcentagem = Util::randomDouble();
 
         if (porcentagem <= horarioMutacaoProbabilidade) {
             //printf("pai: %g\n", populacao[j]->getFO());
@@ -1638,7 +1638,8 @@ Solucao* Resolucao::gerarHorarioAGMutacao(Solucao* pSolucao)
 {
     switch (horarioTipoMutacao) {
         case Configuracao::TipoMutacao::substiui_disciplina:
-            return gerarHorarioAGMutacaoSubstDisc(pSolucao);
+            //return gerarHorarioAGMutacaoSubstDisc(pSolucao);
+            return event_swap(*pSolucao).release();
         case Configuracao::TipoMutacao::substitui_professor:
             return gerarHorarioAGMutacaoSubstProf(*pSolucao);
     }
@@ -2619,8 +2620,9 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         iteracaoAlvo = iteracaoAtual;
         tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(),
                                      tempoInicio);
-        log << "Nova melhor solucao!\n";
-        log << boost::format("%-8d %u\n") % best.getFO() % best.getHash();
+        Util::logprint(log, boost::format("Iteracao %d. Nova melhor solucao!\n")
+                       % iteracaoAtual);
+        Util::logprint(log, boost::format("%-8d %u\n") % best.getFO() % best.getHash());
     }
 }
 
@@ -2853,7 +2855,7 @@ Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
 
     while (num_camadas_visitadas < camadasTamanho) {
         const auto camada = [&] {
-            int n {};
+            int n;
             do {
                 n = Util::randomBetween(0, camadasTamanho);
             } while (camadas_visitadas[n]);
@@ -2865,12 +2867,10 @@ Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
 
         auto filho = crossoverOrdemCamada(pai1, pai2, camada);
         if (filho) {
-            //printf("filho: %g\n\n", filho->fo);
             return filho;
         }
     }
 
-    //puts("Nenhum filho");
     return nullptr;
 }
 
@@ -2938,99 +2938,116 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
     return nullptr;
 }
 
+
+std::vector<std::string> Resolucao::inverterPMXRepr(
+    const std::unordered_map<std::string, std::vector<int>>& mapping
+) const
+{
+    auto camada_tamanho = blocosTamanho * dias_semana_util;
+    std::vector<std::string> repr(camada_tamanho);
+
+    for (auto& p : mapping) {
+        auto pd = p.first;
+        auto& vec = p.second;
+
+        for (auto x : vec) {
+            repr[x] = pd;
+        }
+    }
+
+    return repr;
+}
+
+std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>> 
+Resolucao::crossoverPMXCriarRepr(
+    const Solucao& pai1, 
+    const Solucao& pai2, 
+    int camada) const
+{
+    auto camada_tamanho = blocosTamanho * dias_semana_util;
+    auto comeco_camada = pai1.horario->getPosition(0, 0, camada);
+    auto fim_camada = comeco_camada + camada_tamanho;
+
+    std::unordered_map<std::string, std::vector<int>> repr;
+    std::vector<int> novo_pai1(camada_tamanho);
+    std::vector<int> novo_pai2(camada_tamanho);
+
+    for (auto i = comeco_camada; i < fim_camada; i++) {
+        auto pd = pai1.horario->at(i);
+        auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        repr[nome].push_back(i - comeco_camada);
+        novo_pai1[i - comeco_camada] = i - comeco_camada;
+    }
+
+    auto conversor = repr;
+    for (auto i = comeco_camada; i < fim_camada; i++) {
+        auto pd = pai2.horario->at(i);
+        auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        auto x = conversor.at(nome).back();
+        conversor[nome].pop_back();
+        novo_pai2[i - comeco_camada] = x;
+    }
+
+    return {inverterPMXRepr(repr), novo_pai1, novo_pai2};
+}
+
+std::vector<int> Resolucao::crossoverPMXSwap(
+    const std::vector<int>& pai1, 
+    const std::vector<int>& pai2,
+    int xbegin, int xend
+) const
+{
+    auto camada_tamanho = pai1.size();
+
+    auto genes = pai1;
+    std::vector<int> map(camada_tamanho + 1);
+
+    for (auto i = 0u; i < camada_tamanho; i++) {
+        map[genes[i]] = i;
+    }
+
+    for (auto i = xbegin; i < xend; i++) {
+        auto value = pai2[i];
+        std::swap(genes[i], genes[map[value]]);
+
+        auto idx = map[value];
+        std::swap(map[genes[idx]], map[genes[i]]);
+    }
+
+    return genes;
+}
+
 Solucao* Resolucao::crossoverPMXCamada(
     const Solucao& pai1,
     const Solucao& pai2,
     int camadaCruz
 )
 {
-    const auto camada_tam = dias_semana_util * blocosTamanho;
-    std::vector<bool> preenchidos(camada_tam);
+    std::vector<std::string> repr;
+    std::vector<int> novo_pai1;
+    std::vector<int> novo_pai2;
+    std::tie(repr, novo_pai1, novo_pai2) = crossoverPMXCriarRepr(pai1, pai2, camadaCruz);
 
-    // Gera o ponto de cruzamento e encontra as coordenadas dele na matriz 3D
+    auto tamanho_camada = blocosTamanho * dias_semana_util;
+    auto camada_inicio = pai1.horario->getPosition(0, 0, camadaCruz);
+    auto camada_fim = camada_inicio + tamanho_camada;
+
     int xbegin, xend;
     std::tie(xbegin, xend) = getCrossoverPoints(pai1, camadaCruz);
-    int bloco, dia, camada;
-    std::tie(bloco, dia, camada) = pai1.horario->getCoords(xbegin);
 
-    auto comeco_camada = pai1.horario->getPosition(0, 0, camada);
+    auto filho_repr = crossoverPMXSwap(novo_pai1, novo_pai2, xbegin - camada_inicio, 
+                                       xend - camada_inicio);
 
-    // Gera o vector de genes entre os pontos de cruzamento
-    auto genes = getSubTour(pai1, xbegin, xend);
-    auto filho = std::make_unique<Solucao>(pai2);
-    filho->horario->clearCamada(camada);
+    auto filho = pai2.clone();
+    auto alocacoes = filho->horario->getAlocFromDiscNames(camadaCruz);
+    filho->horario->clearCamada(camadaCruz);
 
-    // Percorre os genes do subtour, inserindo-os na camada. Se não for possível,
-    // o cruzamento não gera filho
-    auto sucesso = insereSubTour(genes, *filho, xbegin);
-    if (!sucesso) {
-        return nullptr;
-    }
-
-    for (auto i = xbegin; i < xend; i++) {
-        preenchidos[i - comeco_camada] = true;
-    }
-
-    // Insere as disciplinas de pai2 que estavam no ponto de cruzamento
-    // mas que não foram inseridas de pai1
-    auto comeco_camada_it = begin(pai2.horario->matriz) + comeco_camada;
-    auto fim_camada_it = comeco_camada_it + camada_tam;
-
-    for (auto i = xbegin; i < xend; i++) {
-        auto currPd = pai2.horario->at(i);
-
-        // Verifica se já foi copiado (estava nos genes transmitidos)
-        // Se sim, ele é removido dos genes (para caso haja repetição de genes
-        // ele não entrar nessa condicional mais de uma vez), e passa para a
-        // próxima iteração
-        auto it = begin(genes);
-        if ((it = procura_gene(genes, currPd)) != end(genes)) {
-            genes.erase(it);
-            continue;
-        }
-
-        auto idxPai2 = i;
-        // Enquanto idxPai2 estiver no ponto de crossover
-        while (xbegin <= idxPai2 && idxPai2 < xend) {
-            printf("%d\n", idxPai2);
-            auto pdPai2 = pai2.horario->at(idxPai2);
-            printf("pai2:%s\n", !pdPai2 ? "null" : pdPai2->getDisciplina()->getId().c_str());
-            // Localiza o valor dessa posição no pai 1
-            auto pdPai1 = pai1.horario->at(idxPai2);
-            printf("pai1:%s\n", !pdPai1 ? "null" : pdPai1->getDisciplina()->getId().c_str());
-            // Localiza o mesmo valor no pai 2
-            auto pdPai2It = std::find_if(comeco_camada_it, fim_camada_it,
-                                         [&pdPai1](ProfessorDisciplina* pd) {
-                                             return pd_equals(pdPai1, pd);
-                                         });
-            // Se o índice ainda faz parte do ponto de crossover, executa
-            // para o novo valor.
-            idxPai2 = gsl::narrow_cast<int>(std::distance(
-                begin(pai2.horario->matriz), pdPai2It));
-        }
-        std::tie(bloco, dia, camada) = filho->horario->getCoords(idxPai2);
-
-        if (currPd && !filho->horario->insert(dia, bloco, camada, currPd)) {
+    for (auto i = camada_inicio; i < camada_fim; i++) {
+        auto pdname = repr[filho_repr[i - camada_inicio]];
+        int dia, bloco, camada;
+        std::tie(dia, bloco, camada) = filho->horario->getCoords(i);
+        if (!filho->horario->insert(dia, bloco, camada, alocacoes[pdname])) {
             return nullptr;
-        }
-        preenchidos[idxPai2 - comeco_camada] = true;
-    }
-
-    // Preenche as lacunas que restaram no horário
-    for (auto d = 0; d < dias_semana_util; d++) {
-        for (auto b = 0; b < blocosTamanho; b++) {
-            auto indice_horario = filho->horario->getPosition(d, b, camada);
-            auto indice_camada = indice_horario - comeco_camada;
-
-            if (preenchidos[indice_camada]) {
-                continue;
-            }
-
-            auto pdPai2 = pai2.horario->matriz[indice_horario];
-            if (pdPai2 && !filho->horario->insert(d, b, camada, pdPai2)) {
-                return nullptr;
-            }
-            preenchidos[indice_camada] = true;
         }
     }
 

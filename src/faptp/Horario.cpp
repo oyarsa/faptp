@@ -444,3 +444,20 @@ int Horario::aulasProfessores(
     }
     return num;
 }
+
+std::unordered_map<std::string, ProfessorDisciplina*> 
+Horario::getAlocFromDiscNames(int camada) const
+{
+    auto camada_inicio = getPosition(0, 0, camada);
+    auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
+    
+    std::unordered_map<std::string, ProfessorDisciplina*> alocs;
+
+    for (auto i = camada_inicio; i < camada_fim; i++) {
+        auto pd = at(i);
+        auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        alocs[nome] = pd;
+    }
+
+    return alocs;
+}

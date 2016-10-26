@@ -21,6 +21,7 @@ public:
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) override;
     void clearSlot(int pDia, int pBloco, int pCamada) override;
     void clearCamada(int camada);
+    std::unordered_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
 
     std::size_t getHash();
 
