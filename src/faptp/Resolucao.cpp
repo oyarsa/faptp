@@ -2782,6 +2782,19 @@ Resolucao::getSubTour(const Solucao& pai, int xbegin, int xend) const
     return subtour;
 }
 
+void Resolucao::printCamada(const Solucao& s, int camada) const
+{
+    auto camada_tamanho = dias_semana_util * blocosTamanho;
+    auto comeco_camada = s.horario->getPosition(0, 0, camada);
+
+    for (auto i = comeco_camada; i < comeco_camada + camada_tamanho; i++) {
+        auto pd = s.horario->at(i);
+        auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        std::cout << nome << " ";
+    }
+    std::cout << "\n\n";
+}
+
 Solucao* Resolucao::crossoverOrdemCamada(
     const Solucao& pai1,
     const Solucao& pai2,
@@ -2790,15 +2803,19 @@ Solucao* Resolucao::crossoverOrdemCamada(
     // Gera o ponto de cruzamento e encontra as coordenadas dele na matriz 3D
     int xbegin, xend;
     std::tie(xbegin, xend) = getCrossoverPoints(pai1, camadaCruz);
-    int bloco, dia, camada;
-    std::tie(bloco, dia, camada) = pai1.horario->getCoords(xbegin);
 
     // Gera o vector de genes entre os pontos de cruzamento
     auto genes = getSubTour(pai1, xbegin, xend);
     auto filho = std::make_unique<Solucao>(pai2);
 
+/*    std::cout << "CP: " << xbegin << " - " << xend << "\n";
+    std::cout << "Pai1:\n";
+    printCamada(pai1, camadaCruz);
+    std::cout << "Pai2:\n";
+    printCamada(pai2, camadaCruz);*/
+
     // A camada em que o cruzamento será efetuado é limpa
-    filho->horario->clearCamada(camada);
+    filho->horario->clearCamada(camadaCruz);
 
     // Percorre os genes do subtour, inserindo-os na camada. Se não for possível,
     // o cruzamento não possui filho
@@ -2806,9 +2823,11 @@ Solucao* Resolucao::crossoverOrdemCamada(
     if (!sucesso) {
         return nullptr;
     }
+/*    std::cout << "Filho insert\n";
+    printCamada(*filho, camadaCruz);*/
 
     // Encontra a posição linear do começo da camada
-    auto comecoCamada = filho->horario->getPosition(0, 0, camada);
+    auto comecoCamada = filho->horario->getPosition(0, 0, camadaCruz);
     // E calcula o número de horários na semana
     auto tamCamada = dias_semana_util * blocosTamanho;
 
@@ -2816,14 +2835,14 @@ Solucao* Resolucao::crossoverOrdemCamada(
     // de volta ao início dela, até chegar no xbegin, inserindo as disciplinas
     // que já não estão no intervalo
     auto pai2idx = xend;
-    for (auto i = xend; i < tamCamada + xend; i++) {
+    for (auto i = xend; i < tamCamada + xbegin; i++) {
         // Encontra um índice válido (warpando quando chega ao final da camada)
         auto pai1idx = Util::warpIntervalo(i, tamCamada, comecoCamada);
         auto it = begin(genes);
 
         // Procura a primeira disciplina do pai2 que não está nos genes do cruzamento
         while ((it = procura_gene(genes, pai2.horario->matriz[pai2idx]))
-            != end(genes)) {
+                    != end(genes)) {
             // Apaga dos genes para não haver outra colisão, e passa para a próxima
             // posição no pai2
             genes.erase(it);
@@ -2831,15 +2850,24 @@ Solucao* Resolucao::crossoverOrdemCamada(
         }
 
         // Adquire as coordenadas da disciplina no pai1
-        std::tie(bloco, dia, std::ignore) = filho->horario->getCoords(pai1idx);
+        int bloco, dia, camada;
+        std::tie(bloco, dia, camada) = filho->horario->getCoords(pai1idx);
         auto currPd = pai2.horario->matriz[pai2idx];
 
         // Tenta inserir a disciplina do pai2 nas coordenadas do pai1
         // Se falhar, o cruzamento não gera filhos
-        if (currPd && !filho->horario->insert(dia, bloco, camada, currPd)) {
+        if (!filho->horario->insert(dia, bloco, camada, currPd)) {
             return nullptr;
         }
+
+        pai2idx = Util::warpIntervalo(pai2idx + 1, tamCamada, comecoCamada);
+        //std::cout << "Inseriu " << (currPd ? currPd->getDisciplina()->getId() : "null") << "\n";
+        //std::cout << pai2idx << '\n';
     }
+
+    //std::cout << "Resultado\n";
+    //printCamada(*filho, camadaCruz);
+    //std::cout << "Fim\n\n";
 
     filho->calculaFO();
     return filho.release();
@@ -2847,9 +2875,6 @@ Solucao* Resolucao::crossoverOrdemCamada(
 
 Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
 {
-    //puts("\n\nordem");
-    //printf("pais: %g %gradeCache\n", pai1.fo, pai2.fo);
-
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
 
@@ -2882,14 +2907,14 @@ std::pair<int, int> Resolucao::getCrossoverPoints(
     auto dia1 = Util::randomBetween(0, dias_semana_util);
     auto dia2 = Util::randomBetween(0, dias_semana_util);
 
-    auto bloco1 = Util::randomBetween(0, blocosTamanho);
-    auto bloco2 = Util::randomBetween(0, blocosTamanho);
+    auto bloco1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+    auto bloco2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
     auto x1 = pai.horario->getPosition(dia1, bloco1, camada);
     auto x2 = pai.horario->getPosition(dia2, bloco2, camada);
 
     auto xbegin = std::min(x1, x2);
-    auto xend = std::max(x1, x2);
+    auto xend = std::max(x1, x2) + 1;
 
     return {xbegin, xend};
 }

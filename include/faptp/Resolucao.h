@@ -356,6 +356,7 @@ private:
     Disciplina* getRandomDisc(const std::vector<Disciplina*>& restantes) const;
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
+    void printCamada(const Solucao& s, int camada) const;
     std::vector<Solucao*> populacao;
 };
 
