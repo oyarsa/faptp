@@ -52,7 +52,7 @@ struct HySST::Impl
     int                    maior_fo;
     long long              tempo_fo;
 
-    const std::array<Resolucao::Vizinhanca, 6> heuristicas_mutacionais{
+    const std::array<Resolucao::Vizinhanca, 4> heuristicas_mutacionais{
         Resolucao::Vizinhanca::ES,
         Resolucao::Vizinhanca::EM,
         Resolucao::Vizinhanca::RS,

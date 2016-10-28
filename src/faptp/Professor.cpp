@@ -89,5 +89,5 @@ bool Professor::haveCompetencia(std::string pDisciplina)
 
 int Professor::preferenciaAulas() const
 {
-    return 20;
+    return 24;
 }

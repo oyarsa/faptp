@@ -178,7 +178,7 @@ private:
     std::unordered_map<std::string, int> disciplinasIndex;
     std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
     std::unordered_map<std::string, AlunoPerfil*> alunoPerfis;
-    std::unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    mutable std::unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
 #ifdef MODELO

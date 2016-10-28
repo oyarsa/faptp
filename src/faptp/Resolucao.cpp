@@ -571,7 +571,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
         ultimaIteracao = iter;
-        //logPopulacao(populacao, iter);
+        logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);
@@ -2377,8 +2377,8 @@ bool Resolucao::geraProfessorDisciplina(
         auto prof = profs[rnd_prof];
 
         if (prof->creditoMaximo != 0 &&
-            prof->creditoMaximo < creditos_alocados_prof[prof->nome]
-            + disc->cargaHoraria) {
+                prof->creditoMaximo < creditos_alocados_prof[prof->nome]
+                + disc->cargaHoraria) {
             continue;
         }
         success = geraAlocacao(sol, disc, prof, camada);
@@ -2808,12 +2808,6 @@ Solucao* Resolucao::crossoverOrdemCamada(
     auto genes = getSubTour(pai1, xbegin, xend);
     auto filho = std::make_unique<Solucao>(pai2);
 
-/*    std::cout << "CP: " << xbegin << " - " << xend << "\n";
-    std::cout << "Pai1:\n";
-    printCamada(pai1, camadaCruz);
-    std::cout << "Pai2:\n";
-    printCamada(pai2, camadaCruz);*/
-
     // A camada em que o cruzamento será efetuado é limpa
     filho->horario->clearCamada(camadaCruz);
 
@@ -2823,8 +2817,6 @@ Solucao* Resolucao::crossoverOrdemCamada(
     if (!sucesso) {
         return nullptr;
     }
-/*    std::cout << "Filho insert\n";
-    printCamada(*filho, camadaCruz);*/
 
     // Encontra a posição linear do começo da camada
     auto comecoCamada = filho->horario->getPosition(0, 0, camadaCruz);
@@ -2861,13 +2853,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
         }
 
         pai2idx = Util::warpIntervalo(pai2idx + 1, tamCamada, comecoCamada);
-        //std::cout << "Inseriu " << (currPd ? currPd->getDisciplina()->getId() : "null") << "\n";
-        //std::cout << pai2idx << '\n';
     }
-
-    //std::cout << "Resultado\n";
-    //printCamada(*filho, camadaCruz);
-    //std::cout << "Fim\n\n";
 
     filho->calculaFO();
     return filho.release();
@@ -3337,9 +3323,13 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         auto posicoes_aloc = remove_aloc_memorizando(*viz, aloc, camada);
 
         // Modifica a alocação para o novo professor
-        aloc->professor = novo_prof;
+        auto pdId = "pr" + novo_prof->id + "di" + aloc->disciplina->id;
+        if (!professorDisciplinas[pdId]) {
+            professorDisciplinas[pdId] = new ProfessorDisciplina(novo_prof, aloc->disciplina);
+        }
+        auto pd = professorDisciplinas[pdId];
         // Reinsere com a nova alocação
-        auto ok = reinsere_alocacoes(*viz, posicoes_aloc, aloc, camada);
+        auto ok = reinsere_alocacoes(*viz, posicoes_aloc, pd, camada);
         if (ok) {
             viz->calculaFO();
             return viz;

@@ -102,9 +102,9 @@ void semArgumentos()
             .porcentagemCruzamentos(80) // %
             .numMaximoIteracoesSemEvolucaoGRASP(15)
             .numMaximoIteracoesSemEvolucaoAG(20)
-            .tipoCruzamento(Configuracao::TipoCruzamento::ordem)
+            .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
             .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-            .mutacaoProbabilidade(15) // %
+            .mutacaoProbabilidade(35) // %
             .graspNumVizinhos(2)
             .graspAlfa(20) // %
             .camadaTamanho(input_all_json.camadasTamanho)
@@ -113,8 +113,8 @@ void semArgumentos()
             .tentativasMutacao(4)
             .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
             .tipoConstrucao(Configuracao::TipoGrade::grasp)
-            .tipoFo(Configuracao::TipoFo::Soft_constraints)
-            .timeout(1e9)
+            .tipoFo(Configuracao::TipoFo::Soma_carga)
+            .timeout(30'000)
             };
 
     std::cout << "Montando horarios [AG + Modelo]...\n";
@@ -246,7 +246,7 @@ std::string teste_tempo_iter(int num_exec, F f)
             .camadaTamanho(input_all_json.camadasTamanho)
             .perfilTamanho(input_all_json.perfilTamanho)
             .tentativasMutacao(4)
-            .tipoFo(Configuracao::TipoFo::Soft_constraints)
+            .tipoFo(Configuracao::TipoFo::Soma_carga)
         };
 
         Util::logprint(oss, boost::format("i: %d") % (i+1));
@@ -259,6 +259,9 @@ std::string teste_tempo_iter(int num_exec, F f)
         Util::logprint(oss, boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n")
                        % r.foAlvo % r.tempoAlvo);
         print_violacoes(s->reportarViolacoes());
+
+        auto savePath = Util::join_path({"teste", "fo" + std::to_string(s->getFO())});
+        Output::write(s.get(), savePath);
     }
 
     Util::logprint(oss, "\n");
@@ -270,7 +273,7 @@ void teste_tempo()
 {
     const auto timeout_sec = 30;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 5;
+    const auto num_exec = 1;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -278,10 +281,10 @@ void teste_tempo()
     oss << "Tempo maximo: " << timeout_ms << "\n";
     oss << "Numero de execucoes: " << num_exec << "\n\n";
 
-    Util::logprint(oss, "SA-ILS\n");
+    /*Util::logprint(oss, "SA-ILS\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioSA_ILS(timeout_ms);
-    });
+    });*/
 
     Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
@@ -554,9 +557,9 @@ int main(int argc, char* argv[])
                 << "GRASPNVzi GRASPAlfa NExec\n";
         }
     } else {
-        semArgumentos();
+        //semArgumentos();
 
-        //teste_tempo();
+        teste_tempo();
     }
 
     //upload_result("asdasdas", "1231");
