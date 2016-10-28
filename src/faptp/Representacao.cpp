@@ -63,11 +63,11 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
     return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force)
+bool Representacao::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
-    int position = getPosition(pDia, pBloco, pCamada);
+    int position = getPosition(dia, bloco, camada);
 
-    matriz[position] = pProfessorDisciplina;
+    matriz[position] = pd;
 
     return true;
 }

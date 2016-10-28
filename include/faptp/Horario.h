@@ -14,11 +14,11 @@ public:
     Horario& operator=(const Horario& outro);
     virtual ~Horario();
 
-    bool colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) const;
+    bool colisaoProfessorAlocado(int pDia, int pBloco, const Professor & professor) const;
     bool isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) const;
 
     bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina) override;
-    bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force) override;
+    bool insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force) override;
     void clearSlot(int pDia, int pBloco, int pCamada) override;
     void clearCamada(int camada);
     std::unordered_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
@@ -38,7 +38,8 @@ public:
         const std::unordered_map<std::string, Professor*>& professores) const;
 private:
     std::unordered_map<std::string, int> discCamada;
-    std::unordered_map<std::string, int> creditos_alocados_;
+    std::unordered_map<std::string, int> creditos_alocados_disc_;
+    std::unordered_map<std::string, int> creditos_alocados_prof_;
     std::size_t hash_;
 
     int contaJanelasDia(int dia, int camada) const;

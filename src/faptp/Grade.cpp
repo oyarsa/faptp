@@ -53,9 +53,6 @@ bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 
 bool Grade::discRepetida(const Disciplina* pDisciplina)
 {
-    // Percorre as disciplinas adicionadas e verifica se o nome de pDisciplina
-    // se encontra em suas listas de equival�ncias. Se sim, ela � uma disciplina
-    // repetida e n�o pode ser inserida
     auto found = std::find_if(begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
                               [&pDisciplina](Disciplina* d) {
                                   return d == pDisciplina;
@@ -63,62 +60,56 @@ bool Grade::discRepetida(const Disciplina* pDisciplina)
     if (found != end(disciplinasAdicionadas)) {
         return true;
     }
-    // Percorre as disciplinas cursadas do aluno e verifica se o nome de pDisciplina
-    // é equivalente a alguma. Se sim, ela � uma disciplina repetida e n�o pode
-    // ser inserida
     return !aluno->isRestante(pDisciplina->getId());
 }
 
 bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
 {
-    bool viavel = true;
+    const auto& corequisitos = pDisciplina->coRequisitos;
+    const auto& cursadas = aluno->cursadas;
 
-    const auto& pDisciplinaCoRequisitos = pDisciplina->coRequisitos;
+    for (const auto& coreq : corequisitos) {
+        const auto& equivalentes = getDisciplina(coreq)->equivalentes;
 
-    if (pDisciplinaCoRequisitos.size() > 0) {
-        const auto& disciplinasCursadas = aluno->cursadas;
+        auto cursou = find_first_of(begin(equivalentes), end(equivalentes),
+                                    begin(cursadas), end(cursadas)) != end(equivalentes);
 
-        if (disciplinasCursadas.size() > 0) {
-            for (const auto& coRequisito : pDisciplinaCoRequisitos) {
-                const auto& equivalentes = getDisciplina(coRequisito)->equivalentes;
-                auto possuiPreReq = (find_first_of(equivalentes.begin(), equivalentes.end(),
-                                                   disciplinasCursadas.begin(), disciplinasCursadas.end()) != equivalentes.end())
-                        || (std::find_first_of(equivalentes.begin(), equivalentes.end(),
-                                               disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(),
-                                               [](const std::string& a, const Disciplina* const b) {
-                                                   return a == b->nome;
-                                               }) != equivalentes.end());
-
-                if (!possuiPreReq) {
-                    viavel = false;
-                    break;
-                }
-            }
+        if (cursou) {
+            continue;
         }
-    } else {
-        viavel = false;
+
+        auto cursando = std::find_first_of(
+            begin(equivalentes), end(equivalentes),
+            begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
+            [](auto& a, auto& b) { return a == b->nome; }
+        ) != end(equivalentes);
+
+        if (!cursando) {
+            return false;
+        }
     }
 
-    return viavel;
+    return true;
 }
 
 bool Grade::havePreRequisitos(const Disciplina* const pDisciplina)
 {
-    bool viavel = true;
-
-    const auto& pDisciplinaPreRequisitos = pDisciplina->preRequisitos;
-    const auto& disciplinasAprovadas = aluno->aprovadas;
+    const auto& pre_requisitos = pDisciplina->preRequisitos;
+    const auto& aprovadas = aluno->aprovadas;
 
     // Percorre a lista de disciplinas que sao pre-requisitos da atual
-    for (const auto& preRequisito : pDisciplinaPreRequisitos) {
+    for (const auto& prereq : pre_requisitos)
+    {
+        const auto& equivalentes = getDisciplina(prereq)->equivalentes;
         // Se não foi encontrado, retorna falso
-        if (disciplinasAprovadas.find(preRequisito) == end(disciplinasAprovadas)) {
-            viavel = false;
-            break;
+        auto passou = find_first_of(begin(equivalentes), end(equivalentes),
+                                    begin(aprovadas), end(aprovadas)) != end(equivalentes);
+        if (!passou) {
+            return false;
         }
     }
 
-    return viavel;
+    return true;
 }
 
 bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)

@@ -19,9 +19,9 @@ public:
     Professor(std::string pNome);
     Professor(std::string pNome, std::string pId);
 
-    std::string getId();
+    std::string getId() const;
 
-    std::string getNome();
+    std::string getNome() const;
 
     int getNumDisponibilidade() const;
     void setNome(std::string pNome);
@@ -30,12 +30,14 @@ public:
 
     void setDiaDisponivel(unsigned int dia, int bloco);
     void unsetDiaDisponivel(unsigned int dia, int bloco);
-    bool isDiaDisponivel(unsigned int dia, int bloco);
+    bool isDiaDisponivel(unsigned int dia, int bloco) const;
 
     void addCompetencia(std::string pDisciplina, double pPeso);
-    bool haveCompetencia(std::string pDisciplina);
+    bool haveCompetencia(std::string pDisciplina) const;
 
     int preferenciaAulas() const;
+
+    int credito_maximo() const;
 private:
     std::string id;
 
@@ -49,7 +51,7 @@ private:
 
     void init(std::string pNome, std::string pId);
 
-    bool isDiaValido(unsigned int dia);
+    static bool isDiaValido(unsigned int dia);
     void setDiaDisponivel(unsigned int dia, int bloco, bool value);
 };
 

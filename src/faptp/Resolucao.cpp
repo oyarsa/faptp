@@ -173,10 +173,11 @@ void Resolucao::carregarDadosProfessores()
 
         professores[id] = new Professor(nome, id);
         auto& diasDisponiveis = professores[id]->diasDisponiveis;
-        auto& numDisp = professores[id]->numDisponibilidade;
 
         if (jsonProfessores[k].isMember("creditoMaximo") == 1) {
             professores[id]->setCreditoMaximo(jsonProfessores[k]["creditoMaximo"].asInt());
+        } else {
+            professores[id]->setCreditoMaximo(dias_semana_util * blocosTamanho);
         }
 
         if (jsonProfessores[k].isMember("disponibilidade") == 1) {
@@ -187,9 +188,11 @@ void Resolucao::carregarDadosProfessores()
                 for (auto j = 0u; j < disponibilidade[i].size(); j++) {
                     diasDisponiveis[i][j] = disponibilidade[i][j].asBool();
                 }
-
-                numDisp += accumulate(begin(diasDisponiveis[i]), end(diasDisponiveis[i]), 0);
             }
+        } else {
+            diasDisponiveis = std::vector<std::vector<bool>>(
+                blocosTamanho, std::vector<bool>(dias_semana_util, true)
+                );
         }
 
         const auto& competencias = jsonProfessores[k]["competencias"];

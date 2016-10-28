@@ -25,7 +25,7 @@ public:
     const std::vector<ProfessorDisciplina*>& getMatriz() const;
 
     virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina);
-    virtual bool insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force);
+    virtual bool insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force);
 
     // Bloco, dia, camada
     void get3DMatrix(std::size_t pLinear, int triDimensional[3]);

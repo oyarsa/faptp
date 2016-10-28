@@ -21,7 +21,7 @@ void Professor::init(std::string pNome, std::string pId)
     id = pId;
 }
 
-std::string Professor::getId()
+std::string Professor::getId() const
 {
     return id;
 }
@@ -31,7 +31,7 @@ int Professor::getNumDisponibilidade() const
     return numDisponibilidade;
 }
 
-std::string Professor::getNome()
+std::string Professor::getNome() const
 {
     return nome;
 }
@@ -68,7 +68,7 @@ void Professor::unsetDiaDisponivel(unsigned int dia, int bloco)
     setDiaDisponivel(dia, bloco, false);
 }
 
-bool Professor::isDiaDisponivel(unsigned int dia, int bloco)
+bool Professor::isDiaDisponivel(unsigned int dia, int bloco) const
 {
     if (isDiaValido(dia)) {
         return diasDisponiveis[dia][bloco];
@@ -82,7 +82,7 @@ void Professor::addCompetencia(std::string pDisciplina, double pPeso)
     competencias[pDisciplina] = pPeso;
 }
 
-bool Professor::haveCompetencia(std::string pDisciplina)
+bool Professor::haveCompetencia(std::string pDisciplina) const
 {
     return competencias.count(pDisciplina) > 0;
 }
@@ -90,4 +90,9 @@ bool Professor::haveCompetencia(std::string pDisciplina)
 int Professor::preferenciaAulas() const
 {
     return 24;
+}
+
+int Professor::credito_maximo() const
+{
+    return creditoMaximo;
 }

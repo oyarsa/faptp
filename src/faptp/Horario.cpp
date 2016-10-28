@@ -4,32 +4,36 @@
 #include <faptp/Horario.h>
 #include <faptp/Semana.h>
 
-Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}
+Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) 
+    : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}
 
 Horario::~Horario() {}
 
 Horario::Horario(const Horario& outro)
     : Representacao(outro), discCamada(outro.discCamada),
-      creditos_alocados_(outro.creditos_alocados_), hash_(0) {}
+      creditos_alocados_disc_(outro.creditos_alocados_disc_), hash_(0),
+      creditos_alocados_prof_(outro.creditos_alocados_prof_) {}
 
 Horario& Horario::operator=(const Horario& outro)
 {
     Representacao::operator=(outro);
-    creditos_alocados_ = outro.creditos_alocados_;
+    creditos_alocados_disc_ = outro.creditos_alocados_disc_;
+    creditos_alocados_prof_ = outro.creditos_alocados_prof_;
     hash_ = 0;
     discCamada = outro.discCamada;
     return *this;
 }
 
-bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, std::string professorId) const
+bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& professor) const
 {
-    int positionCamada {};
+    if (!professor.isDiaDisponivel(pDia, pBloco) 
+        || creditos_alocados_prof_.at(professor.getId()) >= professor.credito_maximo()) {
+        return true;
+    }
 
-    for (int i = 0; i < camadasTamanho; i++) {
-
-        positionCamada = getPosition(pDia, pBloco, i);
-        if (matriz[positionCamada]
-                && matriz[positionCamada]->professor->getId() == professorId) {
+    for (auto i = 0; i < camadasTamanho; i++) {
+        auto pd = at(pDia, pBloco, i);
+        if (pd && pd->professor->getId() == professor.getId()) {
             return true;
         }
     }
@@ -55,8 +59,8 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
     auto pos = getPosition(dia, bloco, camada);
     auto disc = pd->disciplina;
 
-    auto creditos = creditos_alocados_.find(disc->id);
-    if (creditos != end(creditos_alocados_) && creditos->second >= disc->cargaHoraria) {
+    auto creditos = creditos_alocados_disc_.find(disc->id);
+    if (creditos != end(creditos_alocados_disc_) && creditos->second >= disc->cargaHoraria) {
         return false;
     }
 
@@ -70,22 +74,22 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
     return false;
 }
 
-bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina, bool force)
+bool Horario::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
-    int position = getPosition(pDia, pBloco, pCamada);
-    bool professorAlocado = false;
-    auto disc = pProfessorDisciplina->disciplina;
+    int position = getPosition(dia, bloco, camada);
+    auto disc = pd->disciplina;
+    auto prof = pd->getProfessor();
 
-    if (creditos_alocados_[disc->id] >= disc->cargaHoraria) {
+    if (creditos_alocados_disc_[disc->id] >= disc->cargaHoraria) {
         return false;
     }
 
     if (!matriz[position] || force) {
-        professorAlocado = colisaoProfessorAlocado(pDia, pBloco,
-                                                   pProfessorDisciplina->professor->getId());
+        auto professorAlocado = colisaoProfessorAlocado(dia, bloco, *prof);
         if (!professorAlocado || force) {
-            creditos_alocados_[disc->id]++;
-            return Representacao::insert(pDia, pBloco, pCamada, pProfessorDisciplina, force);
+            creditos_alocados_disc_[disc->id]++;
+            creditos_alocados_prof_[prof->id]++;
+            return Representacao::insert(dia, bloco, camada, pd, force);
         }
     }
     return false;
@@ -98,7 +102,8 @@ void Horario::clearSlot(int pDia, int pBloco, int pCamada)
     if (!profdisc) {
         return;
     }
-    creditos_alocados_[profdisc->disciplina->id]--;
+    creditos_alocados_disc_[profdisc->disciplina->id]--;
+    creditos_alocados_prof_[profdisc->professor->id]--;
     Representacao::clearSlot(pDia, pBloco, pCamada);
 }
 
