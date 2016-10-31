@@ -348,6 +348,11 @@ const std::map<std::string, std::vector<Disciplina*>>& Resolucao::getPeriodoXDis
     return periodoXdisciplina;
 }
 
+int Resolucao::getCamadasTamanho() const
+{
+    return camadasTamanho;
+}
+
 void Resolucao::carregarSolucao()
 {
     const auto& jsonHorario = jsonRoot["horario"];
@@ -2846,7 +2851,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
 
         // Adquire as coordenadas da disciplina no pai1
         int bloco, dia, camada;
-        std::tie(bloco, dia, camada) = filho->horario->getCoords(pai1idx);
+        std::tie(dia, bloco, camada) = filho->horario->getCoords(pai1idx);
         auto currPd = pai2.horario->matriz[pai2idx];
 
         // Tenta inserir a disciplina do pai2 nas coordenadas do pai1
@@ -2916,7 +2921,7 @@ bool Resolucao::insereSubTour(
 {
     for (auto i = 0u; i < genes.size(); i++) {
         int bloco, dia, camada;
-        std::tie(bloco, dia, camada) = filho.horario->getCoords(i + xbegin);
+        std::tie(dia, bloco, camada) = filho.horario->getCoords(i + xbegin);
         auto currPd = genes[i];
 
         if (currPd && !filho.horario->insert(dia, bloco, camada, currPd)) {

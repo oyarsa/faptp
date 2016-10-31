@@ -82,7 +82,7 @@ std::tuple<int, int, int> Representacao::getCoords(std::size_t pLinear) const
     int coord[3];
     Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
 
-    return std::make_tuple(coord[0], coord[1], coord[2]);
+    return std::make_tuple(coord[1], coord[0], coord[2]);
 }
 
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina)

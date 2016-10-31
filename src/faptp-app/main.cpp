@@ -271,9 +271,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 30;
+    const auto timeout_sec = 20;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 1;
+    const auto num_exec = 2;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -281,10 +281,10 @@ void teste_tempo()
     oss << "Tempo maximo: " << timeout_ms << "\n";
     oss << "Numero de execucoes: " << num_exec << "\n\n";
 
-    /*Util::logprint(oss, "SA-ILS\n");
+    Util::logprint(oss, "SA-ILS\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioSA_ILS(timeout_ms);
-    });*/
+    });
 
     Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
@@ -296,9 +296,8 @@ void teste_tempo()
         return r.gerarHorarioWDJU(timeout_ms);
     });
 
-    std::ofstream out;
-    out.open((boost::format("resultados%d.txt") % timeout_sec).str(), 
-             std::ios::out | std::ios::app);
+    std::ofstream out{(boost::format("resultados%d.txt") % timeout_sec).str(), 
+                     std::ios::out | std::ios::app};
     out << oss.str() << std::endl;
 }
 

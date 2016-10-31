@@ -234,26 +234,28 @@ HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
     const auto& horario = solucao.getHorario();
 
     auto num_slots_percorridos = 0u;
-    auto num_slots = horario.getMatriz().size() / 2;
+    auto num_slots = horario.getMatriz().size();
     std::vector<bool> slots_percorridos(num_slots, false);
 
     while (num_slots_percorridos < num_slots) {
-        auto slot = [&] {
-            int s;
+            int s, d,b,k;
             do {
-                s = Util::randomBetween(0, gsl::narrow_cast<int>(num_slots));
+                d = Util::randomBetween(0, dias_semana_util);
+                b = 2 * Util::randomBetween(0, res.getBlocosTamanho()/2);
+                k = Util::randomBetween(0, res.getCamadasTamanho());
+                s = horario.getPosition(d, b, k);
             } while (slots_percorridos[s]);
-            return s;
-        }();
-        num_slots_percorridos++;
+            auto slot = s;
+        num_slots_percorridos += 2;
         slots_percorridos[slot] = true;
+        slots_percorridos[slot+1] = true;
 
-        if (!horario.at(2*slot) && !horario.at(2*slot+1)) {
-            return horario.getCoords(2*slot);
+        if (!horario.at(slot) && !horario.at(slot+1)) {
+            return horario.getCoords(slot);
         }
     }
 
-    return {0, 0, 0};
+    return {};
 }
 
 boost::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
@@ -297,7 +299,7 @@ std::vector<HySST::Impl::Event> HySST::Impl::list_all_liebhabers(
     auto horario = solucao.getHorario();
 
     for (auto d = 0; d < dias_semana_util; d++) {
-        for (auto b = 0; b < horario.getBlocosTamanho(); b++) {
+        for (auto b = 0; b < horario.getBlocosTamanho() / 2; b += 2) {
             auto pd = horario.at(d, b, camada);
             horario.clearSlot(d, b, camada);
 
@@ -321,7 +323,7 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     int d_og, b_og, c_og;
     Time_slot slot;
     std::tie(slot, pd) = Util::randomChoice(liebhabers);
-    std::tie(b_og, d_og, c_og) = slot;
+    std::tie(d_og, b_og, c_og) = slot;
 
     int d_dest, b_dest, c_dest;
     std::tie(d_dest, b_dest, c_dest) = dest;
@@ -338,14 +340,6 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
 
 Resolucao::Vizinhanca HySST::Impl::choose_hill() const
 {
-    /* First Improvement possui performance muito ruim
-    auto llh = Util::randomChoice(heuristicas_hill);
-    if (llh == Resolucao::Vizinhanca::HC_FI) {
-    puts("first");
-    } else {
-    puts("ejec");
-    }
-    */
     return Resolucao::Vizinhanca::HC_EC;
 }
 

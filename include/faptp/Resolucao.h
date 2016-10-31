@@ -58,6 +58,7 @@ public:
     int getBlocosTamanho() const;
     const std::map<std::string, std::vector<Disciplina*>>&
         getPeriodoXDisciplinas() const;
+    int getCamadasTamanho() const;
 
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();

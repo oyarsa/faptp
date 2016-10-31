@@ -23,6 +23,15 @@ void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y,
     triDimensional[0] = gsl::narrow_cast<int>(bloco); 
     triDimensional[1] = gsl::narrow_cast<int>(dia);
     triDimensional[2] = gsl::narrow_cast<int>(camada);
+    
+
+    /*auto dia = pLinear % X;
+    pLinear /= X;
+    auto bloco = pLinear % Y;
+    pLinear /= Y;
+    auto camada = pLinear;
+
+    triDimensional[]*/
 }
 
 std::vector<std::string>& Util::strSplit(const std::string& s, char delim, std::vector<std::string>& elems)

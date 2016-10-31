@@ -26,8 +26,10 @@ Horario& Horario::operator=(const Horario& outro)
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& professor) const
 {
+    auto creditos = creditos_alocados_prof_.find(professor.getId());
     if (!professor.isDiaDisponivel(pDia, pBloco) 
-        || creditos_alocados_prof_.at(professor.getId()) >= professor.credito_maximo()) {
+        || creditos != end(creditos_alocados_prof_) 
+           && creditos->second >= professor.credito_maximo()) {
         return true;
     }
 
@@ -65,7 +67,7 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
     }
 
     if (!matriz[pos]) {
-        auto isProfAloc = colisaoProfessorAlocado(dia, bloco, pd->professor->getId());
+        auto isProfAloc = colisaoProfessorAlocado(dia, bloco, *pd->professor);
         if (!isProfAloc) {
             return true;
         }
