@@ -340,7 +340,7 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
 
 Resolucao::Vizinhanca HySST::Impl::choose_hill() const
 {
-    return Resolucao::Vizinhanca::HC_EC;
+    return Util::randomChoice(heuristicas_hill);
 }
 
 Resolucao::Vizinhanca HySST::Impl::choose_mut() const

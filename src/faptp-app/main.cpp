@@ -5,7 +5,6 @@
 #include <ios>
 #include <string>
 #include <chrono>
-#include <deque>
 #include <thread>
 
 #include <boost/format.hpp>
@@ -243,10 +242,22 @@ std::string teste_tempo_iter(int num_exec, F f)
     for (auto i = 0; i < num_exec; i++) {
         Resolucao r{Configuracao()
             .arquivoEntrada(Util::join_path({"entradas"}, "input.all.json"))
+            .populacaoInicial(20)
+            .porcentagemCruzamentos(80)
+            .numMaximoIteracoesSemEvolucaoGRASP(15)
+            .numMaximoIteracoesSemEvolucaoAG(20)
+            .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+            .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+            .mutacaoProbabilidade(35) // %
+            .graspNumVizinhos(2)
+            .graspAlfa(20) // %
             .camadaTamanho(input_all_json.camadasTamanho)
             .perfilTamanho(input_all_json.perfilTamanho)
             .tentativasMutacao(4)
-            .tipoFo(Configuracao::TipoFo::Soma_carga)
+            .numTorneioPopulacao(4)
+            .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+            .tipoConstrucao(Configuracao::TipoGrade::grasp)
+            .tipoFo(Configuracao::TipoFo::Soft_constraints)
         };
 
         Util::logprint(oss, boost::format("i: %d") % (i+1));
@@ -271,9 +282,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 20;
+    const auto timeout_sec = 60;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 2;
+    const auto num_exec = 5;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -296,6 +307,27 @@ void teste_tempo()
         return r.gerarHorarioWDJU(timeout_ms);
     });
 
+    Util::logprint(oss, "AG - PMX\n");
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        r.setTimeout(timeout_ms);
+        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::pmx;
+        return r.gerarHorarioAG()->clone();
+    });
+
+    Util::logprint(oss, "AG - OX\n");
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        r.setTimeout(timeout_ms);
+        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ordem;
+        return r.gerarHorarioAG()->clone();
+    });
+
+    Util::logprint(oss, "AG - CX\n");
+    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
+        r.setTimeout(timeout_ms);
+        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ciclo;
+        return r.gerarHorarioAG()->clone();
+    });
+;
     std::ofstream out{(boost::format("resultados%d.txt") % timeout_sec).str(), 
                      std::ios::out | std::ios::app};
     out << oss.str() << std::endl;
@@ -367,7 +399,7 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file,
     std::cout << "Arquivo: " << conf_file << "\n\n";
 
     std::ifstream config{conf_file};
-    std::deque<std::thread> threads;
+    std::vector<std::thread> threads;
 
     std::string id;
     int frac_time, sa_iter, sa_reaq, sa_chances, ils_iter, ils_pmax;
@@ -391,7 +423,7 @@ void experimento_sa_ils_cli(const std::string& input, const std::string& file,
                 ils_iter, ils_pmax, ils_p0, timeout);
 
             Util::logprint(out_str, boost::format("%s,%d,%lld,%d\r\n") 
-                           % id % i % tempo % fo);
+                                    % id % i % tempo % fo);
         }
         std::cout << "\n";
 
@@ -425,7 +457,7 @@ std::pair<long long, int> experimento_hysst(
 }
 
 void experimento_hysst_cli(const std::string& input, const std::string& file,
-                           long long timeout)
+                           const std::string& servidor, long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -433,10 +465,22 @@ void experimento_hysst_cli(const std::string& input, const std::string& file,
     // formato saida:
     // ID,NExec,Tempo,Fo
 
-    std::ifstream config{file};
+    std::string conf_file;
+
+    if (file == "auto") {
+        conf_file = get_auto_file_name();
+    } else {
+        conf_file = file;
+    }
+
+    std::cout << "Arquivo: " << conf_file << "\n\n";
+
+    std::ifstream config{conf_file};
+    std::vector<std::thread> threads;
 
     std::string id;
     int max_level, t_start, t_step, it_hc, it_mut, n_exec;
+    auto num_config = 1;
 
     while (config >> id >> max_level >> t_start >> t_step >> it_hc 
            >> it_mut >> n_exec) {
@@ -446,7 +490,7 @@ void experimento_hysst_cli(const std::string& input, const std::string& file,
         auto filename = path + id + ".txt";
 
         std::cout << "ID: " << id << "\n\n";
-        std::ofstream out{filename};
+        std::ostringstream out{filename};
         out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
@@ -458,10 +502,15 @@ void experimento_hysst_cli(const std::string& input, const std::string& file,
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
                            % id % i % tempo % fo);
         }
-
         std::cout << "\n";
+
+        threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+        num_config++;
     }
 
+    for (auto& t : threads) {
+        t.join();
+    }
 }
 
 std::pair<long long, int> experimento_wdju(
@@ -484,7 +533,7 @@ std::pair<long long, int> experimento_wdju(
 }
 
 void experimento_wdju_cli(const std::string& input, const std::string& file,
-                          long long timeout)
+                          const std::string& servidor, long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -492,11 +541,23 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
     // formato saida:
     // ID,NExec,Tempo,Fo
 
-    std::ifstream config{file};
+    std::string conf_file;
+
+    if (file == "auto") {
+        conf_file = get_auto_file_name();
+    } else {
+        conf_file = file;
+    }
+
+    std::cout << "Arquivo: " << conf_file << "\n\n";
+
+    std::ifstream config{conf_file};
+    std::vector<std::thread> threads;
 
     std::string id;
     int stag_limit, n_exec;
     double jump_factor;
+    auto num_config = 1;
 
     while (config >> id >> stag_limit >> jump_factor >> n_exec) {
         auto path = Util::join_path({"experimento"});
@@ -505,7 +566,7 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
         auto filename = path + id + ".txt";
 
         std::cout << "ID: " << id << "\n\n";
-        std::ofstream out{filename};
+        std::ostringstream out{filename};
         out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
@@ -517,8 +578,14 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
                            % id % i % tempo % fo);
         }
-
         std::cout << "\n";
+
+        threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+        num_config++;
+    }
+
+    for (auto& t : threads) {
+        t.join();
     }
 }
 
@@ -535,9 +602,9 @@ int main(int argc, char* argv[])
         } else if (algo == "-sa_ils") {
             experimento_sa_ils_cli(argv[2], argv[3], argv[4], timeout);
         } else if (algo == "-hysst") {
-            experimento_hysst_cli(argv[2], argv[3], timeout);
+            experimento_hysst_cli(argv[2], argv[3], argv[4], timeout);
         } else if (algo == "-wdju") {
-            experimento_wdju_cli(argv[2], argv[3], timeout);
+            experimento_wdju_cli(argv[2], argv[3], argv[4], timeout);
         } else {
             std::cout << "Algoritmo invalido\n";
         }
@@ -560,6 +627,4 @@ int main(int argc, char* argv[])
 
         teste_tempo();
     }
-
-    //upload_result("asdasdas", "1231");
 }

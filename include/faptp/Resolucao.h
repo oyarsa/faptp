@@ -59,6 +59,7 @@ public:
     const std::map<std::string, std::vector<Disciplina*>>&
         getPeriodoXDisciplinas() const;
     int getCamadasTamanho() const;
+    void setTimeout(long timeout);
 
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();

@@ -353,6 +353,11 @@ int Resolucao::getCamadasTamanho() const
     return camadasTamanho;
 }
 
+void Resolucao::setTimeout(long timeout)
+{
+    this->timeout = timeout;
+}
+
 void Resolucao::carregarSolucao()
 {
     const auto& jsonHorario = jsonRoot["horario"];
@@ -579,7 +584,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
         ultimaIteracao = iter;
-        logPopulacao(populacao, iter);
+        //logPopulacao(populacao, iter);
 
         gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
         gerarHorarioAGEfetuaMutacao(populacao);
@@ -2628,9 +2633,9 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         iteracaoAlvo = iteracaoAtual;
         tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(),
                                      tempoInicio);
-        Util::logprint(log, boost::format("Iteracao %d. Nova melhor solucao!\n")
-                       % iteracaoAtual);
-        Util::logprint(log, boost::format("%-8d %u\n") % best.getFO() % best.getHash());
+        //Util::logprint(log, boost::format("Iteracao %d. Nova melhor solucao!\n")
+        //               % iteracaoAtual);
+        //Util::logprint(log, boost::format("%-8d %u\n") % best.getFO() % best.getHash());
     }
 }
 
@@ -3408,7 +3413,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 {
     // Número máximo de disciplinas por restrições de tempo
     // (5! = 120, grande o suficiente)
-    constexpr auto max_per = 5;
+    constexpr auto max_per = 3;
     const auto aulas_semana = blocosTamanho * dias_semana_util;
 
     auto num_disc_per = std::min(max_per, Util::randomBetween(
@@ -3477,9 +3482,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 
     int d_e2, b_e2;
     std::tie(d_e2, b_e2) = [&] {
-        int d{};
-        int b{};
-
+        int d, b;
         do {
             d = Util::randomBetween(0, dias_semana_util);
             b = 2 * Util::randomBetween(0, blocosTamanho / 2);
@@ -3521,7 +3524,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     auto cadeias = encontra_subgrafos_conexos(grafo);
 
     // Encontra as soluções a partir das trocas de cada cadeia
-    std::vector<std::unique_ptr<Solucao>> solucoes{};
+    std::vector<std::unique_ptr<Solucao>> solucoes;
 
     for (const auto& c : cadeias) {
         auto s = swap_timeslots(sol, {d_e1, b_e1}, {d_e2, b_e2}, c);
@@ -3530,8 +3533,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     }
 
     // Encontra solução com melhor FO
-    auto& best = *max_element(begin(solucoes), end(solucoes), std::less<>{});
-    return move(best);
+    return std::move(*max_element(begin(solucoes), end(solucoes), std::less<>{}));
 }
 
 const std::unordered_map<std::string, Professor*>& Resolucao::getProfessores() const
