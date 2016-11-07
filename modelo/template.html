@@ -1,0 +1,39 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Horários</title>
+    <style>{{ css }}</style>
+</head>
+
+<body>
+    {% for nome, horarios in periodos %}
+        <h1 align="center" class="nome">{{ nome }}</h1>
+        <table align="center" class="horario">
+            <thead>
+                <tr>
+                    {% for dia in dias %}
+                        <th>{{ dia }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for horario in horarios %}
+                    <tr>
+                        {% for evento in horario %}
+                            <td>
+                                {% if evento is none %}
+                                    ---
+                                {% else %}
+                                    <b>{{ evento.disc }}</b>
+                                    <br/>
+                                    <i>{{ evento.prof }}</i>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</body>
+</html>

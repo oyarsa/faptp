@@ -1,0 +1,27 @@
+.nome {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-variant: small-caps;
+}
+
+.horario {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    width: 70%;
+    border-collapse: collapse;
+}
+
+.horario td, .horario th {
+    font-size: 1em;
+    border: 1px solid #045707;
+    padding: 3px 7px 2px 7px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.horario th {
+	text-align: center;
+    font-size: 1.1em;
+    padding-top: 5px;
+    padding-bottom: 4px;
+    background-color: #00923F;
+    color: #ffffff;
+}
