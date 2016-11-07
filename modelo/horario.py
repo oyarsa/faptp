@@ -2,6 +2,7 @@
 
 import sys
 import json
+import random
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -9,13 +10,46 @@ dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 num_dias = 6
 num_horarios = 4
 cssfile = 'estilo.css'
+nome_cores = ['vermelho', 'amarelo', 'azul', 'verde', 'roxo', 'rosa', 'cinza',
+              'azul2', 'cinza2']
 
 
 def matriz_vazia(rows, cols):
     return [[None for _ in range(cols)] for _ in range(rows)]
 
 
-def carregar_periodos(horarios):
+def get_disciplinas_periodo(horarios):
+    periodos = {}
+
+    for periodo in horarios['periodos']:
+        disciplinas = set()
+        for e in periodo['eventos']:
+            disciplinas.add(e['disciplina'])
+        periodos[periodo['nome']] = disciplinas
+
+    return periodos
+
+
+def get_disciplinas_cores(disciplinas):
+    cores = random.sample(nome_cores, len(disciplinas))
+    disc_cores = {}
+
+    for i, d in enumerate(disciplinas):
+        disc_cores[d] = cores[i]
+
+    return disc_cores
+
+
+def get_periodos_cores(periodos):
+    periodo_cores = {}
+
+    for periodo, disciplinas in periodos.items():
+        periodo_cores[periodo] = get_disciplinas_cores(disciplinas)
+
+    return periodo_cores
+
+
+def carregar_periodos(horarios, cores):
     periodos = []
 
     for periodo in horarios['periodos']:
@@ -27,7 +61,8 @@ def carregar_periodos(horarios):
             horario = int(e['horario'])
             matriz[horario][dia] = {
                 'prof': e['professor'],
-                'disc': e['disciplina']
+                'disc': e['disciplina'],
+                'cor': cores[nome][e['disciplina']]
             }
 
         periodos.append((nome, matriz))
@@ -46,7 +81,8 @@ def main():
     with open(infile, encoding='utf8') as f:
         horarios = json.load(f)
 
-    periodos = carregar_periodos(horarios)
+    cores = get_periodos_cores(get_disciplinas_periodo(horarios))
+    periodos = carregar_periodos(horarios, cores)
 
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template('template.html')

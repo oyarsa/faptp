@@ -8,11 +8,11 @@
 #include <sstream>
 #include <array>
 #include <fstream>
-
+#include <json/json.h>
 #include <faptp/Output.h>
 #include <faptp/Semana.h>
 
-void Output::write(Solucao* pSolucao, const std::string& savePath)
+void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
 {
     // Criando o diretorio de saida
     Util::create_folder(savePath);
@@ -110,3 +110,35 @@ void Output::write(Solucao* pSolucao, const std::string& savePath)
     arquivoSaida << std::nounitbuf << saida.str() << "\n";
 }
 
+void Output::writeJson(const Solucao& solucao, const std::string& outfile)
+{
+    Json::Value raiz;
+    Json::Value periodos{Json::arrayValue};
+    auto& horario = solucao.getHorario();
+
+    for (auto c = 0; c < solucao.camadasTamanho; c++) {
+        Json::Value periodo;
+        periodo["nome"] = solucao.camada_periodo.at(c);
+
+        Json::Value eventos{Json::arrayValue};
+        for (auto b = 0; b < solucao.blocosTamanho; b++) {
+            for (auto d = 0; d < dias_semana_util; d++) {
+                auto pd = horario.at(d, b, c);
+                if (pd) {
+                    Json::Value e;
+                    e["professor"] = pd->getProfessor()->getNome();
+                    e["disciplina"] = pd->getDisciplina()->getNome();
+                    e["horario"] = b;
+                    e["dia"] = d;
+                    eventos.append(e);
+                }
+            }
+        }
+        periodo["eventos"] = eventos;
+        periodos.append(periodo);
+    }
+    raiz["periodos"] = periodos;
+
+    std::ofstream out{outfile};
+    out << raiz;
+}

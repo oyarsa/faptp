@@ -5,8 +5,9 @@
 
 .horario {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    width: 70%;
+    width: 90%;
     border-collapse: collapse;
+    font-size: 14px;
 }
 
 .horario td, .horario th {
@@ -24,4 +25,40 @@
     padding-bottom: 4px;
     background-color: #00923F;
     color: #ffffff;
+}
+
+.vermelho {
+    background-color: #f7bfb9;
+}
+
+.amarelo {
+    background-color: #f7f6b9;
+}
+
+.azul {
+    background-color: #b9d1f7;
+}
+
+.verde {
+    background-color: #b9f7cc;
+}
+
+.roxo {
+    background-color: #d3b9f7;
+}
+
+.rosa {
+    background-color: #ffa5e8;
+}
+
+.cinza {
+    background-color: #dfdfdf;
+}
+
+.azul2 {
+    background-color: #5998ff;
+}
+
+.cinza2 {
+    background-color: #9e9e9e;
 }

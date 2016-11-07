@@ -2122,7 +2122,7 @@ void Resolucao::teste()
 
     auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo_grasp / n)
         + "grasp"});
-    Output::write(sol.get(), savePath);
+    Output::writeHtml(sol.get(), savePath);
 
     //bench modelo
     gradeTipoConstrucao = Configuracao::TipoGrade::modelo;
@@ -2135,7 +2135,7 @@ void Resolucao::teste()
     //
     //reinsereGrades(sol);
     //savePath = Util::join_path({"teste", "fo" + std::to_string(r) + "modelo"});
-    //Output::write(sol, savePath);
+    //Output::writeHtml(sol, savePath);
     //showResult(sol);
 }
 

@@ -20,15 +20,15 @@
                 {% for horario in horarios %}
                     <tr>
                         {% for evento in horario %}
-                            <td>
-                                {% if evento is none %}
-                                    ---
-                                {% else %}
+                            {% if evento is none %}
+                                <td>---</td>
+                            {% else %}
+                                <td class="{{ evento.cor }}">
                                     <b>{{ evento.disc }}</b>
                                     <br/>
                                     <i>{{ evento.prof }}</i>
-                                {% endif %}
-                            </td>
+                                </td>
+                            {% endif %}
                         {% endfor %}
                     </tr>
                 {% endfor %}

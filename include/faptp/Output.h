@@ -15,7 +15,8 @@
 class Output
 {
 public:
-    static void write(Solucao* solucao, const std::string& savePath);
+    static void writeHtml(Solucao* solucao, const std::string& savePath);
+    static void writeJson(const Solucao& solucao, const std::string& outfile);
 };
 
 #endif /* OUTPUT_H */

@@ -129,7 +129,7 @@ void semArgumentos()
     //r.showResult();
 
     auto savePath = Util::join_path({"teste", "fo" + std::to_string(fo)});
-    Output::write(r.getSolucao(), savePath);
+    Output::writeHtml(r.getSolucao(), savePath);
 
     std::ostringstream oss;
     oss << "solucaoAlvo: " << r.foAlvo << "\n";
@@ -284,7 +284,8 @@ std::string teste_tempo_iter(int num_exec, F f)
         print_violacoes(s->reportarViolacoes());
 
         auto savePath = Util::join_path({"teste", "fo" + std::to_string(s->getFO())});
-        Output::write(s.get(), savePath);
+        //Output::writeHtml(s.get(), savePath);
+        Output::writeJson(*s, "result.json");
     }
 
     Util::logprint(oss, "\n");
@@ -294,9 +295,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 60;
+    const auto timeout_sec = 1;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 5;
+    const auto num_exec = 1;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -309,7 +310,7 @@ void teste_tempo()
         return r.gerarHorarioSA_ILS(timeout_ms);
     });
 
-    Util::logprint(oss, "HySST\n");
+    /*Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioHySST(timeout_ms, 100, 100);
     });
@@ -338,7 +339,7 @@ void teste_tempo()
         r.setTimeout(timeout_ms);
         r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ciclo;
         return r.gerarHorarioAG()->clone();
-    });
+    });*/
 ;
     std::ofstream out{(boost::format("resultados%d.txt") % timeout_sec).str(), 
                      std::ios::out | std::ios::app};
