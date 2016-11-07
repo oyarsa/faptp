@@ -1,0 +1,143 @@
+{
+  "type": "object",
+  "properties": {
+    "alunoperfis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cursadas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "periodo": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "peso": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "restantes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "turma": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "disciplinas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capacidade": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "carga": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "curso": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "periodo": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "turma": {
+            "type": "string"
+          },
+          "periodominimo": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "ofertada": {
+            "type": "boolean"
+          },
+          "prerequisitos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "professores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "competencias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "disponibilidade": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 32767
+              }
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "professordisciplinas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "professor": {
+            "type": "string"
+          },
+          "disciplina": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,80 @@
+{
+    "periodos": [
+        {
+            "eventos": [
+                {
+                    "professor": "P1",
+                    "horario": 0,
+                    "disciplina": "A1",
+                    "dia": 0
+                },
+                {
+                    "professor": "P1",
+                    "horario": 0,
+                    "disciplina": "A1",
+                    "dia": 1
+                },
+                {
+                    "professor": "P2",
+                    "horario": 0,
+                    "disciplina": "B",
+                    "dia": 2
+                },
+                {
+                    "professor": "P3",
+                    "horario": 0,
+                    "disciplina": "C",
+                    "dia": 3
+                },
+                {
+                    "professor": "P3",
+                    "horario": 0,
+                    "disciplina": "D",
+                    "dia": 4
+                },
+                {
+                    "professor": "P2",
+                    "horario": 0,
+                    "disciplina": "E",
+                    "dia": 5
+                },
+                {
+                    "professor": "P2",
+                    "horario": 1,
+                    "disciplina": "E",
+                    "dia": 0
+                }
+            ],
+            "nome": "1"
+        },
+        {
+            "eventos": [
+                {
+                    "professor": "P1",
+                    "horario": 0,
+                    "disciplina": "A2",
+                    "dia": 0
+                },
+                {
+                    "professor": "P1",
+                    "horario": 0,
+                    "disciplina": "A2",
+                    "dia": 1
+                },
+                {
+                    "professor": "P2",
+                    "horario": 0,
+                    "disciplina": "F",
+                    "dia": 2
+                },
+                {
+                    "professor": "P2",
+                    "horario": 0,
+                    "disciplina": "F",
+                    "dia": 3
+                }
+            ],
+            "nome": "2"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "periodos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "professor": {
+                  "type": "string"
+                },
+                "horario": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 32767
+                },
+                "disciplina": {
+                  "type": "string"
+                },
+                "dia": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 32767
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "nome": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
