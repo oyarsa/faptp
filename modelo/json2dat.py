@@ -2,7 +2,6 @@
 
 import json
 import sys
-import io
 
 num_dias = 6
 num_horarios = 4
@@ -11,25 +10,19 @@ pesos_constraints = [1] * 9
 
 
 def print_set(aset):
-    out = io.StringIO()
-    out.write('{')
-    out.write(', '.join('"%s"' % (str(x)) for x in aset))
-    out.write('}')
-    r = out.getvalue()
-    out.close()
-    return r
+    return '{' + ', '.join('"{}"'.format(x) for x in aset) + '}'
 
 
 def get_periodos(disciplinas):
-    return sorted(set(str(d['periodo']) for d in disciplinas))
+    return set(str(d['periodo']) for d in disciplinas)
 
 
 def get_disciplinas(disciplinas):
-    return sorted(set(str(d['id']) for d in disciplinas))
+    return [str(d['id']) for d in disciplinas]
 
 
 def get_professores(professores):
-    return sorted(set(str(p['id']) for p in professores))
+    return [str(p['id']) for p in professores]
 
 
 def get_oferecidas(disciplinas):
@@ -113,11 +106,11 @@ def main():
     infile = sys.argv[1]
     outfile = sys.argv[2]
 
-    with open(infile) as f:
+    with open(infile, encoding='utf8') as f:
         indict = json.load(f)
 
-    disciplinas = sorted(indict['disciplinas'], key=lambda x: str(x['id']))
-    professores = sorted(indict['professores'], key=lambda x: str(x['id']))
+    disciplinas = indict['disciplinas']
+    professores = indict['professores']
 
     with open(outfile, 'w') as f:
         print('num_horarios =', num_horarios, file=f, end=';\n\n')

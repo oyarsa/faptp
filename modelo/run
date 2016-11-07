@@ -1,8 +1,6 @@
 #! /bin/bash
 
-cd "$(dirname ${BASH_SOURCE[0]})"
-
-infile="input.json"
+infile="../entradas/input.json"
 modelfile="Horario.mod"
 modeldat="input.dat"
 modelout="result.csv"
@@ -11,6 +9,8 @@ htmlfile="horarios.html"
 outfolder="out"
 
 function solve() {
+    clean
+
     mkdir -p "$outfolder"
     py json2dat.py "$infile" "$outfolder/$modeldat"
     oplrun "$modelfile" "$outfolder/$modeldat"
@@ -20,7 +20,7 @@ function solve() {
 }
 
 function clean() {
-    rm -r "$outfolder"
+    rm -rf "$outfolder"
 }
 
 # Set command to command line argument
@@ -30,4 +30,5 @@ command="$1"
 : ${command:=solve}
 
 # Run command
+cd "$(dirname ${BASH_SOURCE[0]})"
 eval "$command"
