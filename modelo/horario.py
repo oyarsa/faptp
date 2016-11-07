@@ -84,10 +84,10 @@ def main():
     cores = get_periodos_cores(get_disciplinas_periodo(horarios))
     periodos = carregar_periodos(horarios, cores)
 
-    env = Environment(loader=FileSystemLoader('.'))
+    env = Environment(loader=FileSystemLoader(sys.path[0]))
     template = env.get_template('template.html')
 
-    with open(cssfile) as f:
+    with open(sys.path[0] + '/' + cssfile) as f:
         css = f.read()
 
     with open(outfile, 'w', encoding='utf8') as f:

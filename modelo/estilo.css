@@ -8,6 +8,7 @@
     width: 90%;
     border-collapse: collapse;
     font-size: 14px;
+    table-layout: fixed;
 }
 
 .horario td, .horario th {
