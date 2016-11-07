@@ -1,0 +1,33 @@
+#! /bin/bash
+
+cd "$(dirname ${BASH_SOURCE[0]})"
+
+infile="input.json"
+modelfile="Horario.mod"
+modeldat="input.dat"
+modelout="result.csv"
+jsonout="result.json"
+htmlfile="horarios.html"
+outfolder="out"
+
+function solve() {
+    mkdir -p "$outfolder"
+    py json2dat.py "$infile" "$outfolder/$modeldat"
+    oplrun "$modelfile" "$outfolder/$modeldat"
+    mv "$modelout" "$outfolder/$modelout"
+    py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout"
+    php horario.php "$outfolder/$jsonout" "$outfolder/$htmlfile"
+}
+
+function clean() {
+    rm -r "$outfolder"
+}
+
+# Set command to command line argument
+command="$1"
+
+# If that was empty, set it to "test"
+: ${command:=solve}
+
+# Run command
+eval "$command"

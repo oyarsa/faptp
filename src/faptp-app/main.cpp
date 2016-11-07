@@ -114,7 +114,7 @@ void semArgumentos()
             .tipoConstrucao(Configuracao::TipoGrade::grasp)
             .tipoFo(Configuracao::TipoFo::Soma_carga)
             .timeout(30'000)
-            };
+    };
 
     std::cout << "Montando horarios [AG + Modelo]...\n";
 
@@ -192,7 +192,7 @@ experimento_ag(const std::string& input,
 }
 
 void experimento_ag_cli(const std::string& input, const std::string& file, 
-                        long long timeout)
+                        const std::string& servidor, long long timeout)
 {
     // comentário do topo
     // formato entrada:
@@ -200,11 +200,21 @@ void experimento_ag_cli(const std::string& input, const std::string& file,
     // formato saida:
     // ID,NExec,Tempo,Fo
 
-    std::ifstream config {file};
+    std::string conf_file;
+
+    if (file == "auto") {
+        conf_file = get_auto_file_name();
+    } else {
+        conf_file = file;
+    }
+
+    std::ifstream config {conf_file};
+    std::vector<std::thread> threads;
 
     std::string id, cruz_oper;
     int taxa_mut, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
     int grasp_nviz, grasp_alfa, n_exec;
+    auto num_config = 1;
 
     while (config >> id >> taxa_mut >> n_indiv >> p_cruz
         >> cruz_oper >> n_mut >> n_tour
@@ -216,7 +226,7 @@ void experimento_ag_cli(const std::string& input, const std::string& file,
         auto filename = path + id + ".txt";
 
         std::cout << "ID: " << id << "\n\n";
-        std::ofstream out {filename};
+        std::ostringstream out {filename};
         out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
         for (auto i = 0; i < n_exec; i++) {
@@ -229,8 +239,10 @@ void experimento_ag_cli(const std::string& input, const std::string& file,
             Util::logprint(out, boost::format("%s,%d,%lld,%d\n") 
                            % id % i % tempo % fo);
         }
-
         std::cout << "\n";
+
+        threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+        num_config++;
     }
 }
 
@@ -591,6 +603,31 @@ void experimento_wdju_cli(const std::string& input, const std::string& file,
 
 int main(int argc, char* argv[])
 {
+    static const char usage[] = R"(
+USAGE:
+
+    faptp -h
+    faptp <algo> <entrada> <configuracao> <servidor>
+
+Onde:
+    
+    -h, --help
+        Mostra essa mensagem de ajuda e sai.
+    
+    <algo>
+        Algoritmo a ser executado. Deve ser um entre: -ag, -sa_ils, -hysst, -wdju.
+    
+    <entrada>
+        Arquivo de entrada.
+
+    <configuracao>
+        Arquivo de configuração. Se for 'auto', irá pegar o número do arquivo
+        de acordo com o número da máquina.
+
+    <servidor>
+        Endereço IP do servidor para onde os resultados serão enviados.
+)";
+
     const auto timeout = 60'000;
     
     if (argc == 5) {
@@ -598,7 +635,7 @@ int main(int argc, char* argv[])
         // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
         // segundo é o arquivo de entrada, terceiro é o de configuração
         if (algo == "-ag") {
-            experimento_ag_cli(argv[2], argv[3], timeout);
+            experimento_ag_cli(argv[2], argv[3], argv[4], timeout);
         } else if (algo == "-sa_ils") {
             experimento_sa_ils_cli(argv[2], argv[3], argv[4], timeout);
         } else if (algo == "-hysst") {
@@ -608,19 +645,10 @@ int main(int argc, char* argv[])
         } else {
             std::cout << "Algoritmo invalido\n";
         }
-
-    } else if (argc == 3) {
-        // Primeiro argumento é a entrada, o segundo é o arquivo de configuração
-        //experimento_ag_cli(argv[1], argv[2]);
-        semArgumentos();
     } else if (argc == 2) {
         std::string flag = argv[1];
         if (flag == "-h" || flag == "--help") {
-            std::cout << "Primeiro argumento é a entrada, o segundo " 
-                << "é o arquivo de configuração\n";
-            std::cout << "Formato da config:\n";
-            std::cout << "ID AGIter NIndiv %Cruz NMut NTour GRASPIter " 
-                << "GRASPNVzi GRASPAlfa NExec\n";
+            std::cout << usage << "\n";
         }
     } else {
         //semArgumentos();

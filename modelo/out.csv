@@ -1,0 +1,13 @@
+turma,dia,horario,disciplina,professor
+1,0,0,A1,P1
+1,1,0,A1,P1
+1,2,0,B,P2
+1,3,0,C,P3
+1,4,0,D,P3
+1,5,0,E,P2
+1,0,1,E,P2
+2,0,0,A2,P1
+2,1,0,A2,P1
+2,2,0,F,P2
+2,3,0,F,P2
+
