@@ -11,7 +11,7 @@
 int num_dias = ...;
 int num_horarios = ...;
 range J = 1..num_dias;  // dias
-range I = 1..num_horarios;  // hor�rios
+range I = 1..num_horarios;  // horários
 range Ja = 1..num_horarios-2;
 range Jb = 1..num_dias-2;
 
@@ -19,32 +19,32 @@ int num_constraints = 9;
 int pi[1..num_constraints] = ...;  // pesos das constraints
 int h[P][D] = ...;  // se P pode lecionar D
 int H[D][C] = ...;  // se D pertence a C
-int A[P][I][J] = ...;  // se P est� dispon�vel em (I, J)
-int G[D] = ...;  // se D � uma disciplina dif�cil
-int F[P][D] = ...;  // se P possui prefer�ncia por D
+int A[P][I][J] = ...;  // se P está disponível em (I, J)
+int G[D] = ...;  // se D é uma disciplina difícil
+int F[P][D] = ...;  // se P possui preferência por D
 int Q[P] = ...;  // aulas desejadas por P
 int N[P] = ...;  // horas no contrato de P
-int K[D] = ...;  // carga hor�ria D
-int O[D] = ...;  // se D est� sendo oferecida
+int K[D] = ...;  // carga horária D
+int O[D] = ...;  // se D está sendo oferecida
 
-dvar boolean x[D][I][J];  // D agendada no hor�rio (I, J)
+dvar boolean x[D][I][J];  // D agendada no horário (I, J)
 dvar boolean L[P][D];  // P alocado para D
 dvar boolean r[C][I][J];  // se a C tem aula em (I, J)
 dvar boolean alfa1[Ja][C][I][J];  // se existe uma janela de tamanho Ja
-								  // come�ando em I no dia J para turma C
-dvar int alfa[C]; // n�mero de janelas para turma C
-dvar boolean w[P][J];  // se o professor P d� aula em J
+								  // começando em I no dia J para turma C
+dvar int alfa[C]; // número de janelas para turma C
+dvar boolean w[P][J];  // se o professor P dá aula em J
 dvar boolean beta1[Jb][P][J];  // se existe uma janela de tamanho Jb
-							   // come�ando em J para professor P
-dvar int beta[P];  // n�mero de janelas para professor P
+							   // começando em J para professor P
+dvar int beta[P];  // número de janelas para professor P
 dvar boolean g[C][J];  // se a turma C possui aula em J
-dvar int gama[C];  // n�mero de dias de aula de C
-dvar int delta[C];  // n�mero de aulas que C tem aos s�bados
-dvar int epsilon[D][J];  // n�mero de aulas seguidas de D em J
-dvar int teta[J][C];  // n�mero de aulas dificeis em J para C
-dvar boolean capa[C][J];  // se existe uma aula dif�cil no �ltimo hor�rio de C em J
-dvar int lambda[P];  // n�mero de disciplinas atribu�das a P que n�o s�o de sua prefer�ncias
-dvar int mi[P];  // n�mero de aulas que excedem a prefer�ncia de P
+dvar int gama[C];  // número de dias de aula de C
+dvar int delta[C];  // número de aulas que C tem aos sábados
+dvar int epsilon[D][J];  // número de aulas seguidas de D em J
+dvar int teta[J][C];  // número de aulas dificeis em J para C
+dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de C em J
+dvar int lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
+dvar int mi[P];  // número de aulas que excedem a preferência de P
 
 /*
 minimize
@@ -145,7 +145,7 @@ subject to {
 execute {
 	var csv = "";
 
-	csv += "turma,dia,horario,disciplina,professor\n";
+	csv += "periodo,dia,horario,disciplina,professor\n";
 
 	for (c in C) {
 		for (d in D) {

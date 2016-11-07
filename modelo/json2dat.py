@@ -38,14 +38,6 @@ def get_contrato_prof(professores):
     return [p[key] if key in p else horas_max for p in professores]
 
 
-def disc_to_index(disciplinas):
-    return {d['id']: i for i, d in enumerate(disciplinas)}
-
-
-def prof_to_index(professores):
-    return {p['id']: i for i, p in enumerate(professores)}
-
-
 def new_matrix(rows, cols, val=0):
     return [[val for _ in range(cols)] for _ in range(rows)]
 

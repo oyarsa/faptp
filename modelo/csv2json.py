@@ -9,7 +9,7 @@ from itertools import groupby
 def group_eventos(events):
     eventos = []
     periodos = []
-    keyfunc = lambda x: x['turma']
+    keyfunc = lambda x: x['periodo']
     data = sorted(events, key=keyfunc)
     for k, g in groupby(data, keyfunc):
         eventos.append(list(g))
@@ -22,7 +22,7 @@ def convert_dict(periodos, eventos):
     pdict = []
     for i, key in enumerate(periodos):
         for e in eventos[i]:
-            del e['turma']
+            del e['periodo']
             e['dia'] = int(e['dia'])
             e['horario'] = int(e['horario'])
 
