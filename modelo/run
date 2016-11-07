@@ -16,7 +16,7 @@ function solve() {
     oplrun "$modelfile" "$outfolder/$modeldat"
     mv "$modelout" "$outfolder/$modelout"
     py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout"
-    php horario.php "$outfolder/$jsonout" "$outfolder/$htmlfile"
+    py horario.py "$outfolder/$jsonout" "$outfolder/$htmlfile"
 }
 
 function clean() {
