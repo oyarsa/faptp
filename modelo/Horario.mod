@@ -27,9 +27,8 @@ int N[P] = ...;  // horas no contrato de P
 int K[D] = ...;  // carga horária D
 int O[D] = ...;  // se D está sendo oferecida
 
-dvar boolean x[D][I][J];  // D agendada no horário (I, J)
-dvar boolean L[P][D];  // P alocado para D
-dvar boolean r[C][I][J];  // se a C tem aula em (I, J)
+dvar boolean x[P][D][I][J];  // D agendada no horário (I, J) para o professor P
+dvar int r[C][I][J];  // se a C tem aula em (I, J)
 dvar boolean alfa1[Ja][C][I][J];  // se existe uma janela de tamanho Ja
 								  // começando em I no dia J para turma C
 dvar int alfa[C]; // número de janelas para turma C
@@ -46,7 +45,7 @@ dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de 
 dvar int lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
 dvar int mi[P];  // número de aulas que excedem a preferência de P
 
-/*
+
 minimize
 	pi[1] * (sum (c in C) alfa[c]) +
 	pi[2] * (sum (p in P) beta[p]) +
@@ -56,37 +55,37 @@ minimize
 	pi[6] * (sum (j in J, c in C) teta[j][c]) +
 	pi[7] * (sum (j in J, c in C) capa[c][j]) +
 	pi[8] * (sum (p in P) lambda[p]) +
-	pi[9] * (sum (p in P) mi[p]);*/
+	pi[9] * (sum (p in P) mi[p]);
 
 
 subject to {
 
-	/*// 1
+	// 1
 	forall (i in I, j in J, p in P)
-	  sum (d in D) x[d][i][j] * L[p][d] <= A[p][i][j];*/
+	  sum (d in D) x[p][d][i][j] <= A[p][i][j];
 
 	// 2
 	forall (i in I, j in J, c in C)
-	  sum (d in D) x[d][i][j] * H[d][c] <= 1;
+	  sum (p in P, d in D) x[p][d][i][j] * H[d][c] <= 1;
 
 	// 3
-	forall (d in D)
-	  sum (p in P) L[p][d] * h[p][d] == O[d];
+	forall (p in P, d in D, i in I, j in J)
+		x[p][d][i][j] <= h[p][d];
 
 	// 4
 	forall (p in P)
-	  sum(d in D, i in I, j in J) x[d][i][j] * h[p][d] <= N[p];
+	  sum(d in D, i in I, j in J) x[p][d][i][j] * h[p][d] <= N[p];
 
 	// 5
 	forall (d in D)
-	  sum (i in I, j in J) x[d][i][j] == K[d];
+	  sum (p in P, i in I, j in J) x[p][d][i][j] == K[d] * O[d];
 
 	// 6
 
-/*
 	// 7
 	forall (c in C, i in I, j in J)
-	  r[c][i][j] <= (sum (d in D) x[d][i][j] * H[d][c]);
+	  r[c][i][j] == (sum (p in P, d in D) x[p][d][i][j] * H[d][c]);
+
 
 	// 8
 	forall (c in C, i in I, j in J, k in 1..num_horarios-1-i)
@@ -98,7 +97,7 @@ subject to {
 
 	// 10
 	forall (p in P, j in J)
-	  w[p][j] <= sum (i in I, d in D) x[d][i][j] * L[p][d];
+	  w[p][j] <= sum (i in I, d in D) x[p][d][i][j];
 
 	// 11
 	forall (p in P, j in J, k in 1..num_dias-1-j)
@@ -109,8 +108,11 @@ subject to {
 	  beta[p] == sum (k in Jb, j in J) beta1[k][p][j];
 
 	// 13
+	forall (c in C, i in I, j in J)
+		g[c][j] >= r[c][i][j];
+
 	forall (c in C, j in J)
-	  g[c][j] == sum (i in I) r[c][i][j];
+	  g[c][j] <= sum (i in I) r[c][i][j];
 
 	// 14
 	forall (c in C)
@@ -118,28 +120,28 @@ subject to {
 
 	// 15
 	forall (c in C)
-	  delta[c] == sum (d in D, i in I, j in J) x[d][i][j] * H[d][c];
+	  delta[c] == sum (p in P, d in D, i in I, j in J) x[p][d][i][j] * H[d][c];
 
 	// 16
 	forall (d in D, j in J)
-	  (sum (i in I) x[d][i][j]) - epsilon[d][j] <= 2;
+	  (sum (p in P, i in I) x[p][d][i][j]) - epsilon[d][j] <= 2;
 
 	// 17
 	forall (c in C, j in J)
-	  sum (i in I, d in D) x[d][i][j] * G[d] * H[d][c] - teta[j][c] <= 2;
+	  sum (i in I, d in D, p in P) x[p][d][i][j] * G[d] * H[d][c] - teta[j][c] <= 2;
 
 	// 18
 	forall (c in C, j in J)
-	  capa[c][j] == sum(d in D, i in num_horarios - 1..num_horarios)
-	  								x[d][i][j] * G[d] * H[d][c];
+	  capa[c][j] == sum(p in P, d in D, i in num_horarios - 1..num_horarios)
+	  								x[p][d][i][j] * G[d] * H[d][c];
 
 	// 19
-	forall (p in P)
-	  lambda[p] == sum (d in D) L[p][d] * (1 - F[p][d]);
+	forall (p in P, i in I, j in J)
+	  lambda[p] == sum (d in D) x[p][d][i][j] * (1 - F[p][d]);
 
 	// 20
 	forall (p in P)
-	  mi[p] >= sum (d in D, i in I, j in J) x[d][i][j] * L[p][d] - Q[p];*/
+	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
 }
 
 execute {
@@ -153,17 +155,14 @@ execute {
 				continue;
 			}
 
-			for (i in I) {
-				for (j in J) {
-					if (x[d][i][j] == 0) {
-						continue;
-					}
-
-					for (p in P) {
-						if (L[p][d] == 1) {
-							csv += c + "," + (j-1) + "," + (i-1) + "," + d + "," + p + "\n";
-							break;
+			for (p in P) {
+				for (i in I) {
+					for (j in J) {
+						if (x[p][d][i][j] == 0) {
+							continue;
 						}
+
+						csv += c + "," + (j-1) + "," + (i-1) + "," + d + "," + p + "\n";
 					}
 				}
 			}

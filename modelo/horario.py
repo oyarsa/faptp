@@ -18,16 +18,11 @@ def matriz_vazia(rows, cols):
     return [[None for _ in range(cols)] for _ in range(rows)]
 
 
-def get_disciplinas_periodo(horarios):
-    periodos = {}
-
-    for periodo in horarios['periodos']:
-        disciplinas = set()
-        for e in periodo['eventos']:
-            disciplinas.add(e['disciplina'])
-        periodos[periodo['nome']] = disciplinas
-
-    return periodos
+def get_disciplinas_periodo(periodo):
+    disciplinas = set()
+    for e in periodo['eventos']:
+        disciplinas.add(e['disciplina'])
+    return disciplinas
 
 
 def get_disciplinas_cores(disciplinas):
@@ -40,21 +35,17 @@ def get_disciplinas_cores(disciplinas):
     return disc_cores
 
 
-def get_periodos_cores(periodos):
-    periodo_cores = {}
-
-    for periodo, disciplinas in periodos.items():
-        periodo_cores[periodo] = get_disciplinas_cores(disciplinas)
-
-    return periodo_cores
+def get_cores_periodo(periodo):
+    return get_disciplinas_cores(get_disciplinas_periodo(periodo))
 
 
-def carregar_periodos(horarios, cores):
+def carregar_periodos(horarios):
     periodos = []
 
     for periodo in horarios['periodos']:
         nome = periodo['nome']
         matriz = matriz_vazia(num_horarios, num_dias)
+        cores = get_cores_periodo(periodo)
 
         for e in periodo['eventos']:
             dia = int(e['dia'])
@@ -62,7 +53,7 @@ def carregar_periodos(horarios, cores):
             matriz[horario][dia] = {
                 'prof': e['professor'],
                 'disc': e['disciplina'],
-                'cor': cores[nome][e['disciplina']]
+                'cor': cores[e['disciplina']]
             }
 
         periodos.append((nome, matriz))
@@ -81,8 +72,7 @@ def main():
     with open(infile, encoding='utf8') as f:
         horarios = json.load(f)
 
-    cores = get_periodos_cores(get_disciplinas_periodo(horarios))
-    periodos = carregar_periodos(horarios, cores)
+    periodos = carregar_periodos(horarios)
 
     env = Environment(loader=FileSystemLoader(sys.path[0]))
     template = env.get_template('template.html')
