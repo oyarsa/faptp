@@ -1,8 +1,8 @@
-#include <faptp/WDJU.h>
+#include <faptp-lib/WDJU.h>
 
 #include <gsl/gsl>
 
-#include <faptp/Timer.h>
+#include <faptp-lib/Timer.h>
 
 WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
            double jump_factor)

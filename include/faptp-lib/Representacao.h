@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <tuple>
-#include <faptp/ProfessorDisciplina.h>
-#include <faptp/Util.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/ProfessorDisciplina.h>
+#include <faptp-lib/Util.h>
+#include <faptp-lib/Semana.h>
 
 class Representacao
 {

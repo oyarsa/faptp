@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-#include <faptp/UUID.h>
+#include <faptp-lib/UUID.h>
 
 class Professor
 {

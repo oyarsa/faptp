@@ -1,4 +1,4 @@
-﻿#include <faptp/Resolucao.h>
+﻿#include <faptp-lib/Resolucao.h>
 
 #include <fstream>
 #include <numeric>
@@ -19,20 +19,20 @@
     #include <modelo-grade/modelo_solver.h>
 #endif
 
-#include <faptp/Professor.h>
-#include <faptp/Disciplina.h>
-#include <faptp/ProfessorDisciplina.h>
-#include <faptp/AlunoPerfil.h>
-#include <faptp/Solucao.h>
-#include <faptp/Algorithms.h>
-#include <faptp/Util.h>
-#include <faptp/Semana.h>
-#include <faptp/Aleatorio.h>
-#include <faptp/Output.h>
-#include <faptp/SA.h>
-#include <faptp/ILS.h>
-#include <faptp/WDJU.h>
-#include <faptp/HySST.h>
+#include <faptp-lib/Professor.h>
+#include <faptp-lib/Disciplina.h>
+#include <faptp-lib/ProfessorDisciplina.h>
+#include <faptp-lib/AlunoPerfil.h>
+#include <faptp-lib/Solucao.h>
+#include <faptp-lib/Algorithms.h>
+#include <faptp-lib/Util.h>
+#include <faptp-lib/Semana.h>
+#include <faptp-lib/Aleatorio.h>
+#include <faptp-lib/Output.h>
+#include <faptp-lib/SA.h>
+#include <faptp-lib/ILS.h>
+#include <faptp-lib/WDJU.h>
+#include <faptp-lib/HySST.h>
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)

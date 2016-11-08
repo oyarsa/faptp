@@ -1,10 +1,10 @@
-#include <faptp/Representacao.h>
+#include <faptp-lib/Representacao.h>
 
 #include <algorithm>
 #include <cmath>
 
-#include <faptp/Algorithms.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/Algorithms.h>
+#include <faptp-lib/Semana.h>
 
 Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho)
 {

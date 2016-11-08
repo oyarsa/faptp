@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include <faptp/Disciplina.h>
-#include <faptp/Util.h>
+#include <faptp-lib/Disciplina.h>
+#include <faptp-lib/Util.h>
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
     : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, UUID::GenerateUuid(),

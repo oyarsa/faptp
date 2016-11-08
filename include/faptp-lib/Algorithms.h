@@ -1,9 +1,9 @@
 #ifndef SORTTEMPLATE_H
 #define SORTTEMPLATE_H
 
-#include <faptp/Disciplina.h>
-#include <faptp/ProfessorDisciplina.h>
-#include <faptp/Solucao.h>
+#include <faptp-lib/Disciplina.h>
+#include <faptp-lib/ProfessorDisciplina.h>
+#include <faptp-lib/Solucao.h>
 #include <string>
 #include <unordered_set>
 

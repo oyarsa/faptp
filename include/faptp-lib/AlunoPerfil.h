@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_set>
 
-#include <faptp/Disciplina.h>
+#include <faptp-lib/Disciplina.h>
 
 class AlunoPerfil
 {

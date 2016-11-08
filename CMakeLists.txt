@@ -14,60 +14,60 @@ conan_basic_setup()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(FAPTP_INCLUDE
-    include/faptp/Aleatorio.h
-    include/faptp/AlunoPerfil.h
-    include/faptp/Disciplina.h
-    include/faptp/Grade.h
-    include/faptp/Horario.h
-    include/faptp/Output.h
-    include/faptp/Professor.h
-    include/faptp/ProfessorDisciplina.h
-    include/faptp/Representacao.h
-    include/faptp/Resolucao.h
-    include/faptp/Semana.h
-    include/faptp/Solucao.h
-    include/faptp/Util.h
-    include/faptp/UUID.h
-    include/faptp/Algorithms.h
-    include/faptp/Configuracao.h
-    include/faptp/SA.h
-    include/faptp/ILS.h
-    include/faptp/WDJU.h
-    include/faptp/HySST.h
-    include/faptp/Timer.h
+set(faptp-lib_INCLUDE
+    include/faptp-lib/Aleatorio.h
+    include/faptp-lib/AlunoPerfil.h
+    include/faptp-lib/Disciplina.h
+    include/faptp-lib/Grade.h
+    include/faptp-lib/Horario.h
+    include/faptp-lib/Output.h
+    include/faptp-lib/Professor.h
+    include/faptp-lib/ProfessorDisciplina.h
+    include/faptp-lib/Representacao.h
+    include/faptp-lib/Resolucao.h
+    include/faptp-lib/Semana.h
+    include/faptp-lib/Solucao.h
+    include/faptp-lib/Util.h
+    include/faptp-lib/UUID.h
+    include/faptp-lib/Algorithms.h
+    include/faptp-lib/Configuracao.h
+    include/faptp-lib/SA.h
+    include/faptp-lib/ILS.h
+    include/faptp-lib/WDJU.h
+    include/faptp-lib/HySST.h
+    include/faptp-lib/Timer.h
     )
 
-set(FAPTP_SOURCE
-    src/faptp/Aleatorio.cpp
-    src/faptp/AlunoPerfil.cpp
-    src/faptp/Disciplina.cpp
-    src/faptp/Grade.cpp
-    src/faptp/Horario.cpp
-    src/faptp/Output.cpp
-    src/faptp/Professor.cpp
-    src/faptp/ProfessorDisciplina.cpp
-    src/faptp/Representacao.cpp
-    src/faptp/Resolucao.cpp
-    src/faptp/Solucao.cpp
-    src/faptp/Util.cpp
-    src/faptp/UUID.cpp
-    src/faptp/SA.cpp
-    src/faptp/ILS.cpp
-    src/faptp/WDJU.cpp
-    src/faptp/HySST.cpp
+set(faptp-lib_SOURCE
+    src/faptp-lib/Aleatorio.cpp
+    src/faptp-lib/AlunoPerfil.cpp
+    src/faptp-lib/Disciplina.cpp
+    src/faptp-lib/Grade.cpp
+    src/faptp-lib/Horario.cpp
+    src/faptp-lib/Output.cpp
+    src/faptp-lib/Professor.cpp
+    src/faptp-lib/ProfessorDisciplina.cpp
+    src/faptp-lib/Representacao.cpp
+    src/faptp-lib/Resolucao.cpp
+    src/faptp-lib/Solucao.cpp
+    src/faptp-lib/Util.cpp
+    src/faptp-lib/UUID.cpp
+    src/faptp-lib/SA.cpp
+    src/faptp-lib/ILS.cpp
+    src/faptp-lib/WDJU.cpp
+    src/faptp-lib/HySST.cpp
     )
 
-set(FAPTP_FILES
-    ${FAPTP_INCLUDE}
-    ${FAPTP_SOURCE})
+set(faptp-lib_FILES
+    ${faptp-lib_INCLUDE}
+    ${faptp-lib_SOURCE})
 
-add_library(faptp ${FAPTP_FILES})
-target_link_libraries(faptp ${CONAN_LIBS})
+add_library(faptp-lib ${faptp-lib_FILES})
+target_link_libraries(faptp-lib ${CONAN_LIBS})
 
-add_executable(faptp-app src/faptp-app/main.cpp)
-target_link_libraries(faptp-app faptp)
+add_executable(faptp src/faptp/main.cpp)
+target_link_libraries(faptp faptp-lib)
 
 if (MODELO)
-  target_link_libraries(faptp modelo-grade-lib)
+  target_link_libraries(faptp-lib modelo-grade-lib)
 endif()

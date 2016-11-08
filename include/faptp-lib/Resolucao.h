@@ -15,7 +15,7 @@
 #endif
 
 #include <json/json.h>
-#include <faptp/Configuracao.h>
+#include <faptp-lib/Configuracao.h>
 
 class Professor;
 

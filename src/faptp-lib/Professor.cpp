@@ -1,5 +1,5 @@
-#include <faptp/Professor.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/Professor.h>
+#include <faptp-lib/Semana.h>
 
 Professor::Professor(std::string pNome) : creditoMaximo(), numDisponibilidade()
 {

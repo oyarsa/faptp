@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include <faptp/Solucao.h>
-#include <faptp/Resolucao.h>
+#include <faptp-lib/Solucao.h>
+#include <faptp-lib/Resolucao.h>
 
 class WDJU
 {

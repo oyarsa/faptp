@@ -1,8 +1,8 @@
 #include <utility>
 #include <sstream>
 
-#include <faptp/AlunoPerfil.h>
-#include <faptp/Util.h>
+#include <faptp-lib/AlunoPerfil.h>
+#include <faptp-lib/Util.h>
 
 AlunoPerfil::AlunoPerfil(double pPeso, const std::string& pId,
                          const std::string& pTurma, const std::string& pPeriodo)

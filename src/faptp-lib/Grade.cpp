@@ -1,9 +1,9 @@
 ﻿#include <iostream>
 #include <unordered_map>
 
-#include <faptp/Grade.h>
-#include <faptp/Resolucao.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/Grade.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/Semana.h>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
              const std::vector<Disciplina*>& pDisciplinasCurso,

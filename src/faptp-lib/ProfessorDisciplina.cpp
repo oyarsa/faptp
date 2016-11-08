@@ -1,4 +1,4 @@
-#include <faptp/ProfessorDisciplina.h>
+#include <faptp-lib/ProfessorDisciplina.h>
 
 ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina)
     : id(UUID::GenerateUuid())

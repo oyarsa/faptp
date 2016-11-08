@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include <faptp/Solucao.h>
+#include <faptp-lib/Solucao.h>
 
 class Output
 {

@@ -3,7 +3,7 @@
 
 #include <gsl/gsl>
 
-#include <faptp/Aleatorio.h>
+#include <faptp-lib/Aleatorio.h>
 
 class Aleatorio
 {

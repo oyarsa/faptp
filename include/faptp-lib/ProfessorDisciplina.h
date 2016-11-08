@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <faptp/Professor.h>
-#include <faptp/Disciplina.h>
+#include <faptp-lib/Professor.h>
+#include <faptp-lib/Disciplina.h>
 
 class ProfessorDisciplina
 {

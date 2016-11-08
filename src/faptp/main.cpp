@@ -10,15 +10,15 @@
 #include <boost/format.hpp>
 #include <cpr/cpr.h>
 
-#include <faptp/Resolucao.h>
-#include <faptp/Output.h>
-#include <faptp/Configuracao.h>
-#include <faptp/Util.h>
-#include <faptp/Timer.h>
-#include <faptp/SA.h>
-#include <faptp/WDJU.h>
-#include <faptp/HySST.h>
-#include <faptp/ILS.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/Output.h>
+#include <faptp-lib/Configuracao.h>
+#include <faptp-lib/Util.h>
+#include <faptp-lib/Timer.h>
+#include <faptp-lib/SA.h>
+#include <faptp-lib/WDJU.h>
+#include <faptp-lib/HySST.h>
+#include <faptp-lib/ILS.h>
 
 /*
  * PARÂMETROS DE CONFIGURAÇÃO *
@@ -607,8 +607,8 @@ int main(int argc, char* argv[])
     static const char usage[] = R"(
 USAGE:
 
-    faptp -h
-    faptp <algo> <entrada> <configuracao> <servidor>
+    faptp-lib -h
+    faptp-lib <algo> <entrada> <configuracao> <servidor>
 
 Onde:
     

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <faptp/Horario.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/Horario.h>
+#include <faptp-lib/Semana.h>
 
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) 
     : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}

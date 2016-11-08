@@ -9,8 +9,8 @@
 #include <array>
 #include <fstream>
 #include <json/json.h>
-#include <faptp/Output.h>
-#include <faptp/Semana.h>
+#include <faptp-lib/Output.h>
+#include <faptp-lib/Semana.h>
 
 void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
 {

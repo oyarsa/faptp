@@ -3,9 +3,9 @@
 
 #include <gsl/gsl>
 
-#include <faptp/Solucao.h>
-#include <faptp/Resolucao.h>
-#include <faptp/Aleatorio.h>
+#include <faptp-lib/Solucao.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/Aleatorio.h>
 
 Solucao::Solucao(
     int pBlocosTamanho,

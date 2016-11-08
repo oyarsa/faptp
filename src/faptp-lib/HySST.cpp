@@ -1,11 +1,11 @@
-#include <faptp/HySST.h>
+#include <faptp-lib/HySST.h>
 
 #include <boost/optional.hpp>
 #include <array>
 
-#include <faptp/Resolucao.h>
-#include <faptp/Solucao.h>
-#include <faptp/Timer.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/Solucao.h>
+#include <faptp-lib/Timer.h>
 
 // Implementação
 

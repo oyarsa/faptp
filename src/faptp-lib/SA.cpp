@@ -1,5 +1,5 @@
-#include <faptp/SA.h>
-#include <faptp/Timer.h>
+#include <faptp-lib/SA.h>
+#include <faptp-lib/Timer.h>
 
 SA::SA(const Resolucao& res, double alfa, double t0, int max_iter, int max_reheats,
        long long timeout,

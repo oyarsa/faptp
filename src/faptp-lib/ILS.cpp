@@ -1,5 +1,5 @@
-#include <faptp/ILS.h>
-#include <faptp/Resolucao.h>
+#include <faptp-lib/ILS.h>
+#include <faptp-lib/Resolucao.h>
 
 ILS::ILS(const Resolucao& res, int num_iter, int p_max, int p0, int max_iter,
          long long timeout)

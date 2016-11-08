@@ -3,8 +3,8 @@
 #include <stdexcept>
 #include <iomanip>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <faptp/Util.h>
-#include <faptp/Aleatorio.h>
+#include <faptp-lib/Util.h>
+#include <faptp-lib/Aleatorio.h>
 #include <windows.h>
 
 int Util::getPosition(int y, int x, int z, int Y, int Z)
