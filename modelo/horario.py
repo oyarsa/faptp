@@ -18,14 +18,14 @@ def matriz_vazia(rows, cols):
     return [[None for _ in range(cols)] for _ in range(rows)]
 
 
-def get_disciplinas_periodo(periodo):
+def disciplinas_periodo(periodo):
     disciplinas = set()
     for e in periodo['eventos']:
         disciplinas.add(e['disciplina'])
     return disciplinas
 
 
-def get_disciplinas_cores(disciplinas):
+def disciplinas_cores(disciplinas):
     cores = random.sample(nome_cores, len(disciplinas))
     disc_cores = {}
 
@@ -35,8 +35,8 @@ def get_disciplinas_cores(disciplinas):
     return disc_cores
 
 
-def get_cores_periodo(periodo):
-    return get_disciplinas_cores(get_disciplinas_periodo(periodo))
+def cores_periodo(periodo):
+    return disciplinas_cores(disciplinas_periodo(periodo))
 
 
 def carregar_periodos(horarios):
@@ -45,7 +45,7 @@ def carregar_periodos(horarios):
     for periodo in horarios['periodos']:
         nome = periodo['nome']
         matriz = matriz_vazia(num_horarios, num_dias)
-        cores = get_cores_periodo(periodo)
+        cores = cores_periodo(periodo)
 
         for e in periodo['eventos']:
             dia = int(e['dia'])

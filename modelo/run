@@ -14,9 +14,20 @@ function solve() {
     mkdir -p "$outfolder"
     py json2dat.py "$infile" "$outfolder/$modeldat"
     oplrun "$modelfile" "$outfolder/$modeldat"
+    OUT=$?
+    if [ $OUT -ne 0 ] ; then
+        echo "Erro na resolução do modelo. Encerrando."
+        exit 1
+    fi
+
     mv "$modelout" "$outfolder/$modelout"
-    py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout"
-    py horario.py "$outfolder/$jsonout" "$outfolder/$htmlfile"
+    py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout" >/dev/null 2>&1
+    py horario.py "$outfolder/$jsonout" "$outfolder/$htmlfile" >/dev/null 2>&1
+
+    OUT=$?
+    if [ $OUT -eq 0 ] ; then
+        echo "Execução terminada com sucesso. Arquivos disponíveis em $outfolder/"
+    fi
 }
 
 function clean() {

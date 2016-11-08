@@ -10,6 +10,7 @@
 {string} P = ...;  // professores
 int num_dias = ...;
 int num_horarios = ...;
+{int} Horarios_pares = {1 + 2*k | k in 0..(num_horarios-2) div 2};
 range J = 1..num_dias;  // dias
 range I = 1..num_horarios;  // horários
 range Ja = 1..num_horarios-2;
@@ -26,6 +27,7 @@ int Q[P] = ...;  // aulas desejadas por P
 int N[P] = ...;  // horas no contrato de P
 int K[D] = ...;  // carga horária D
 int O[D] = ...;  // se D está sendo oferecida
+{int} B[D] = ...;  // blocos da disciplina D
 
 dvar boolean x[P][D][I][J];  // D agendada no horário (I, J) para o professor P
 dvar int r[C][I][J];  // se a C tem aula em (I, J)
@@ -45,7 +47,7 @@ dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de 
 dvar int lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
 dvar int mi[P];  // número de aulas que excedem a preferência de P
 
-
+/*
 minimize
 	pi[1] * (sum (c in C) alfa[c]) +
 	pi[2] * (sum (p in P) beta[p]) +
@@ -55,8 +57,7 @@ minimize
 	pi[6] * (sum (j in J, c in C) teta[j][c]) +
 	pi[7] * (sum (j in J, c in C) capa[c][j]) +
 	pi[8] * (sum (p in P) lambda[p]) +
-	pi[9] * (sum (p in P) mi[p]);
-
+	pi[9] * (sum (p in P) mi[p]);*/
 
 subject to {
 
@@ -66,7 +67,7 @@ subject to {
 
 	// 2
 	forall (i in I, j in J, c in C)
-	  sum (p in P, d in D) x[p][d][i][j] * H[d][c] <= 1;
+	  sum (p in P, d in D) (x[p][d][i][j] * H[d][c]) <= 1;
 
 	// 3
 	forall (p in P, d in D, i in I, j in J)
@@ -74,18 +75,20 @@ subject to {
 
 	// 4
 	forall (p in P)
-	  sum(d in D, i in I, j in J) x[p][d][i][j] * h[p][d] <= N[p];
+	  sum(d in D, i in I, j in J) (x[p][d][i][j] * h[p][d]) <= N[p];
 
 	// 5
 	forall (d in D)
 	  sum (p in P, i in I, j in J) x[p][d][i][j] == K[d] * O[d];
 
 	// 6
+	forall (p in P, d in D, i in Horarios_pares, j in J, b in B[d]: b == 2)
+		x[p][d][i][j] - x[p][d][i+1][j] == 0;
 
+/*
 	// 7
 	forall (c in C, i in I, j in J)
 	  r[c][i][j] == (sum (p in P, d in D) x[p][d][i][j] * H[d][c]);
-
 
 	// 8
 	forall (c in C, i in I, j in J, k in 1..num_horarios-1-i)
@@ -96,12 +99,15 @@ subject to {
 	  alfa[c] == sum (k in Ja, i in I, j in J) alfa1[k][c][i][j];
 
 	// 10
+	forall (p in P, d in D, i in I, j in J)
+		w[p][j] >= x[p][d][i][j];
+
 	forall (p in P, j in J)
 	  w[p][j] <= sum (i in I, d in D) x[p][d][i][j];
 
 	// 11
 	forall (p in P, j in J, k in 1..num_dias-1-j)
-	   w[p][j] - sum (l in 1..k) w[p][j+l] - w[p][j+k+1] - beta1[k][p][j] <= 1;
+	  w[p][j] - sum (l in 1..k) w[p][j+l] - w[p][j+k+1] - beta1[k][p][j] <= 1;
 
 	// 12
 	forall (p in P)
@@ -132,7 +138,7 @@ subject to {
 
 	// 18
 	forall (c in C, j in J)
-	  capa[c][j] == sum(p in P, d in D, i in num_horarios - 1..num_horarios)
+	  capa[c][j] == sum(p in P, d in D, i in (num_horarios - 1)..num_horarios)
 	  								x[p][d][i][j] * G[d] * H[d][c];
 
 	// 19
@@ -141,7 +147,7 @@ subject to {
 
 	// 20
 	forall (p in P)
-	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
+	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];*/
 }
 
 execute {
@@ -169,7 +175,6 @@ execute {
 		}
 	}
 
-	writeln(csv);
 	var f = new IloOplOutputFile("result.csv");
 	f.writeln(csv);
 }

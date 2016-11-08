@@ -13,27 +13,27 @@ def print_set(aset):
     return '{' + ', '.join('"{}"'.format(x) for x in aset) + '}'
 
 
-def get_periodos(disciplinas):
+def periodos_nome(disciplinas):
     return set(str(d['periodo']) for d in disciplinas)
 
 
-def get_disciplinas(disciplinas):
+def disciplinas_nome(disciplinas):
     return [str(d['id']) for d in disciplinas]
 
 
-def get_professores(professores):
+def professores_nome(professores):
     return [str(p['id']) for p in professores]
 
 
-def get_oferecidas(disciplinas):
+def oferecidas(disciplinas):
     return [int(d['ofertada']) for d in disciplinas]
 
 
-def get_carga_horaria(disciplinas):
+def carga_horaria(disciplinas):
     return [d['carga'] for d in disciplinas]
 
 
-def get_contrato_prof(professores):
+def contrato_prof(professores):
     key = 'creditoMaximo'
     return [p[key] if key in p else horas_max for p in professores]
 
@@ -42,7 +42,7 @@ def new_matrix(rows, cols, val=0):
     return [[val for _ in range(cols)] for _ in range(rows)]
 
 
-def get_habilitados(professores, disciplinas):
+def habilitados(professores, disciplinas):
     matriz = new_matrix(len(professores), len(disciplinas))
 
     for i, p in enumerate(professores):
@@ -53,8 +53,8 @@ def get_habilitados(professores, disciplinas):
     return matriz
 
 
-def get_turma_disciplina(disciplinas):
-    periodos = get_periodos(disciplinas)
+def turma_disciplina(disciplinas):
+    periodos = periodos_nome(disciplinas)
     matriz = new_matrix(len(disciplinas), len(periodos))
 
     for i, d in enumerate(disciplinas):
@@ -65,7 +65,7 @@ def get_turma_disciplina(disciplinas):
     return matriz
 
 
-def get_disponibilidade(professores):
+def disponibilidade(professores):
     profmatrix = []
 
     for p in professores:
@@ -78,16 +78,30 @@ def get_disponibilidade(professores):
     return profmatrix
 
 
-def get_disciplinas_dificeis(disciplinas):
+def disciplinas_dificeis(disciplinas):
     return [0 for _ in disciplinas]
 
 
-def get_preferencias_disciplinas(professores, disciplinas):
+def preferencias_disciplinas(professores, disciplinas):
     return new_matrix(len(professores), len(disciplinas), val=1)
 
 
-def get_preferencias_aulas(professores):
-    return get_contrato_prof(professores)
+def preferencias_aulas(professores):
+    return contrato_prof(professores)
+
+
+def blocos_disciplina(disciplina):
+    carga = disciplina['carga']
+    return [2] * (carga // 2) + [1] * (carga % 2)
+
+
+def blocos_disciplinas(disciplinas):
+    return [blocos_disciplina(d) for d in disciplinas]
+
+
+def print_array_of_sets(x):
+    s = ['{' + ', '.join(str(j) for j in i) + '}' for i in x]
+    return '[' + ', '.join(s) + ']'
 
 
 def main():
@@ -108,18 +122,19 @@ def main():
         print('num_horarios =', num_horarios, file=f, end=';\n\n')
         print('num_dias =', num_dias, file=f, end=';\n\n')
         print('pi =', pesos_constraints, file=f, end=';\n\n')
-        print('C =', print_set(get_periodos(disciplinas)), file=f, end=';\n\n')
-        print('D =', print_set(get_disciplinas(disciplinas)), file=f, end=';\n\n')
-        print('P =', print_set(get_professores(professores)), file=f, end=';\n\n')
-        print('O =', get_oferecidas(disciplinas), file=f, end=';\n\n')
-        print('K =', get_carga_horaria(disciplinas), file=f, end=';\n\n')
-        print('N =', get_contrato_prof(professores), file=f, end=';\n\n')
-        print('h =', get_habilitados(professores, disciplinas), file=f, end=';\n\n')
-        print('H =', get_turma_disciplina(disciplinas), file=f, end=';\n\n')
-        print('A =', get_disponibilidade(professores), file=f, end=';\n\n')
-        print('G =', get_disciplinas_dificeis(disciplinas), file=f, end=';\n\n')
-        print('F =', get_preferencias_disciplinas(professores, disciplinas), file=f, end=';\n\n')
-        print('Q =', get_preferencias_aulas(professores), file=f, end=';\n\n')
+        print('C =', print_set(periodos_nome(disciplinas)), file=f, end=';\n\n')
+        print('D =', print_set(disciplinas_nome(disciplinas)), file=f, end=';\n\n')
+        print('P =', print_set(professores_nome(professores)), file=f, end=';\n\n')
+        print('O =', oferecidas(disciplinas), file=f, end=';\n\n')
+        print('K =', carga_horaria(disciplinas), file=f, end=';\n\n')
+        print('N =', contrato_prof(professores), file=f, end=';\n\n')
+        print('h =', habilitados(professores, disciplinas), file=f, end=';\n\n')
+        print('H =', turma_disciplina(disciplinas), file=f, end=';\n\n')
+        print('A =', disponibilidade(professores), file=f, end=';\n\n')
+        print('G =', disciplinas_dificeis(disciplinas), file=f, end=';\n\n')
+        print('F =', preferencias_disciplinas(professores, disciplinas), file=f, end=';\n\n')
+        print('Q =', preferencias_aulas(professores), file=f, end=';\n\n')
+        print('B =', print_array_of_sets(blocos_disciplinas(disciplinas)), file=f, end=';\n\n')
 
 
 if __name__ == '__main__':
