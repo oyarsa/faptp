@@ -104,6 +104,10 @@ def print_array_of_sets(x):
     return '[' + ', '.join(s) + ']'
 
 
+def filtrar_nao_ofertadas(disciplinas):
+    return [d for d in disciplinas if d['ofertada']]
+
+
 def main():
     if len(sys.argv) != 3:
         print('Número inválido de argumentos')
@@ -115,7 +119,7 @@ def main():
     with open(infile, encoding='utf8') as f:
         indict = json.load(f)
 
-    disciplinas = indict['disciplinas']
+    disciplinas = filtrar_nao_ofertadas(indict['disciplinas'])
     professores = indict['professores']
 
     with open(outfile, 'w') as f:
