@@ -58,7 +58,15 @@ def carregar_periodos(horarios):
 
         periodos.append((nome, matriz))
 
-    return periodos
+    def sort_func(tup):
+        nome, _ = tup
+        try:
+            turma, curso = nome.split('-')
+            return curso, turma
+        except ValueError:
+            return nome
+
+    return sorted(periodos, key=sort_func)
 
 
 def main():
@@ -76,7 +84,6 @@ def main():
 
     env = Environment(loader=FileSystemLoader(sys.path[0]))
     template = env.get_template('template.html')
-
     with open(sys.path[0] + '/' + cssfile) as f:
         css = f.read()
 
