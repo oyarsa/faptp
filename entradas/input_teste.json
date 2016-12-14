@@ -102,7 +102,7 @@
     "disciplinas": [
         {
             "capacidade": 10,
-            "carga": 2,
+            "carga": 4,
             "curso": "C",
             "id": "A1",
             "nome": "A1",
@@ -178,7 +178,7 @@
             "periodo": 2,
             "turma": "A",
             "periodominimo": 2,
-            "ofertada": false
+            "ofertada": true
         }
     ],
     "professores": [

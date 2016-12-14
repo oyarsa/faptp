@@ -1,6 +1,6 @@
 #! /bin/bash
 
-infile="../entradas/input.all.json"
+infile="../entradas/input_teste.json"
 modelfile="Horario.mod"
 modeldat="input.dat"
 modelout="result.csv"
@@ -21,8 +21,8 @@ function solve() {
     fi
 
     mv "$modelout" "$outfolder/$modelout"
-    py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout" >/dev/null 2>&1
-    py horario.py "$outfolder/$jsonout" "$outfolder/$htmlfile" >/dev/null 2>&1
+    py csv2json.py "$outfolder/$modelout" "$outfolder/$jsonout"
+    py horario.py "$outfolder/$jsonout" "$outfolder/$htmlfile"
 
     OUT=$?
     if [ $OUT -eq 0 ] ; then

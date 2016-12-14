@@ -30,24 +30,23 @@ int O[D] = ...;  // se D está sendo oferecida
 {int} B[D] = ...;  // blocos da disciplina D
 
 dvar boolean x[P][D][I][J];  // D agendada no horário (I, J) para o professor P
-dvar int r[C][I][J];  // se a C tem aula em (I, J)
+dvar int+ r[C][I][J];  // se a C tem aula em (I, J)
 dvar boolean alfa1[Ja][C][I][J];  // se existe uma janela de tamanho Ja
 								  // começando em I no dia J para turma C
-dvar int alfa[C]; // número de janelas para turma C
+dvar int+ alfa[C]; // número de janelas para turma C
 dvar boolean w[P][J];  // se o professor P dá aula em J
 dvar boolean beta1[Jb][P][J];  // se existe uma janela de tamanho Jb
 							   // começando em J para professor P
-dvar int beta[P];  // número de janelas para professor P
+dvar int+ beta[P];  // número de janelas para professor P
 dvar boolean g[C][J];  // se a turma C possui aula em J
-dvar int gama[C];  // número de dias de aula de C
-dvar int delta[C];  // número de aulas que C tem aos sábados
-dvar int epsilon[D][J];  // número de aulas seguidas de D em J
-dvar int teta[J][C];  // número de aulas dificeis em J para C
+dvar int+ gama[C];  // número de dias de aula de C
+dvar int+ delta[C];  // número de aulas que C tem aos sábados
+dvar int+ epsilon[D][J];  // número de aulas seguidas de D em J
+dvar int+ teta[J][C];  // número de aulas dificeis em J para C
 dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de C em J
-dvar int lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
-dvar int mi[P];  // número de aulas que excedem a preferência de P
+dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
+dvar int+ mi[P];  // número de aulas que excedem a preferência de P
 
-/*
 minimize
 	pi[1] * (sum (c in C) alfa[c]) +
 	pi[2] * (sum (p in P) beta[p]) +
@@ -57,7 +56,7 @@ minimize
 	pi[6] * (sum (j in J, c in C) teta[j][c]) +
 	pi[7] * (sum (j in J, c in C) capa[c][j]) +
 	pi[8] * (sum (p in P) lambda[p]) +
-	pi[9] * (sum (p in P) mi[p]);*/
+	pi[9] * (sum (p in P) mi[p]);
 
 subject to {
 
@@ -85,7 +84,6 @@ subject to {
 	forall (p in P, d in D, i in Horarios_pares, j in J, b in B[d]: b == 2)
 		x[p][d][i][j] - x[p][d][i+1][j] == 0;
 
-/*
 	// 7
 	forall (c in C, i in I, j in J)
 	  r[c][i][j] == (sum (p in P, d in D) x[p][d][i][j] * H[d][c]);
@@ -147,7 +145,8 @@ subject to {
 
 	// 20
 	forall (p in P)
-	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];*/
+	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
+
 }
 
 execute {
