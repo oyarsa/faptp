@@ -62,19 +62,19 @@ minimize
 
 subject to {
 
-	// 1
+	// Disponibilidade do professor
 	forall (i in I, j in J, p in P)
 	  sum (d in D) x[p][d][i][j] <= A[p][i][j];
 
-	// 2
+	// Conflito de aulas em um período
 	forall (i in I, j in J, c in C)
 	  sum (p in P, d in D) (x[p][d][i][j] * H[d][c]) <= 1;
 
-	// 3
+	// Capacitação do professor
 	forall (p in P, d in D, i in I, j in J)
 		x[p][d][i][j] <= h[p][d];
 
-  // Restrições que impedem que uma disciplina tenha mais de um professor associado
+  // Impedem que uma disciplina tenha mais de um professor associado
   forall (p in P, d in D, i in I, j in J)
 	  Lec[p][d] >= x[p][d][i][j];
 
@@ -84,11 +84,11 @@ subject to {
 	forall (d in D)
 	   sum (p in P) Lec[p][d] == O[d];
 
-	// 4
+	// Contrato do professor
 	forall (p in P)
 	  sum(d in D, i in I, j in J) (x[p][d][i][j] * h[p][d]) <= N[p];
 
-	// 5
+	// Carga horária das disciplinas
 	forall (d in D)
 	  sum (p in P, i in I, j in J) x[p][d][i][j] == K[d] * O[d];
 
@@ -108,66 +108,61 @@ subject to {
   forall (d in D)
 	  sum (p in P, i in I, j in J) gem[p][d][i][j] == B[d];
 
-	// 7
+	// Janelas de disciplinas
 	forall (c in C, i in I, j in J)
 	  r[c][i][j] == (sum (p in P, d in D) x[p][d][i][j] * H[d][c]);
 
-	// 8
 	forall (c in C, i in I, j in J, k in 1..num_horarios-1-i)
 	  r[c][i][j] - (sum (l in 1..k) r[c][i+l][j]) + r[c][i+k+1][j] - alfa1[k][c][i][j] <= 1;
 
-	// 9
 	forall (c in C)
 	  alfa[c] == sum (k in Ja, i in I, j in J) alfa1[k][c][i][j];
 
-	// 10
+	// Intervalo de trabalho dos professores
 	forall (p in P, d in D, i in I, j in J)
 		w[p][j] >= x[p][d][i][j];
 
 	forall (p in P, j in J)
 	  w[p][j] <= sum (i in I, d in D) x[p][d][i][j];
 
-	// 11
 	forall (p in P, j in J, k in 1..num_dias-1-j)
 	  w[p][j] - sum (l in 1..k) w[p][j+l] - w[p][j+k+1] - beta1[k][p][j] <= 1;
 
-	// 12
 	forall (p in P)
 	  beta[p] == sum (k in Jb, j in J) beta1[k][p][j];
 
-	// 13
+	// Horário compacto
 	forall (c in C, i in I, j in J)
 		g[c][j] >= r[c][i][j];
 
 	forall (c in C, j in J)
 	  g[c][j] <= sum (i in I) r[c][i][j];
 
-	// 14
 	forall (c in C)
 	  gama[c] == sum (j in J) g[c][j];
 
-	// 15
+	// Aulas aos sábados
 	forall (c in C)
 	  delta[c] == sum (p in P, d in D, i in I) x[p][d][i][num_dias] * H[d][c];
 
-	// 16
+	// Aulas seguidas
 	forall (d in D, j in J)
 	  (sum (p in P, i in I) x[p][d][i][j]) - epsilon[d][j] <= 2;
 
-	// 17
+	// Aulas seguidas de nível difícil
 	forall (c in C, j in J)
 	  sum (i in I, d in D, p in P) x[p][d][i][j] * G[d] * H[d][c] - teta[j][c] <= 2;
 
-	// 18
+	// Aulas de nível difícil no último horário
 	forall (c in C, j in J)
 	  capa[c][j] == sum(p in P, d in D, i in (num_horarios - 1)..num_horarios)
 	  								x[p][d][i][j] * G[d] * H[d][c];
 
-	// 19
+	// Preferência do professor (disciplinas)
 	forall (p in P, i in I, j in J)
 	  lambda[p] == sum (d in D) x[p][d][i][j] * (1 - F[p][d]);
 
-	// 20
+	// Preferência do professor (número de aulas)
 	forall (p in P)
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
 }
