@@ -27,7 +27,7 @@ int Q[P] = ...;  // aulas desejadas por P
 int N[P] = ...;  // horas no contrato de P
 int K[D] = ...;  // carga horária D
 int O[D] = ...;  // se D está sendo oferecida
-{int} B[D] = ...;  // blocos da disciplina D
+int B[D] = ...;  // número de aulas geminadas da disciplina D
 
 dvar boolean x[P][D][I][J];  // D agendada no horário (I, J) para o professor P
 dvar int+ r[C][I][J];  // se a C tem aula em (I, J)
@@ -47,6 +47,7 @@ dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de 
 dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
 dvar int+ mi[P];  // número de aulas que excedem a preferência de P
 dvar boolean Lec[P][D];  // professor P leciona disciplina D
+dvar boolean gem[P][D][I][J]; // indica se uma aula geminada começa em i,j
 
 minimize
 	pi[1] * (sum (c in C) alfa[c]) + // janelas
@@ -91,10 +92,21 @@ subject to {
 	forall (d in D)
 	  sum (p in P, i in I, j in J) x[p][d][i][j] == K[d] * O[d];
 
-  /*
-	// 6
-	forall (p in P, d in D, i in Horarios_pares, j in J, b in B[d]: b == 2)
-		x[p][d][i][j] == x[p][d][i+1][j];*/
+  // Aulas geminadas
+  forall (p in P, d in D, i in Horarios_pares, j in J)
+		gem[p][d][i][j] <= x[p][d][i][j];
+
+  forall (p in P, d in D, i in Horarios_pares, j in J)
+    gem[p][d][i][j] <= x[p][d][i+1][j];
+
+  forall (p in P, d in D, i in Horarios_pares, j in J)
+    gem[p][d][i][j] >= x[p][d][i][j] + x[p][d][i+1][j] - 1;
+
+  forall (p in P, d in D, i in Horarios_pares, j in J)
+	  gem[p][d][i+1][j] == 0;
+
+  forall (d in D)
+	  sum (p in P, i in I, j in J) gem[p][d][i][j] == B[d];
 
 	// 7
 	forall (c in C, i in I, j in J)

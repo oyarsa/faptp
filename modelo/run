@@ -1,6 +1,6 @@
 #! /bin/bash
 
-infile="../entradas/input.all.json"
+infile="../entradas/input_teste.json"
 modelfile="Horario.mod"
 modeldat="input.dat"
 modelout="result.csv"

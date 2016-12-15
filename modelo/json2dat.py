@@ -92,7 +92,7 @@ def preferencias_aulas(professores):
 
 def blocos_disciplina(disciplina):
     carga = disciplina['carga']
-    return [2] * (carga // 2) + [1] * (carga % 2)
+    return carga // 2
 
 
 def blocos_disciplinas(disciplinas):
@@ -138,7 +138,7 @@ def main():
         print('G =', disciplinas_dificeis(disciplinas), file=f, end=';\n\n')
         print('F =', preferencias_disciplinas(professores, disciplinas), file=f, end=';\n\n')
         print('Q =', preferencias_aulas(professores), file=f, end=';\n\n')
-        print('B =', print_array_of_sets(blocos_disciplinas(disciplinas)), file=f, end=';\n\n')
+        print('B =', blocos_disciplinas(disciplinas), file=f, end=';\n\n')
 
 
 if __name__ == '__main__':
