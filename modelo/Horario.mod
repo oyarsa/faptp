@@ -37,7 +37,7 @@ dvar int+ alfa[C]; // número de janelas para turma C
 dvar boolean w[P][J];  // se o professor P dá aula em J
 dvar boolean beta1[Jb][P][J];  // se existe uma janela de tamanho Jb
 							   // começando em J para professor P
-dvar int+ beta[P];  // número de janelas para professor P
+dvar int+ beta[P];  // número de intervalos de trabalho para professor P
 dvar boolean g[C][J];  // se a turma C possui aula em J
 dvar int+ gama[C];  // número de dias de aula de C
 dvar int+ delta[C];  // número de aulas que C tem aos sábados
@@ -46,19 +46,18 @@ dvar int+ teta[J][C];  // número de aulas dificeis em J para C
 dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de C em J
 dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
 dvar int+ mi[P];  // número de aulas que excedem a preferência de P
-dvar int+ phi[D]; // número de aulas da disciplina D no sábado
+dvar boolean Lec[P][D];  // professor P leciona disciplina D
 
 minimize
-	pi[1] * (sum (c in C) alfa[c]) +
-	pi[2] * (sum (p in P) beta[p]) +
-	pi[3] * (sum (c in C) gama[c]) +
-	pi[4] * (sum (c in C) delta[c]) +
-	pi[5] * (sum (d in D, j in J) epsilon[d][j]) +
-	pi[6] * (sum (j in J, c in C) teta[j][c]) +
-	pi[7] * (sum (j in J, c in C) capa[c][j]) +
-	pi[8] * (sum (p in P) lambda[p]) +
-	pi[9] * (sum (p in P) mi[p]) +
-	pi[10] * (sum (d in D) phi[d]);
+	pi[1] * (sum (c in C) alfa[c]) + // janelas
+	pi[2] * (sum (p in P) beta[p]) + // intervalo de trabalho
+	pi[3] * (sum (c in C) gama[c]) + // horário compacto
+	pi[4] * (sum (c in C) delta[c]) + // aulas aos sábados
+	pi[5] * (sum (d in D, j in J) epsilon[d][j]) + // aulas seguidas
+	pi[6] * (sum (j in J, c in C) teta[j][c]) + // aulas difíceis seguidas
+	pi[7] * (sum (j in J, c in C) capa[c][j]) + // aulas difíceis no último horário
+	pi[8] * (sum (p in P) lambda[p]) + // preferência do professor (disciplinas)
+	pi[9] * (sum (p in P) mi[p]); // preferências do professor (número de aulas)
 
 subject to {
 
@@ -73,6 +72,16 @@ subject to {
 	// 3
 	forall (p in P, d in D, i in I, j in J)
 		x[p][d][i][j] <= h[p][d];
+
+  // Restrições que impedem que uma disciplina tenha mais de um professor associado
+  forall (p in P, d in D, i in I, j in J)
+	  Lec[p][d] >= x[p][d][i][j];
+
+	forall (p in P, d in D)
+	  Lec[p][d] <= sum (i in I, j in J) x[p][d][i][j];
+
+	forall (d in D)
+	   sum (p in P) Lec[p][d] == O[d];
 
 	// 4
 	forall (p in P)
@@ -127,7 +136,7 @@ subject to {
 
 	// 15
 	forall (c in C)
-	  delta[c] == sum (p in P, d in D, i in I, j in J) x[p][d][i][j] * H[d][c];
+	  delta[c] == sum (p in P, d in D, i in I) x[p][d][i][num_dias] * H[d][c];
 
 	// 16
 	forall (d in D, j in J)
@@ -149,10 +158,6 @@ subject to {
 	// 20
 	forall (p in P)
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
-
-	// 21
-	forall (d in D)
-		phi[d] == sum (p in P, i in I) x[p][d][i][num_dias];
 }
 
 execute {
