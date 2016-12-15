@@ -6,7 +6,7 @@ import sys
 num_dias = 6
 num_horarios = 4
 horas_max = num_dias * num_horarios
-pesos_constraints = [1] * 9
+pesos_constraints = [1] * 10
 
 
 def print_set(aset):

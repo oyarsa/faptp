@@ -16,7 +16,7 @@ range I = 1..num_horarios;  // horários
 range Ja = 1..num_horarios-2;
 range Jb = 1..num_dias-2;
 
-int num_constraints = 9;
+int num_constraints = 10;
 int pi[1..num_constraints] = ...;  // pesos das constraints
 int h[P][D] = ...;  // se P pode lecionar D
 int H[D][C] = ...;  // se D pertence a C
@@ -46,6 +46,7 @@ dvar int+ teta[J][C];  // número de aulas dificeis em J para C
 dvar boolean capa[C][J];  // se existe uma aula difícil no último horário de C em J
 dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de sua preferências
 dvar int+ mi[P];  // número de aulas que excedem a preferência de P
+dvar int+ phi[D]; // número de aulas da disciplina D no sábado
 
 minimize
 	pi[1] * (sum (c in C) alfa[c]) +
@@ -56,7 +57,8 @@ minimize
 	pi[6] * (sum (j in J, c in C) teta[j][c]) +
 	pi[7] * (sum (j in J, c in C) capa[c][j]) +
 	pi[8] * (sum (p in P) lambda[p]) +
-	pi[9] * (sum (p in P) mi[p]);
+	pi[9] * (sum (p in P) mi[p]) +
+	pi[10] * (sum (d in D) phi[d]);
 
 subject to {
 
@@ -80,9 +82,10 @@ subject to {
 	forall (d in D)
 	  sum (p in P, i in I, j in J) x[p][d][i][j] == K[d] * O[d];
 
+  /*
 	// 6
 	forall (p in P, d in D, i in Horarios_pares, j in J, b in B[d]: b == 2)
-		x[p][d][i][j] - x[p][d][i+1][j] == 0;
+		x[p][d][i][j] == x[p][d][i+1][j];*/
 
 	// 7
 	forall (c in C, i in I, j in J)
@@ -147,6 +150,9 @@ subject to {
 	forall (p in P)
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
 
+	// 21
+	forall (d in D)
+		phi[d] == sum (p in P, i in I) x[p][d][i][num_dias];
 }
 
 execute {
