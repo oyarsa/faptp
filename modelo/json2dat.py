@@ -108,6 +108,21 @@ def filtrar_nao_ofertadas(disciplinas):
     return [d for d in disciplinas if d['ofertada']]
 
 
+def filtrar_disciplinas_curso(disciplinas, curso):
+    return [d for d in disciplinas if d['curso'] == curso]
+
+
+def filtrar_professores_curso(professores, disciplinas):
+    filtrados = []
+    disciplinas = [int(d) for d in disciplinas_nome(disciplinas)]
+    for p in professores:
+        for d in p['competencias']:
+            if d in disciplinas:
+                filtrados.append(p)
+                break
+    return filtrados
+
+
 def main():
     if len(sys.argv) != 3:
         print('Número inválido de argumentos')
@@ -120,7 +135,12 @@ def main():
         indict = json.load(f)
 
     disciplinas = filtrar_nao_ofertadas(indict['disciplinas'])
+    disciplinas = filtrar_disciplinas_curso(disciplinas, 'EFB')
     professores = indict['professores']
+    professores = filtrar_professores_curso(professores, disciplinas)
+
+    print(len(disciplinas))
+    print(len(professores))
 
     with open(outfile, 'w') as f:
         print('num_horarios =', num_horarios, file=f, end=';\n\n')
