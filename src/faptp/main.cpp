@@ -257,7 +257,7 @@ std::string teste_tempo_iter(int num_exec, F f)
             .populacaoInicial(20)
             .porcentagemCruzamentos(80)
             .numMaximoIteracoesSemEvolucaoGRASP(15)
-            .numMaximoIteracoesSemEvolucaoAG(20)
+            .numMaximoIteracoesSemEvolucaoAG(1e9)
             .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
             .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
             .mutacaoProbabilidade(35) // %
@@ -295,7 +295,7 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 1;
+    const auto timeout_sec = 5*60;
     const auto timeout_ms = timeout_sec * 1000;
     const auto num_exec = 1;
 
@@ -310,7 +310,7 @@ void teste_tempo()
         return r.gerarHorarioSA_ILS(timeout_ms);
     });
 
-    /*Util::logprint(oss, "HySST\n");
+    Util::logprint(oss, "HySST\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         return r.gerarHorarioHySST(timeout_ms, 100, 100);
     });
@@ -339,7 +339,7 @@ void teste_tempo()
         r.setTimeout(timeout_ms);
         r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ciclo;
         return r.gerarHorarioAG()->clone();
-    });*/
+    });
 ;
     std::ofstream out{(boost::format("resultados%d.txt") % timeout_sec).str(), 
                      std::ios::out | std::ios::app};

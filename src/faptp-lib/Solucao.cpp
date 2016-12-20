@@ -91,7 +91,7 @@ int Solucao::calculaFOSoftConstraints() const
         horario->contaJanelas() +
         horario->intervalosTrabalho(res.getProfessores()) +
         horario->numDiasAula() +
-        900 * horario->aulasSabado() +
+        horario->aulasSabado() +
         horario->aulasSeguidas(res.getDisciplinas()) +
         horario->aulasSeguidasDificil() +
         horario->aulaDificilUltimoHorario() +
