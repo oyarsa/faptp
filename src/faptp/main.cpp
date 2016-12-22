@@ -295,9 +295,9 @@ std::string teste_tempo_iter(int num_exec, F f)
 
 void teste_tempo()
 {
-    const auto timeout_sec = 5*60;
+    const auto timeout_sec = 2*60;
     const auto timeout_ms = timeout_sec * 1000;
-    const auto num_exec = 1;
+    const auto num_exec = 30;
 
     std::ostringstream oss;
     oss << std::string(25, '=') << "\n";
@@ -320,27 +320,12 @@ void teste_tempo()
         return r.gerarHorarioWDJU(timeout_ms);
     });
 
-    Util::logprint(oss, "AG - PMX\n");
+    Util::logprint(oss, "AG\n");
     oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
         r.setTimeout(timeout_ms);
-        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::pmx;
         return r.gerarHorarioAG()->clone();
     });
-
-    Util::logprint(oss, "AG - OX\n");
-    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-        r.setTimeout(timeout_ms);
-        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ordem;
-        return r.gerarHorarioAG()->clone();
-    });
-
-    Util::logprint(oss, "AG - CX\n");
-    oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-        r.setTimeout(timeout_ms);
-        r.horarioTipoCruzamento = Configuracao::TipoCruzamento::ciclo;
-        return r.gerarHorarioAG()->clone();
-    });
-;
+    
     std::ofstream out{(boost::format("resultados%d.txt") % timeout_sec).str(), 
                      std::ios::out | std::ios::app};
     out << oss.str() << std::endl;
