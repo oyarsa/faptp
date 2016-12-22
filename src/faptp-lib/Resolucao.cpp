@@ -611,7 +611,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
 Solucao* Resolucao::gerarHorarioAG2()
 {
-    tempoInicio = std::chrono::steady_clock::now();
+    tempoInicio = std::chrono::high_resolution_clock::now();
 
     populacao = gerarHorarioAGPopulacaoInicial2();
     foAlvo = populacao[0]->getFO();
@@ -3012,7 +3012,7 @@ Resolucao::crossoverPMXCriarRepr(
         novo_pai2[i - comeco_camada] = x;
     }
 
-    return {inverterPMXRepr(repr), novo_pai1, novo_pai2};
+    return std::make_tuple(inverterPMXRepr(repr), novo_pai1, novo_pai2);
 }
 
 std::vector<int> Resolucao::crossoverPMXSwap(
@@ -3253,13 +3253,13 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
         auto d_e2 = Util::randomBetween(0, dias_semana_util);
         auto b_e2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
-        if (swap_blocos(*viz, {d_e1, b_e1}, {d_e2, b_e2}, camada)) {
+        if (swap_blocos(*viz, std::make_tuple(d_e1, b_e1), 
+                        std::make_tuple(d_e2, b_e2), camada)) {
             viz->calculaFO();
             return viz;
         }
     }
 
-    //puts("ops es");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3527,7 +3527,8 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     std::vector<std::unique_ptr<Solucao>> solucoes;
 
     for (const auto& c : cadeias) {
-        auto s = swap_timeslots(sol, {d_e1, b_e1}, {d_e2, b_e2}, c);
+        auto s = swap_timeslots(sol, std::make_tuple(d_e1, b_e1), 
+                                std::make_tuple(d_e2, b_e2), c);
         s->calculaFO();
         solucoes.push_back(move(s));
     }
