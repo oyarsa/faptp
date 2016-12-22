@@ -304,7 +304,7 @@ std::vector<HySST::Impl::Event> HySST::Impl::list_all_liebhabers(
             horario.clearSlot(d, b, camada);
 
             if (horario.isViable(dia, bloco, camada, pd)) {
-                liebhabers.push_back({{d, b, camada}, pd});
+                liebhabers.push_back({std::make_tuple(d, b, camada), pd});
             }
             horario.insert(d, b, camada, pd);
         }
