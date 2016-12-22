@@ -709,7 +709,7 @@ Solucao* Resolucao::gerarHorarioAG2()
 
 Solucao* Resolucao::gerarHorarioAG3()
 {
-    tempoInicio = std::chrono::steady_clock::now();
+    tempoInicio = std::chrono::high_resolution_clock::now();
 
     populacao = gerarHorarioAGPopulacaoInicial2();
     foAlvo = populacao[0]->getFO();
@@ -2631,7 +2631,7 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         foAlvo = best.getFO();
         hashAlvo = best.getHash();
         iteracaoAlvo = iteracaoAtual;
-        tempoAlvo = Util::chronoDiff(std::chrono::steady_clock::now(),
+        tempoAlvo = Util::chronoDiff(std::chrono::high_resolution_clock::now(),
                                      tempoInicio);
         //Util::logprint(log, boost::format("Iteracao %d. Nova melhor solucao!\n")
         //               % iteracaoAtual);
