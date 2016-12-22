@@ -7,6 +7,8 @@
 #include "Grade.h"
 #include "Configuracao.h"
 
+class Resolucao;
+
 class Solucao
 {
     friend class Resolucao;
