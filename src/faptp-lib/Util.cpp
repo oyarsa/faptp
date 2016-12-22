@@ -5,7 +5,10 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <faptp-lib/Util.h>
 #include <faptp-lib/Aleatorio.h>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 int Util::getPosition(int y, int x, int z, int Y, int Z)
 {
@@ -137,9 +140,13 @@ std::string Util::date_time()
 
 std::string Util::get_computer_name()
 {
+#ifdef _WIN32
     char buf[MAX_COMPUTERNAME_LENGTH + 1];
     unsigned long len;
     GetComputerName(buf, &len);
 
     return buf;
+#else
+    return "0";
+#endif
 }
