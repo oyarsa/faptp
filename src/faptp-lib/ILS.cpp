@@ -83,7 +83,7 @@ std::unique_ptr<Solucao> ILS::gerar_vizinho(
 
 std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
 {
-    static const std::unordered_set<Resolucao::Vizinhanca> movimentos {
+    static const std::set<Resolucao::Vizinhanca> movimentos {
             Resolucao::Vizinhanca::ES,
             Resolucao::Vizinhanca::EM,
             Resolucao::Vizinhanca::RS,
@@ -106,7 +106,7 @@ std::unique_ptr<Solucao> ILS::descent_phase(const Solucao& solucao) const
 }
 
 Resolucao::Vizinhanca ILS::escolher_vizinhanca(
-    const std::unordered_set<Resolucao::Vizinhanca>& movimentos
+    const std::set<Resolucao::Vizinhanca>& movimentos
 ) const
 {
     return Util::randomChoice(movimentos);

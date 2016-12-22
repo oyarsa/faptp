@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <set>
 
 #include "Solucao.h"
 #include "Resolucao.h"
@@ -37,7 +38,7 @@ private:
     std::unique_ptr<Solucao> descent_phase(const Solucao& solucao) const;
 
     Resolucao::Vizinhanca escolher_vizinhanca(
-        const std::unordered_set<Resolucao::Vizinhanca>& movimentos) const;
+        const std::set<Resolucao::Vizinhanca>& movimentos) const;
     std::unique_ptr<Solucao> perturbacao(const Solucao& solucao) const;
 
     const Resolucao& res_;
