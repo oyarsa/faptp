@@ -69,7 +69,7 @@ target_link_libraries(faptp-lib ${CONAN_LIBS})
 add_executable(faptp src/faptp/main.cpp)
 target_link_libraries(faptp faptp-lib)
 
-if (NOT ${MSVC})
+if (NOT MSVC)
     target_link_libraries(faptp pthread)
 endif()
 
