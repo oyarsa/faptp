@@ -120,7 +120,7 @@ semArgumentos()
                  .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
                  .tipoConstrucao(Configuracao::TipoGrade::grasp)
                  .tipoFo(Configuracao::TipoFo::Soma_carga)
-                 .timeout(30'000) };
+                 .timeout(30000) };
 
   std::cout << "Montando horarios [AG + Modelo]...\n";
 
