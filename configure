@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+sudo apt-get update && sudo apt-get install -y git build-essential python-pip cmake
+pip install conan
+git clone https://github.com/oyarsa/faptp.git
+cd faptp
+mkdir build && cd build
+conan install .. -s compiler=gcc -s compiler.libcxx=libstdc++11 --build=missing -s build_type=Release
+cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build .
