@@ -301,9 +301,8 @@ teste_tempo_iter(int num_exec, F f)
 }
 
 void
-teste_tempo()
+teste_tempo(int timeout_sec = 120)
 {
-  const auto timeout_sec = 2 * 60;
   const auto timeout_ms = timeout_sec * 1000;
   const auto num_exec = 30;
 
@@ -620,7 +619,7 @@ Onde:
         Endere�o IP do servidor para onde os resultados ser�o enviados.
 )";
 
-  const auto timeout = 60'000;
+  const auto timeout = 60000;
 
   if (argc == 5) {
     std::string algo = argv[1];
@@ -645,6 +644,7 @@ Onde:
   } else {
     // semArgumentos();
 
-    teste_tempo();
+    teste_tempo(2 * 60);
+    teste_tempo(3 * 60);
   }
 }

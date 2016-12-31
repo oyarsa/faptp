@@ -67,7 +67,11 @@ add_library(faptp-lib ${faptp-lib_FILES})
 target_link_libraries(faptp-lib ${CONAN_LIBS})
 
 add_executable(faptp src/faptp/main.cpp)
-target_link_libraries(faptp faptp-lib pthread)
+target_link_libraries(faptp faptp-lib)
+
+if (NOT ${MSVC})
+    target_link_libraries(faptp pthread)
+endif()
 
 if (MODELO)
   target_link_libraries(faptp-lib modelo-grade-lib)
