@@ -13,7 +13,7 @@ NUM_HORARIOS = 4
 CSS_FILE = 'estilo.css'
 NOME_CORES = ['vermelho', 'amarelo', 'azul', 'verde', 'roxo', 'rosa', 'cinza',
               'azul2', 'cinza2']
-
+PESOS_FO = 	[2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667]
 
 def conta_janelas_dia(dia, camada):
     janelas = 0
@@ -140,7 +140,7 @@ def aulas_professores(matriz, professores):
     return 0
 
 
-def calcular_fo(matriz, horarios, pesos=[1] * 9):
+def calcular_fo(matriz, horarios):
     professores, disciplinas = get_professores_disciplinas(horarios)
     penalidades = [
         ('Janelas', conta_janelas(matriz)),
@@ -157,8 +157,8 @@ def calcular_fo(matriz, horarios, pesos=[1] * 9):
     ]
 
     funcao_objetivo = sum(peso * penalidade[1]
-                          for peso, penalidade in zip(pesos, penalidades))
-    return funcao_objetivo, penalidades
+                          for peso, penalidade in zip(PESOS_FO, penalidades))
+    return round(funcao_objetivo), penalidades
 
 
 def matriz_vazia(rows, cols):

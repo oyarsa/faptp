@@ -644,7 +644,7 @@ Onde:
   } else {
     // semArgumentos();
 
-    teste_tempo(2 * 60);
+    teste_tempo(1 * 60);
     //teste_tempo(3 * 60);
   }
 }
