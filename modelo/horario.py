@@ -89,7 +89,7 @@ def is_aula_dia(dia, camada):
 
 def num_dias_aula(matriz):
     return sum(sum(is_aula_dia(d, c) for d in range(NUM_DIAS))
-               for c in matriz)
+               for _, c in matriz)
 
 
 def aulas_sabado_camada(camada):
