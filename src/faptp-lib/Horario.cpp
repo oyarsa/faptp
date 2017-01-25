@@ -4,7 +4,7 @@
 #include <faptp-lib/Horario.h>
 #include <faptp-lib/Semana.h>
 
-Horario::Horario(int pBlocosTamanho, int pCamadasTamanho) 
+Horario::Horario(int pBlocosTamanho, int pCamadasTamanho)
     : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}
 
 Horario::~Horario() {}
@@ -27,8 +27,8 @@ Horario& Horario::operator=(const Horario& outro)
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& professor) const
 {
     auto creditos = creditos_alocados_prof_.find(professor.getId());
-    if (!professor.isDiaDisponivel(pDia, pBloco) 
-        || creditos != end(creditos_alocados_prof_) 
+    if (!professor.isDiaDisponivel(pDia, pBloco)
+        || creditos != end(creditos_alocados_prof_)
            && creditos->second >= professor.credito_maximo()) {
         return true;
     }
@@ -199,7 +199,7 @@ int Horario::intervalosTrabalhoProf(const std::string& professor) const
      auto contando = false;
      auto contador = 0;
 
-     for (auto j = 0; j < blocosTamanho; j++) {
+     for (auto j = 0; j < dias_semana_util; j++) {
          if (isProfDia(professor, j)) {
              if (!contando) {
                  contando = true;
@@ -452,12 +452,12 @@ int Horario::aulasProfessores(
     return num;
 }
 
-std::unordered_map<std::string, ProfessorDisciplina*> 
+std::unordered_map<std::string, ProfessorDisciplina*>
 Horario::getAlocFromDiscNames(int camada) const
 {
     auto camada_inicio = getPosition(0, 0, camada);
     auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
-    
+
     std::unordered_map<std::string, ProfessorDisciplina*> alocs;
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
