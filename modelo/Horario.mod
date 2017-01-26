@@ -17,7 +17,7 @@ range Ja = 1..num_horarios-2;
 range Jb = 1..num_dias-2;
 
 int num_constraints = 10;
-int pi[1..num_constraints] = ...;  // pesos das constraints
+float pi[1..num_constraints] = ...;  // pesos das constraints
 int h[P][D] = ...;  // se P pode lecionar D
 int H[D][C] = ...;  // se D pertence a C
 int A[P][I][J] = ...;  // se P está disponível em (I, J)
@@ -48,9 +48,12 @@ dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de
 dvar int+ mi[P];  // número de aulas que excedem a preferência de P
 dvar boolean Lec[P][D];  // professor P leciona disciplina D
 dvar boolean gem[P][D][I][J]; // indica se uma aula geminada começa em i,j
+dvar int+ penalidades[1..num_constraints];
 
 minimize
-	pi[1] * (sum (c in C) alfa[c]) + // janelas
+	sum (i in 1..num_constraints) (pi[i] * penalidades[i]);
+
+	/*pi[1] * (sum (c in C) alfa[c]) + // janelas
 	pi[2] * (sum (p in P) beta[p]) + // intervalo de trabalho
 	pi[3] * (sum (c in C) gama[c]) + // horário compacto
 	pi[4] * (sum (c in C) delta[c]) + // aulas aos sábados
@@ -58,7 +61,8 @@ minimize
 	pi[6] * (sum (j in J, c in C) teta[j][c]) + // aulas difíceis seguidas
 	pi[7] * (sum (j in J, c in C) capa[c][j]) + // aulas difíceis no último horário
 	pi[8] * (sum (p in P) lambda[p]) + // preferência do professor (disciplinas)
-	pi[9] * (sum (p in P) mi[p]); // preferências do professor (número de aulas)
+	pi[9] * (sum (p in P) mi[p]); // preferências do professor (número de aulas)*/
+
 
 subject to {
 
@@ -126,7 +130,7 @@ subject to {
 	  w[p][j] <= sum (i in I, d in D) x[p][d][i][j];
 
 	forall (p in P, j in J, k in 1..num_dias-1-j)
-	  w[p][j] - sum (l in 1..k) w[p][j+l] - w[p][j+k+1] - beta1[k][p][j] <= 1;
+		w[p][j] - (sum (l in 1..k) w[p][j+l]) + w[p][j+k+1] - beta1[k][p][j] <= 1;
 
 	forall (p in P)
 	  beta[p] == sum (k in Jb, j in J) beta1[k][p][j];
@@ -165,6 +169,17 @@ subject to {
 	// Preferência do professor (número de aulas)
 	forall (p in P)
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
+
+	penalidades[1] == (sum (c in C) alfa[c]); // janelas
+	penalidades[2] == 0; //(sum (p in P) beta[p]); // intervalo de trabalho
+	penalidades[3] == (sum (c in C) gama[c]); // horário compacto
+	penalidades[4] == (sum (c in C) delta[c]); // aulas aos sábados
+	penalidades[5] == (sum (d in D, j in J) epsilon[d][j]);  // aulas seguidas
+	penalidades[6] == (sum (j in J, c in C) teta[j][c]);  // aulas difíceis seguidas
+	penalidades[7] == (sum (j in J, c in C) capa[c][j]); // aulas difíceis no último horário
+	penalidades[8] == (sum (p in P) lambda[p]); // preferência do professor (disciplinas)
+	penalidades[9] == (sum (p in P) mi[p]); // preferências do professor (número de aulas)
+
 }
 
 execute {
@@ -194,4 +209,16 @@ execute {
 
 	var f = new IloOplOutputFile("result.csv");
 	f.writeln(csv);
+
+	writeln(w);
+
+	writeln('Janelas ' + penalidades[1]);
+	writeln('Intevalo de trabalho ' + penalidades[2]);
+	writeln('Horário compacto ' + penalidades[3]);
+	writeln('Aulas aos sábados ' + penalidades[4]);
+	writeln('Aulas seguidas ' + penalidades[5]);
+	writeln('Aulas difiíceis seguidas ' + penalidades[6]);
+	writeln('Aulas difíceis no último horário ' + penalidades[7]);
+	writeln('Preferência do professor (disciplinas) ' + penalidades[8]);
+	writeln('Preferência do professor (disciplinas) ' + penalidades[9]);
 }

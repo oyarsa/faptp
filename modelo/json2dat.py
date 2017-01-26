@@ -3,10 +3,10 @@
 import json
 import sys
 
-num_dias = 6
-num_horarios = 4
-horas_max = num_dias * num_horarios
-pesos_constraints = [1] * 9
+NUM_DIAS = 6
+NUM_HORARIOS = 4
+HORAS_MAX = NUM_DIAS * NUM_HORARIOS
+PESOS_CONSTRAINTS = [2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667]
 
 
 def print_set(aset):
@@ -35,7 +35,7 @@ def carga_horaria(disciplinas):
 
 def contrato_prof(professores):
     key = 'creditoMaximo'
-    return [p[key] if key in p else horas_max for p in professores]
+    return [p[key] if key in p else HORAS_MAX for p in professores]
 
 
 def new_matrix(rows, cols, val=0):
@@ -70,9 +70,9 @@ def disponibilidade(professores):
 
     for p in professores:
         if 'disponibilidade' not in p:
-            matriz = new_matrix(num_horarios, num_dias, val=1)
+            matriz = new_matrix(NUM_HORARIOS, NUM_DIAS, val=1)
         else:
-            matriz = [h[:num_dias] for h in p['disponibilidade']]
+            matriz = [h[:NUM_DIAS] for h in p['disponibilidade']]
         profmatrix.append(matriz)
 
     return profmatrix
@@ -139,13 +139,13 @@ def main():
     professores = indict['professores']
     professores = filtrar_professores_curso(professores, disciplinas)
 
-    print(len(disciplinas))
-    print(len(professores))
+    print('Número de disciplinas:', len(disciplinas))
+    print('Número de professores:', len(professores))
 
     with open(outfile, 'w') as f:
-        print('num_horarios =', num_horarios, file=f, end=';\n\n')
-        print('num_dias =', num_dias, file=f, end=';\n\n')
-        print('pi =', pesos_constraints, file=f, end=';\n\n')
+        print('num_horarios =', NUM_HORARIOS, file=f, end=';\n\n')
+        print('num_dias =', NUM_DIAS, file=f, end=';\n\n')
+        print('pi =', PESOS_CONSTRAINTS, file=f, end=';\n\n')
         print('C =', print_set(periodos_nome(disciplinas)), file=f, end=';\n\n')
         print('D =', print_set(disciplinas_nome(disciplinas)), file=f, end=';\n\n')
         print('P =', print_set(professores_nome(professores)), file=f, end=';\n\n')

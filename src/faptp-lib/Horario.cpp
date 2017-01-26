@@ -148,7 +148,7 @@ int Horario::contaJanelasDia(int dia, int camada) const
                 contando = true;
             }
             if (contando && contador > 0) {
-                janelas++;
+                janelas += contador;
                 contador = 0;
             }
         } else if (contando) {
@@ -156,7 +156,7 @@ int Horario::contaJanelasDia(int dia, int camada) const
         }
     }
 
-    return contador;
+    return janelas;
 }
 
 int Horario::contaJanelasCamada(int camada) const
@@ -205,7 +205,7 @@ int Horario::intervalosTrabalhoProf(const std::string& professor) const
                  contando = true;
              }
              if (contando && contador > 0) {
-                 intervalos++;
+                 intervalos += contador;
                  contador = 0;
              }
          } else if (contando) {
@@ -213,7 +213,7 @@ int Horario::intervalosTrabalhoProf(const std::string& professor) const
          }
      }
 
-     return contador;
+     return intervalos;
 }
 
 int Horario::intervalosTrabalho(

@@ -13,7 +13,7 @@ NUM_HORARIOS = 4
 CSS_FILE = 'estilo.css'
 NOME_CORES = ['vermelho', 'amarelo', 'azul', 'verde', 'roxo', 'rosa', 'cinza',
               'azul2', 'cinza2']
-PESOS_FO = 	[2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667]
+PESOS_FO = [2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667]
 
 def conta_janelas_dia(dia, camada):
     janelas = 0
@@ -26,12 +26,12 @@ def conta_janelas_dia(dia, camada):
             if not contando:
                 contando = True
             if contando and contador > 0:
-                janelas += 1
+                janelas += contador
                 contador = 0
         elif contando:
             contador += 1
 
-    return contador
+    return janelas
 
 
 def conta_janelas_camada(camada):
@@ -67,12 +67,12 @@ def intervalos_trabalho_prof(matriz, professor):
             if not contando:
                 contando = True
             if contando and contador > 0:
-                intervalos += 1
+                intervalos += contador
                 contador = 0
         elif contando:
             contador += 1
 
-    return contador
+    return intervalos
 
 
 def intervalos_trabalho(matriz, professores):
