@@ -86,15 +86,17 @@ void Solucao::calculaFO()
     }
 }
 
-int Solucao::calculaFOSomaCarga()
+Solucao::FO_t Solucao::calculaFOSomaCarga()
 {
     res.gerarGrade(this);
-    return std::accumulate(begin(grades), end(grades), 0, [](int acc, auto el) {
-        return acc + gsl::narrow_cast<int>(el.second->getFO());
-    });
+	return std::accumulate(begin(grades), end(grades), Solucao::FO_t{ 0 }, 
+		[](auto acc, auto el) {
+			return acc + el.second->getFO();
+		}
+	);
 }
 
-int Solucao::calculaFOSoftConstraints() const
+Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 {
 	std::array<int, k_num_pesos> penalidades = { {
 		horario->contaJanelas(),
@@ -109,10 +111,10 @@ int Solucao::calculaFOSoftConstraints() const
 	} };
 
 	auto fo = std::inner_product(begin(pesos_), end(pesos_), begin(penalidades), 0.0);
-    return -static_cast<int>(round(fo));
+	return fo;
 }
 
-int Solucao::getFO()
+Solucao::FO_t Solucao::getFO()
 {
     if (fo == -1) {
         calculaFO();
@@ -120,7 +122,7 @@ int Solucao::getFO()
     return fo;
 }
 
-int Solucao::getFO() const
+Solucao::FO_t Solucao::getFO() const
 {
     if (fo == -1) {
         throw std::runtime_error{"FO não calculada"};

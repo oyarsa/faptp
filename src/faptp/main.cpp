@@ -154,7 +154,7 @@ semArgumentos()
   print_violacoes(r.getSolucao()->reportarViolacoes());
 }
 
-std::pair<long long, int>
+std::pair<long long, Solucao::FO_t>
 experimento_ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
                const std::string& oper_cruz, int grasp_iter, int grasp_nviz,
                int grasp_alfa, int n_tour, int n_mut, long long timeout)
@@ -236,7 +236,7 @@ experimento_ag_cli(const std::string& input, const std::string& file,
 
     for (auto i = 0; i < n_exec; i++) {
       long long tempo;
-      int fo;
+      Solucao::FO_t fo;
       std::tie(tempo, fo) =
         experimento_ag(input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
                        grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
@@ -283,7 +283,7 @@ teste_tempo_iter(int num_exec, F f)
     Timer t;
     auto s = f(r);
 
-    Util::logprint(oss, boost::format(" - fo: %d - t: %lld\n") % s->getFO() %
+    Util::logprint(oss, boost::format(" - fo: %g - t: %lld\n") % s->getFO() %
                           t.elapsed());
     Util::logprint(oss, boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n") %
                           r.foAlvo % r.tempoAlvo);
@@ -336,7 +336,7 @@ teste_tempo(int timeout_sec = 120)
   out << oss.str() << std::endl;
 }
 
-std::pair<long long, int>
+std::pair<long long, Solucao::FO_t>
 experimento_sa_ils(const std::string& input, int frac_time, double alfa,
                    double t0, int sa_iter, int sa_reaq, int sa_chances,
                    int ils_iter, int ils_pmax, int ils_p0, long long timeout)
@@ -418,7 +418,7 @@ experimento_sa_ils_cli(const std::string& input, const std::string& file,
 
     for (auto i = 0; i < n_exec; i++) {
       long long tempo;
-      int fo;
+      Solucao::FO_t fo;
       std::tie(tempo, fo) =
         experimento_sa_ils(input, frac_time, alfa, t0, sa_iter, sa_reaq,
                            sa_chances, ils_iter, ils_pmax, ils_p0, timeout);
@@ -438,7 +438,7 @@ experimento_sa_ils_cli(const std::string& input, const std::string& file,
   }
 }
 
-std::pair<long long, int>
+std::pair<long long, Solucao::FO_t>
 experimento_hysst(const std::string& input, int max_level, int t_start,
                   int t_step, int it_hc, int it_mut, long long timeout)
 {
@@ -497,7 +497,7 @@ experimento_hysst_cli(const std::string& input, const std::string& file,
 
     for (auto i = 0; i < n_exec; i++) {
       long long tempo;
-      int fo;
+      Solucao::FO_t fo;
       std::tie(tempo, fo) = experimento_hysst(input, max_level, t_start, t_step,
                                               it_hc, it_mut, timeout);
 
@@ -515,7 +515,7 @@ experimento_hysst_cli(const std::string& input, const std::string& file,
   }
 }
 
-std::pair<long long, int>
+std::pair<long long, Solucao::FO_t>
 experimento_wdju(const std::string& input, int stag_limit, double jump_factor,
                  long long timeout)
 {
@@ -573,7 +573,7 @@ experimento_wdju_cli(const std::string& input, const std::string& file,
 
     for (auto i = 0; i < n_exec; i++) {
       long long tempo;
-      int fo;
+      Solucao::FO_t fo;
       std::tie(tempo, fo) =
         experimento_wdju(input, stag_limit, jump_factor, timeout);
 

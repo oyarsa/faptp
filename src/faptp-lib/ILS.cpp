@@ -61,7 +61,7 @@ long long ILS::tempo_fo() const
     return tempo_fo_;
 }
 
-int ILS::maior_fo() const
+Solucao::FO_t ILS::maior_fo() const
 {
     return maior_fo_;
 }

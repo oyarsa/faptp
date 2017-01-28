@@ -21,6 +21,7 @@ class Solucao
     friend class Resolucao;
     friend class Output;
 public:
+	using FO_t = double;
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, 
             const Resolucao& res, Configuracao::TipoFo tipo_fo,
 		    const boost::optional<std::array<double, 9>>& pesos = boost::none);
@@ -31,10 +32,10 @@ public:
     void insertGrade(Grade* grade);
 
     void calculaFO();
-    int calculaFOSomaCarga();
-    int calculaFOSoftConstraints() const;
-    int getFO();
-    int getFO() const;
+    FO_t calculaFOSomaCarga();
+    FO_t calculaFOSoftConstraints() const;
+    FO_t getFO();
+    FO_t getFO() const;
 
     std::unordered_map<std::string, int> reportarViolacoes() const;
 
@@ -54,7 +55,7 @@ private:
     std::unordered_map<std::string, Grade*> grades;
 
     int gradesLength;
-    int fo = -1;
+    FO_t fo = -1;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
 	std::array<double, 9> pesos_;

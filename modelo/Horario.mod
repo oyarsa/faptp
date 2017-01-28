@@ -53,16 +53,6 @@ dvar int+ penalidades[1..num_constraints];
 minimize
 	sum (i in 1..num_constraints) (pi[i] * penalidades[i]);
 
-	/*pi[1] * (sum (c in C) alfa[c]) + // janelas
-	pi[2] * (sum (p in P) beta[p]) + // intervalo de trabalho
-	pi[3] * (sum (c in C) gama[c]) + // horário compacto
-	pi[4] * (sum (c in C) delta[c]) + // aulas aos sábados
-	pi[5] * (sum (d in D, j in J) epsilon[d][j]) + // aulas seguidas
-	pi[6] * (sum (j in J, c in C) teta[j][c]) + // aulas difíceis seguidas
-	pi[7] * (sum (j in J, c in C) capa[c][j]) + // aulas difíceis no último horário
-	pi[8] * (sum (p in P) lambda[p]) + // preferência do professor (disciplinas)
-	pi[9] * (sum (p in P) mi[p]); // preferências do professor (número de aulas)*/
-
 
 subject to {
 
@@ -131,6 +121,10 @@ subject to {
 
 	forall (p in P, j in J, k in 1..num_dias-1-j)
 		w[p][j] - (sum (l in 1..k) w[p][j+l]) + w[p][j+k+1] - beta1[k][p][j] <= 1;
+		//(w[p][j] - (sum (l in 1..k) w[p][j+l]) + w[p][j+k+1] >= 1) == beta1[k][p][j];
+
+  //forall (p in P, j in J, k in Jb: j + k >= num_dias)
+		//beta1[k][p][j] == 0;
 
 	forall (p in P)
 	  beta[p] == sum (k in Jb, j in J) beta1[k][p][j];
@@ -171,7 +165,7 @@ subject to {
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
 
 	penalidades[1] == (sum (c in C) alfa[c]); // janelas
-	penalidades[2] == 0; //(sum (p in P) beta[p]); // intervalo de trabalho
+	penalidades[2] == (sum (p in P) beta[p]); // intervalo de trabalho
 	penalidades[3] == (sum (c in C) gama[c]); // horário compacto
 	penalidades[4] == (sum (c in C) delta[c]); // aulas aos sábados
 	penalidades[5] == (sum (d in D, j in J) epsilon[d][j]);  // aulas seguidas
@@ -210,6 +204,9 @@ execute {
 	var f = new IloOplOutputFile("result.csv");
 	f.writeln(csv);
 
+	writeln('Beta');
+	writeln(beta1);
+	writeln('W');
 	writeln(w);
 
 	writeln('Janelas ' + penalidades[1]);

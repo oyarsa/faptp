@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <faptp-lib/Solucao.h>
 
 class Resolucao;
-class Solucao;
 
 class HySST
 {
@@ -21,7 +21,7 @@ public:
     std::unique_ptr<Solucao> gerar_horario(const Solucao& s_inicial);
 
     long long tempo_fo() const;
-    int maior_fo() const;
+    Solucao::FO_t maior_fo() const;
 
 private:
     struct Impl;

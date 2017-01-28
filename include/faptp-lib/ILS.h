@@ -30,7 +30,7 @@ public:
     void set_timeout(long long timeout);
 
     long long tempo_fo() const;
-    int maior_fo() const;
+    Solucao::FO_t maior_fo() const;
 
 private:
     std::unique_ptr<Solucao> gerar_vizinho(Resolucao::Vizinhanca vizinhanca,
@@ -49,7 +49,7 @@ private:
     long long timeout_;
     Timer t_;
     long long tempo_fo_;
-    int maior_fo_;
+    Solucao::FO_t maior_fo_;
 };
 
 

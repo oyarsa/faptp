@@ -135,9 +135,9 @@ def main():
         indict = json.load(f)
 
     disciplinas = filtrar_nao_ofertadas(indict['disciplinas'])
-    disciplinas = filtrar_disciplinas_curso(disciplinas, 'EFB')
+    #disciplinas = filtrar_disciplinas_curso(disciplinas, 'EFB')
     professores = indict['professores']
-    professores = filtrar_professores_curso(professores, disciplinas)
+    #professores = filtrar_professores_curso(professores, disciplinas)
 
     print('Número de disciplinas:', len(disciplinas))
     print('Número de professores:', len(professores))

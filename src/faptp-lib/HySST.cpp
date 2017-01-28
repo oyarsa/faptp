@@ -49,7 +49,7 @@ struct HySST::Impl
     const int              max_level;
     const std::vector<int> thresholds;
     const int              it_hc;
-    int                    maior_fo;
+    Solucao::FO_t          maior_fo;
     long long              tempo_fo;
 
     const std::array<Resolucao::Vizinhanca, 4> heuristicas_mutacionais = {{
@@ -368,7 +368,7 @@ long long HySST::tempo_fo() const
     return d_->tempo_fo;
 }
 
-int HySST::maior_fo() const
+Solucao::FO_t HySST::maior_fo() const
 {
     return d_->maior_fo;
 }

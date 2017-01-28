@@ -158,7 +158,7 @@ def calcular_fo(matriz, horarios):
 
     funcao_objetivo = sum(peso * penalidade[1]
                           for peso, penalidade in zip(PESOS_FO, penalidades))
-    return round(funcao_objetivo), penalidades
+    return funcao_objetivo, penalidades
 
 
 def matriz_vazia(rows, cols):

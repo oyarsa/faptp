@@ -14,7 +14,7 @@ public:
     std::unique_ptr<Solucao> gerar_horario(const Solucao& solucao);
 
     long long tempo_fo() const;
-    int maior_fo() const;
+    Solucao::FO_t maior_fo() const;
 
 private:
     double next_jump(const std::vector<double>& history) const;
@@ -25,5 +25,5 @@ private:
     int stagnation_limit_;
     double max_jump_factor_;
     long long tempo_fo_;
-    int maior_fo_;
+    Solucao::FO_t maior_fo_;
 };

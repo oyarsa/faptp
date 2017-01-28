@@ -90,7 +90,7 @@ long long WDJU::tempo_fo() const
     return tempo_fo_;
 }
 
-int WDJU::maior_fo() const
+Solucao::FO_t WDJU::maior_fo() const
 {
     return maior_fo_;
 }

@@ -2098,8 +2098,8 @@ void Resolucao::teste()
     auto n = 5;
     auto t_grasp = 0ll;
     auto fo_grasp = 0.0;
-    auto max_fo_grasp = 0;
-    auto min_fo_grasp = std::numeric_limits<int>::max();
+    auto max_fo_grasp = Solucao::FO_t{0};
+    auto min_fo_grasp = std::numeric_limits<Solucao::FO_t>::max();
     gradeTipoConstrucao = Configuracao::TipoGrade::grasp;
     for (auto i = 0; i < n; i++) {
         auto begin = Util::now();
@@ -2305,8 +2305,7 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
         auto hash = std::to_string(individuo->getHash());
         log << std::left << std::setw(8) << individuo->getFO()
                 << " " << hash << "\n";
-        printf("%-8d %s\n", individuo->getFO(),
-               hash.c_str());
+        printf("%-8g %s\n", individuo->getFO(), hash.c_str());
         freq[individuo->getHash()]++;
     }
 
