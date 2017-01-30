@@ -48,7 +48,7 @@ def config_str(config):
 
 configs_todas = [config_str(c) for c in combinacoes]
 
-completos = files = [f[:-4] for f in os.listdir('.') if f.endswith('.txt')]
+completos = files = [f[:-4] for f in os.listdir('.') if f.endswith('.csv')]
 configs = [c for c in configs_todas if c.split()[0] not in completos]
 
 print("Numero configs: ", len(configs))
