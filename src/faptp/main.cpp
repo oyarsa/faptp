@@ -184,6 +184,7 @@ experimento_ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
                  .perfilTamanho(input_all_json.perfilTamanho)
                  .numTorneioPopulacao(n_tour)
                  .tentativasMutacao(n_mut)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
                  .timeout(timeout) };
 
   Timer t;
@@ -371,6 +372,7 @@ experimento_sa_ils(const std::string& input, int frac_time, double alfa,
   Resolucao r{ Configuracao()
                  .arquivoEntrada(input)
                  .camadaTamanho(input_all_json.camadasTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
                  .perfilTamanho(input_all_json.perfilTamanho) };
 
   Timer t;
@@ -449,6 +451,7 @@ experimento_hysst(const std::string& input, int max_level, int t_start,
                  .arquivoEntrada(input)
                  .camadaTamanho(input_all_json.camadasTamanho)
                  .perfilTamanho(input_all_json.perfilTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
                  .tentativasMutacao(it_mut) };
 
   Timer t;
@@ -525,6 +528,7 @@ experimento_wdju(const std::string& input, int stag_limit, double jump_factor,
   Resolucao r{ Configuracao()
                  .arquivoEntrada(input)
                  .camadaTamanho(input_all_json.camadasTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
                  .perfilTamanho(input_all_json.perfilTamanho) };
 
   Timer t;
@@ -622,7 +626,7 @@ Onde:
         Endere�o IP do servidor para onde os resultados ser�o enviados.
 )";
 
-  const auto timeout = 60000;
+  const auto timeout = 100;
 
   if (argc == 5) {
     std::string algo = argv[1];
