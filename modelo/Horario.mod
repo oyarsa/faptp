@@ -48,10 +48,19 @@ dvar int+ lambda[P];  // número de disciplinas atribuídas a P que não são de
 dvar int+ mi[P];  // número de aulas que excedem a preferência de P
 dvar boolean Lec[P][D];  // professor P leciona disciplina D
 dvar boolean gem[P][D][I][J]; // indica se uma aula geminada começa em i,j
-dvar int+ penalidades[1..num_constraints];
+//dvar int+ penalidades[1..num_constraints];
 
 minimize
-	sum (i in 1..num_constraints) (pi[i] * penalidades[i]);
+	//sum (i in 1..num_constraints) (pi[i] * penalidades[i]);
+	pi[1] * (sum (c in C) alfa[c]) + // janelas
+  pi[2] * (sum (p in P) beta[p]) + // intervalo de trabalho
+  pi[3] * (sum (c in C) gama[c]) + // horário compacto
+  pi[4] * (sum (c in C) delta[c]) + // aulas aos sábados
+  pi[5] * (sum (d in D, j in J) epsilon[d][j]) + // aulas seguidas
+  pi[6] * (sum (j in J, c in C) teta[j][c]) + // aulas difíceis seguidas
+  pi[7] * (sum (j in J, c in C) capa[c][j]) + // aulas difíceis no último horário
+  pi[8] * (sum (p in P) lambda[p]) + // preferência do professor (disciplinas)
+  pi[9] * (sum (p in P) mi[p]); // preferências do professor (número de aulas)
 
 
 subject to {
@@ -164,7 +173,7 @@ subject to {
 	forall (p in P)
 	  mi[p] >= sum (d in D, i in I, j in J) x[p][d][i][j] - Q[p];
 
-	penalidades[1] == (sum (c in C) alfa[c]); // janelas
+	/*penalidades[1] == (sum (c in C) alfa[c]); // janelas
 	penalidades[2] == (sum (p in P) beta[p]); // intervalo de trabalho
 	penalidades[3] == (sum (c in C) gama[c]); // horário compacto
 	penalidades[4] == (sum (c in C) delta[c]); // aulas aos sábados
@@ -173,7 +182,7 @@ subject to {
 	penalidades[7] == (sum (j in J, c in C) capa[c][j]); // aulas difíceis no último horário
 	penalidades[8] == (sum (p in P) lambda[p]); // preferência do professor (disciplinas)
 	penalidades[9] == (sum (p in P) mi[p]); // preferências do professor (número de aulas)
-
+  */
 }
 
 execute {
@@ -204,12 +213,12 @@ execute {
 	var f = new IloOplOutputFile("result.csv");
 	f.writeln(csv);
 
-	writeln('Beta');
+	/*writeln('Beta');
 	writeln(beta1);
 	writeln('W');
-	writeln(w);
+	writeln(w);*/
 
-	writeln('Janelas ' + penalidades[1]);
+	/*writeln('Janelas ' + penalidades[1]);
 	writeln('Intevalo de trabalho ' + penalidades[2]);
 	writeln('Horário compacto ' + penalidades[3]);
 	writeln('Aulas aos sábados ' + penalidades[4]);
@@ -217,5 +226,5 @@ execute {
 	writeln('Aulas difiíceis seguidas ' + penalidades[6]);
 	writeln('Aulas difíceis no último horário ' + penalidades[7]);
 	writeln('Preferência do professor (disciplinas) ' + penalidades[8]);
-	writeln('Preferência do professor (disciplinas) ' + penalidades[9]);
+	writeln('Preferência do professor (disciplinas) ' + penalidades[9]);*/
 }

@@ -8,7 +8,7 @@
 #include <thread>
 
 #include <boost/format.hpp>
-//#include <cpr/cpr.h>
+#include <cpr/cpr.h>
 
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Output.h>
@@ -49,7 +49,7 @@ void
 upload_result(const std::string& id, const std::string& resultado,
               int num_config, const std::string& servidor)
 {
-  /*for (auto i = 0; i < num_tentativas_upload; i++) {
+  for (auto i = 0; i < num_tentativas_upload; i++) {
         std::this_thread::sleep_for(std::chrono::seconds(segundos_espera * i));
 
         auto r = cpr::Post(cpr::Url{servidor},
@@ -57,14 +57,13 @@ upload_result(const std::string& id, const std::string& resultado,
                                         {"nome", id}});
 
         if (r.error.code == cpr::ErrorCode::OK) {
-            std::cout << num_config << ") "  << id << ": enviado com
-    sucesso\n\n";
+            std::cout << num_config << ") "  << id << ": enviado com sucesso\n\n";
             return;
         } else {
             std::cout << num_config << ") tentativa " << i+1 << " falhou: "
                 << r.error.message << "\n\n";
         }
-    }*/
+    }
 
   std::cout << num_config << ") Erro ao enviar " << id
             << ". Salvo em 'falhas/'\n";
@@ -248,6 +247,10 @@ experimento_ag_cli(const std::string& input, const std::string& file,
 
     threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
     num_config++;
+  }
+
+  for (auto& t : threads) {
+	t.join();
   }
 }
 
