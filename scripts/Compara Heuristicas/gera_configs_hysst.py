@@ -5,7 +5,7 @@ import os
 # Configuração do script
 diretorio_saida = 'config_hysst'
 num_maq = 40
-num_exec = 2
+num_exec = 10
 
 # Conjunto de parâmetros
 max_level = [5, 15, 30]

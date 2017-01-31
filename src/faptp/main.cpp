@@ -80,12 +80,16 @@ std::string
 get_auto_file_name()
 {
   auto pc_name = Util::get_computer_name();
+  std::cout << "PC Name: " << pc_name << "\n";
   auto pos = pc_name.find('-') + 1;
   auto pc_num = std::stoi(pc_name.substr(pos));
+  std::cout << "PC Number: " << pc_num << "\n";
 
   auto filename = std::to_string(pc_num) + ".txt";
+  auto path = Util::join_path({ "config" }, filename);
 
-  return Util::join_path({ "config" }, filename);
+  std::cout << "Path: " << path << "\n";
+  return path;
 }
 
 void
@@ -626,7 +630,7 @@ Onde:
         Endere�o IP do servidor para onde os resultados ser�o enviados.
 )";
 
-  const auto timeout = 100;
+  const auto timeout = 3 * 60 * 1000;
 
   if (argc == 5) {
     std::string algo = argv[1];
