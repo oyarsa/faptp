@@ -23,7 +23,7 @@ def home():
     return 'OK'
 
 
-@app.route('/submit', methods=['POST'])
+@app.route('/', methods=['POST'])
 def submit():
     result = request.form['result']
     nome = request.form['nome']
