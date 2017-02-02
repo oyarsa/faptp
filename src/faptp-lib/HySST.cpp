@@ -226,6 +226,10 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::ejection_move(
     }
 
     auto liebhabers = list_all_liebhabers(solucao, *slot);
+    if (liebhabers.empty()) {
+        return boost::none;
+    }
+
     return choose_and_move(solucao, liebhabers, *slot);
 }
 

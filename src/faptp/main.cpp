@@ -312,7 +312,7 @@ void
 teste_tempo(int timeout_sec = 120)
 {
   const auto timeout_ms = timeout_sec * 1000;
-  const auto num_exec = 1;
+  const auto num_exec = 3;
 
   std::ostringstream oss;
   oss << std::string(25, '=') << "\n";
@@ -324,7 +324,7 @@ teste_tempo(int timeout_sec = 120)
   oss << teste_tempo_iter(
     num_exec, [&](Resolucao& r) { return r.gerarHorarioSA_ILS(timeout_ms); });
 
-  /*Util::logprint(oss, "HySST\n");
+  Util::logprint(oss, "HySST\n");
   oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
     return r.gerarHorarioHySST(timeout_ms, 100, 100);
   });
@@ -337,7 +337,7 @@ teste_tempo(int timeout_sec = 120)
   oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
     r.setTimeout(timeout_ms);
     return r.gerarHorarioAG()->clone();
-  });*/
+  });
 
   std::ofstream out{ (boost::format("resultados%d.txt") % timeout_sec).str(),
                      std::ios::out | std::ios::app };
@@ -656,6 +656,6 @@ Onde:
     // semArgumentos();
 
     teste_tempo(1 * 60);
-    //teste_tempo(3 * 60);
+    teste_tempo(3 * 60);
   }
 }

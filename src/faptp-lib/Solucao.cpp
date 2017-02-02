@@ -91,7 +91,7 @@ Solucao::FO_t Solucao::calculaFOSomaCarga()
     res.gerarGrade(this);
 	return std::accumulate(begin(grades), end(grades), Solucao::FO_t{ 0 }, 
 		[](auto acc, auto el) {
-			return acc + el.second->getFO();
+			return acc + gsl::narrow_cast<int>(el.second->getFO());
 		}
 	);
 }
@@ -111,7 +111,7 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 	} };
 
 	auto fo = std::inner_product(begin(pesos_), end(pesos_), begin(penalidades), 0.0);
-	return fo;
+	return -fo;
 }
 
 Solucao::FO_t Solucao::getFO()
