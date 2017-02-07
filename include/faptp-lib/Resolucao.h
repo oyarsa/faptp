@@ -73,7 +73,7 @@ public:
 
     std::unique_ptr<Solucao> gerarHorarioHySST(
         long long tempo_total, long long tempo_mu, long long tempo_hc);
-    std::unique_ptr<Solucao> gerarHorarioHySST(HySST& HySST);
+    std::unique_ptr<Solucao> gerarHorarioHySST(HySST& HySST, int it_mut);
 
     void gerarGrade() const;
     void gerarGrade(Solucao* pSolucao) const;

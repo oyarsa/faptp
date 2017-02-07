@@ -3734,15 +3734,14 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(
 )
 {
     HySST hysst{*this, tempo_total, tempo_mu, tempo_hc, 15, 5, 5, 5};
-    return gerarHorarioHySST(hysst);
+    return gerarHorarioHySST(hysst, 5);
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(HySST& hysst)
+std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(HySST& hysst, int it_mut)
 {
+    horarioMutacaoTentativas = it_mut;
     auto s_inicial = gerarSolucaoAleatoriaNotNull();
-
     auto s = hysst.gerar_horario(*s_inicial);
-
     foAlvo = hysst.maior_fo();
     tempoAlvo = hysst.tempo_fo();
 

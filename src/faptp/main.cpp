@@ -81,8 +81,12 @@ get_auto_file_name()
 {
   auto pc_name = Util::get_computer_name();
   std::cout << "PC Name: " << pc_name << "\n";
-  auto pos = pc_name.find('-') + 1;
-  auto pc_num = std::stoi(pc_name.substr(pos));
+  auto pos = pc_name.find('-');
+  if (pos == std::string::npos) {
+    std::cout << "Nome invalido\n";
+    exit(1);
+  }
+  auto pc_num = std::stoi(pc_name.substr(pos + 1));
   std::cout << "PC Number: " << pc_num << "\n";
 
   auto filename = std::to_string(pc_num) + ".txt";
@@ -229,13 +233,8 @@ experimento_ag_cli(const std::string& input, const std::string& file,
   while (config >> id >> taxa_mut >> n_indiv >> p_cruz >> cruz_oper >> n_mut >>
          n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
 
-    auto path = Util::join_path({ "experimento" });
-    Util::create_folder(path);
-
-    auto filename = path + id + ".txt";
-
     std::cout << "ID: " << id << "\n\n";
-    std::ostringstream out{ filename };
+    std::ostringstream out;
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
@@ -312,7 +311,7 @@ void
 teste_tempo(int timeout_sec = 120)
 {
   const auto timeout_ms = timeout_sec * 1000;
-  const auto num_exec = 3;
+  const auto num_exec = 5;
 
   std::ostringstream oss;
   oss << std::string(25, '=') << "\n";
@@ -320,14 +319,14 @@ teste_tempo(int timeout_sec = 120)
   oss << "Tempo maximo: " << timeout_ms << "\n";
   oss << "Numero de execucoes: " << num_exec << "\n\n";
 
-  Util::logprint(oss, "SA-ILS\n");
+  /*Util::logprint(oss, "SA-ILS\n");
   oss << teste_tempo_iter(
     num_exec, [&](Resolucao& r) { return r.gerarHorarioSA_ILS(timeout_ms); });
 
   Util::logprint(oss, "HySST\n");
   oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
     return r.gerarHorarioHySST(timeout_ms, 100, 100);
-  });
+  });*/
 
   Util::logprint(oss, "WDJU\n");
   oss << teste_tempo_iter(
@@ -460,7 +459,7 @@ experimento_hysst(const std::string& input, int max_level, int t_start,
 
   Timer t;
   HySST hysst{ r, timeout, 100, 100, max_level, t_start, t_step, it_hc };
-  auto s = r.gerarHorarioHySST(hysst);
+  auto s = r.gerarHorarioHySST(hysst, it_mut);
   auto fo = s->getFO();
   auto tempo = t.elapsed();
 
@@ -496,13 +495,8 @@ experimento_hysst_cli(const std::string& input, const std::string& file,
 
   while (config >> id >> max_level >> t_start >> t_step >> it_hc >> it_mut >>
          n_exec) {
-    auto path = Util::join_path({ "experimento" });
-    Util::create_folder(path);
-
-    auto filename = path + id + ".txt";
-
     std::cout << "ID: " << id << "\n\n";
-    std::ostringstream out{ filename };
+    std::ostringstream out;
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
@@ -573,13 +567,8 @@ experimento_wdju_cli(const std::string& input, const std::string& file,
   auto num_config = 1;
 
   while (config >> id >> stag_limit >> jump_factor >> n_exec) {
-    auto path = Util::join_path({ "experimento" });
-    Util::create_folder(path);
-
-    auto filename = path + id + ".txt";
-
     std::cout << "ID: " << id << "\n\n";
-    std::ostringstream out{ filename };
+    std::ostringstream out;
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
@@ -600,6 +589,85 @@ experimento_wdju_cli(const std::string& input, const std::string& file,
   for (auto& t : threads) {
     t.join();
   }
+}
+
+template <typename F>
+void experimento_comparacao_iter(int num_exec, const std::string& nome, F heuristica)
+{
+  constexpr auto k_headers = "Algoritmo,FO";
+
+  std::ostringstream saida{};
+  saida << k_headers << "\n";
+
+  for (auto i = 0; i < num_exec; i++) {
+    Resolucao r{ Configuracao()
+      .arquivoEntrada(
+        Util::join_path({ "entradas" }, "input.all.json"))
+      .populacaoInicial(20)
+      .porcentagemCruzamentos(80)
+      .numMaximoIteracoesSemEvolucaoGRASP(15)
+      .numMaximoIteracoesSemEvolucaoAG(inf)
+      .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+      .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+      .mutacaoProbabilidade(35) // %
+      .graspNumVizinhos(2)
+      .graspAlfa(20) // %
+      .camadaTamanho(input_all_json.camadasTamanho)
+      .perfilTamanho(input_all_json.perfilTamanho)
+      .tentativasMutacao(4)
+      .numTorneioPopulacao(4)
+      .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+      .tipoConstrucao(Configuracao::TipoGrade::grasp)
+      .tipoFo(Configuracao::TipoFo::Soma_carga) };
+
+    auto s = heuristica(r);
+    saida << nome << "," << s->getFO() << "\n";
+    std::cout << "\t" << s->getFO() << "\n";
+  }
+  std::cout << "\n";
+
+  std::ofstream arquivo{ nome + ".csv" };
+  arquivo << saida.str();
+}
+
+void
+experimento_comparacao(int timeout_sec = 60, int num_exec = 30)
+{
+  const auto timeout_ms = timeout_sec * 1000;
+
+  std::cout << "SA-ILS\n";
+  experimento_comparacao_iter(
+    num_exec, "SA-ILS", [&](Resolucao& r) {
+    SA sa{ r, 0.97, 2, 100, 500, timeout_ms / 100, {
+      { Resolucao::Vizinhanca::ES, 25 },
+      { Resolucao::Vizinhanca::EM, 43 },
+      { Resolucao::Vizinhanca::RS, 20 },
+      { Resolucao::Vizinhanca::RM, 10 },
+      { Resolucao::Vizinhanca::KM, 2 }
+    } };
+    ILS ils{ r, inf, 30, 3, 10, timeout_ms / 100 };
+    return r.gerarHorarioSA_ILS(sa, ils, timeout_ms);
+  });
+
+  std::cout << "HySST\n";
+  experimento_comparacao_iter(num_exec, "HySST", [&](Resolucao& r) {
+    HySST hysst{r, timeout_ms, 100, 100, 15, 1, 10, 5};
+    return r.gerarHorarioHySST(hysst, 5);
+  });
+
+  std::cout << "WDJU\n";
+  experimento_comparacao_iter(
+    num_exec, "WDJU", [&](Resolucao& r) {
+    WDJU wdju{ r, timeout_ms, 30, 0.002 };
+    return r.gerarHorarioWDJU(wdju);
+  });
+
+  /*std::cout << "AG\n";
+  experimento_comparacao_iter(num_exec, "AG", [&](Resolucao& r) {
+    r.setTimeout(timeout_ms);
+    return r.gerarHorarioAG()->clone();
+  });*/
+
 }
 
 int
@@ -656,6 +724,7 @@ Onde:
     // semArgumentos();
 
     teste_tempo(1 * 60);
-    teste_tempo(3 * 60);
+    //teste_tempo(3 * 60);
+    //experimento_comparacao();
   }
 }

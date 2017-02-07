@@ -141,9 +141,15 @@ std::string Util::date_time()
 std::string Util::get_computer_name()
 {
 #ifdef _WIN32
-    char buf[MAX_COMPUTERNAME_LENGTH + 1];
-    unsigned long len;
-    GetComputerName(buf, &len);
+    constexpr DWORD k_info_buffer_size = 32767;
+    TCHAR buf[k_info_buffer_size];
+    DWORD len = k_info_buffer_size;
+    if (!GetComputerName(buf, &len)) {
+      fprintf(stderr, "Erro ao recuperar o nome do computador: %d\n", GetLastError());
+      exit(1);
+    }
+
+    printf("Name: %s, %lu\n", buf, len);
 
     return buf;
 #else
