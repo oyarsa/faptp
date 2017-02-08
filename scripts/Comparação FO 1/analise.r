@@ -1,0 +1,11 @@
+ag <- read.csv('AG.csv')
+hysst <- read.csv('HySST.csv')
+sails <- read.csv('SA-ILS.csv')
+wdju <- read.csv('WDJU.csv')
+total <- rbind(ag, hysst, sails, wdju)
+
+shapiro.test(total$FO)
+qqnorm(total$FO)
+qqline(total$FO)
+kruskal.test(FO~Algoritmo, data=total)
+boxplot(FO~Algoritmo, data=total)
