@@ -14,9 +14,12 @@ porcent_cruz = [20, 30]
 oper_cruz    = ['PMX', 'OX', 'CX']
 num_mut      = [2, 4]
 num_torneio  = [2, 4]
-grasp_iter   = [15, 25]
-grasp_vizinh = [2, 4]
-grasp_alfa   = [20, 40, 60]
+#grasp_iter   = [15, 25]
+grasp_iter = [15]
+#grasp_vizinh = [2, 4]
+grasp_vizinh = [2]
+#grasp_alfa   = [20, 40, 60]
+grasp_alfa   = [20]
 
 num_comb = (len(taxa_mutacao) * len(num_indiv)
             * len(porcent_cruz) * len(oper_cruz)
