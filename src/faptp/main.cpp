@@ -21,7 +21,7 @@
 #include <faptp-lib/ILS.h>
 
 /*
- * PAR�METROS DE CONFIGURA��O *
+ * PARÂMETROS DE CONFIGURAÇÃO *
  * input.all.json ->
  *      camadasTamanho : 33
  *      perfilTamanho : 1392
@@ -42,7 +42,7 @@ constexpr Entrada input_json{ 4, 10 };
 int num_tentativas_upload = 15;
 int segundos_espera = 30;
 
-// n�mero de itera��es grande para o algoritmo se encerrar por tempo
+// número de iterações grande para o algoritmo se encerrar por tempo
 constexpr auto inf = static_cast<int>(1e9);
 
 void
@@ -207,7 +207,7 @@ void
 experimento_ag_cli(const std::string& input, const std::string& file,
                    const std::string& servidor, long long timeout)
 {
-  // coment�rio do topo
+  // comentário do topo
   // formato entrada:
   // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
   // NExec
@@ -310,6 +310,7 @@ teste_tempo_iter(int num_exec, F f)
 void
 teste_tempo(int timeout_sec = 120)
 {
+  std::cout << "Teste de tempo\n\n";
   const auto timeout_ms = timeout_sec * 1000;
   const auto num_exec = 5;
 
@@ -392,7 +393,7 @@ void
 experimento_sa_ils_cli(const std::string& input, const std::string& file,
                        const std::string& servidor, long long timeout)
 {
-  // coment�rio do topo
+  // comentário do topo
   // formato entrada:
   // ID FracTime Alfa t0 SAiter SAreaq SAchances ILSiter ILSpmax ILSp0 NExec
   // formato saida:
@@ -470,7 +471,7 @@ void
 experimento_hysst_cli(const std::string& input, const std::string& file,
                       const std::string& servidor, long long timeout)
 {
-  // coment�rio do topo
+  // comentário do topo
   // formato entrada:
   // ID MaxLevel TStart TStep IterHc IterMut NExec
   // formato saida:
@@ -542,7 +543,7 @@ void
 experimento_wdju_cli(const std::string& input, const std::string& file,
                      const std::string& servidor, long long timeout)
 {
-  // coment�rio do topo
+  // comentário do topo
   // formato entrada:
   // ID StagLimit JumpFactor NExec
   // formato saida:
@@ -673,7 +674,7 @@ experimento_comparacao(int timeout_sec = 60, int num_exec = 30)
 int
 main(int argc, char* argv[])
 {
-  static const char usage[] = R"(
+  const auto usage = R"(
 USAGE:
 
     faptp-lib -h
@@ -682,7 +683,7 @@ USAGE:
 Onde:
 
     -h, --help
-        Mostra essa mensagem de ajuda e sai.
+        Mostra esta mensagem de ajuda e encerra o programa.
 
     <algo>
         Algoritmo a ser executado. Deve ser um entre: -ag, -sa_ils, -hysst, -wdju.
@@ -691,29 +692,36 @@ Onde:
         Arquivo de entrada.
 
     <configuracao>
-        Arquivo de configura��o. Se for 'auto', ir� pegar o n�mero do arquivo
-        de acordo com o n�mero da m�quina.
+        Arquivo de configuracao. Se for 'auto', ira pegar o numero do arquivo
+        de acordo com o numero da maquina, buscando numa pasta 'config'. Por 
+        exemplo, uma maquina de nome 'XXX-01' ira gerar o caminho 'config\1.txt'.
 
     <servidor>
-        Endere�o IP do servidor para onde os resultados ser�o enviados.
+        Endereco IP do servidor para onde os resultados serao enviados.
 )";
 
   const auto timeout = 3 * 60 * 1000;
 
   if (argc == 5) {
+    // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
+    // segundo é o arquivo de entrada, terceiro é o de configuração
+
     std::string algo = argv[1];
-    // Primeiro argumento � o algoritmo {-ag, -sa_ils, -hysst, -wdju}
-    // segundo � o arquivo de entrada, terceiro � o de configura��o
+    auto entrada = argv[2];
+    auto configuracao = argv[3];
+    auto servidor = argv[4];
+
     if (algo == "-ag") {
-      experimento_ag_cli(argv[2], argv[3], argv[4], timeout);
+      experimento_ag_cli(entrada, configuracao, servidor, timeout);
     } else if (algo == "-sa_ils") {
-      experimento_sa_ils_cli(argv[2], argv[3], argv[4], timeout);
+      experimento_sa_ils_cli(entrada, configuracao, servidor, timeout);
     } else if (algo == "-hysst") {
-      experimento_hysst_cli(argv[2], argv[3], argv[4], timeout);
+      experimento_hysst_cli(entrada, configuracao, servidor, timeout);
     } else if (algo == "-wdju") {
-      experimento_wdju_cli(argv[2], argv[3], argv[4], timeout);
+      experimento_wdju_cli(entrada, configuracao, servidor, timeout);
     } else {
       std::cout << "Algoritmo invalido\n";
+      return 1;
     }
   } else if (argc == 2) {
     std::string flag = argv[1];
@@ -721,6 +729,7 @@ Onde:
       std::cout << usage << "\n";
     }
   } else {
+    std::cout << "Sem argumentos. Executando: ";
     // semArgumentos();
 
     teste_tempo(1 * 60);
