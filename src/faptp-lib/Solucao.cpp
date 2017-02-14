@@ -22,13 +22,14 @@ Solucao::Solucao(
     , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
     , grades()
     , gradesLength(0)
+    , fo(boost::none)
     , res(res) 
     , tipo_fo(tipo_fo)
 {
 	if (pesos) {
 		pesos_ = *pesos;
 	} else {
-		pesos_ = k_pesos_padrao;
+		pesos_ = pesos_padrao;
 	}
 }
 
@@ -89,16 +90,16 @@ void Solucao::calculaFO()
 Solucao::FO_t Solucao::calculaFOSomaCarga()
 {
     res.gerarGrade(this);
-	return std::accumulate(begin(grades), end(grades), Solucao::FO_t{ 0 }, 
-		[](auto acc, auto el) {
-			return acc + gsl::narrow_cast<int>(el.second->getFO());
+	return std::accumulate(begin(grades), end(grades), FO_t{ 0 }, 
+		[](auto acc, auto cur) {
+			return acc + gsl::narrow_cast<int>(cur.second->getFO());
 		}
 	);
 }
 
 Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 {
-	std::array<int, k_num_pesos> penalidades = { {
+	std::array<int, num_pesos> penalidades = { {
 		horario->contaJanelas(),
 		horario->intervalosTrabalho(res.getProfessores()),
 		horario->numDiasAula(),
@@ -116,23 +117,24 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 
 Solucao::FO_t Solucao::getFO()
 {
-    if (fo == -1) {
+    if (!fo) {
         calculaFO();
     }
-    return fo;
+    return *fo;
 }
 
 Solucao::FO_t Solucao::getFO() const
 {
-    if (fo == -1) {
+    if (!fo) {
         throw std::runtime_error{"FO não calculada"};
     }
-    return fo;
+    return *fo;
 }
 
 std::unordered_map<std::string, int> Solucao::reportarViolacoes() const
 {
     std::unordered_map<std::string, int> m;
+
     m["Janelas"] = horario->contaJanelas();
     m["Intervalos"] = horario->intervalosTrabalho(res.getProfessores());
     m["Dias de Aula"] = horario->numDiasAula();
@@ -142,6 +144,7 @@ std::unordered_map<std::string, int> Solucao::reportarViolacoes() const
     m["Dificil Ultimo Horario"] = horario->aulaDificilUltimoHorario();
     m["Preferencias disc"] = horario->preferenciasProfessores(res.getProfessores());
     m["Preferencias aulas"] = horario->aulasProfessores(res.getProfessores());
+
     return m;
 }
 

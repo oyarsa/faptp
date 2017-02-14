@@ -8,9 +8,9 @@
 #include "Grade.h"
 #include "Configuracao.h"
 
-constexpr std::size_t k_num_pesos = 9;
-// constexpr std::array<double, 9> k_pesos_padrao{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-constexpr std::array<double, k_num_pesos> k_pesos_padrao{ 
+constexpr std::size_t num_pesos = 9;
+// constexpr std::array<double, 9> pesos_padrao{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+constexpr std::array<double, num_pesos> pesos_padrao{ 
 	{ 2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667 } 
 };
 
@@ -55,10 +55,10 @@ private:
     std::unordered_map<std::string, Grade*> grades;
 
     int gradesLength;
-    FO_t fo = -1;
+    boost::optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
-	std::array<double, 9> pesos_;
+	std::array<double, num_pesos> pesos_;
 };
 
 #endif /* SOLUCAO_H */
