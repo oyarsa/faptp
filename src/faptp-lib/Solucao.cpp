@@ -1,8 +1,6 @@
 #include <numeric>
 #include <functional>
 
-#include <gsl/gsl>
-
 #include <faptp-lib/Solucao.h>
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Aleatorio.h>
@@ -13,7 +11,7 @@ Solucao::Solucao(
 	int pPerfisTamanho,
 	const Resolucao& res,
 	Configuracao::TipoFo tipo_fo,
-	const boost::optional<std::array<double, 9>>& pesos
+	const optional<std::array<double, 9>>& pesos
 )
     : id(aleatorio::randomInt())
     , blocosTamanho(pBlocosTamanho)
@@ -22,7 +20,7 @@ Solucao::Solucao(
     , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
     , grades()
     , gradesLength(0)
-    , fo(boost::none)
+    , fo(nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
 {
@@ -92,7 +90,7 @@ Solucao::FO_t Solucao::calculaFOSomaCarga()
     res.gerarGrade(this);
 	return std::accumulate(begin(grades), end(grades), FO_t{ 0 }, 
 		[](auto acc, auto cur) {
-			return acc + gsl::narrow_cast<int>(cur.second->getFO());
+			return acc + static_cast<int>(cur.second->getFO());
 		}
 	);
 }

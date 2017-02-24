@@ -11,8 +11,7 @@
 #include <stack>
 #include <set>
 
-#include <gsl/gsl>
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -413,7 +412,7 @@ void Resolucao::atualizarDisciplinasIndex()
     // }
 
     for (size_t i = 0; i < disciplinas.size(); i++) {
-        disciplinasIndex[disciplinas[i]->id] = gsl::narrow_cast<int>(i);
+        disciplinasIndex[disciplinas[i]->id] = static_cast<int>(i);
     }
 }
 
@@ -1790,7 +1789,7 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
         apGrade = gerarGradeTipoCombinacaoConstrutiva(
             new Grade(blocosTamanho, alunoPerfil, horario,
                       disciplinas, disciplinasIndex), 
-            gsl::narrow_cast<int>(apRestante.size()));
+            static_cast<int>(apRestante.size()));
 
         pSolucao->insertGrade(apGrade);
 
@@ -1903,7 +1902,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
                 ProfessorDisciplina* professorDisciplinaRemovido = NULL;
 
                 disciplinasSize = grade->disciplinasAdicionadas.size();
-                random = Util::randomBetween(0, gsl::narrow_cast<int>(disciplinasSize));
+                random = Util::randomBetween(0, static_cast<int>(disciplinasSize));
                 grade->remove2(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
 
                 // Se houve uma remo��o
@@ -1962,7 +1961,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
             for (int j = 0; j < (i + 1); j++) {
                 auto random = Util::randomBetween(0, 
-                    gsl::narrow_cast<int>(currentGrade->disciplinasAdicionadas.size()));
+                    static_cast<int>(currentGrade->disciplinasAdicionadas.size()));
                 if (random == -1) {
                     break;
                 }
@@ -2056,7 +2055,7 @@ int Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante)
                                    return d->cargaHoraria >= accept;
                                });
 
-    return gsl::narrow_cast<int>(std::distance(begin(apRestante), it));
+    return static_cast<int>(std::distance(begin(apRestante), it));
 }
 
 void Resolucao::showResult()
@@ -2211,21 +2210,20 @@ Resolucao::converteHorario(Solucao* pSolucao) const
 
 void Resolucao::logExperimentos()
 {
-    using boost::format;
     using Util::logprint;
 
-    logprint(log, format("Tempo total selecao: %d") % tempoTotalSelec);
-    logprint(log, format("Tempo total elitismo: %d") % tempoTotalElit);
+    logprint(log, fmt::format("Tempo total selecao: {}", tempoTotalSelec));
+    logprint(log, fmt::format("Tempo total elitismo: %d", tempoTotalElit));
 
     for (auto i = 0; i < numcruz; i++) {
-        logprint(log, format("C%d: tempo total: %llu iguais: %d melhores: %d")
-                      % (i + 1) % tempoTotalCruz[i] % contadorIguaisCruz[i] 
-                      % contadorMelhoresCruz[i]);
+        logprint(log, fmt::format("C{}: tempo total: {} iguais: {} melhores: {}",
+                      i + 1, tempoTotalCruz[i], contadorIguaisCruz[i],
+                      contadorMelhoresCruz[i]));
     }
     for (auto i = 0; i < numcruz; i++) {
-        logprint(log, format("M%d: tempo total: %llu iguais: %d melhores: %d")
-                      % (i + 1) % tempoTotalMut[i] % contadorIguaisMut[i]
-                      % contadorMelhoresMut[i]);
+        logprint(log, fmt::format("M%d: tempo total: %llu iguais: %d melhores: %d",
+                      i + 1, tempoTotalMut[i], contadorIguaisMut[i],
+                      contadorMelhoresMut[i]));
     }
 
     logprint(log, "\n");
@@ -2632,9 +2630,6 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
         iteracaoAlvo = iteracaoAtual;
         tempoAlvo = Util::chronoDiff(std::chrono::high_resolution_clock::now(),
                                      tempoInicio);
-        //Util::logprint(log, boost::format("Iteracao %d. Nova melhor solucao!\n")
-        //               % iteracaoAtual);
-        //Util::logprint(log, boost::format("%-8d %u\n") % best.getFO() % best.getHash());
     }
 }
 
@@ -3590,7 +3585,7 @@ std::pair<int, ProfessorDisciplina*> Resolucao::get_random_notnull_aloc(
     ProfessorDisciplina* aloc{nullptr};
     int pos;
     while (!aloc) {
-        pos = Util::randomBetween(0, gsl::narrow_cast<int>(sol.horario->matriz.size()));
+        pos = Util::randomBetween(0, static_cast<int>(sol.horario->matriz.size()));
         aloc = sol.horario->at(pos);
     }
     return {pos, aloc};

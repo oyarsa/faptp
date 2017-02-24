@@ -1,6 +1,5 @@
 [requires]
-Boost/1.60.0@lasote/stable
-gsl/0.0.1@KindDragon/stable
+fmt/3.0.0@memsharded/testing
 jsoncpp/1.7.7@theirix/stable
 cpr/1.2.0@DEGoodmanWilson/testing
 

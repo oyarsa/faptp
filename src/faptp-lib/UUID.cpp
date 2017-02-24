@@ -9,8 +9,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <gsl/gsl>
-
 #include <faptp-lib/UUID.h>
 
 std::string UUID::GenerateUuid()
@@ -21,7 +19,7 @@ std::string UUID::GenerateUuid()
     char* pGuidStr = guidStr;
     int i;
 
-    srand(gsl::narrow_cast<unsigned>(time(nullptr))); /*Randomize based on time.*/
+    srand(static_cast<unsigned>(time(nullptr))); /*Randomize based on time.*/
 
     /*Data1 - 8 characters.*/
     //*pGuidStr++ = '{';

@@ -2,7 +2,7 @@
 #include <utility>
 #include <stdexcept>
 #include <iomanip>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <fmt/time.h>
 #include <faptp-lib/Util.h>
 #include <faptp-lib/Aleatorio.h>
 
@@ -23,9 +23,9 @@ void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y,
     auto bloco = ((pLinear % tamanho) % Y);
     auto camada = pLinear / (X * Y);
 
-    triDimensional[0] = gsl::narrow_cast<int>(bloco); 
-    triDimensional[1] = gsl::narrow_cast<int>(dia);
-    triDimensional[2] = gsl::narrow_cast<int>(camada);
+    triDimensional[0] = static_cast<int>(bloco); 
+    triDimensional[1] = static_cast<int>(dia);
+    triDimensional[2] = static_cast<int>(camada);
     
 
     /*auto dia = pLinear % X;
@@ -131,11 +131,8 @@ std::size_t Util::hash_string(const std::string& str)
 
 std::string Util::date_time()
 {
-    auto facet = new boost::posix_time::time_facet("%d-%m-%Y %H:%M:%S");
-    std::ostringstream oss;
-    oss.imbue(std::locale(oss.getloc(), facet));
-    oss << boost::posix_time::second_clock::local_time();
-    return oss.str();
+  std::time_t t = std::time(nullptr);
+  return fmt::format("The date is {:%d-%m-%Y %H:%M:%S}.", *std::localtime(&t));
 }
 
 std::string Util::get_computer_name()

@@ -7,7 +7,7 @@
 #include <chrono>
 #include <thread>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <cpr/cpr.h>
 
 #include <faptp-lib/Resolucao.h>
@@ -244,8 +244,8 @@ experimento_ag_cli(const std::string& input, const std::string& file,
         experimento_ag(input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
                        grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
 
-      Util::logprint(out,
-                     boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+      Util::logprint(
+        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
@@ -285,15 +285,15 @@ teste_tempo_iter(int num_exec, F f)
                    .tipoConstrucao(Configuracao::TipoGrade::grasp)
                    .tipoFo(Configuracao::TipoFo::Soft_constraints) };
 
-    Util::logprint(oss, boost::format("i: %d") % (i + 1));
+    Util::logprint(oss, fmt::format("i: {}" , i + 1));
 
     Timer t;
     auto s = f(r);
 
-    Util::logprint(oss, boost::format(" - fo: %g - t: %lld\n") % s->getFO() %
-                          t.elapsed());
-    Util::logprint(oss, boost::format("\t fo_alvo: %d - tempo_alvo: %lld\n") %
-                          r.foAlvo % r.tempoAlvo);
+    Util::logprint(oss, fmt::format(" - fo: {} - t: {}\n", s->getFO(),
+                          t.elapsed()));
+    Util::logprint(oss, fmt::format("\t fo_alvo: {} - tempo_alvo: {}\n",
+                          r.foAlvo, r.tempoAlvo));
     print_violacoes(s->reportarViolacoes());
 
     auto savePath =
@@ -339,7 +339,7 @@ teste_tempo(int timeout_sec = 120)
     return r.gerarHorarioAG()->clone();
   });
 
-  std::ofstream out{ (boost::format("resultados%d.txt") % timeout_sec).str(),
+  std::ofstream out{ (fmt::format("resultados{}.txt", timeout_sec)),
                      std::ios::out | std::ios::app };
   out << oss.str() << std::endl;
 }
@@ -432,8 +432,8 @@ experimento_sa_ils_cli(const std::string& input, const std::string& file,
         experimento_sa_ils(input, frac_time, alfa, t0, sa_iter, sa_reaq,
                            sa_chances, ils_iter, ils_pmax, ils_p0, timeout);
 
-      Util::logprint(out_str,
-                     boost::format("%s,%d,%lld,%d\r\n") % id % i % tempo % fo);
+      Util::logprint(
+        out_str, fmt::format("{},{},{},{}\r\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
@@ -506,8 +506,8 @@ experimento_hysst_cli(const std::string& input, const std::string& file,
       std::tie(tempo, fo) = experimento_hysst(input, max_level, t_start, t_step,
                                               it_hc, it_mut, timeout);
 
-      Util::logprint(out,
-                     boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+      Util::logprint(
+        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
@@ -578,8 +578,8 @@ experimento_wdju_cli(const std::string& input, const std::string& file,
       std::tie(tempo, fo) =
         experimento_wdju(input, stag_limit, jump_factor, timeout);
 
-      Util::logprint(out,
-                     boost::format("%s,%d,%lld,%d\n") % id % i % tempo % fo);
+      Util::logprint(
+        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 

@@ -1,6 +1,6 @@
 #include <faptp-lib/HySST.h>
 
-#include <boost/optional.hpp>
+#include <optional.hpp>
 #include <array>
 
 #include <faptp-lib/Resolucao.h>
@@ -30,15 +30,15 @@ struct HySST::Impl
 
     std::unique_ptr<Solucao> ejection_chains(const Solucao& solucao) const;
 
-    boost::optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
+    optional<Time_slot> ejection_move(Solucao& solucao, Time_slot place) const;
 
     Time_slot pick_place(const Solucao& solucao) const;
 
-    boost::optional<Time_slot> pick_event_and_move(Solucao& solucao, Time_slot slot) const;
+    optional<Time_slot> pick_event_and_move(Solucao& solucao, Time_slot slot) const;
 
     std::vector<Event> list_all_liebhabers(const Solucao& solucao, Time_slot slot) const;
 
-    boost::optional<Time_slot> choose_and_move(
+    optional<Time_slot> choose_and_move(
         Solucao& solucao, const std::vector<Event>& liebhabers,
         Time_slot dest) const;
 
@@ -215,19 +215,19 @@ std::unique_ptr<Solucao> HySST::Impl::ejection_chains(const Solucao& solucao) co
     return s;
 }
 
-boost::optional<HySST::Impl::Time_slot> HySST::Impl::ejection_move(
+optional<HySST::Impl::Time_slot> HySST::Impl::ejection_move(
     Solucao& solucao,
     Time_slot place
 ) const
 {
     auto slot = pick_event_and_move(solucao, place);
     if (!slot) {
-        return boost::none;
+        return nullopt;
     }
 
     auto liebhabers = list_all_liebhabers(solucao, *slot);
     if (liebhabers.empty()) {
-        return boost::none;
+        return nullopt;
     }
 
     return choose_and_move(solucao, liebhabers, *slot);
@@ -262,7 +262,7 @@ HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
     return {};
 }
 
-boost::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
+optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
     Solucao& solucao,
     Time_slot slot
 ) const
@@ -284,7 +284,7 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
         && horario.insert(dia, bloco+1, camada, pd2)) {
         return std::make_tuple(novo_dia, novo_bloco, camada);
     } else {
-        return boost::none;
+        return nullopt;
     }
 }
 
@@ -317,7 +317,7 @@ std::vector<HySST::Impl::Event> HySST::Impl::list_all_liebhabers(
     return liebhabers;
 }
 
-boost::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
+optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     Solucao& solucao,
     const std::vector<Event>& liebhabers,
     Time_slot dest
@@ -337,7 +337,7 @@ boost::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     if (horario.insert(d_dest, b_dest, c_dest, pd)) {
         return std::make_tuple(d_og, b_og, c_og);
     } else {
-        return boost::none;
+        return nullopt;
     }
 }
 

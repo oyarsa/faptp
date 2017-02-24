@@ -1,7 +1,5 @@
 #include <faptp-lib/WDJU.h>
 
-#include <gsl/gsl>
-
 #include <faptp-lib/Timer.h>
 
 WDJU::WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
@@ -49,7 +47,7 @@ std::unique_ptr<Solucao> WDJU::gerar_horario(const Solucao& solucao)
             iter++;
             if (iter == stagnation_limit_) {
                 iter = 0;
-                jump_height = gsl::narrow_cast<int>(s_best->getFO() * jump_factor);
+                jump_height = static_cast<int>(s_best->getFO() * jump_factor);
                 jump_factor = next_jump(history);
             }
         }

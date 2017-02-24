@@ -7,8 +7,6 @@
 #include <iostream>
 #include <chrono>
 
-#include <gsl/gsl>
-
 namespace Util
 {
 int getPosition(int y, int x, int z, int Y, int Z);
@@ -84,7 +82,7 @@ inline int fast_floor(double x)
 template <typename Container>
 auto& randomChoice(Container& c)
 {
-    auto n = randomBetween(0, gsl::narrow_cast<int>(c.size()));
+    auto n = randomBetween(0, static_cast<int>(c.size()));
     auto it = begin(c);
     std::advance(it, n);
     return *it;

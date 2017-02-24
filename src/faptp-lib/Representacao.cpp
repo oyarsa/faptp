@@ -152,7 +152,7 @@ int Representacao::getPositionDisciplina(std::vector<ProfessorDisciplina*>::iter
     int x = -1;
 
     if (iterFound != iterEnd) {
-        x = gsl::narrow_cast<int>(iterFound - iter);
+        x = static_cast<int>(iterFound - iter);
     }
 
     return x;

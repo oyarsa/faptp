@@ -2,7 +2,10 @@
 #define SOLUCAO_H
 
 #include <unordered_map>
-#include <boost/optional.hpp>
+#include <array>
+#include <memory>
+
+#include <optional.hpp>
 
 #include "Horario.h"
 #include "Grade.h"
@@ -14,6 +17,10 @@ constexpr std::array<double, num_pesos> pesos_padrao{
 	{ 2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667 } 
 };
 
+
+using std::experimental::optional;
+using std::experimental::nullopt;
+
 class Resolucao;
 
 class Solucao
@@ -24,7 +31,7 @@ public:
 	using FO_t = double;
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, 
             const Resolucao& res, Configuracao::TipoFo tipo_fo,
-		    const boost::optional<std::array<double, 9>>& pesos = boost::none);
+		    const optional<std::array<double, 9>>& pesos = nullopt);
     Solucao(const Solucao& outro);
     virtual ~Solucao();
 
@@ -55,7 +62,7 @@ private:
     std::unordered_map<std::string, Grade*> grades;
 
     int gradesLength;
-    boost::optional<FO_t> fo;
+    optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
 	std::array<double, num_pesos> pesos_;

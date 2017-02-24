@@ -71,6 +71,10 @@ target_link_libraries(faptp faptp-lib)
 
 if (NOT MSVC)
     target_link_libraries(faptp pthread)
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 if (MODELO)
