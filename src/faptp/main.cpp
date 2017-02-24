@@ -50,7 +50,7 @@ upload_result(const std::string& id, const std::string& resultado,
               int num_config, const std::string& servidor)
 {
   for (auto i = 0; i < num_tentativas_upload; i++) {
-        std::this_thread::sleep_for(std::chrono::seconds(segundos_espera * i));
+        std::this_thread::sleep_for(std::chrono::seconds(segundos_espera));
 
         auto r = cpr::Post(cpr::Url{servidor},
                            cpr::Payload{{"result", resultado},
