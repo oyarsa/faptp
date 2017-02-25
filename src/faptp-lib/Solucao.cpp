@@ -109,8 +109,8 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 		horario->aulasProfessores(res.getProfessores())
 	} };
 
-	auto fo = std::inner_product(begin(pesos_), end(pesos_), begin(penalidades), 0.0);
-	return -fo;
+	auto fo_ = std::inner_product(begin(pesos_), end(pesos_), begin(penalidades), 0.0);
+	return -fo_;
 }
 
 Solucao::FO_t Solucao::getFO()

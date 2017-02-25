@@ -190,7 +190,7 @@ private:
 #endif
     std::chrono::high_resolution_clock::time_point tempoInicio;
     std::ostringstream log;
-    long long timeout;
+    long long timeout_;
 
     void carregarDados();
     void carregarDadosProfessores();

@@ -70,11 +70,9 @@ void Professor::unsetDiaDisponivel(unsigned int dia, int bloco)
 
 bool Professor::isDiaDisponivel(unsigned int dia, int bloco) const
 {
-    volatile int b = bloco;
     if (isDiaValido(dia)) {
         return diasDisponiveis[bloco][dia];
     }
-
     return false;
 }
 

@@ -65,11 +65,10 @@ bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplin
 
 bool Representacao::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
-    int position = getPosition(dia, bloco, camada);
-
-    matriz[position] = pd;
-
-    return true;
+  (void)force;
+  int position = getPosition(dia, bloco, camada);
+  matriz[position] = pd;
+  return true;
 }
 
 void Representacao::get3DMatrix(std::size_t pLinear, int triDimensional[3])

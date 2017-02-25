@@ -313,7 +313,8 @@ int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
 
 bool Horario::isDiscDificil(const std::string& disciplina) const
 {
-    return false;
+  (void)disciplina;
+  return false;
 }
 
 int Horario::aulasSeguidasDificilDia(int dia, int camada) const
@@ -381,7 +382,9 @@ int Horario::aulaDificilUltimoHorario() const
 
 bool Horario::isProfPref(const std::string& prof, const std::string& disc) const
 {
-    return true;
+  (void)prof;
+  (void)disc;
+  return true;
 }
 
 int Horario::preferenciasProfessor(const std::string& professor) const

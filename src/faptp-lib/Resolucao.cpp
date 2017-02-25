@@ -1,5 +1,5 @@
-﻿#include <faptp-lib/Resolucao.h>
-
+﻿#include <fmt/format.h>
+#include <faptp-lib/Resolucao.h>
 #include <fstream>
 #include <numeric>
 #include <iostream>
@@ -11,7 +11,6 @@
 #include <stack>
 #include <set>
 
-#include <fmt/format.h>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -62,7 +61,7 @@ Resolucao::Resolucao(const Configuracao& c)
       , professorDisciplinas()
       , solucao(nullptr)
       , jsonRoot()
-      , timeout(c.timeout_)
+      , timeout_(c.timeout_)
       , horarioTipoFo(c.tipoFo_)
 #ifdef MODELO
       , curso(nullptr)
@@ -354,7 +353,8 @@ int Resolucao::getCamadasTamanho() const
 
 void Resolucao::setTimeout(long timeout)
 {
-    this->timeout = timeout;
+  (void)timeout;
+  this->timeout_ = timeout;
 }
 
 void Resolucao::carregarSolucao()
@@ -581,7 +581,7 @@ Solucao* Resolucao::gerarHorarioAG()
     Timer t;
     auto iter = 0;
 
-    while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout) {
+    while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
         ultimaIteracao = iter;
         //logPopulacao(populacao, iter);
 
@@ -2175,6 +2175,7 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 
     return total;
 #else
+    (void)pSolucao;
     return 0;
 #endif
 }
@@ -2204,6 +2205,7 @@ Resolucao::converteHorario(Solucao* pSolucao) const
     }
     return horarioBin;
 #else
+  (void)pSolucao;
     return {};
 #endif
 }
@@ -2622,7 +2624,7 @@ void Resolucao::gerarHorarioAGVerificaEvolucao(
     int iteracaoAtual
 )
 {
-    auto& best = *populacao[0];
+    auto& best = *pop[0];
 
     if (best.getFO() > foAlvo) {
         foAlvo = best.getFO();
