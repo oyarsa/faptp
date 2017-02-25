@@ -2,6 +2,7 @@
 fmt/3.0.0@memsharded/testing
 jsoncpp/1.7.7@theirix/stable
 cpr/1.2.0@DEGoodmanWilson/testing
+cxxopts/latest@signal9/stable
 
 [generators]
 cmake

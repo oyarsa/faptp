@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 
+#include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <cpr/cpr.h>
 
@@ -43,7 +44,7 @@ int num_tentativas_upload = 15;
 int segundos_espera = 30;
 
 // número de iterações grande para o algoritmo se encerrar por tempo
-constexpr auto inf = static_cast<int>(1e9);
+constexpr auto infinito = static_cast<int>(1e9);
 
 void
 upload_result(const std::string& id, const std::string& resultado,
@@ -183,7 +184,7 @@ experimento_ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
                  .populacaoInicial(n_indiv)
                  .porcentagemCruzamentos(p_cruz) // %
                  .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
-                 .numMaximoIteracoesSemEvolucaoAG(inf)
+                 .numMaximoIteracoesSemEvolucaoAG(infinito)
                  .tipoCruzamento(cruzamento)
                  .mutacaoProbabilidade(taxa_mut) // %
                  .graspNumVizinhos(grasp_nviz)
@@ -271,7 +272,7 @@ teste_tempo_iter(int num_exec, F f)
                    .populacaoInicial(20)
                    .porcentagemCruzamentos(80)
                    .numMaximoIteracoesSemEvolucaoGRASP(15)
-                   .numMaximoIteracoesSemEvolucaoAG(inf)
+                   .numMaximoIteracoesSemEvolucaoAG(infinito)
                    .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
                    .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
                    .mutacaoProbabilidade(35) // %
@@ -381,7 +382,7 @@ experimento_sa_ils(const std::string& input, int frac_time, double alfa,
 
   Timer t;
   SA sa{ r, alfa, t0, sa_iter, sa_reaq, timeout / frac_time, escolhido };
-  ILS ils{ r, inf, ils_pmax, ils_p0, ils_iter, timeout / frac_time };
+  ILS ils{ r, infinito, ils_pmax, ils_p0, ils_iter, timeout / frac_time };
   auto s = r.gerarHorarioSA_ILS(sa, ils, timeout);
   auto fo = s->getFO();
   auto tempo = t.elapsed();
@@ -607,7 +608,7 @@ void experimento_comparacao_iter(int num_exec, const std::string& nome, F heuris
       .populacaoInicial(20)
       .porcentagemCruzamentos(80)
       .numMaximoIteracoesSemEvolucaoGRASP(15)
-      .numMaximoIteracoesSemEvolucaoAG(inf)
+      .numMaximoIteracoesSemEvolucaoAG(infinito)
       .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
       .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
       .mutacaoProbabilidade(35) // %
@@ -646,7 +647,7 @@ experimento_comparacao(int timeout_sec = 60, int num_exec = 30)
       { Resolucao::Vizinhanca::RM, 10 },
       { Resolucao::Vizinhanca::KM, 2 }
     } };
-    ILS ils{ r, inf, 30, 3, 10, timeout_ms / 100 };
+    ILS ils{ r, infinito, 30, 3, 10, timeout_ms / 100 };
     return r.gerarHorarioSA_ILS(sa, ils, timeout_ms);
   });
 
@@ -671,69 +672,89 @@ experimento_comparacao(int timeout_sec = 60, int num_exec = 30)
 
 }
 
-int
-main(int argc, char* argv[])
-{
-  const auto usage = R"(
-USAGE:
-
-    faptp-lib -h
-    faptp-lib <algo> <entrada> <configuracao> <servidor>
+const auto usage = R"(
+Usage:
+    faptp -h | --help
+    faptp <-a|--algo ALGO> <-i|--input INPUT> <-c|--config CONF> <-s|--server SERVER>
+    faptp
 
 Onde:
-
     -h, --help
         Mostra esta mensagem de ajuda e encerra o programa.
 
-    <algo>
-        Algoritmo a ser executado. Deve ser um entre: -ag, -sa_ils, -hysst, -wdju.
+    ALGO
+        Algoritmo a ser executado. Deve ser um entre: ag, sa_ils, hysst, wdju.
 
-    <entrada>
+    INPUT
         Arquivo de entrada.
 
-    <configuracao>
+    CONF
         Arquivo de configuracao. Se for 'auto', ira pegar o numero do arquivo
         de acordo com o numero da maquina, buscando numa pasta 'config'. Por 
         exemplo, uma maquina de nome 'XXX-01' ira gerar o caminho 'config\1.txt'.
 
-    <servidor>
+    SERVER
         Endereco IP do servidor para onde os resultados serao enviados.
+
+    <Nenhuma opcao>
+        Execucao dos testes.
 )";
 
-  const auto timeout = 3 * 60 * 1000;
+int
+main(int argc, char* argv[])
+{
+   const auto timeout = 3 * 60 * 1000;
 
-  if (argc == 5) {
-    // Primeiro argumento é o algoritmo {-ag, -sa_ils, -hysst, -wdju}
-    // segundo é o arquivo de entrada, terceiro é o de configuração
+   if (argc == 1) {
+       fmt::print("Sem argumentos. Executando: ");
+       // semArgumentos();
+       teste_tempo(1 * 60);
+       //teste_tempo(3 * 60);
+       return 0;
+   }
 
-    std::string algo = argv[1];
-    auto entrada = argv[2];
-    auto configuracao = argv[3];
-    auto servidor = argv[4];
+   try {
+     cxxopts::Options options{"faPTP",
+       "Geração de matrizes de horário para instituições de ensino "
+       "superior privadas"};
 
-    if (algo == "-ag") {
-      experimento_ag_cli(entrada, configuracao, servidor, timeout);
-    } else if (algo == "-sa_ils") {
-      experimento_sa_ils_cli(entrada, configuracao, servidor, timeout);
-    } else if (algo == "-hysst") {
-      experimento_hysst_cli(entrada, configuracao, servidor, timeout);
-    } else if (algo == "-wdju") {
-      experimento_wdju_cli(entrada, configuracao, servidor, timeout);
-    } else {
-      std::cout << "Algoritmo invalido\n";
-      return 1;
-    }
-  } else if (argc == 2) {
-    std::string flag = argv[1];
-    if (flag == "-h" || flag == "--help") {
-      std::cout << usage << "\n";
-    }
-  } else {
-    std::cout << "Sem argumentos. Executando: ";
-    // semArgumentos();
+     options.add_options()
+       ("h,help", "Mostrar ajuda")
+       ("a,algo", "Algoritmo", cxxopts::value<std::string>())
+       ("i,input", "Arquvo de entrada", cxxopts::value<std::string>())
+       ("c,config", "Arquivo de configuracao", 
+        cxxopts::value<std::string>()->default_value("auto"))
+       ("s,server", "Servidor para submissao dos resultados",
+        cxxopts::value<std::string>());
+     
+     options.parse(argc, argv);
 
-    teste_tempo(1 * 60);
-    //teste_tempo(3 * 60);
-    //experimento_comparacao();
-  }
+     if (options.count("help")) {
+       std::cout << usage << "\n";
+       return 0;
+     }
+
+     auto algo = options["algo"].as<std::string>();
+     auto entrada = options["input"].as<std::string>();
+     auto configuracao = options["config"].as<std::string>();
+     auto servidor = options["server"].as<std::string>();
+
+     if (algo == "ag") {
+       experimento_ag_cli(entrada, configuracao, servidor, timeout);
+     } else if (algo == "sa_ils") {
+       experimento_sa_ils_cli(entrada, configuracao, servidor, timeout);
+     } else if (algo == "hysst") {
+       experimento_hysst_cli(entrada, configuracao, servidor, timeout);
+     } else if (algo == "wdju") {
+       experimento_wdju_cli(entrada, configuracao, servidor, timeout);
+     } else {
+       std::cout << "Algoritmo invalido\n";
+       return 1;
+     }
+     return 0;
+
+   } catch (const cxxopts::OptionException& e) {
+     fmt::print("Erro ao ler argumentos: {}", e.what());
+     return 1;
+   }
 }
