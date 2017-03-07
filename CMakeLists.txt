@@ -1,7 +1,7 @@
 project(faPTP)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(MODELO FALSE)
 
 if (MODELO)
@@ -10,7 +10,7 @@ if (MODELO)
     add_definitions(-DIL_STD -DMODELO)
 endif()
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -72,11 +72,19 @@ target_link_libraries(faptp faptp-lib)
 if (NOT MSVC)
     target_link_libraries(faptp pthread)
 else()
+	# Otimizações e configuração do runtime para estático
     set(VC_OPTIMIZATIONS "/Ox /Oi /Ot /GL /arch:AVX /fp:fast")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT ${VC_OPTIMIZATIONS}")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT ${VC_OPTIMIZATIONS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP")
+
+	# Nível alto de warnings e compilação paralela, assim como C++17
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP /std:c++latest")
+
+	# Link Time Codegen
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG")
+	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 

@@ -11,7 +11,7 @@ Solucao::Solucao(
 	int pPerfisTamanho,
 	const Resolucao& res,
 	Configuracao::TipoFo tipo_fo,
-	const optional<std::array<double, 9>>& pesos
+	const std::optional<std::array<double, 9>>& pesos
 )
     : id(aleatorio::randomInt())
     , blocosTamanho(pBlocosTamanho)
@@ -20,7 +20,7 @@ Solucao::Solucao(
     , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
     , grades()
     , gradesLength(0)
-    , fo(nullopt)
+    , fo(std::nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
 {
