@@ -66,7 +66,20 @@ set(faptp-lib_FILES
 add_library(faptp-lib ${faptp-lib_FILES})
 target_link_libraries(faptp-lib ${CONAN_LIBS})
 
-add_executable(faptp src/faptp/main.cpp)
+
+set(faptp_INCLUDE
+	include/faptp/experimento.h
+	)
+
+set(faptp_SOURCE
+	src/faptp/experimento.cpp
+	src/faptp/main.cpp)
+
+set(faptp_FILES
+	${faptp_INCLUDE}
+	${faptp_SOURCE})
+
+add_executable(faptp ${faptp_FILES})
 target_link_libraries(faptp faptp-lib)
 
 if (NOT MSVC)
