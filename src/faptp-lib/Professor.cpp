@@ -41,7 +41,7 @@ void Professor::setNome(std::string pNome)
     nome = pNome;
 }
 
-bool Professor::isDiaValido(unsigned int dia)
+constexpr bool Professor::isDiaValido(unsigned int dia)
 {
     return dia < dias_semana_total;
 }

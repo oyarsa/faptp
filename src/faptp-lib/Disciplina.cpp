@@ -89,12 +89,14 @@ bool Disciplina::isPreRequisito(const std::string& pDisciplina)
     return preRequisitos.find(pDisciplina) != end(preRequisitos);
 }
 
-void Disciplina::addProfessorCapacitado(Professor* professor)
+void
+Disciplina::addProfessorCapacitado(Professor* professor)
 {
-    Util::insert_sorted(professoresCapacitados, professor,
-                        [](Professor* a, Professor* b) {
-                            return a->getNumDisponibilidade() < b->getNumDisponibilidade();
-                        });
+  Util::insert_sorted(
+    professoresCapacitados, professor,
+    [](auto a, auto b) {
+      return a->getNumDisponibilidade() < b->getNumDisponibilidade();
+    });
 }
 
 int Disciplina::periodoNum() const

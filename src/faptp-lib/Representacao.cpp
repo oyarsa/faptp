@@ -125,18 +125,18 @@ std::vector<int> Representacao::getAllEmpty(int camada)
     return empties;
 }
 
-void Representacao::clearDisciplina(ProfessorDisciplina* pProfessorDisciplina, int camada)
+void
+Representacao::clearDisciplina(const ProfessorDisciplina* pProfessorDisciplina, 
+                               int camada)
 {
-    int position = -1;
-
-    for (int d = 0; d < dias_semana_util; d++) {
-        for (int b = 0; b < blocosTamanho; b++) {
-            position = getPosition(d, b, camada);
-            if (matriz[position] == pProfessorDisciplina) {
-                matriz[position] = nullptr;
-            }
-        }
+  for (auto d = 0; d < dias_semana_util; d++) {
+    for (auto b = 0; b < blocosTamanho; b++) {
+      const auto position = getPosition(d, b, camada);
+      if (matriz[position] == pProfessorDisciplina) {
+        matriz[position] = nullptr;
+      }
     }
+  }
 }
 
 void Representacao::clearSlot(int pDia, int pBloco, int pCamada)

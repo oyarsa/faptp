@@ -92,9 +92,9 @@ std::unique_ptr<Solucao> HySST::gerar_horario(const Solucao& s_inicial)
     while (t_total.elapsed() < d_->tempo_total) {
         auto s_stage_best = s_atual->clone();
         auto s_stage_start = s_atual->clone();
-        auto eps = d_->thresholds[level];
+        const auto eps = d_->thresholds[level];
 
-        auto t_mu = Timer();
+        const auto t_mu = Timer();
         while (t_mu.elapsed() < d_->tempo_mutation && t_total.elapsed() < d_->tempo_total) {
             auto llh = d_->choose_mut();
             auto s_viz = d_->aplicar_heuristica(llh, *s_atual);
@@ -235,31 +235,32 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::ejection_move(
 
 HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
 {
-    const auto& horario = solucao.getHorario();
+  const auto& horario = solucao.getHorario();
 
-    auto num_slots_percorridos = 0u;
-    auto num_slots = horario.getMatriz().size();
-    std::vector<bool> slots_percorridos(num_slots, false);
+  auto num_slots_percorridos = 0u;
+  const auto num_slots = horario.getMatriz().size();
+  std::vector<bool> slots_percorridos(num_slots, false);
 
-    while (num_slots_percorridos < num_slots) {
-            int s, d,b,k;
-            do {
-                d = Util::randomBetween(0, dias_semana_util);
-                b = 2 * Util::randomBetween(0, res.getBlocosTamanho()/2);
-                k = Util::randomBetween(0, res.getCamadasTamanho());
-                s = horario.getPosition(d, b, k);
-            } while (slots_percorridos[s]);
-            auto slot = s;
-        num_slots_percorridos += 2;
-        slots_percorridos[slot] = true;
-        slots_percorridos[slot+1] = true;
+  while (num_slots_percorridos < num_slots) {
+    auto s = 0;
+    do {
+      const auto d = Util::randomBetween(0, dias_semana_util);
+      const auto b = 2 * Util::randomBetween(0, res.getBlocosTamanho() / 2);
+      const auto k = Util::randomBetween(0, res.getCamadasTamanho());
+      s = horario.getPosition(d, b, k);
+    } while (slots_percorridos[s]);
 
-        if (!horario.at(slot) && !horario.at(slot+1)) {
-            return horario.getCoords(slot);
-        }
+    auto slot = s;
+    num_slots_percorridos += 2;
+    slots_percorridos[slot] = true;
+    slots_percorridos[slot + 1] = true;
+
+    if (!horario.at(slot) && !horario.at(slot + 1)) {
+      return horario.getCoords(slot);
     }
+  }
 
-    return {};
+  return {};
 }
 
 std::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
@@ -323,10 +324,10 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     Time_slot dest
 ) const
 {
-    ProfessorDisciplina* pd;
+    ProfessorDisciplina* pd = nullptr;
     int d_og, b_og, c_og;
     Time_slot slot;
-    std::tie(slot, pd) = Util::randomChoice(liebhabers);
+    std::tie(slot, pd) = *Util::randomChoice(liebhabers);
     std::tie(d_og, b_og, c_og) = slot;
 
     int d_dest, b_dest, c_dest;
@@ -344,12 +345,12 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
 
 Resolucao::Vizinhanca HySST::Impl::choose_hill() const
 {
-    return Util::randomChoice(heuristicas_hill);
+    return *Util::randomChoice(heuristicas_hill);
 }
 
 Resolucao::Vizinhanca HySST::Impl::choose_mut() const
 {
-    return Util::randomChoice(heuristicas_mutacionais);
+    return *Util::randomChoice(heuristicas_mutacionais);
 }
 
 // Interface

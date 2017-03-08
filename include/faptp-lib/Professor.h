@@ -51,7 +51,7 @@ private:
 
     void init(std::string pNome, std::string pId);
 
-    static bool isDiaValido(unsigned int dia);
+    constexpr static bool isDiaValido(unsigned int dia);
     void setDiaDisponivel(unsigned int dia, int bloco, bool value);
 };
 

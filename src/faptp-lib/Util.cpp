@@ -10,18 +10,18 @@
 #include <windows.h>
 #endif
 
-int Util::getPosition(int y, int x, int z, int Y, int Z)
+constexpr int Util::getPosition(int y, int x, int z, int Y, int Z)
 {
     return (x + (y * Y) + (z * Y * Z));
 }
 
 void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, int Z)
 {
-    auto tamanho = X * Y * Z;
+    const auto tamanho = X * Y * Z;
 
-    auto dia = ((pLinear % tamanho) / Y) % X;
-    auto bloco = ((pLinear % tamanho) % Y);
-    auto camada = pLinear / (X * Y);
+    const auto dia = ((pLinear % tamanho) / Y) % X;
+    const auto bloco = ((pLinear % tamanho) % Y);
+    const auto camada = pLinear / (X * Y);
 
     triDimensional[0] = static_cast<int>(bloco); 
     triDimensional[1] = static_cast<int>(dia);
@@ -54,11 +54,6 @@ std::vector<std::string> Util::strSplit(const std::string& s, char delim)
     return elems;
 }
 
-double Util::timeDiff(clock_t tf, clock_t t0)
-{
-    return (tf - t0) / 1000000.0 * 1000;
-}
-
 long long Util::chronoDiff(std::chrono::time_point<std::chrono::high_resolution_clock> t_end,
                            std::chrono::time_point<std::chrono::high_resolution_clock> t_begin)
 {
@@ -89,12 +84,6 @@ double Util::randomDouble()
     constexpr auto max_random = 32767;
     return static_cast<double>(randomBetween(0, max_random)) / max_random;
 }
-
-int Util::warpIntervalo(int i, int tamIntervalo, int comecoIntervalo)
-{
-    return (i - comecoIntervalo) % tamIntervalo + comecoIntervalo;
-}
-
 
 std::string Util::join_path(const std::vector<std::string>& folders, const std::string& file)
 {
@@ -135,12 +124,19 @@ std::string Util::date_time()
   return fmt::format("The date is {:%d-%m-%Y %H:%M:%S}.", *std::localtime(&t));
 }
 
+void
+Util::logprint(std::ostream& log, std::string_view data)
+{
+  log << data;
+  std::cout << data;
+}
+
 std::string Util::get_computer_name()
 {
 #ifdef _WIN32
-    constexpr DWORD k_info_buffer_size = 32767;
-    TCHAR buf[k_info_buffer_size];
-    DWORD len = k_info_buffer_size;
+    constexpr DWORD info_buffer_size = 65;
+    TCHAR buf[info_buffer_size];
+    DWORD len = info_buffer_size;
     if (!GetComputerName(buf, &len)) {
       fprintf(stderr, "Erro ao recuperar o nome do computador: %d\n", GetLastError());
       exit(1);

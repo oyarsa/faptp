@@ -69,15 +69,16 @@ template <typename Container>
 void RemoveDisciplinasNome(Container& c,
                            std::vector<Disciplina*>& disciplinas)
 {
-    for (auto it = std::begin(c); it != std::end(c); ++it) {
-        auto found = std::find_if(std::begin(disciplinas), std::end(disciplinas),
-                                  [&](Disciplina* d) {
-                                      return d->getNome() == *it;
-                                  });
-        if (found != std::end(disciplinas)) {
-            c.erase(it);
-        }
+  for (auto it = std::begin(c); it != std::end(c); ++it) {
+    const auto found = std::find_if(
+      std::begin(disciplinas), std::end(disciplinas),
+      [&](const Disciplina* d) {
+        return d->getNome() == *it;
+      });
+    if (found != std::end(disciplinas)) {
+      c.erase(it);
     }
+  }
 }
 
 struct DisciplinaFindDisciplinaId
@@ -135,32 +136,35 @@ struct less<Solucao*>
 
 }
 
-inline bool pd_equals(ProfessorDisciplina* lhs, ProfessorDisciplina* rhs)
+inline bool pd_equals(const ProfessorDisciplina* lhs,
+                      const ProfessorDisciplina* rhs)
 {
-    if (lhs == rhs) {
-        return true;
-    }
-    if (!lhs || !rhs) {
-        return false;
-    }
-    return lhs->getDisciplina() == rhs->getDisciplina();
+  if (lhs == rhs) {
+    return true;
+  }
+  if (!lhs || !rhs) {
+    return false;
+  }
+  return lhs->getDisciplina() == rhs->getDisciplina();
 }
 
-inline std::vector<ProfessorDisciplina*>::iterator
-procura_gene(std::vector<ProfessorDisciplina*>& genes,
-             ProfessorDisciplina* pd)
+inline auto
+procura_gene(const std::vector<ProfessorDisciplina*>& genes,
+             const ProfessorDisciplina* pd)
 {
-    return std::find_if(begin(genes), end(genes), [&pd](ProfessorDisciplina* o) {
-                            return pd_equals(o, pd);
-                        });
+  return std::find_if(begin(genes), end(genes),
+                      [pd](const ProfessorDisciplina* o) {
+                        return pd_equals(o, pd);
+                      });
 }
 
 inline bool genes_contem(const std::vector<ProfessorDisciplina*>& genes,
-                         ProfessorDisciplina* pd)
+                         const ProfessorDisciplina* pd)
 {
-    return std::find_if(begin(genes), end(genes), [&pd](ProfessorDisciplina* o) {
-                            return pd_equals(o, pd);
-                        }) != end(genes);
+  return std::find_if(begin(genes), end(genes),
+                      [pd](const ProfessorDisciplina* o) {
+                        return pd_equals(o, pd);
+                      }) != end(genes);
 }
 
 #endif /* SORTTEMPLATE_H */

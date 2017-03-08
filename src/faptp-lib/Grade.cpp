@@ -46,70 +46,77 @@ Grade::~Grade()
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 {
-    auto success = aluno->getPeriodoNum() >= pDisciplina->periodoMinimoNum();
-
-    return success;
+    return aluno->getPeriodoNum() >= pDisciplina->periodoMinimoNum();
 }
 
-bool Grade::discRepetida(const Disciplina* pDisciplina)
+bool
+Grade::discRepetida(const Disciplina* pDisciplina)
 {
-    auto found = std::find_if(begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
-                              [&pDisciplina](Disciplina* d) {
-                                  return d == pDisciplina;
-                              });
-    if (found != end(disciplinasAdicionadas)) {
-        return true;
-    }
-    return !aluno->isRestante(pDisciplina->getId());
-}
+  const auto found = std::find_if(
+    begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
+    [pDisciplina](auto d) {
+      return d == pDisciplina;
+    });
 
-bool Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
-{
-    const auto& corequisitos = pDisciplina->coRequisitos;
-    const auto& cursadas = aluno->cursadas;
-
-    for (const auto& coreq : corequisitos) {
-        const auto& equivalentes = getDisciplina(coreq)->equivalentes;
-
-        auto cursou = find_first_of(begin(equivalentes), end(equivalentes),
-                                    begin(cursadas), end(cursadas)) != end(equivalentes);
-
-        if (cursou) {
-            continue;
-        }
-
-        auto cursando = std::find_first_of(
-            begin(equivalentes), end(equivalentes),
-            begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
-            [](auto& a, auto& b) { return a == b->nome; }
-        ) != end(equivalentes);
-
-        if (!cursando) {
-            return false;
-        }
-    }
-
+  if (found != end(disciplinasAdicionadas)) {
     return true;
+  }
+
+  return !aluno->isRestante(pDisciplina->getId());
 }
 
-bool Grade::havePreRequisitos(const Disciplina* const pDisciplina)
+bool
+Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
 {
-    const auto& pre_requisitos = pDisciplina->preRequisitos;
-    const auto& aprovadas = aluno->aprovadas;
+  const auto& corequisitos = pDisciplina->coRequisitos;
+  const auto& cursadas = aluno->cursadas;
 
-    // Percorre a lista de disciplinas que sao pre-requisitos da atual
-    for (const auto& prereq : pre_requisitos)
-    {
-        const auto& equivalentes = getDisciplina(prereq)->equivalentes;
-        // Se não foi encontrado, retorna falso
-        auto passou = find_first_of(begin(equivalentes), end(equivalentes),
-                                    begin(aprovadas), end(aprovadas)) != end(equivalentes);
-        if (!passou) {
-            return false;
-        }
+  for (const auto& coreq : corequisitos) {
+    const auto& equivalentes = getDisciplina(coreq)->equivalentes;
+
+    const auto cursou = find_first_of(
+      begin(equivalentes), end(equivalentes),
+      begin(cursadas), end(cursadas)) != end(equivalentes);
+
+    if (cursou) {
+      continue;
     }
 
-    return true;
+    const auto cursando = std::find_first_of(
+      begin(equivalentes), end(equivalentes),
+      begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
+      [](auto a, auto b) {
+        return a == b->nome;
+      }
+    ) != end(equivalentes);
+
+    if (!cursando) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool
+Grade::havePreRequisitos(const Disciplina* const pDisciplina)
+{
+  const auto& pre_requisitos = pDisciplina->preRequisitos;
+  const auto& aprovadas = aluno->aprovadas;
+
+  // Percorre a lista de disciplinas que sao pre-requisitos da atual
+  for (const auto& prereq : pre_requisitos) {
+    const auto& equivalentes = getDisciplina(prereq)->equivalentes;
+    // Se não foi encontrado, retorna falso
+    const auto passou = find_first_of(
+      begin(equivalentes), end(equivalentes),
+      begin(aprovadas), end(aprovadas)) != end(equivalentes);
+    if (!passou) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
@@ -118,9 +125,9 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
     // e verificando se já estão ocupados por alguma outra
     for (auto i = 0; i < dias_semana_util; i++) {
         for (auto j = 0; j < blocosTamanho; j++) {
-            auto currPosHorario = getPosition(i, j, pCamada);
-            auto currPosGrade = getPosition(i, j, 0);
-            auto currPd = horario->matriz[currPosHorario];
+            const auto currPosHorario = getPosition(i, j, pCamada);
+            const auto currPosGrade = getPosition(i, j, 0);
+            const auto currPd = horario->matriz[currPosHorario];
 
             if (!currPd || currPd->disciplina != pDisciplina)
                 continue;
@@ -222,8 +229,8 @@ bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pr
 
 bool Grade::insert(Disciplina* pDisciplina)
 {
-    auto camada = horario->discCamada[pDisciplina->id];
-    auto viavel = isViable(pDisciplina, camada);
+    const auto camada = horario->discCamada[pDisciplina->id];
+    const auto viavel = isViable(pDisciplina, camada);
     if (!viavel) {
         return false;
     }
@@ -236,8 +243,8 @@ Disciplina* Grade::remove(Disciplina* pDisciplina)
 {
     for (auto d = 0; d < dias_semana_util; d++) {
         for (auto b = 0; b < blocosTamanho; b++) {
-            auto pos = getPosition(d, b, 0);
-            auto currPd = matriz[pos];
+            const auto pos = getPosition(d, b, 0);
+            const auto currPd = matriz[pos];
             if (currPd && currPd->disciplina == pDisciplina) {
                 matriz[pos] = nullptr;
             }

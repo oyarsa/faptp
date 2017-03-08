@@ -163,11 +163,11 @@ public:
 
     static const int numcruz = 6;
     int contadorIguaisCruz[numcruz];
-    int contadorIguaisMut[2];
+    int contadorIguaisMut[numcruz];
     int contadorMelhoresCruz[numcruz];
-    int contadorMelhoresMut[2];
+    int contadorMelhoresMut[numcruz];
     long long tempoTotalCruz[numcruz];
-    long long tempoTotalMut[2];
+    long long tempoTotalMut[numcruz];
     long long tempoTotalSelec;
     long long tempoTotalElit;
 private:
@@ -211,7 +211,7 @@ private:
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const;
 
-    std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(Solucao* solucaoPai1, Solucao* solucaoPai2);
+    std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(const Solucao* solucaoPai1, const Solucao* solucaoPai2);
     bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG);
     bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG);
 
@@ -227,7 +227,7 @@ private:
                                                      Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
     bool swapSlots(Solucao& sol, int posX1, int posX2) const;
-    Solucao* gerarHorarioAGMutacao(Solucao* pSolucao);
+    Solucao* gerarHorarioAGMutacao(const Solucao* pSolucao) const;
 
     void gerarGradeTipoGrasp2(Solucao* sol) const;
 
@@ -283,7 +283,7 @@ private:
     void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& pop, int iteracaoAtual);
 
     std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil,
-                                          Solucao* solucao) const;
+                                          const Solucao* solucao) const;
     std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade) const;
     void buscaLocal(std::unique_ptr<Grade>& grade) const;
     Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao) const;

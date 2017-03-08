@@ -38,7 +38,7 @@ public:
     int getFirstDisciplina(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> pMatriz);
 
     std::vector<int> getAllEmpty(int camada);
-    void clearDisciplina(ProfessorDisciplina* pProfessorDisciplina, int camada);
+    void clearDisciplina(const ProfessorDisciplina* pProfessorDisciplina, int camada);
     virtual void clearSlot(int pDia, int pBloco, int pCamda);
 
     int getPositionDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, std::vector<ProfessorDisciplina*>::iterator iterFound);

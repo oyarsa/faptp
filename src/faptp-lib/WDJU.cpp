@@ -61,7 +61,7 @@ double WDJU::next_jump(const std::vector<double>& history) const
     if (history.empty() || Util::randomDouble() < 0.5) {
         return Util::randomDouble() * max_jump_factor_;
     } else {
-        return Util::randomChoice(history);
+        return *Util::randomChoice(history);
     }
 }
 
@@ -74,7 +74,7 @@ std::unique_ptr<Solucao> WDJU::gerar_vizinho(const Solucao& solucao) const
         Resolucao::Vizinhanca::RM
     };
 
-    switch (Util::randomChoice(movimentos)) {
+    switch (*Util::randomChoice(movimentos)) {
     case Resolucao::Vizinhanca::ES: return res_.event_swap(solucao);
     case Resolucao::Vizinhanca::EM: return res_.event_move(solucao);
     case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);

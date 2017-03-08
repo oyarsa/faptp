@@ -54,7 +54,7 @@ void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
             for (int k = 0; k < dias_semana_util; k++) {
-                auto pd = pSolucao->horario->at(k, j, i);
+                const auto pd = pSolucao->horario->at(k, j, i);
                 if (pd) {
                     saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
                             << "<i>" << pd->getProfessor()->getNome() << "</i>"
@@ -88,7 +88,7 @@ void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
             for (int k = 0; k < dias_semana_util; k++) {
-                auto pd = gradeAtual->at(k, j, 0);
+                const auto pd = gradeAtual->at(k, j, 0);
                 if (pd) {
                     saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
                             << "<b>" << pd->getDisciplina()->getId() << "</b>"
@@ -123,7 +123,7 @@ void Output::writeJson(const Solucao& solucao, const std::string& outfile)
         Json::Value eventos{Json::arrayValue};
         for (auto b = 0; b < solucao.blocosTamanho; b++) {
             for (auto d = 0; d < dias_semana_util; d++) {
-                auto pd = horario.at(d, b, c);
+                const auto pd = horario.at(d, b, c);
                 if (pd) {
                     Json::Value e;
                     e["professor"] = pd->getProfessor()->getNome();

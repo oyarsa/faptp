@@ -20,14 +20,14 @@ std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
     auto temp = t0_;
     auto reheats = 0;
     auto iter_t = 0;
-    auto eps = 0.01;
+    const auto eps = 0.01;
     Timer t;
 
     while (reheats < max_reheats_ && t.elapsed() < timeout_) {
         while (iter_t < max_iter_ && t.elapsed() < timeout_) {
             iter_t++;
             auto s_viz = gerar_vizinho(*s_atual);
-            auto delta = s_viz->getFO() - s_atual->getFO();
+            const auto delta = s_viz->getFO() - s_atual->getFO();
 
             if (delta > 0) {
                 s_atual = move(s_viz);
@@ -36,7 +36,7 @@ std::unique_ptr<Solucao> SA::gerar_horario(const Solucao& s_inicial) const
                     s_best = s_atual->clone();
                 }
             } else {
-                auto x = Util::randomDouble();
+                const auto x = Util::randomDouble();
                 if (x < std::exp(-delta/temp)) {
                     s_atual = move(s_viz);
                 }
@@ -68,5 +68,5 @@ std::unique_ptr<Solucao> SA::gerar_vizinho(const Solucao& solucao) const
 
 Resolucao::Vizinhanca SA::escolher_vizinhanca() const
 {
-    return Util::randomChoice(chances_vizinhancas_);
+    return *Util::randomChoice(chances_vizinhancas_);
 }

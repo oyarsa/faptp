@@ -26,7 +26,7 @@ Horario& Horario::operator=(const Horario& outro)
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& professor) const
 {
-    auto creditos = creditos_alocados_prof_.find(professor.getId());
+    const auto creditos = creditos_alocados_prof_.find(professor.getId());
     if (!professor.isDiaDisponivel(pDia, pBloco)
         || creditos != end(creditos_alocados_prof_)
            && creditos->second >= professor.credito_maximo()) {
@@ -34,7 +34,7 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& pro
     }
 
     for (auto i = 0; i < camadasTamanho; i++) {
-        auto pd = at(pDia, pBloco, i);
+        const auto pd = at(pDia, pBloco, i);
         if (pd && pd->professor->getId() == professor.getId()) {
             return true;
         }
@@ -58,16 +58,16 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
         return true;
     }
 
-    auto pos = getPosition(dia, bloco, camada);
-    auto disc = pd->disciplina;
+    const auto pos = getPosition(dia, bloco, camada);
+    const auto disc = pd->disciplina;
 
-    auto creditos = creditos_alocados_disc_.find(disc->id);
+    const auto creditos = creditos_alocados_disc_.find(disc->id);
     if (creditos != end(creditos_alocados_disc_) && creditos->second >= disc->cargaHoraria) {
         return false;
     }
 
     if (!matriz[pos]) {
-        auto isProfAloc = colisaoProfessorAlocado(dia, bloco, *pd->professor);
+        const auto isProfAloc = colisaoProfessorAlocado(dia, bloco, *pd->professor);
         if (!isProfAloc) {
             return true;
         }
@@ -78,16 +78,16 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
 
 bool Horario::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
-    int position = getPosition(dia, bloco, camada);
-    auto disc = pd->disciplina;
-    auto prof = pd->getProfessor();
+    const auto position = getPosition(dia, bloco, camada);
+    const auto disc = pd->disciplina;
+    const auto prof = pd->getProfessor();
 
     if (creditos_alocados_disc_[disc->id] >= disc->cargaHoraria) {
         return false;
     }
 
     if (!matriz[position] || force) {
-        auto professorAlocado = colisaoProfessorAlocado(dia, bloco, *prof);
+        const auto professorAlocado = colisaoProfessorAlocado(dia, bloco, *prof);
         if (!professorAlocado || force) {
             creditos_alocados_disc_[disc->id]++;
             creditos_alocados_prof_[prof->id]++;
@@ -127,7 +127,7 @@ std::size_t Horario::getHash()
 
     for (const auto& pd : matriz) {
         if (pd) {
-            oss << pd->disciplina->id + pd->professor->id;
+            oss << pd->disciplina->id << pd->professor->id;
         } else {
             oss << "00";
         }
@@ -184,7 +184,7 @@ bool Horario::isProfDia(
 {
     for (auto c = 0; c < camadasTamanho; c++) {
         for (auto b = 0; b < blocosTamanho; b++) {
-            auto pd = at(dia, b, c);
+            const auto pd = at(dia, b, c);
             if (pd && pd->getProfessor()->getId() == professor) {
                 return true;
             }
@@ -221,7 +221,7 @@ int Horario::intervalosTrabalho(
 ) const
 {
     auto intervalos = 0;
-    for (auto& p : professores) {
+    for (const auto& p : professores) {
         intervalos += intervalosTrabalhoProf(p.second->getId());
     }
     return intervalos;
@@ -279,10 +279,10 @@ int Horario::aulasSabado() const
 int Horario::aulasSeguidasDiscDia(const std::string& disciplina, int dia) const
 {
     auto num = 0;
-    auto camada = discCamada.at(disciplina);
+    const auto camada = discCamada.at(disciplina);
 
     for (auto b = 0; b < blocosTamanho; b++) {
-        auto pd = at(dia, b, camada);
+        const auto pd = at(dia, b, camada);
         if (pd && pd->getDisciplina()->getId() == disciplina) {
             num++;
         }
@@ -311,9 +311,8 @@ int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
     return num;
 }
 
-bool Horario::isDiscDificil(const std::string& disciplina) const
+bool Horario::isDiscDificil(const std::string&) const
 {
-  (void)disciplina;
   return false;
 }
 
@@ -322,7 +321,7 @@ int Horario::aulasSeguidasDificilDia(int dia, int camada) const
     auto num = 0;
 
     for (auto b = 0; b < blocosTamanho; b++) {
-        auto pd = at(dia, b, camada);
+        const auto pd = at(dia, b, camada);
         if (pd && isDiscDificil(pd->getDisciplina()->getId())) {
             num++;
         }
@@ -353,11 +352,11 @@ bool Horario::aulaDificilUltimoHorarioDia(int dia, int camada) const
 {
     const auto ultimo = blocosTamanho - 2;
 
-    auto pd1 = at(dia, ultimo, camada);
-    auto pd2 = at(dia, ultimo + 1, camada);
+    const auto pd1 = at(dia, ultimo, camada);
+    const auto pd2 = at(dia, ultimo + 1, camada);
 
-    auto dif1 = pd1 && isDiscDificil(pd1->getDisciplina()->getId());
-    auto dif2 = pd2 && isDiscDificil(pd2->getDisciplina()->getId());
+    const auto dif1 = pd1 && isDiscDificil(pd1->getDisciplina()->getId());
+    const auto dif2 = pd2 && isDiscDificil(pd2->getDisciplina()->getId());
 
     return dif1 || dif2;
 }
@@ -395,12 +394,12 @@ int Horario::preferenciasProfessor(const std::string& professor) const
     for (auto c = 0; c < camadasTamanho; c++) {
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho; b++) {
-                auto pd = at(d, b, c);
+                const auto pd = at(d, b, c);
                 if (!pd || (pd && pd->getProfessor()->getId() != professor)) {
                     continue;
                 }
 
-                auto& disc = pd->getDisciplina()->getId();
+                const auto& disc = pd->getDisciplina()->getId();
                 if (percorrido[disc]) {
                     continue;
                 }
@@ -419,7 +418,7 @@ int Horario::preferenciasProfessores(
 ) const
 {
     auto num = 0;
-    for (auto& p : professores) {
+    for (const auto& p : professores) {
         num += preferenciasProfessor(p.second->getId());
     }
     return num;
@@ -432,7 +431,7 @@ int Horario::aulasProfessor(const std::string& professor, int preferencia) const
     for (auto c = 0; c < camadasTamanho; c++) {
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho; b++) {
-                auto pd = at(d, b, c);
+                const auto pd = at(d, b, c);
                 if (pd && pd->getProfessor()->getId() == professor) {
                     num++;
                 }
@@ -440,7 +439,7 @@ int Horario::aulasProfessor(const std::string& professor, int preferencia) const
         }
     }
 
-    auto excesso = num - preferencia;
+    const auto excesso = num - preferencia;
     return std::max(excesso, 0);
 }
 
@@ -449,7 +448,7 @@ int Horario::aulasProfessores(
 ) const
 {
     auto num = 0;
-    for (auto& p : professores) {
+    for (const auto& p : professores) {
         num += aulasProfessor(p.second->getId(), p.second->preferenciaAulas());
     }
     return num;
@@ -458,8 +457,8 @@ int Horario::aulasProfessores(
 std::unordered_map<std::string, ProfessorDisciplina*>
 Horario::getAlocFromDiscNames(int camada) const
 {
-    auto camada_inicio = getPosition(0, 0, camada);
-    auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
+    const auto camada_inicio = getPosition(0, 0, camada);
+    const auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
 
     std::unordered_map<std::string, ProfessorDisciplina*> alocs;
 

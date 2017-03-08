@@ -1,8 +1,6 @@
-#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <ios>
 #include <string>
 #include <chrono>
 #include <thread>
@@ -132,9 +130,9 @@ semArgumentos()
 
   std::cout << "Montando horarios [AG + Modelo]...\n";
 
-  auto inicio = Util::now();
+  const auto inicio = Util::now();
   r.gerarHorarioAG();
-  auto fim = Util::now();
+  const auto fim = Util::now();
 
   std::cout << "Tempo do horario: " << Util::chronoDiff(fim, inicio)
             << "ms\n\n";

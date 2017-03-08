@@ -109,7 +109,7 @@ Resolucao::Vizinhanca ILS::escolher_vizinhanca(
     const std::set<Resolucao::Vizinhanca>& movimentos
 ) const
 {
-    return Util::randomChoice(movimentos);
+    return *Util::randomChoice(movimentos);
 }
 
 std::unique_ptr<Solucao> ILS::perturbacao(const Solucao& solucao) const
