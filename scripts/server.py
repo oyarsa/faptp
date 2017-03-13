@@ -11,7 +11,7 @@ def salvar_arquivo(nome, result):
     os.makedirs(RESULT_FOLDER, exist_ok=True)
     filename = os.path.join(RESULT_FOLDER, nome) + '.csv'
 
-    with open(filename, 'w') as f:
+    with open(filename, 'a') as f:
         print(result, file=f)
 
     with open(LOGFILE, 'a') as f:
