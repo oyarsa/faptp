@@ -1,8 +1,10 @@
 library(plyr)
 library(ggplot2)
 
+best <- 580.35
+
 le.arquivos <- function(caminho) {
-  arquivos <- list.files(caminho, pattern = ".*.txt")
+  arquivos <- list.files(caminho, pattern = ".*.csv")
   ldply(arquivos, .fun = function(x) {
     read.csv(file=x, stringsAsFactors=FALSE)
   })
@@ -13,7 +15,7 @@ join.nl <- function(...) {
 }
 
 rpd <- function(f.method, f.best) {
-  abs((f.method - 22502)/22502) * 100 
+  abs((abs(f.method) - best)/best) * 100 
 }
 
 rpd.reduce <- function(f, col, f.best) {
