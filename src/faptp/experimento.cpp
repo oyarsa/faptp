@@ -21,7 +21,7 @@
 #include <faptp-lib/ILS.h>
 
 /*
-* PARÂMETROS DE CONFIGURAÇÃO *
+* PARÃ‚METROS DE CONFIGURAÃ‡ÃƒO *
 * input.all.json ->
 *      camadasTamanho : 33
 *      perfilTamanho : 1392
@@ -44,7 +44,7 @@ constexpr Entrada input_json{ 4, 10 };
 int num_tentativas_upload = 15;
 int segundos_espera = 30;
 
-// número de iterações grande para o algoritmo se encerrar por tempo
+// nÃºmero de iteraÃ§Ãµes grande para o algoritmo se encerrar por tempo
 constexpr auto infinito = static_cast<int>(1e9);
 
 void
@@ -153,7 +153,6 @@ void
 ag_cli(std::string_view input, std::string_view file,
        std::string_view servidor, long long timeout)
 {
-  // comentário do topo
   // formato entrada:
   // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
   // NExec
@@ -341,7 +340,6 @@ void
 sa_ils_cli(std::string_view input, std::string_view file,
            std::string_view servidor, long long timeout)
 {
-  // comentário do topo
   // formato entrada:
   // ID FracTime Alfa t0 SAiter SAreaq SAchances ILSiter ILSpmax ILSp0 NExec
   // formato saida:
@@ -419,7 +417,6 @@ void
 hysst_cli(std::string_view input, std::string_view file,
           std::string_view servidor, long long timeout)
 {
-  // comentário do topo
   // formato entrada:
   // ID MaxLevel TStart TStep IterHc IterMut NExec
   // formato saida:
@@ -491,7 +488,6 @@ void
 wdju_cli(std::string_view input, std::string_view file,
          std::string_view servidor, long long timeout)
 {
-  // comentário do topo
   // formato entrada:
   // ID StagLimit JumpFactor NExec
   // formato saida:
@@ -612,11 +608,13 @@ comparacao(int timeout_sec = 60, int num_exec = 30)
       return r.gerarHorarioWDJU(wdju);
     });
 
-  /*std::cout << "AG\n";
+  /*
+  std::cout << "AG\n";
   comparacao_iter(num_exec, "AG", [&](Resolucao& r) {
   r.setTimeout(timeout_ms);
   return r.gerarHorarioAG()->clone();
-  });*/
+  });
+  */
 }
 
 } // namespace experimento

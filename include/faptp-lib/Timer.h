@@ -3,12 +3,12 @@
 #include <chrono>
 #include <ostream>
 
-/// Implementa um cronÙmetro, facilitando a mediÁ„o da passagem
-/// do tempo na condiÁ„o de parada dos algoritmos.
+/// Implementa um cron√¥metro, facilitando a medi√ß√£o da passagem
+/// do tempo na condi√ß√£o de parada dos algoritmos.
 class Timer
 {
 public:
-  /// Cria um novo timer, com tempo inicial igual ao momento de criaÁ„o.
+  /// Cria um novo timer, com tempo inicial igual ao momento de cria√ß√£o.
   Timer()
   {
     reset();
@@ -22,7 +22,7 @@ public:
   }
 
   /// Calcula o tempo decorrido (em ms) do momento inicial ao momento da chamada.
-  /// 
+  ///
   /// @return Tempo em milissegundos entre o momento inicial e o "agora".
   long long
   elapsed() const
@@ -31,12 +31,12 @@ public:
     return std::chrono::duration_cast<std::chrono::milliseconds>(e).count();
   }
 
-  /// Imprime a representaÁ„o textual do tempo decorrido para a `os`,
+  /// Imprime a representa√ß√£o textual do tempo decorrido para a `os`,
   /// exemplo: `150ms`.
-  /// 
-  /// @param os Stream de saÌda onde ser· impressa a representaÁ„o textual.
-  /// @param t Timer que ser· representado.
-  /// @return A stream de saÌda `os`, apÛs ser modificada.
+  ///
+  /// @param os Stream de sa√≠da onde ser√° impressa a representa√ß√£o textual.
+  /// @param t Timer que ser√° representado.
+  /// @return A stream de sa√≠da `os`, ap√≥s ser modificada.
   friend std::ostream&
   operator<<(std::ostream& os, const Timer& t)
   {
@@ -45,6 +45,6 @@ public:
   }
 
 private:
-  /// Momento inicial, de onde os c·lculos de tempo decorrido ser„o derivados.
+  /// Momento inicial, de onde os c√°lculos de tempo decorrido ser√£o derivados.
   std::chrono::high_resolution_clock::time_point start_;
 };

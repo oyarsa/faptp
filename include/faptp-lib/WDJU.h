@@ -8,31 +8,31 @@
 class WDJU
 {
 public:
-  /// Constrói uma configuração do WDJU.
-  /// 
-  /// @param res Objeto de onde os operadores de vizinhança serão chamados
-  /// @param timeout Tempo limite de execução do algoritmo.
-  /// @param stagnation_limit Limite de iterações sem melhoria.
-  /// @param jump_factor Fator de alteração da altura do salto.
+  /// ConstrÃ³i uma configuraÃ§Ã£o do WDJU.
+  ///
+  /// @param res Objeto de onde os operadores de vizinhanÃ§a serÃ£o chamados
+  /// @param timeout Tempo limite de execuÃ§Ã£o do algoritmo.
+  /// @param stagnation_limit Limite de iteraÃ§Ãµes sem melhoria.
+  /// @param jump_factor Fator de alteraÃ§Ã£o da altura do salto.
   WDJU(const Resolucao& res, long long timeout, int stagnation_limit,
        double jump_factor);
 
-  /// Aplica o WDJU em uma solução inicial, buscando melhorar a solução.
-  /// A melhor solução é retornada quando o tempo se esgota.
+  /// Aplica o WDJU em uma soluÃ§Ã£o inicial, buscando melhorar a soluÃ§Ã£o.
+  /// A melhor soluÃ§Ã£o Ã© retornada quando o tempo se esgota.
   ///
-  /// @param solucao Solução inicial para o algoritmo.
-  /// @return Melhor solução encontrada.
+  /// @param solucao SoluÃ§Ã£o inicial para o algoritmo.
+  /// @return Melhor soluÃ§Ã£o encontrada.
   std::unique_ptr<Solucao> gerar_horario(const Solucao& solucao);
 
-  /// Obtém o tempo em milissegundos do começo da execução até encontrar
-  /// a primeira solução com a melhor FO.
+  /// ObtÃ©m o tempo em milissegundos do comeÃ§o da execuÃ§Ã£o atÃ© encontrar
+  /// a primeira soluÃ§Ã£o com a melhor FO.
   ///
-  /// @return Tempo em milissegundos até encontrar solução com a melhor FO.
+  /// @return Tempo em milissegundos atÃ© encontrar soluÃ§Ã£o com a melhor FO.
   long long tempo_fo() const;
 
-  /// Obtém FO da melhor solução encontrada.
+  /// ObtÃ©m FO da melhor soluÃ§Ã£o encontrada.
   ///
-  /// @return FO da melhor solução encontrada.
+  /// @return FO da melhor soluÃ§Ã£o encontrada.
   Solucao::FO_t maior_fo() const;
 
 private:

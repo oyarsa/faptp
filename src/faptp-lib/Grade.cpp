@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <unordered_map>
 
 #include <faptp-lib/Grade.h>

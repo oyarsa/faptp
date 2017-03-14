@@ -1,4 +1,4 @@
-﻿#include <fmt/format.h>
+#include <fmt/format.h>
 #include <faptp-lib/Resolucao.h>
 #include <fstream>
 #include <numeric>
