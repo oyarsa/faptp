@@ -1,6 +1,8 @@
 _build/
+.build/
 .vs/
 .conan/
+docs/
 experimento/
 teste/
 modelo/out
