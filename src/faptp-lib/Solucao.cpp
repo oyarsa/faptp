@@ -5,13 +5,25 @@
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Aleatorio.h>
 
+const std::unordered_map<std::string, double> Solucao::pesos_padrao {
+  { "Janelas", 2 },
+  { "IntervalosTrabalho", 1.5 },
+  { "NumDiasAula", 3.5 },
+  { "AulasSabado", 4.667 },
+  { "AulasSeguidas", 4 },
+  { "AulasSeguidasDificil", 2.5 },
+  { "AulaDificilUltimoHorario", 2.333 },
+  { "PreferenciasProfessores", 3.167 },
+  { "AulasProfessores", 1.667 }
+};
+
 Solucao::Solucao(
 	int pBlocosTamanho,
 	int pCamadasTamanho,
 	int pPerfisTamanho,
 	const Resolucao& res,
 	Configuracao::TipoFo tipo_fo,
-	const std::optional<std::array<double, 9>>& pesos
+    const std::unordered_map<std::string, double>& pesos
 )
     : id(aleatorio::randomInt())
     , blocosTamanho(pBlocosTamanho)
@@ -23,13 +35,8 @@ Solucao::Solucao(
     , fo(std::nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
-{
-	if (pesos) {
-		pesos_ = *pesos;
-	} else {
-		pesos_ = pesos_padrao;
-	}
-}
+    , pesos_(pesos)
+{}
 
 Solucao::Solucao(const Solucao& outro)
     : camada_periodo(outro.camada_periodo)
@@ -97,20 +104,20 @@ Solucao::FO_t Solucao::calculaFOSomaCarga()
 
 Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 {
-	std::array<int, num_pesos> penalidades = { {
-		horario->contaJanelas(),
-		horario->intervalosTrabalho(res.getProfessores()),
-		horario->numDiasAula(),
-		horario->aulasSabado(),
-		horario->aulasSeguidas(res.getDisciplinas()),
-		horario->aulasSeguidasDificil(),
-		horario->aulaDificilUltimoHorario(),
-		horario->preferenciasProfessores(res.getProfessores()),
-		horario->aulasProfessores(res.getProfessores())
-	} };
+  const auto& h = *horario;
 
-	auto fo_ = std::inner_product(begin(pesos_), end(pesos_), begin(penalidades), 0.0);
-	return -fo_;
+  auto fo_ =
+    pesos_.at("Janelas") * h.contaJanelas() + 
+    pesos_.at("IntervalosTrabalho") * h.intervalosTrabalho(res.getProfessores()) + 
+    pesos_.at("NumDiasAula") * h.numDiasAula() +
+    pesos_.at("AulasSabado") * h.aulasSabado() +
+    pesos_.at("AulasSeguidas") * h.aulasSeguidas(res.getDisciplinas()) +
+    pesos_.at("AulasSeguidasDificil") * h.aulasSeguidasDificil() +
+    pesos_.at("AulaDificilUltimoHorario") * h.aulaDificilUltimoHorario() +
+    pesos_.at("PreferenciasProfessores") * h.preferenciasProfessores(res.getProfessores()) + 
+    pesos_.at("AulasProfessores") * h.aulasProfessores(res.getProfessores());
+
+  return -fo_;
 }
 
 Solucao::FO_t Solucao::getFO()

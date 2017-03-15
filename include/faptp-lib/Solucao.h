@@ -11,12 +11,6 @@
 #include "Grade.h"
 #include "Configuracao.h"
 
-constexpr std::size_t num_pesos = 9;
-// constexpr std::array<double, 9> pesos_padrao{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-constexpr std::array<double, num_pesos> pesos_padrao{ 
-	{ 2, 1.5, 3.5, 4.667, 4, 2.5, 2.333, 3.167, 1.667 } 
-};
-
 class Resolucao;
 
 class Solucao
@@ -25,9 +19,9 @@ class Solucao
     friend class Output;
 public:
 	using FO_t = double;
-    Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho, 
+    Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,
             const Resolucao& res, Configuracao::TipoFo tipo_fo,
-		    const std::optional<std::array<double, 9>>& pesos = std::nullopt);
+            const std::unordered_map<std::string, double>& pesos = pesos_padrao);
     Solucao(const Solucao& outro);
     virtual ~Solucao();
 
@@ -61,8 +55,9 @@ private:
 	std::optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
-	std::array<double, num_pesos> pesos_;
+    std::unordered_map<std::string, double> pesos_;
+
+    static const std::unordered_map<std::string, double> pesos_padrao;
 };
 
 #endif /* SOLUCAO_H */
-

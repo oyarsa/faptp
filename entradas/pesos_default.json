@@ -1,0 +1,11 @@
+{
+    "Janelas": 2,
+    "IntervalosTrabalho": 1.5,
+    "NumDiasAula": 3.5,
+    "AulasSabado": 4.667,
+    "AulasSeguidas": 4,
+    "AulasSeguidasDificil": 2.5,
+    "AulaDificilUltimoHorario": 2.333,
+    "PreferenciasProfessores": 3.167,
+    "AulasProfessores": 1.667
+}
