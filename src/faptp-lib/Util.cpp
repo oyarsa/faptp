@@ -149,3 +149,10 @@ std::string Util::get_computer_name()
     return "0";
 #endif
 }
+
+std::string
+Util::read_whole_file(std::istream& file)
+{
+  return { std::istreambuf_iterator<char>{file},
+           std::istreambuf_iterator<char>{} };
+}

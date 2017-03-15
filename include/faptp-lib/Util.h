@@ -286,6 +286,12 @@ void logprint(std::ostream& log, std::string_view data);
 /// @returns Nome do computador.
 std::string get_computer_name();
 
+/// Lê todo o conteúdo da stream `file` para uma string.
+/// 
+/// @param file Stream de entrada de onde o arquivo será lido.
+/// @returns String contendo todo o conteúdo de `file`.
+std::string read_whole_file(std::istream& file);
+
 } // namespace Util
 
 #endif /* UTIL_H */
