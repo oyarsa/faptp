@@ -1,12 +1,9 @@
-# faptp
-
+# faPTP
 ## Geração de matrizes de horário para instituições de ensino superior privadas
-faptp é o projeto que implementa os algoritmos descritos em Silva et al., 2016.
-Atualmente consiste em um Algoritmo Genético para a evolução das matrizes de horário
-e uma implementação do GRASP para geração das grades de disciplinas dos estudantes.
-No futuro serão implementados algoritmos da literatura a título de comparação.
 
-## Algortimos implementados
+Implementa os algoritmos descritos em Silva et al., 2016 e Silva e Cunha, 2017. Consiste em um Algoritmo Genético para a evolução das matrizes de horário e uma implementação do GRASP para geração das grades de disciplinas dos estudantes, além de implementados algoritmos da literatura implementados a título de comparação.
+
+### Algortimos implementados
 - Algoritmo genético
   - População inicial: geração aleatória
   - Seleção: torneio n-ário
@@ -29,7 +26,7 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
   - Estágio de hill-climbing: heurísticas de hill climbing para realizar movimentos
     grandes na solução.
 
-## Movimentos implementados
+### Movimentos implementados
 - Event Swap
 - Event Move
 - Resource Swap
@@ -38,19 +35,20 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
 - Kempe Chain
 - First Improvement
 - Ejection Chain
-  
-## Dependências
-- C++14 (testado com Visual C++ 2015 Update 2)
-- Bibliotecas: 
-	- Guidelines Support Library (testado com a implementação da Microsoft)
+
+### Dependências
+- C++17 (testado com Visual C++ 2017)
+- Bibliotecas:
 	- JsonCpp
-	- Boost
+	- fmt
+  - CPR
+  - CxxOpts
 	* O gerenciador de pacotes Conan é utilizado, com as dependências descritas em conanfile.txt
 - Se o modelo matemático for utilizado (configurar com MODELO = True no CMakeLists.txt), uma instalação
   do CPLEX é necessária, assim como uma copia do repositório ModeloGrade na mesma pasta do faPTP
 
-## Orientações
-- O código é escrito em C++14. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
+### Orientações
+- O código é escrito em C++17. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
 - O código deve compilar sem warnings no -Wall do GCC e no /W4 do Visual Studio.
 - O código não deve gerar mensagens de erro na ferramenta Cpp Core Checker, ou no Checker do clang-tidy.
   - Exceções: o arquivo UUID.cpp, que utiliza técnicas que as Guidelines proibem, teve suas warnings suprimidas
@@ -59,4 +57,4 @@ No futuro serão implementados algoritmos da literatura a título de comparaçã
 - O projeto inclui muitas instâncias que violam as Guidelines. Modificações para conformar essas
   instâncias são bem-vindas. Commits que incluam códigos que não sigam as Guidelines estão sujeitos a discussão.
 
-Copyright 2016 Italo Silva, Saulo Campos, Pedro Mázala  
+Copyright 2016 Italo Silva, Saulo Campos, Pedro Mázala
