@@ -34,7 +34,7 @@ Onde:
 int
 main(int argc, char* argv[])
 {
-   const auto timeout = 3 * 60 * 1000;
+   const auto timeout = 60 * 60 * 1000;
 
    if (argc == 1) {
        fmt::print("Sem argumentos. Executando: ");

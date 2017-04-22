@@ -130,10 +130,6 @@ subject to {
 
 	forall (p in P, j in J, k in 1..num_dias-1-j)
 		w[p][j] - (sum (l in 1..k) w[p][j+l]) + w[p][j+k+1] - beta1[k][p][j] <= 1;
-		//(w[p][j] - (sum (l in 1..k) w[p][j+l]) + w[p][j+k+1] >= 1) == beta1[k][p][j];
-
-  //forall (p in P, j in J, k in Jb: j + k >= num_dias)
-		//beta1[k][p][j] == 0;
 
 	forall (p in P)
 	  beta[p] == sum (k in Jb, j in J) beta1[k][p][j];
@@ -166,8 +162,12 @@ subject to {
 	  								x[p][d][i][j] * G[d] * H[d][c];
 
 	// Preferência do professor (disciplinas)
-	forall (p in P, i in I, j in J)
-	  lambda[p] == sum (d in D) x[p][d][i][j] * (1 - F[p][d]);
+	//forall (p in P, i in I, j in J)
+	  //lambda[p] == sum (d in D) x[p][d][i][j] * (1 - F[p][d]);
+
+  // Isso talvez não funcione
+	forall (p in P)
+	  lambda[p] == sum (d in D, i in I, j in J) x[p][d][i][j] * (1 - F[p][d]);
 
 	// Preferência do professor (número de aulas)
 	forall (p in P)

@@ -33,7 +33,7 @@ combinacoes = itertools.product(
 print("Combinacoes:", num_comb)
 
 # Formato
-# ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GIter GNVzi GAlfa NExec
+# ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GIter GNViz GAlfa NExec
 param_cod = ["TM", "NI", "PC", "Xo", "NM", "NT", "GI", "GV", "GA"]
 
 

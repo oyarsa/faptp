@@ -1,10 +1,10 @@
 library(plyr)
 library(ggplot2)
 
-best <- 580.35
+best <- 530.835
 
 le.arquivos <- function(caminho) {
-  arquivos <- list.files(caminho, pattern = ".*.csv")
+  arquivos <- list.files(caminho, pattern = ".*.txt")
   ldply(arquivos, .fun = function(x) {
     read.csv(file=x, stringsAsFactors=FALSE)
   })
