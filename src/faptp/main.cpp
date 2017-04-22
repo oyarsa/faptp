@@ -1,90 +1,155 @@
-#include <cxxopts.hpp>
-#include <fmt/format.h>
+#include <faptp-lib/Configuracao.h>
+#include <faptp-lib/HySST.h>
+#include <faptp-lib/ILS.h>
+#include <faptp-lib/Output.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/SA.h>
+#include <faptp-lib/Semana.h>
+#include <faptp-lib/WDJU.h>
 
-#include <faptp/experimento.h>
+#include <fstream>
+#include <iostream>
+#include <memory>
 
-const auto usage = R"(
-Usage:
-    faptp -h | --help
-    faptp <-a|--algo ALGO> <-i|--input INPUT> <-c|--config CONF> <-s|--server SERVER>
-    faptp
+#include <json/json.h>
 
-Onde:
-    -h, --help
-        Mostra esta mensagem de ajuda e encerra o programa.
-
-    ALGO
-        Algoritmo a ser executado. Deve ser um entre: ag, sa_ils, hysst, wdju.
-
-    INPUT
-        Arquivo de entrada.
-
-    CONF
-        Arquivo de configuracao. Se for 'auto', ira pegar o numero do arquivo
-        de acordo com o numero da maquina, buscando numa pasta 'config'. Por 
-        exemplo, uma maquina de nome 'XXX-01' ira gerar o caminho 'config\1.txt'.
-
-    SERVER
-        Endereco IP do servidor para onde os resultados serao enviados.
-
-    <Nenhuma opcao>
-        Execucao dos testes.
-)";
-
-int
-main(int argc, char* argv[])
+std::unique_ptr<Solucao> wdju(Resolucao& r, const Json::Value& json)
 {
-   const auto timeout = 60 * 60 * 1000;
+  const auto stag_limit = json["StagLimit"].asInt();
+  const auto jump_factor = json["JumpFactor"].asDouble();
+  WDJU wdju{ r, r.timeout(), stag_limit, jump_factor };
+  return r.gerarHorarioWDJU(wdju);
+}
 
-   if (argc == 1) {
-       fmt::print("Sem argumentos. Executando: ");
-       experimento::teste_tempo(1 * 60);
-       // experimento::teste_tempo(3 * 60);
-       return 0;
-   }
+std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
+{
+  r.horarioPopulacaoInicial = json["NIndiv"].asInt();
+  r.horarioCruzamentoPorcentagem = json["%Cruz"].asInt() / 100.0;
+  r.horarioMutacaoTentativas = json["NMut"].asInt();
+  r.horarioTorneioPopulacao = json["NTour"].asInt();
+  r.maxIterSemEvolAG = json["AGIter"].asInt();
+  r.horarioTipoCruzamento = [&json]() {
+    auto x = json["CruzOper"];
+    if (x == "CX") return Configuracao::TipoCruzamento::ciclo;
+    if (x == "OX") return Configuracao::TipoCruzamento::ordem;
+    if (x == "PMX") return Configuracao::TipoCruzamento::pmx;
+  }();
+  r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-   try {
-     cxxopts::Options options{"faPTP",
-       "Geração de matrizes de horário para instituições de ensino "
-       "superior privadas"};
+  return std::unique_ptr<Solucao>(r.gerarHorarioAG());
+}
 
-     options.add_options()
-       ("h,help", "Mostrar ajuda")
-       ("a,algo", "Algoritmo", cxxopts::value<std::string>())
-       ("i,input", "Arquvo de entrada", cxxopts::value<std::string>())
-       ("c,config", "Arquivo de configuracao", 
-        cxxopts::value<std::string>()->default_value("auto"))
-       ("s,server", "Servidor para submissao dos resultados",
-        cxxopts::value<std::string>());
-     
-     options.parse(argc, argv);
+std::unique_ptr<Solucao> sails(Resolucao& r, const Json::Value& json)
+{
+  static const auto a = std::vector<std::pair<Resolucao::Vizinhanca, int>>{
+    { Resolucao::Vizinhanca::ES, 25 },
+    { Resolucao::Vizinhanca::EM, 43 },
+    { Resolucao::Vizinhanca::RS, 20 },
+    { Resolucao::Vizinhanca::RM, 10 },
+    { Resolucao::Vizinhanca::KM, 2 }
+  };
 
-     if (options.count("help")) {
-       std::cout << usage << "\n";
-       return 0;
-     }
+  static const auto b = std::vector<std::pair<Resolucao::Vizinhanca, int>>{
+    { Resolucao::Vizinhanca::ES, 35 },
+    { Resolucao::Vizinhanca::EM, 43 },
+    { Resolucao::Vizinhanca::RS, 10 },
+    { Resolucao::Vizinhanca::RM, 5 },
+    { Resolucao::Vizinhanca::KM, 7 }
+  };
 
-     auto algo = options["algo"].as<std::string>();
-     auto entrada = options["input"].as<std::string>();
-     auto configuracao = options["config"].as<std::string>();
-     auto servidor = options["server"].as<std::string>();
+  const auto sa_chances = json["SAchance"].asInt();
+  const auto alfa = json["SAlfa"].asDouble();
+  const auto t0 = json["t0"].asDouble();
+  const auto sa_iter = json["SAiter"].asInt();
+  const auto sa_reaq = json["SAreaq"].asInt();
+  const auto frac_time = json["FracTime"].asInt();
+  const auto ils_p0 = json["ILSp0"].asInt();
+  const auto ils_pmax = json["ILSpmax"].asInt();
+  const auto ils_iter = json["ILSiter"].asInt();
 
-     if (algo == "ag") {
-       experimento::ag_cli(entrada, configuracao, servidor, timeout);
-     } else if (algo == "sa_ils") {
-       experimento::sa_ils_cli(entrada, configuracao, servidor, timeout);
-     } else if (algo == "hysst") {
-       experimento::hysst_cli(entrada, configuracao, servidor, timeout);
-     } else if (algo == "wdju") {
-       experimento::wdju_cli(entrada, configuracao, servidor, timeout);
-     } else {
-       std::cout << "Algoritmo invalido\n";
-       return 1;
-     }
-     return 0;
+  const auto& escolhido = [&] {
+    if (sa_chances == 0) {
+      return a;
+    } else {
+      return b;
+    }
+  }();
 
-   } catch (const cxxopts::OptionException& e) {
-     fmt::print("Erro ao ler argumentos: {}", e.what());
-     return 1;
-   }
+  SA sa{ r, alfa, t0, sa_iter, sa_reaq, r.timeout() / frac_time, escolhido };
+  ILS ils{ r, 1e9, ils_pmax, ils_p0, ils_iter, r.timeout() / frac_time };
+  return r.gerarHorarioSA_ILS(sa, ils, r.timeout());
+}
+
+std::unique_ptr<Solucao> hysst(Resolucao& r, const Json::Value& json)
+{
+  const auto it_mut = json["IterMut"].asInt();
+  const auto max_level = json["MaxLevel"].asInt();
+  const auto t_start = json["TStart"].asInt();
+  const auto t_step = json["TStep"].asInt();
+  const auto it_hc = json["IterHc"].asInt();
+
+  r.horarioMutacaoTentativas = it_mut;
+  HySST hysst{ r, r.timeout(), 100, 100, max_level, t_start, t_step, it_hc };
+
+  return r.gerarHorarioHySST(hysst, it_mut);
+}
+
+void run(const std::string& conf, const std::string& input, 
+         const std::string& out)
+{
+  Json::Value json;
+  {
+    std::ifstream file{ conf };
+    file >> json;
+  }
+
+  dias_semana_util = json["numeroDiasLetivos"].asInt();
+  const auto numeroHorarios = json["numeroHorarios"].asInt();
+  const auto numeroAlunos = json["numeroAlunos"].asInt();
+  const auto numeroPeriodos = json["numeroPeriodos"].asInt();
+  const auto timeout = json["tempo"].asInt();
+  const auto fo = [&json]() {
+    auto x = json["fo"].asString();
+    if (x == "pref") return Configuracao::TipoFo::Soft_constraints;
+    else return Configuracao::TipoFo::Soma_carga;
+  }();
+
+  Resolucao r{ Configuracao()
+    .arquivoEntrada(input)
+    .blocoTamanho(numeroHorarios)
+    .camadaTamanho(numeroPeriodos)
+    .perfilTamanho(numeroAlunos)
+    .timeout(timeout)
+    .tipoFo(fo) };
+
+  if (fo == Configuracao::TipoFo::Soma_carga) {
+    r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
+    r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
+    r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
+  } else {
+    auto restricoes = {
+      "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado", 
+      "AulasSeguidas", "AulasSeguidasDificil", "AulaDificilUltimoHorario",
+      "PreferenciasProfessores", "AulasProfessores"
+    };
+
+    for (auto k : restricoes)
+      r.pesos_soft[k] = json["pesos"][k].asDouble();
+  }
+
+  auto algoritmo = json["algoritmo"].asString();
+  auto solucao = [&]() {
+    if (algoritmo == "AG") return ag(r, json["parametros"]);
+    else if (algoritmo == "HySST") return  hysst(r, json["parametros"]);
+    else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
+    else if (algoritmo == "WDJU") return wdju(r, json["parametros"]);
+  }();
+
+  Output::writeJson(*solucao, out);
+}
+
+
+int main()
+{
+  std::cout << "Hello world\n";
 }

@@ -364,9 +364,22 @@ HySST::HySST(Resolucao& res, long long tempo_total, long long tempo_mutation,
 
 HySST::HySST(const HySST& outro) : d_{std::make_unique<Impl>(*outro.d_)} {}
 
-HySST::HySST(HySST&& outro) : d_{std::move(outro.d_)} {}
+HySST& HySST::operator=(const HySST& rhs)
+{
+  d_ = std::make_unique<Impl>(*rhs.d_);
+  return *this;
+}
 
-HySST::~HySST() {}
+HySST::HySST(HySST&& outro) noexcept : d_{std::move(outro.d_)} {}
+
+HySST& HySST::operator=(HySST&& rhs) noexcept
+{
+  d_ = std::move(rhs.d_);
+  return *this;
+}
+
+HySST::~HySST()
+{}
 
 long long HySST::tempo_fo() const
 {

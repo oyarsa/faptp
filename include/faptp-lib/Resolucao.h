@@ -54,6 +54,7 @@ public:
 
     double start();
     double start(bool input);
+    long long timeout() const;
 
     int getBlocosTamanho() const;
     const std::map<std::string, std::vector<Disciplina*>>&
@@ -127,6 +128,8 @@ public:
     Configuracao::TipoMutacao horarioTipoMutacao;
     // FO utilizada
     Configuracao::TipoFo horarioTipoFo;
+    // Mapa dos pesos das restrições
+    std::unordered_map<std::string, double> pesos_soft;
 
     int horarioIteracao;
 
@@ -207,8 +210,8 @@ private:
     std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
                                                         Configuracao::TipoCruzamento tipoCruz);
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
-    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao);
-    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const;
+    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao);
+    Solucao* gerarHorarioAGTorneio(std::vector<Solucao*>& solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const;
 
     std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(const Solucao* solucaoPai1, const Solucao* solucaoPai2);
@@ -241,7 +244,7 @@ private:
     void gerarGradeTipoGraspConstrucao(Solucao* pSolucao);
 
     void gerarGradeTipoGraspConstrucao(Grade* pGrade);
-    void gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
+    void gerarGradeTipoGraspConstrucao(Grade* pGrade, std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
     Solucao* gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao);
     Solucao* gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao);
     [[deprecated("Use gerarGradeTipoGrasp2")]]
@@ -260,7 +263,7 @@ private:
     void logPopulacao(const std::vector<Solucao*>& pop, int iter);
 
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
-    bool gerarCamada(Solucao* sol, int camada, std::vector<Disciplina*> discs,
+    bool gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
                      std::unordered_map<std::string, int>& creditos_alocados_prof);
     bool geraProfessorDisciplina(Solucao* sol, Disciplina* disc,
                                  int camada, std::unordered_map<std::string, int>& creditos_alocados_prof);

@@ -13,8 +13,10 @@ public:
           int max_level, int t_start, int t_step, int it_hc);
 
     HySST(const HySST& outro);
+    HySST& operator=(const HySST& rhs);
 
-    HySST(HySST&& outro);
+    HySST(HySST&& outro) noexcept;
+    HySST& operator=(HySST&& rhs) noexcept;
 
     ~HySST();
 

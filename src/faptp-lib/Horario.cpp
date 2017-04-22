@@ -28,8 +28,8 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& pro
 {
     const auto creditos = creditos_alocados_prof_.find(professor.getId());
     if (!professor.isDiaDisponivel(pDia, pBloco)
-        || creditos != end(creditos_alocados_prof_)
-           && creditos->second >= professor.credito_maximo()) {
+        || (creditos != end(creditos_alocados_prof_)
+           && creditos->second >= professor.credito_maximo())) {
         return true;
     }
 
@@ -311,18 +311,13 @@ int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
     return num;
 }
 
-bool Horario::isDiscDificil(const std::string&) const
-{
-  return false;
-}
-
 int Horario::aulasSeguidasDificilDia(int dia, int camada) const
 {
     auto num = 0;
 
     for (auto b = 0; b < blocosTamanho; b++) {
         const auto pd = at(dia, b, camada);
-        if (pd && isDiscDificil(pd->getDisciplina()->getId())) {
+        if (pd && pd->getDisciplina()->isDificil()) {
             num++;
         }
     }
@@ -355,8 +350,8 @@ bool Horario::aulaDificilUltimoHorarioDia(int dia, int camada) const
     const auto pd1 = at(dia, ultimo, camada);
     const auto pd2 = at(dia, ultimo + 1, camada);
 
-    const auto dif1 = pd1 && isDiscDificil(pd1->getDisciplina()->getId());
-    const auto dif2 = pd2 && isDiscDificil(pd2->getDisciplina()->getId());
+    const auto dif1 = pd1 && pd1->getDisciplina()->isDificil();
+    const auto dif2 = pd2 && pd2->getDisciplina()->isDificil();
 
     return dif1 || dif2;
 }
@@ -365,7 +360,7 @@ int Horario::aulaDificilUltimoHorarioCamada(int camada) const
 {
     auto num = 0;
     for (auto d = 0; d < dias_semana_util; d++) {
-        num += aulasSeguidasDificilDia(d, camada);
+        num += aulaDificilUltimoHorarioDia(d, camada);
     }
     return num;
 }
@@ -374,19 +369,12 @@ int Horario::aulaDificilUltimoHorario() const
 {
     auto num = 0;
     for (auto c = 0; c < camadasTamanho; c++) {
-        num += aulasSeguidasDificilCamada(c);
+        num += aulaDificilUltimoHorarioCamada(c);
     }
     return num;
 }
 
-bool Horario::isProfPref(const std::string& prof, const std::string& disc) const
-{
-  (void)prof;
-  (void)disc;
-  return true;
-}
-
-int Horario::preferenciasProfessor(const std::string& professor) const
+int Horario::preferenciasProfessor(const Professor& professor) const
 {
     auto num = 0;
     std::unordered_map<std::string, bool> percorrido;
@@ -395,7 +383,7 @@ int Horario::preferenciasProfessor(const std::string& professor) const
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho; b++) {
                 const auto pd = at(d, b, c);
-                if (!pd || (pd && pd->getProfessor()->getId() != professor)) {
+                if (!pd || pd->getProfessor()->getId() != professor.getId()) {
                     continue;
                 }
 
@@ -405,7 +393,7 @@ int Horario::preferenciasProfessor(const std::string& professor) const
                 }
 
                 percorrido[disc] = true;
-                num += !isProfPref(professor, disc);
+                num += !professor.isDiscPreferencia(disc);
             }
         }
     }
@@ -419,7 +407,7 @@ int Horario::preferenciasProfessores(
 {
     auto num = 0;
     for (const auto& p : professores) {
-        num += preferenciasProfessor(p.second->getId());
+        num += preferenciasProfessor(*p.second);
     }
     return num;
 }

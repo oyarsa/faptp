@@ -20,9 +20,9 @@ class Solucao
 public:
 	using FO_t = double;
     Solucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho,
-            const Resolucao& res, Configuracao::TipoFo tipo_fo,
-            const std::unordered_map<std::string, double>& pesos = pesos_padrao);
+            const Resolucao& res, Configuracao::TipoFo tipo_fo);
     Solucao(const Solucao& outro);
+    Solucao& operator=(const Solucao&) = delete;
     virtual ~Solucao();
 
     std::unique_ptr<Solucao> clone() const;
@@ -55,7 +55,6 @@ private:
 	std::optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
-    std::unordered_map<std::string, double> pesos_;
 
     static const std::unordered_map<std::string, double> pesos_padrao;
 };

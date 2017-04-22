@@ -51,6 +51,8 @@ public:
 
     void addProfessorCapacitado(Professor* professor);
 
+    bool isDificil() const;
+
 private:
     std::string id;
     std::string turma;
@@ -67,6 +69,7 @@ private:
     std::unordered_set<std::string> coRequisitos;
     std::unordered_set<std::string> equivalentes;
     std::vector<Professor*> professoresCapacitados;
+    bool dificil;
 };
 
 #endif /* DISCIPLINA_H */

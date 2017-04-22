@@ -24,8 +24,8 @@ public:
     virtual ~Grade();
 
     bool insert2(Disciplina* pDisciplina);
-    bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar);
-    bool insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force);
+    bool insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+    bool insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar, bool force);
     bool insert(Disciplina* pDisciplina);
     Disciplina* remove2(Disciplina* pDisciplina, ProfessorDisciplina* & pProfessorDisciplina);
     Disciplina* remove(Disciplina* pDisciplina);
@@ -49,7 +49,7 @@ private:
     double fo;
 
     //! Recebe um nome e retorna um ponteiro para uma disciplina
-    Disciplina* getDisciplina(std::string pNomeDisc);
+    Disciplina* getDisciplina(const std::string& pNomeDisc);
 
     bool havePreRequisitos(const Disciplina* const pDisciplina);
     bool hasPeriodoMinimo(const Disciplina* const pDisciplina) const;

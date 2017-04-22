@@ -1,4 +1,4 @@
-#include <faptp/experimento.h>
+#include <faptp-exp/experimento.h>
 
 #include <fstream>
 #include <sstream>

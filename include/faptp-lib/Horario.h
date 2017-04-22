@@ -56,16 +56,13 @@ private:
     int aulasSeguidasDiscDia(const std::string& disciplina, int dia) const;
     int aulasSeguidasDisc(const std::string& disciplina) const;
 
-    bool isDiscDificil(const std::string& disciplina) const;
-
     int aulasSeguidasDificilDia(int dia, int camada) const;
     int aulasSeguidasDificilCamada(int camada) const;
 
     bool aulaDificilUltimoHorarioDia(int dia, int camada) const;
     int aulaDificilUltimoHorarioCamada(int camada) const;
 
-    bool isProfPref(const std::string& prof, const std::string& disc) const;
-    int preferenciasProfessor(const std::string& professor) const;
+    int preferenciasProfessor(const Professor& professor) const;
 
     int aulasProfessor(const std::string& professor, int preferencia) const;
 };

@@ -63,6 +63,7 @@ Resolucao::Resolucao(const Configuracao& c)
       , jsonRoot()
       , timeout_(c.timeout_)
       , horarioTipoFo(c.tipoFo_)
+      , pesos_soft(Solucao::pesos_padrao)
 #ifdef MODELO
       , curso(nullptr)
       , alunos()
@@ -195,16 +196,21 @@ void Resolucao::carregarDadosProfessores()
 
         const auto& competencias = jsonProfessores[k]["competencias"];
         for (auto j = 0u; j < competencias.size(); j++) {
+            auto disciplinaId = competencias[j].asString();
 
-            std::vector<Disciplina*>::iterator it;
-            std::string disciplinaId = competencias[j].asString();
-
-            it = find_if(disciplinas.begin(), disciplinas.end(),
+            auto it = find_if(disciplinas.begin(), disciplinas.end(),
                          DisciplinaFindDisciplinaId(disciplinaId));
             if (it != disciplinas.end()) {
                 (*it)->addProfessorCapacitado(professores[id]);
             }
         }
+
+        const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
+        for (const auto& d_id : preferencias)
+            professores[id]->addDiscPreferencia(d_id.asString());
+        professores[id]->preferenciaNumAulas =
+            jsonProfessores[k].get("preferenciaHoras", 
+                                   dias_semana_util * blocosTamanho).asInt();
     }
 }
 
@@ -226,6 +232,7 @@ void Resolucao::carregarDadosDisciplinas()
 
         Disciplina* disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
         disciplina->ofertada = jsonDisciplinas[i]["ofertada"].asBool();
+        disciplina->dificil = jsonDisciplinas[i].get("dificil", false).asBool();
 
         const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
         for (auto j = 0u; j < corequisitos.size(); j++) {
@@ -991,7 +998,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
     return solucoesAG;
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> solucoesPopulacao)
+std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao)
 {
     auto pai1 = selecaoTorneio(solucoesPopulacao);
     auto pai2 = selecaoTorneio(solucoesPopulacao);
@@ -1000,7 +1007,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*> 
 }
 
 Solucao*
-Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*> solucoesPopulacao) const
+Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*>& solucoesPopulacao) const
 {
   std::vector<Solucao*> torneioCandidatos{};
   Solucao* vencedor{ nullptr };
@@ -1810,8 +1817,9 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade)
     gerarGradeTipoGraspConstrucao(pGrade, professorDisciplinasIgnorar);
 }
 
-void Resolucao::gerarGradeTipoGraspConstrucao(Grade* pGrade,
-                                              std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar)
+void Resolucao::gerarGradeTipoGraspConstrucao(
+  Grade* pGrade,
+  std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar)
 {
     const auto disponivel = (dias_semana_util - 2) * camadasTamanho;
     auto alunoPerfil = pGrade->aluno;
@@ -2257,16 +2265,17 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
 
         // Remove todas as ocorrências da alocãção, guardando suas posições
         int coord[3];
-        mut->horario->get3DMatrix(idx, coord);
+        auto& horario = *mut->horario;
+        horario.get3DMatrix(idx, coord);
         auto camada = coord[2];
         std::vector<std::pair<int, int>> posicoesAloc;
 
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto h = 0; h < blocosTamanho; h++) {
-                auto linearPos = mut->horario->getPosition(d, h, camada);
-                if (mut->horario->matriz[linearPos] == profDisc) {
+                auto linearPos = horario.getPosition(d, h, camada);
+                if (horario.matriz[linearPos] == profDisc) {
                     posicoesAloc.emplace_back(d, h);
-                    mut->horario->matriz[linearPos] = nullptr;
+                    horario.matriz[linearPos] = nullptr;
                 }
             }
         }
@@ -2276,7 +2285,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
         // Reinsere com a nova alocação
         auto success = true;
         for (const auto& pos : posicoesAloc) {
-            success = mut->horario->insert(pos.first, pos.second, camada,
+            success = horario.insert(pos.first, pos.second, camada,
                                            profDisc);
             if (!success) {
                 break;
@@ -2337,7 +2346,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 }
 
 bool Resolucao::
-gerarCamada(Solucao* sol, int camada, std::vector<Disciplina*> discs,
+gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
             std::unordered_map<std::string, int>& creditos_alocados_prof)
 {
     auto num_discs = discs.size();
@@ -3259,20 +3268,21 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
 {
     for (auto i = 0; i < horarioMutacaoTentativas; i++) {
         auto viz = std::make_unique<Solucao>(sol);
+        auto& horario = *viz->horario;
 
         auto camada = Util::randomBetween(0, camadasTamanho);
         auto dia = Util::randomBetween(0, dias_semana_util);
         auto bloco = 2 * Util::randomBetween(0, blocosTamanho / 2);
 
-        auto e1 = viz->horario->at(dia, bloco, camada);
-        auto e2 = viz->horario->at(dia, bloco + 1, camada);
+        auto e1 = horario.at(dia, bloco, camada);
+        auto e2 = horario.at(dia, bloco + 1, camada);
 
         if (!e1 && !e2) {
             continue;
         }
 
-        viz->horario->clearSlot(dia, bloco, camada);
-        viz->horario->clearSlot(dia, bloco + 1, camada);
+        horario.clearSlot(dia, bloco, camada);
+        horario.clearSlot(dia, bloco + 1, camada);
 
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho / 2; b += 2) {
@@ -3280,13 +3290,12 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
                     continue;
                 }
 
-                if (viz->horario->at(d, b, camada)
-                    || viz->horario->at(d, b + 1, camada)) {
+                if (horario.at(d, b, camada) || horario.at(d, b + 1, camada)) {
                     continue;
                 }
 
-                const auto ok_e1 = !e1 || viz->horario->insert(d, b, camada, e1);
-                const auto ok_e2 = !e2 || viz->horario->insert(d, b + 1, camada, e2);
+                const auto ok_e1 = !e1 || horario.insert(d, b, camada, e1);
+                const auto ok_e2 = !e2 || horario.insert(d, b + 1, camada, e2);
 
                 if (ok_e1 && ok_e2) {
                     viz->calculaFO();
@@ -3622,7 +3631,7 @@ std::vector<int> Resolucao::dfs(
 {
     std::stack<int> s{};
     s.push(no_inicial);
-    visitados[no_inicial];
+    visitados[no_inicial] = true;
 
     std::vector<int> caminho{};
 
@@ -3659,16 +3668,17 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
     std::tie(d_e2, b_e2) = t2;
 
     auto viz = std::make_unique<Solucao>(sol);
+    auto& horario = *viz->horario;
     std::vector<std::pair<int, ProfessorDisciplina*>> alocs{};
 
     // Remove os eventos dos slots atuais
     for (auto e : cadeia) {
         if (e < camadasTamanho) {
             alocs.emplace_back(e, viz->horario->at(d_e1, b_e1, e));
-            viz->horario->clearSlot(d_e1, b_e1, e);
+            horario.clearSlot(d_e1, b_e1, e);
         } else {
             alocs.emplace_back(e, viz->horario->at(d_e2, b_e2, e - camadasTamanho));
-            viz->horario->clearSlot(d_e2, b_e2, e - camadasTamanho);
+            horario.clearSlot(d_e2, b_e2, e - camadasTamanho);
         }
     }
 
@@ -3684,9 +3694,9 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
         }
 
         if (e < camadasTamanho) {
-            ok = viz->horario->insert(d_e2, b_e2, e, aloc);
+            ok = horario.insert(d_e2, b_e2, e, aloc);
         } else {
-            ok = viz->horario->insert(d_e1, b_e1, e - camadasTamanho, aloc);
+            ok = horario.insert(d_e1, b_e1, e - camadasTamanho, aloc);
         }
 
         if (!ok) {
@@ -3739,4 +3749,10 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(HySST& hysst, int it_mut)
     tempoAlvo = hysst.tempo_fo();
 
     return s;
+}
+
+long long
+Resolucao::timeout() const
+{
+  return timeout_;
 }

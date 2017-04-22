@@ -22,7 +22,8 @@ Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriod
       preRequisitos(),
       coRequisitos(),
       equivalentes(),
-      professoresCapacitados() {}
+      professoresCapacitados(),
+      dificil(false) {}
 
 const std::string& Disciplina::getId() const
 {
@@ -99,9 +100,15 @@ Disciplina::addProfessorCapacitado(Professor* professor)
     });
 }
 
+bool
+Disciplina::isDificil() const
+{
+  return dificil;
+}
+
 int Disciplina::periodoNum() const
 {
-    if (periodo == "")
+    if (periodo.empty())
         return 0;
 
     static auto pos = periodo.find('-');
@@ -112,7 +119,7 @@ int Disciplina::periodoNum() const
 
 int Disciplina::periodoMinimoNum() const
 {
-    if (periodoMinimo == "")
+    if (periodoMinimo.empty())
         return 0;
 
     static auto pos = periodoMinimo.find('-');

@@ -22,8 +22,7 @@ Solucao::Solucao(
 	int pCamadasTamanho,
 	int pPerfisTamanho,
 	const Resolucao& res,
-	Configuracao::TipoFo tipo_fo,
-    const std::unordered_map<std::string, double>& pesos
+	Configuracao::TipoFo tipo_fo
 )
     : id(aleatorio::randomInt())
     , blocosTamanho(pBlocosTamanho)
@@ -35,7 +34,6 @@ Solucao::Solucao(
     , fo(std::nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
-    , pesos_(pesos)
 {}
 
 Solucao::Solucao(const Solucao& outro)
@@ -50,7 +48,6 @@ Solucao::Solucao(const Solucao& outro)
       , fo(outro.fo)
       , res(outro.res)
       , tipo_fo(outro.tipo_fo)
-      , pesos_(outro.pesos_)
 {
     for (auto& par : outro.grades) {
         grades[par.first] = new Grade(*par.second);
@@ -72,11 +69,10 @@ std::unique_ptr<Solucao> Solucao::clone() const
 void Solucao::insertGrade(Grade* grade)
 {
     auto& alvoInsercao = grades[grade->aluno->id];
-    if (alvoInsercao) {
-        delete alvoInsercao;
-    } else {
+    if (!alvoInsercao) {
         gradesLength++;
     }
+    delete alvoInsercao;
     alvoInsercao = grade;
 }
 
@@ -105,17 +101,18 @@ Solucao::FO_t Solucao::calculaFOSomaCarga()
 Solucao::FO_t Solucao::calculaFOSoftConstraints() const
 {
   const auto& h = *horario;
+  const auto& pesos = res.pesos_soft;
 
   auto fo_ =
-    pesos_.at("Janelas") * h.contaJanelas() + 
-    pesos_.at("IntervalosTrabalho") * h.intervalosTrabalho(res.getProfessores()) + 
-    pesos_.at("NumDiasAula") * h.numDiasAula() +
-    pesos_.at("AulasSabado") * h.aulasSabado() +
-    pesos_.at("AulasSeguidas") * h.aulasSeguidas(res.getDisciplinas()) +
-    pesos_.at("AulasSeguidasDificil") * h.aulasSeguidasDificil() +
-    pesos_.at("AulaDificilUltimoHorario") * h.aulaDificilUltimoHorario() +
-    pesos_.at("PreferenciasProfessores") * h.preferenciasProfessores(res.getProfessores()) + 
-    pesos_.at("AulasProfessores") * h.aulasProfessores(res.getProfessores());
+    pesos.at("Janelas") * h.contaJanelas() + 
+    pesos.at("IntervalosTrabalho") * h.intervalosTrabalho(res.getProfessores()) + 
+    pesos.at("NumDiasAula") * h.numDiasAula() +
+    pesos.at("AulasSabado") * h.aulasSabado() +
+    pesos.at("AulasSeguidas") * h.aulasSeguidas(res.getDisciplinas()) +
+    pesos.at("AulasSeguidasDificil") * h.aulasSeguidasDificil() +
+    pesos.at("AulaDificilUltimoHorario") * h.aulaDificilUltimoHorario() +
+    pesos.at("PreferenciasProfessores") * h.preferenciasProfessores(res.getProfessores()) + 
+    pesos.at("AulasProfessores") * h.aulasProfessores(res.getProfessores());
 
   return -fo_;
 }

@@ -1,24 +1,22 @@
 #include <faptp-lib/Professor.h>
 #include <faptp-lib/Semana.h>
 
-Professor::Professor(std::string pNome) : creditoMaximo(), numDisponibilidade()
+Professor::Professor(const std::string& pNome) : creditoMaximo(), numDisponibilidade()
 {
-    std::string pId;
-
-    pId = UUID::GenerateUuid();
-
+    std::string pId = UUID::GenerateUuid();
     init(pNome, pId);
 }
 
-Professor::Professor(std::string pNome, std::string pId) : creditoMaximo(), numDisponibilidade()
+Professor::Professor(const std::string& pNome, const std::string& pId) : creditoMaximo(), numDisponibilidade()
 {
     init(pNome, pId);
 }
 
-void Professor::init(std::string pNome, std::string pId)
+void Professor::init(const std::string& pNome, const std::string& pId)
 {
     setNome(pNome);
     id = pId;
+    preferenciaNumAulas = 24;
 }
 
 std::string Professor::getId() const
@@ -36,12 +34,12 @@ std::string Professor::getNome() const
     return nome;
 }
 
-void Professor::setNome(std::string pNome)
+void Professor::setNome(const std::string& pNome)
 {
     nome = pNome;
 }
 
-constexpr bool Professor::isDiaValido(unsigned int dia)
+bool Professor::isDiaValido(int dia)
 {
     return dia < dias_semana_total;
 }
@@ -51,24 +49,24 @@ void Professor::setCreditoMaximo(int pCreditoMaximo)
     creditoMaximo = pCreditoMaximo;
 }
 
-void Professor::setDiaDisponivel(unsigned int dia, int bloco, bool value)
+void Professor::setDiaDisponivel(int dia, int bloco, bool value)
 {
     if (isDiaValido(dia)) {
         diasDisponiveis[dia][bloco] = value;
     }
 }
 
-void Professor::setDiaDisponivel(unsigned int dia, int bloco)
+void Professor::setDiaDisponivel(int dia, int bloco)
 {
     setDiaDisponivel(dia, bloco, true);
 }
 
-void Professor::unsetDiaDisponivel(unsigned int dia, int bloco)
+void Professor::unsetDiaDisponivel(int dia, int bloco)
 {
     setDiaDisponivel(dia, bloco, false);
 }
 
-bool Professor::isDiaDisponivel(unsigned int dia, int bloco) const
+bool Professor::isDiaDisponivel(int dia, int bloco) const
 {
     if (isDiaValido(dia)) {
         return diasDisponiveis[bloco][dia];
@@ -76,19 +74,37 @@ bool Professor::isDiaDisponivel(unsigned int dia, int bloco) const
     return false;
 }
 
-void Professor::addCompetencia(std::string pDisciplina, double pPeso)
+void Professor::addCompetencia(const std::string& pDisciplina, double pPeso)
 {
     competencias[pDisciplina] = pPeso;
 }
 
-bool Professor::haveCompetencia(std::string pDisciplina) const
+bool Professor::haveCompetencia(const std::string& pDisciplina) const
 {
     return competencias.count(pDisciplina) > 0;
 }
 
 int Professor::preferenciaAulas() const
 {
-    return 24;
+    return preferenciaNumAulas;
+}
+
+void
+Professor::setPreferenciaAulas(int num)
+{
+  preferenciaNumAulas = num;
+}
+
+bool
+Professor::isDiscPreferencia(const std::string& disc) const
+{
+  return preferenciasDisciplina.find(disc) != end(preferenciasDisciplina);
+}
+
+void
+Professor::addDiscPreferencia(std::string disc)
+{
+  preferenciasDisciplina.insert(std::move(disc));
 }
 
 int Professor::credito_maximo() const

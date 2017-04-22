@@ -34,7 +34,7 @@ Grade::Grade(const Grade& outro)
       , discToIndex(outro.discToIndex)
       , fo(outro.fo) {}
 
-Disciplina* Grade::getDisciplina(std::string pNomeDisciplina)
+Disciplina* Grade::getDisciplina(const std::string& pNomeDisciplina)
 {
     return disciplinasCurso[discToIndex.at(pNomeDisciplina)];
 }
@@ -177,12 +177,12 @@ bool Grade::insert2(Disciplina* pDisciplina)
     return insert(pDisciplina, {}, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar)
+bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar)
 {
     return insert(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, std::vector<ProfessorDisciplina*> professorDisciplinasIgnorar, bool force)
+bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>&, bool force)
 {
     int camada {};
     int triDimensional[3] {};
@@ -320,7 +320,7 @@ double Grade::getFO2()
 
             if (turmaAluno == turmaDisc && periodoAluno == periodoDisc
                 && !discAvaliada[nomeDisc]) {
-                discAvaliada[nomeDisc] = true;
+                discAvaliada[nomeDisc] = 1;
                 fo += 0.1;
             }
         }

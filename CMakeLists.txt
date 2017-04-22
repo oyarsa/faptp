@@ -57,6 +57,7 @@ set(faptp-lib_SOURCE
     src/faptp-lib/ILS.cpp
     src/faptp-lib/WDJU.cpp
     src/faptp-lib/HySST.cpp
+    src/faptp-lib/Semana.cpp
     )
 
 set(faptp-lib_FILES
@@ -67,23 +68,26 @@ add_library(faptp-lib ${faptp-lib_FILES})
 target_link_libraries(faptp-lib ${CONAN_LIBS})
 
 
-set(faptp_INCLUDE
-	include/faptp/experimento.h
+set(faptp-exp_INCLUDE
+	include/faptp-exp/experimento.h
 	)
 
-set(faptp_SOURCE
-	src/faptp/experimento.cpp
-	src/faptp/main.cpp)
+set(faptp-exp_SOURCE
+	src/faptp-exp/experimento.cpp
+	src/faptp-exp/main.cpp)
 
-set(faptp_FILES
-	${faptp_INCLUDE}
-	${faptp_SOURCE})
+set(faptp-exp_FILES
+	${faptp-exp_INCLUDE}
+	${faptp-exp_SOURCE})
 
-add_executable(faptp ${faptp_FILES})
+add_executable(faptp-exp ${faptp-exp_FILES})
+target_link_libraries(faptp-exp faptp-lib)
+
+add_executable(faptp src/faptp/main.cpp)
 target_link_libraries(faptp faptp-lib)
 
 if (NOT MSVC)
-    target_link_libraries(faptp pthread)
+    target_link_libraries(faptp-exp pthread)
 else()
 	# Otimizações e configuração do runtime para estático
     set(VC_OPTIMIZATIONS "/Ox /Oi /Ot /GL /arch:AVX /fp:fast")
