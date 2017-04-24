@@ -208,9 +208,10 @@ void Resolucao::carregarDadosProfessores()
         const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
         for (const auto& d_id : preferencias)
             professores[id]->addDiscPreferencia(d_id.asString());
+
         professores[id]->preferenciaNumAulas =
             jsonProfessores[k].get("preferenciaHoras", 
-                                   dias_semana_util * blocosTamanho).asInt();
+                                   professores[id]->credito_maximo()).asInt();
     }
 }
 

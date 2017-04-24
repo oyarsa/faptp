@@ -12,6 +12,9 @@
 #include <memory>
 
 #include <json/json.h>
+#include <cxxopts.hpp>
+
+constexpr auto infinito = static_cast<int>(1e9);
 
 std::unique_ptr<Solucao> wdju(Resolucao& r, const Json::Value& json)
 {
@@ -32,11 +35,11 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
     auto x = json["CruzOper"];
     if (x == "CX") return Configuracao::TipoCruzamento::ciclo;
     if (x == "OX") return Configuracao::TipoCruzamento::ordem;
-    if (x == "PMX") return Configuracao::TipoCruzamento::pmx;
+    else /* PMX */ return Configuracao::TipoCruzamento::pmx; 
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-  return std::unique_ptr<Solucao>(r.gerarHorarioAG());
+  return r.gerarHorarioAG()->clone();
 }
 
 std::unique_ptr<Solucao> sails(Resolucao& r, const Json::Value& json)
@@ -76,7 +79,7 @@ std::unique_ptr<Solucao> sails(Resolucao& r, const Json::Value& json)
   }();
 
   SA sa{ r, alfa, t0, sa_iter, sa_reaq, r.timeout() / frac_time, escolhido };
-  ILS ils{ r, 1e9, ils_pmax, ils_p0, ils_iter, r.timeout() / frac_time };
+  ILS ils{ r, infinito, ils_pmax, ils_p0, ils_iter, r.timeout() / frac_time };
   return r.gerarHorarioSA_ILS(sa, ils, r.timeout());
 }
 
@@ -119,7 +122,7 @@ void run(const std::string& conf, const std::string& input,
     .blocoTamanho(numeroHorarios)
     .camadaTamanho(numeroPeriodos)
     .perfilTamanho(numeroAlunos)
-    .timeout(timeout)
+    .timeout(timeout * 1000)
     .tipoFo(fo) };
 
   if (fo == Configuracao::TipoFo::Soma_carga) {
@@ -142,14 +145,58 @@ void run(const std::string& conf, const std::string& input,
     if (algoritmo == "AG") return ag(r, json["parametros"]);
     else if (algoritmo == "HySST") return  hysst(r, json["parametros"]);
     else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
-    else if (algoritmo == "WDJU") return wdju(r, json["parametros"]);
+    else /* WDJU */ return wdju(r, json["parametros"]);
   }();
 
   Output::writeJson(*solucao, out);
 }
 
+const auto usage = R"(
+Forma de usar: 
+  faptp -h | --help
+  faptp -i <file> -c <file> -o <file>
 
-int main()
+Onde:
+  -h, --help
+      Mostra essa mensagem de ajuda.
+
+  -i, --input
+      Arquivo JSON com os dados de entrada.
+
+  -c, --config
+      Arquivo JSON com os dados de configuração do algoritmo.
+
+  -o, --output
+      Nome do arquivo de saída a ser gerado com os resultados.
+)";
+
+int main(int argc, char* argv[])
 {
-  std::cout << "Hello world\n";
+  try {
+    cxxopts::Options options{
+      "faPTP",
+      "Geração de matrizes de horário para instituições de ensino superior privadas"
+    };
+
+    options.add_options()
+      ("h,help", "Mostrar ajuda")
+      ("i,input", "Arquivo de entrada", cxxopts::value<std::string>())
+      ("c,config", "Arquivo de configuração", cxxopts::value<std::string>())
+      ("o,output", "Arquivo de saída", cxxopts::value<std::string>());
+
+    options.parse(argc, argv);
+
+    if (options.count("help"))
+      std::cout << usage << "\n";
+    else
+      run(options["config"].as<std::string>(), 
+          options["input"].as<std::string>(),
+          options["output"].as<std::string>());
+
+    return 0;
+
+  } catch (const cxxopts::OptionException& e) {
+    std::cout << "Erro ao ler os argumentos: " << e.what() << "\n";
+    return 1;
+  }
 }
