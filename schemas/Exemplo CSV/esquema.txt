@@ -1,0 +1,56 @@
+/*
+ * Definição dos esquemas
+ *
+ * Sintaxe:
+ * # <NOME>
+ * <atributo1> : <tipo> [ -> <tabela::atributo referenciados>]
+ * <atributo2> : <tipo> [ -> <tabela::atributo referenciados>]
+ * ...
+ * <atributoN> : <tipo> [ -> <tabela::atributo referenciados>]
+ */
+
+# alunos.csv
+id : String
+periodo : String
+turma : String
+
+# cursadas.csv
+id_aluno : String -> alunos::id
+id_disc : String -> disciplinas::id
+
+# restantes.csv
+id_aluno : String -> alunos::id
+id_disc : String -> disciplinas::id
+
+# disciplinas.csv
+id : String
+capacidade : Integer
+carga : Integer
+curso : String
+nome : String
+periodo : String
+turma : String
+periodominimo : String
+ofertada : Boolean
+
+# co_requisitos.csv
+id_disc : String -> disciplinas::id
+id_corequisitos : String -> disciplinas::id
+
+# pre_requisitos.csv
+id_disc : String -> disciplinas::id
+id_prerequisitos : String -> disciplinas::id
+
+# professores.csv
+id : String
+nome : String
+
+# competencias.csv
+id_prof : String -> professores::id
+id_disc : String -> disciplinas::id
+
+# disponibilidade.csv
+id : String -> professores::id
+dia : Integer
+horario : Integer
+disponivel : Boolean
