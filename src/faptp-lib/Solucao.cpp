@@ -80,6 +80,7 @@ void Solucao::calculaFO()
 {
     switch (tipo_fo) {
     case Configuracao::TipoFo::Soma_carga: 
+        res.gerarGrade(this);
         fo = calculaFOSomaCarga();
         break;
     case Configuracao::TipoFo::Soft_constraints: 
@@ -88,10 +89,10 @@ void Solucao::calculaFO()
     }
 }
 
-Solucao::FO_t Solucao::calculaFOSomaCarga()
+Solucao::FO_t
+Solucao::calculaFOSomaCarga() const
 {
-    res.gerarGrade(this);
-	return std::accumulate(begin(grades), end(grades), FO_t{ 0 }, 
+  return std::accumulate(begin(grades), end(grades), FO_t{ 0 }, 
 		[](auto acc, auto cur) {
 			return acc + static_cast<int>(cur.second->getFO());
 		}

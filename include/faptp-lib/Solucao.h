@@ -29,7 +29,7 @@ public:
     void insertGrade(Grade* grade);
 
     void calculaFO();
-    FO_t calculaFOSomaCarga();
+    FO_t calculaFOSomaCarga() const;
     FO_t calculaFOSoftConstraints() const;
     FO_t getFO();
     FO_t getFO() const;
