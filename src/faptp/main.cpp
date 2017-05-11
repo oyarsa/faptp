@@ -125,22 +125,21 @@ void run(const std::string& conf, const std::string& input,
     .timeout(timeout * 1000)
     .tipoFo(fo) };
 
-  if (fo == Configuracao::TipoFo::Soma_carga) {
-    r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
-    r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
-    r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
-  } else {
-    auto restricoes = {
-      "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado", 
-      "AulasSeguidas", "AulasSeguidasDificil", "AulaDificilUltimoHorario",
-      "PreferenciasProfessores", "AulasProfessores"
-    };
+  r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
+  r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
+  r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
 
-    for (auto k : restricoes)
-      r.pesos_soft[k] = json["pesos"][k].asDouble();
-  }
+  auto restricoes = {
+    "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado", 
+    "AulasSeguidas", "AulasSeguidasDificil", "AulaDificilUltimoHorario",
+    "PreferenciasProfessores", "AulasProfessores"
+  };
+
+  for (auto k : restricoes)
+    r.pesos_soft[k] = json["pesos"][k].asDouble();
 
   auto algoritmo = json["algoritmo"].asString();
+
   auto solucao = [&]() {
     if (algoritmo == "AG") return ag(r, json["parametros"]);
     else if (algoritmo == "HySST") return  hysst(r, json["parametros"]);
