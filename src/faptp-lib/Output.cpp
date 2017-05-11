@@ -110,35 +110,70 @@ void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
     arquivoSaida << std::nounitbuf << saida.str() << "\n";
 }
 
-void Output::writeJson(const Solucao& solucao, const std::string& outfile)
+void
+Output::writeJson(const Solucao& solucao, const std::string& outfile)
 {
-    Json::Value raiz;
-    Json::Value periodos{Json::arrayValue};
-    auto& horario = solucao.getHorario();
+  Json::Value raiz;
+  Json::Value periodos{ Json::arrayValue };
+  auto& horario = solucao.getHorario();
 
-    for (auto c = 0; c < solucao.camadasTamanho; c++) {
-        Json::Value periodo;
-        periodo["nome"] = solucao.camada_periodo.at(c);
+  raiz["fo_grade"] = solucao.calculaFOSomaCarga();
+  raiz["fo_preferencias"] = std::abs(solucao.calculaFOSoftConstraints());
 
-        Json::Value eventos{Json::arrayValue};
-        for (auto b = 0; b < solucao.blocosTamanho; b++) {
-            for (auto d = 0; d < dias_semana_util; d++) {
-                const auto pd = horario.at(d, b, c);
-                if (pd) {
-                    Json::Value e;
-                    e["professor"] = pd->getProfessor()->getNome();
-                    e["disciplina"] = pd->getDisciplina()->getNome();
-                    e["horario"] = b;
-                    e["dia"] = d;
-                    eventos.append(e);
-                }
-            }
+  for (auto c = 0; c < solucao.camadasTamanho; c++) {
+    Json::Value periodo;
+    periodo["nome"] = solucao.camada_periodo.at(c);
+
+    Json::Value eventos{ Json::arrayValue };
+    for (auto b = 0; b < solucao.blocosTamanho; b++) {
+      for (auto d = 0; d < dias_semana_util; d++) {
+        const auto pd = horario.at(d, b, c);
+        if (pd) {
+          Json::Value e;
+          // TODO: Mudar nome para ID.
+          e["professor"] = pd->getProfessor()->getNome();
+          e["disciplina"] = pd->getDisciplina()->getNome();
+          e["horario"] = b;
+          e["dia"] = d;
+          eventos.append(e);
         }
-        periodo["eventos"] = eventos;
-        periodos.append(periodo);
+      }
     }
-    raiz["periodos"] = periodos;
+    periodo["eventos"] = eventos;
+    periodos.append(periodo);
+  }
+  raiz["periodos"] = periodos;
 
-    std::ofstream out{outfile};
-    out << raiz;
+  Json::Value alunos{ Json::arrayValue };
+  for (const auto& par : solucao.grades) {
+    Json::Value aluno;
+    const auto grade = par.second;
+
+    aluno["id"] = grade->aluno->id;
+    aluno["descricao"] = grade->aluno->id + " - " + grade->aluno->periodo;
+    aluno["fo"] = grade->getFO();
+
+    Json::Value horarios{ Json::arrayValue };
+
+    for (auto b = 0; b < solucao.blocosTamanho; b++) {
+      for (auto d = 0; d < dias_semana_util; d++) {
+        const auto pd = grade->at(d, b, 0);
+        if (pd) {
+          // TODO: Mudar nome para ID.
+          Json::Value e;
+          e["disciplina"] = pd->getDisciplina()->getNome();
+          e["dia"] = d;
+          e["horario"] = b;
+          horarios.append(e);
+        }
+      }
+    }
+
+    aluno["grade"] = horarios;
+    alunos.append(aluno);
+  }
+  raiz["alunos"] = alunos;
+
+  std::ofstream out{ outfile };
+  out << raiz;
 }

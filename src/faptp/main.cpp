@@ -147,6 +147,7 @@ void run(const std::string& conf, const std::string& input,
     else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
     else /* WDJU */ return wdju(r, json["parametros"]);
   }();
+  r.gerarGrade(solucao.get());
 
   Output::writeJson(*solucao, out);
 }
@@ -172,7 +173,6 @@ Onde:
 
 int main(int argc, char* argv[])
 {
-  std::cout << "Psiu\n";
   try {
     cxxopts::Options options{
       "faPTP",
@@ -186,7 +186,6 @@ int main(int argc, char* argv[])
       ("o,output", "Arquivo de saída", cxxopts::value<std::string>());
 
     options.parse(argc, argv);
-    std::cout << "Oi\n";
 
     if (options.count("help"))
       std::cout << usage << "\n";
