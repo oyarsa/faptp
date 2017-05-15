@@ -49,7 +49,7 @@ def ajusta_disciplinas(disciplinas):
 
 def ajusta_periodo_turma(lst):
     for d in lst:
-        d['periodo'] += f"-{d['curso']}"
+        d['periodo'] += f"-{d['turma']}:{d['curso']}"
         d['turma'] += f"-{d['curso']}"
 
 

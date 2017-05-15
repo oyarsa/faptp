@@ -253,7 +253,7 @@ void Resolucao::carregarDadosDisciplinas()
 
         disciplinas.push_back(disciplina);
         if (disciplina->ofertada) {
-            periodoXdisciplina[curso + periodo].push_back(disciplina);
+            periodoXdisciplina[curso + turma + periodo].push_back(disciplina);
         }
     }
 

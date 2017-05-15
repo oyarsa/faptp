@@ -130,9 +130,8 @@ Output::writeJson(const Solucao& solucao, const std::string& outfile)
         const auto pd = horario.at(d, b, c);
         if (pd) {
           Json::Value e;
-          // TODO: Mudar nome para ID.
-          e["professor"] = pd->getProfessor()->getNome();
-          e["disciplina"] = pd->getDisciplina()->getNome();
+          e["professor"] = pd->getProfessor()->getId();
+          e["disciplina"] = pd->getDisciplina()->getId();
           e["horario"] = b;
           e["dia"] = d;
           eventos.append(e);
@@ -159,9 +158,8 @@ Output::writeJson(const Solucao& solucao, const std::string& outfile)
       for (auto d = 0; d < dias_semana_util; d++) {
         const auto pd = grade->at(d, b, 0);
         if (pd) {
-          // TODO: Mudar nome para ID.
           Json::Value e;
-          e["disciplina"] = pd->getDisciplina()->getNome();
+          e["disciplina"] = pd->getDisciplina()->getId();
           e["dia"] = d;
           e["horario"] = b;
           horarios.append(e);
