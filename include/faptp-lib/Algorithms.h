@@ -101,13 +101,25 @@ struct SolucaoComparaMaior
     }
 };
 
-namespace std
+struct SolucaoUGreater
 {
+    bool operator()(const std::unique_ptr<Solucao>& lhs, 
+                    const std::unique_ptr<Solucao>& rhs) const
+    {
+        if (!lhs) {
+            return false;
+        }
+        if (!rhs) {
+            return true;
+        }
+        return lhs->getFO() > rhs->getFO();
+    }
+};
 
-template<>
-struct less<unique_ptr<Solucao>>
+struct SolucaoULess
 {
-    bool operator()(const unique_ptr<Solucao>& lhs, const unique_ptr<Solucao>& rhs) const
+    bool operator()(const std::unique_ptr<Solucao>& lhs, 
+                    const std::unique_ptr<Solucao>& rhs) const
     {
         if (!lhs) {
             return true;
@@ -119,8 +131,7 @@ struct less<unique_ptr<Solucao>>
     }
 };
 
-template<>
-struct less<Solucao*>
+struct SolucaoLess
 {
     bool operator()(const Solucao* lhs, const Solucao* rhs) const
     {
@@ -133,8 +144,6 @@ struct less<Solucao*>
         return lhs->getFO() < rhs->getFO();
     }
 };
-
-}
 
 inline bool pd_equals(const ProfessorDisciplina* lhs,
                       const ProfessorDisciplina* rhs)

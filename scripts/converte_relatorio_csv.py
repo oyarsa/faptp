@@ -53,10 +53,6 @@ def ajusta_periodo_turma(lst):
         d['turma'] += f"-{d['curso']}"
 
 
-def blacklist(disciplinas):
-    lst = ['1496', '1500', '1534', ]
-
-
 def main():
     alunos_file = 'alunos.csv'
     competencias_file = 'competencias.csv'
@@ -89,8 +85,6 @@ def main():
     ajusta_periodo_turma(alunos)
 
     ajusta_disciplinas(disciplinas)
-
-    blacklist(disciplinas)
 
     result = {
         'disciplinas': disciplinas,

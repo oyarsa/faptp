@@ -3472,7 +3472,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     } while (std::next_permutation(begin(eventos), end(eventos), std::less<>{}));
 
     // O resultado é a melhor solução dentre as permutações
-    auto& best = *std::max_element(begin(vizinhos), end(vizinhos), std::less<>{});
+    auto& best = *std::max_element(begin(vizinhos), end(vizinhos), SolucaoUGreater());
     return move(best);
 }
 
@@ -3497,7 +3497,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     // A representação escolhida foi a lista de adjcências
     // Os índices são inteiros de [0, 2 * camadasTamanho),
     // onde os eventos de t1 são representados em [0, camadasTamaho)
-    // e os de t2 em [camdasTamanho, 2 * camadasTamaho)
+    // e os de t2 em [camadasTamanho, 2 * camadasTamaho)
     std::vector<std::vector<int>> grafo(2 * camadasTamanho, std::vector<int>{});
 
     // A aresta é traçada entre eventos de timeslots diferentes (formando um
@@ -3536,7 +3536,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     }
 
     // Encontra solução com melhor FO
-    return std::move(*max_element(begin(solucoes), end(solucoes), std::less<>{}));
+    return std::move(*max_element(begin(solucoes), end(solucoes), SolucaoUGreater()));
 }
 
 const std::unordered_map<std::string, Professor*>& Resolucao::getProfessores() const
@@ -3670,34 +3670,38 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
 
     auto viz = std::make_unique<Solucao>(sol);
     auto& horario = *viz->horario;
-    std::vector<std::pair<int, ProfessorDisciplina*>> alocs{};
+    std::vector<std::tuple<int, int, ProfessorDisciplina*>> alocs{};
 
     // Remove os eventos dos slots atuais
     for (auto e : cadeia) {
         if (e < camadasTamanho) {
-            alocs.emplace_back(e, viz->horario->at(d_e1, b_e1, e));
+            alocs.emplace_back(e, 0, viz->horario->at(d_e1, b_e1, e));
             horario.clearSlot(d_e1, b_e1, e);
+            alocs.emplace_back(e, 1, viz->horario->at(d_e1, b_e1 + 1, e));
+            horario.clearSlot(d_e1, b_e1 + 1, e);
         } else {
-            alocs.emplace_back(e, viz->horario->at(d_e2, b_e2, e - camadasTamanho));
+            alocs.emplace_back(e, 0, viz->horario->at(d_e2, b_e2, e - camadasTamanho));
             horario.clearSlot(d_e2, b_e2, e - camadasTamanho);
+            alocs.emplace_back(e, 1, viz->horario->at(d_e2, b_e2 + 1, e - camadasTamanho));
+            horario.clearSlot(d_e2, b_e2 + 1, e - camadasTamanho);
         }
     }
 
     // Reinsere no timeslot invertido
     bool ok{false};
     for (const auto& p : alocs) {
-        int e{};
+        int e, b;
         ProfessorDisciplina* aloc{nullptr};
-        std::tie(e, aloc) = p;
+        std::tie(e, b, aloc) = p;
 
         if (!aloc) {
             continue;
         }
 
         if (e < camadasTamanho) {
-            ok = horario.insert(d_e2, b_e2, e, aloc);
+            ok = horario.insert(d_e2, b_e2 + b, e, aloc);
         } else {
-            ok = horario.insert(d_e1, b_e1, e - camadasTamanho, aloc);
+            ok = horario.insert(d_e1, b_e1 + b, e - camadasTamanho, aloc);
         }
 
         if (!ok) {
