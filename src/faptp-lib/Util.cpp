@@ -125,7 +125,7 @@ std::string Util::date_time()
 }
 
 void
-Util::logprint(std::ostream& log, std::string_view data)
+Util::logprint(std::ostream& log, const std::string& data)
 {
   log << data;
   std::cout << data;

@@ -5,7 +5,7 @@
 #include <array>
 #include <memory>
 
-#include <optional>
+#include <optional/optional.hpp>
 
 #include "Horario.h"
 #include "Grade.h"
@@ -52,7 +52,7 @@ private:
     std::unordered_map<std::string, Grade*> grades;
 
     int gradesLength;
-	std::optional<FO_t> fo;
+	std::experimental::optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
 

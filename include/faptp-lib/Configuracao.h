@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 class Configuracao
 {
@@ -48,7 +48,7 @@ public:
     };
 
     Configuracao() = default;
-    Configuracao& arquivoEntrada(std::string_view filename);
+    Configuracao& arquivoEntrada(const std::string& filename);
     Configuracao& blocoTamanho(int n);
     Configuracao& camadaTamanho(int n);
     Configuracao& perfilTamanho(int n);
@@ -100,7 +100,7 @@ private:
     TipoFo tipoFo_ = TipoFo::Soma_carga;
 };
 
-inline Configuracao& Configuracao::arquivoEntrada(std::string_view filename)
+inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
 {
     filename_ = filename;
     return *this;

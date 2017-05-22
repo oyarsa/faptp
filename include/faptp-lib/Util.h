@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define    UTIL_H
 
-#include <string_view>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -279,7 +279,7 @@ std::string date_time();
 ///
 /// @param log Stream onde `data` também será impressa.
 /// @param data Dados que serão impressos nas streams.
-void logprint(std::ostream& log, std::string_view data);
+void logprint(std::ostream& log, const std::string& data);
 
 /// Obtém o hostname do computador. Funciona apenas no Windows.
 ///

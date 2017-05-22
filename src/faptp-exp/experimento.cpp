@@ -48,8 +48,8 @@ int segundos_espera = 30;
 constexpr auto infinito = static_cast<int>(1e9);
 
 void
-upload_result(std::string_view id, std::string_view resultado,
-              int num_config, std::string_view servidor)
+upload_result(const std::string& id, const std::string& resultado,
+              int num_config, const std::string& servidor)
 {
   for (auto i = 0; i < num_tentativas_upload; i++) {
     std::this_thread::sleep_for(std::chrono::seconds(segundos_espera));
@@ -108,8 +108,8 @@ print_violacoes(const std::unordered_map<std::string, int>& m)
 }
 
 std::pair<long long, Solucao::FO_t>
-ag(std::string_view input, int n_indiv, int taxa_mut, int p_cruz,
-   std::string_view oper_cruz, int grasp_iter, int grasp_nviz,
+ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
+   const std::string& oper_cruz, int grasp_iter, int grasp_nviz,
    int grasp_alfa, int n_tour, int n_mut, long long timeout)
 {
   auto cruzamento = [&] {
@@ -150,8 +150,8 @@ ag(std::string_view input, int n_indiv, int taxa_mut, int p_cruz,
 }
 
 void
-ag_cli(std::string_view input, std::string_view file,
-       std::string_view servidor, long long timeout)
+ag_cli(const std::string& input, const std::string& file,
+       const std::string& servidor, long long timeout)
 {
   // formato entrada:
   // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
@@ -292,7 +292,7 @@ teste_tempo(int timeout_sec)
 }
 
 std::pair<long long, Solucao::FO_t>
-sa_ils(std::string_view input, int frac_time, double alfa,
+sa_ils(const std::string& input, int frac_time, double alfa,
        double t0, int sa_iter, int sa_reaq, int sa_chances,
        int ils_iter, int ils_pmax, int ils_p0, long long timeout)
 {
@@ -337,8 +337,8 @@ sa_ils(std::string_view input, int frac_time, double alfa,
 }
 
 void
-sa_ils_cli(std::string_view input, std::string_view file,
-           std::string_view servidor, long long timeout)
+sa_ils_cli(const std::string& input, const std::string& file,
+           const std::string& servidor, long long timeout)
 {
   // formato entrada:
   // ID FracTime Alfa t0 SAiter SAreaq SAchances ILSiter ILSpmax ILSp0 NExec
@@ -394,7 +394,7 @@ sa_ils_cli(std::string_view input, std::string_view file,
 }
 
 std::pair<long long, Solucao::FO_t>
-hysst(std::string_view input, int max_level, int t_start,
+hysst(const std::string& input, int max_level, int t_start,
       int t_step, int it_hc, int it_mut, long long timeout)
 {
   Resolucao r{ Configuracao()
@@ -414,8 +414,8 @@ hysst(std::string_view input, int max_level, int t_start,
 }
 
 void
-hysst_cli(std::string_view input, std::string_view file,
-          std::string_view servidor, long long timeout)
+hysst_cli(const std::string& input, const std::string& file,
+          const std::string& servidor, long long timeout)
 {
   // formato entrada:
   // ID MaxLevel TStart TStep IterHc IterMut NExec
@@ -466,7 +466,7 @@ hysst_cli(std::string_view input, std::string_view file,
 }
 
 std::pair<long long, Solucao::FO_t>
-wdju(std::string_view input, int stag_limit, double jump_factor,
+wdju(const std::string& input, int stag_limit, double jump_factor,
      long long timeout)
 {
   Resolucao r{ Configuracao()
@@ -485,8 +485,8 @@ wdju(std::string_view input, int stag_limit, double jump_factor,
 }
 
 void
-wdju_cli(std::string_view input, std::string_view file,
-         std::string_view servidor, long long timeout)
+wdju_cli(const std::string& input, const std::string& file,
+         const std::string& servidor, long long timeout)
 {
   // formato entrada:
   // ID StagLimit JumpFactor NExec
@@ -538,7 +538,7 @@ wdju_cli(std::string_view input, std::string_view file,
 
 template <typename F>
 void
-comparacao_iter(int num_exec, std::string_view nome, F heuristica)
+comparacao_iter(int num_exec, const std::string& nome, F heuristica)
 {
   constexpr auto k_headers = "Algoritmo,FO";
 

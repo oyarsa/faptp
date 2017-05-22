@@ -14,6 +14,7 @@ include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 set(faptp-lib_INCLUDE
     include/faptp-lib/Aleatorio.h
@@ -88,6 +89,9 @@ target_link_libraries(faptp faptp-lib)
 
 if (NOT MSVC)
     target_link_libraries(faptp-exp pthread)
+    set(GCC_OPTIMIZATIONS "-Ofast -march=native")
+    set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} ${GCC_OPTIMIZATIONS})
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${GCC_OPTIMIZATIONS})
 else()
 	# Otimizações e configuração do runtime para estático
     set(VC_OPTIMIZATIONS "/Ox /Oi /Ot /GL /arch:AVX /fp:fast")
@@ -96,7 +100,7 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
 	# Nível alto de warnings e compilação paralela, assim como C++17
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP /std:c++latest")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP /std:c++14")
 
 	# Link Time Codegen
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")

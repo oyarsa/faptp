@@ -48,7 +48,7 @@ Implementa os algoritmos descritos em Silva et al., 2016 e Silva e Cunha, 2017. 
   do CPLEX é necessária, assim como uma copia do repositório ModeloGrade na mesma pasta do faPTP
 
 ### Orientações
-- O código é escrito em C++17. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
+- O código é escrito em C++14. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
 - O código deve compilar sem warnings no -Wall do GCC e no /W4 do Visual Studio.
 - O código não deve gerar mensagens de erro na ferramenta Cpp Core Checker, ou no Checker do clang-tidy.
   - Exceções: o arquivo UUID.cpp, que utiliza técnicas que as Guidelines proibem, teve suas warnings suprimidas
