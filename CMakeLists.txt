@@ -1,7 +1,7 @@
 project(faPTP)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(MODELO FALSE)
 
 if (MODELO)
@@ -82,16 +82,18 @@ set(faptp-exp_FILES
 	${faptp-exp_SOURCE})
 
 add_executable(faptp-exp ${faptp-exp_FILES})
+target_link_libraries(faptp-exp ${CONAN_LIBS})
 target_link_libraries(faptp-exp faptp-lib)
 
 add_executable(faptp src/faptp/main.cpp)
+target_link_libraries(faptp ${CONAN_LIBS})
 target_link_libraries(faptp faptp-lib)
 
 if (NOT MSVC)
     target_link_libraries(faptp-exp pthread)
     set(GCC_OPTIMIZATIONS "-Ofast -march=native")
-    set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} ${GCC_OPTIMIZATIONS})
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${GCC_OPTIMIZATIONS})
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_OPTIMIZATIONS}")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${GCC_OPTIMIZATIONS}")
 else()
 	# Otimizações e configuração do runtime para estático
     set(VC_OPTIMIZATIONS "/Ox /Oi /Ot /GL /arch:AVX /fp:fast")
