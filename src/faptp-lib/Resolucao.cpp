@@ -336,7 +336,7 @@ double Resolucao::start()
 double Resolucao::start(bool input)
 {
     if (input) {
-        carregarSolucao();
+        carregarSolucaoOld();
         gerarGrade();
         return solucao->getFO();
     }
@@ -365,7 +365,7 @@ void Resolucao::setTimeout(long timeout)
   this->timeout_ = timeout;
 }
 
-void Resolucao::carregarSolucao()
+void Resolucao::carregarSolucaoOld()
 {
     const auto& jsonHorario = jsonRoot["horario"];
 
@@ -388,6 +388,39 @@ void Resolucao::carregarSolucao()
     }
 
     solucao = solucaoLeitura;
+}
+
+std::unique_ptr<Solucao>
+Resolucao::carregarSolucao(const Json::Value& horarios) 
+{
+  auto sol = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
+                                       perfisTamanho, *this, horarioTipoFo);
+
+  for (auto i = 0u; i < horarios.size(); i++) {
+    sol->camada_periodo[i] = horarios[i]["nome"].asString();
+    for (const auto& evento : horarios[i]["eventos"]) {
+      auto professor = evento["professor"].asString();
+      auto disciplina = evento["disciplina"].asString();
+      auto dia = evento["dia"].asInt();
+      auto bloco = evento["horario"].asInt();
+      auto camada = i;
+
+      auto pdId = professor + disciplina;
+      auto disc = disciplinas[disciplinasIndex[disciplina]];
+
+      sol->horario->discCamada[disc->getId()] = camada;
+
+      if (!professorDisciplinas[pdId]) {
+        professorDisciplinas[pdId] = new ProfessorDisciplina( 
+          professores[professor], disc, pdId);
+      }
+
+      auto ok = sol->horario->insert(dia, bloco, camada, professorDisciplinas[pdId]);
+      if (!ok) return nullptr;
+    }
+  }
+
+  return sol;
 }
 
 Disciplina* Resolucao::getDisciplinaByName(const std::string& nomeDisc)
@@ -1677,6 +1710,7 @@ void Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
             novaGrade = GRASP(aluno, sol);
             gradeCache = novaGrade;
         }
+        auto fo = novaGrade->getFO();
 
         sol->insertGrade(novaGrade);
     }
@@ -3754,6 +3788,18 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioHySST(HySST& hysst, int it_mut)
     tempoAlvo = hysst.tempo_fo();
 
     return s;
+}
+
+std::unique_ptr<Solucao>
+Resolucao::carregarSolucao(const std::string& file) 
+{
+  Json::Value root;
+  {
+    std::ifstream in{ file };
+    in >> root;
+  }
+
+  return carregarSolucao(root["periodos"]);
 }
 
 long long

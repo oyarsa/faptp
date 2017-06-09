@@ -52,7 +52,9 @@ public:
     Resolucao(const Configuracao& c);
     virtual ~Resolucao();
 
+    [[deprecated]]
     double start();
+    [[deprecated]]
     double start(bool input);
     long long timeout() const;
 
@@ -75,6 +77,8 @@ public:
     std::unique_ptr<Solucao> gerarHorarioHySST(
         long long tempo_total, long long tempo_mu, long long tempo_hc);
     std::unique_ptr<Solucao> gerarHorarioHySST(HySST& HySST, int it_mut);
+
+    std::unique_ptr<Solucao> carregarSolucao(const std::string& file);
 
     void gerarGrade() const;
     void gerarGrade(Solucao* pSolucao) const;
@@ -200,7 +204,9 @@ private:
     void carregarDadosDisciplinas();
     void carregarAlunoPerfis();
     void carregarDadosProfessorDisciplinas();
-    void carregarSolucao();
+    [[deprecated("Use carregarSolucao")]]
+    void carregarSolucaoOld();
+    std::unique_ptr<Solucao> carregarSolucao(const Json::Value& horarios);
 
     Disciplina* getDisciplinaByName(const std::string& nomeDisc);
     std::vector<Disciplina*> ordenarDisciplinas();

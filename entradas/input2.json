@@ -1,0 +1,636 @@
+{
+    "alunoperfis": [
+        {
+            "id": "NOVO",
+            "periodo": 1,
+            "peso": 1,
+            "restantes": [
+                "A1",
+                "B",
+                "C",
+                "D",
+                "A2",
+                "E",
+                "F"
+            ],
+            "turma": "A"
+        },
+        {
+            "id": "NOVO2",
+            "periodo": 1,
+            "peso": 1,
+            "restantes": [
+                "A1",
+                "B",
+                "C",
+                "D",
+                "A2",
+                "E",
+                "F"
+            ],
+            "turma": "A"
+        },
+        {
+            "cursadas": [
+                "B",
+                "C",
+                "D"
+            ],
+            "id": "PAU",
+            "periodo": 2,
+            "peso": 1,
+            "restantes": [
+                "A1",
+                "A2",
+                "E",
+                "F"
+            ],
+            "turma": "A"
+        },
+        {
+            "cursadas": [
+                "A1",
+                "B",
+                "C",
+                "D"
+            ],
+            "id": "PASSOU",
+            "periodo": 4,
+            "peso": 1,
+            "restantes": [
+                "A2",
+                "E",
+                "F"
+            ],
+            "turma": "B"
+        },
+        {
+            "cursadas": [
+                "C",
+                "D",
+                "E",
+                "F"
+            ],
+            "id": "GRADE",
+            "periodo": 3,
+            "peso": 1,
+            "restantes": [
+                "A1",
+                "B",
+                "A2"
+            ],
+            "turma": "A"
+        },
+        {
+            "cursadas": [
+                "A1",
+                "B",
+                "C",
+                "D",
+                "F"
+            ],
+            "id": "GRADE_PARCIAL",
+            "periodo": 3,
+            "peso": 1,
+            "restantes": [
+                "A2",
+                "E"
+            ],
+            "turma": "B"
+        }
+    ],
+    "disciplinas": [
+        {
+            "capacidade": 10,
+            "carga": 2,
+            "curso": "C",
+            "id": "A1",
+            "nome": "A1",
+            "periodo": 1,
+            "turma": "B",
+            "periodominimo": 1,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 1,
+            "curso": "C",
+            "id": "B",
+            "nome": "B",
+            "periodo": 1,
+            "turma": "A",
+            "periodominimo": 1,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 1,
+            "curso": "C",
+            "id": "C",
+            "nome": "C",
+            "periodo": 1,
+            "turma": "B",
+            "periodominimo": 1,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 1,
+            "curso": "C",
+            "id": "D",
+            "nome": "D",
+            "periodo": 1,
+            "turma": "B",
+            "periodominimo": 1,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 2,
+            "curso": "C",
+            "id": "A2",
+            "nome": "A2",
+            "periodo": 2,
+            "prerequisitos": [
+                "A1"
+            ],
+            "turma": "B",
+            "periodominimo": 2,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 2,
+            "curso": "C",
+            "id": "E",
+            "nome": "E",
+            "periodo": 1,
+            "turma": "A",
+            "periodominimo": 1,
+            "ofertada": true
+        },
+        {
+            "capacidade": 10,
+            "carga": 2,
+            "curso": "C",
+            "id": "F",
+            "nome": "F",
+            "periodo": 2,
+            "turma": "A",
+            "periodominimo": 2,
+            "ofertada": false
+        }
+    ],
+    "professores": [
+        {
+            "competencias": [
+                "A1",
+                "A2"
+            ],
+            "disponibilidade": [
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ],
+            "id": "P1",
+            "nome": "P1"
+        },
+        {
+            "competencias": [
+                "B",
+                "E",
+                "F"
+            ],
+            "disponibilidade": [
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ],
+            "id": "P2",
+            "nome": "P2"
+        },
+        {
+            "competencias": [
+                "A1",
+                "C",
+                "D"
+            ],
+            "disponibilidade": [
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ],
+            "id": "P3",
+            "nome": "P3"
+        }
+    ],
+    "professordisciplinas": [
+        {
+            "id": "A1",
+            "professor": "P1",
+            "disciplina": "A1"
+        },
+        {
+            "id": "A2",
+            "professor": "P1",
+            "disciplina": "A2"
+        },
+        {
+            "id": "B",
+            "professor": "P2",
+            "disciplina": "B"
+        },
+        {
+            "id": "E",
+            "professor": "P2",
+            "disciplina": "E"
+        },
+        {
+            "id": "F",
+            "professor": "P2",
+            "disciplina": "F"
+        },
+        {
+            "id": "C",
+            "professor": "P3",
+            "disciplina": "C"
+        },
+        {
+            "id": "D",
+            "professor": "P3",
+            "disciplina": "D"
+        }
+    ],
+    "alunos" :
+    [
+        {
+            "descricao" : "NOVO - 1",
+            "fo" : 7.1999999999999993,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "B",
+                    "horario" : 0
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "C",
+                    "horario" : 0
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "D",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 3
+                }
+            ],
+            "id" : "NOVO"
+        },
+        {
+            "descricao" : "NOVO2 - 1",
+            "fo" : 7.1999999999999993,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "B",
+                    "horario" : 0
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "C",
+                    "horario" : 0
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "D",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 3
+                }
+            ],
+            "id" : "NOVO2"
+        },
+        {
+            "descricao" : "GRADE_PARCIAL - 3",
+            "fo" : 4,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 3
+                }
+            ],
+            "id" : "GRADE_PARCIAL"
+        },
+        {
+            "descricao" : "PAU - 2",
+            "fo" : 4,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 3
+                }
+            ],
+            "id" : "PAU"
+        },
+        {
+            "descricao" : "PASSOU - 4",
+            "fo" : 4,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 3
+                }
+            ],
+            "id" : "PASSOU"
+        },
+        {
+            "descricao" : "GRADE - 3",
+            "fo" : 3,
+            "grade" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "B",
+                    "horario" : 0
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 2
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 3
+                }
+            ],
+            "id" : "GRADE"
+        }
+    ],
+    "fo_grade" : 29,
+    "fo_preferencias" : 29.501999999999999,
+    "periodos" :
+    [
+        {
+            "eventos" :
+            [
+                {
+                    "dia" : 1,
+                    "disciplina" : "B",
+                    "horario" : 0,
+                    "professor" : "P2"
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 1,
+                    "professor" : "P2"
+                },
+                {
+                    "dia" : 1,
+                    "disciplina" : "E",
+                    "horario" : 2,
+                    "professor" : "P2"
+                }
+            ],
+            "nome" : "CA1"
+        },
+        {
+            "eventos" :
+            [
+                {
+                    "dia" : 3,
+                    "disciplina" : "C",
+                    "horario" : 0,
+                    "professor" : "P3"
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "D",
+                    "horario" : 1,
+                    "professor" : "P3"
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 2,
+                    "professor" : "P1"
+                },
+                {
+                    "dia" : 3,
+                    "disciplina" : "A1",
+                    "horario" : 3,
+                    "professor" : "P1"
+                }
+            ],
+            "nome" : "CB1"
+        },
+        {
+            "eventos" :
+            [
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 2,
+                    "professor" : "P1"
+                },
+                {
+                    "dia" : 2,
+                    "disciplina" : "A2",
+                    "horario" : 3,
+                    "professor" : "P1"
+                }
+            ],
+            "nome" : "CB2"
+        }
+    ]
+}

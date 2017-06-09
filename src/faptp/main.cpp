@@ -98,7 +98,7 @@ std::unique_ptr<Solucao> hysst(Resolucao& r, const Json::Value& json)
 }
 
 void run(const std::string& conf, const std::string& input, 
-         const std::string& out)
+         const std::string& out, const std::string& mode)
 {
   Json::Value json;
   {
@@ -141,12 +141,16 @@ void run(const std::string& conf, const std::string& input,
   auto algoritmo = json["algoritmo"].asString();
 
   auto solucao = [&]() {
-    if (algoritmo == "AG") return ag(r, json["parametros"]);
+    if (mode == "grade") return r.carregarSolucao(input);
+    else if (algoritmo == "AG") return ag(r, json["parametros"]);
     else if (algoritmo == "HySST") return  hysst(r, json["parametros"]);
     else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
     else /* WDJU */ return wdju(r, json["parametros"]);
   }();
   r.gerarGrade(solucao.get());
+
+  std::cout << "Grade FO: " << solucao->calculaFOSomaCarga() << "\n";
+  std::cout << "Horario FO: " << solucao->calculaFOSoftConstraints() << "\n";
 
   Output::writeJson(*solucao, out);
 }
@@ -154,7 +158,7 @@ void run(const std::string& conf, const std::string& input,
 const auto usage = R"(
 Forma de usar: 
   faptp -h | --help
-  faptp -i <file> -c <file> -o <file>
+  faptp -i <file> -c <file> -o <file> [-m <mode>]
 
 Onde:
   -h, --help
@@ -168,6 +172,12 @@ Onde:
 
   -o, --output
       Nome do arquivo de saída a ser gerado com os resultados.
+
+  -m, --mode
+      Modo de execução: 
+        * horario : geração da matriz de horários. Default.
+        * grade : geração das grades dos alunos. A entrada deve conter
+                  o horário pronto.
 )";
 
 int main(int argc, char* argv[])
@@ -182,16 +192,23 @@ int main(int argc, char* argv[])
       ("h,help", "Mostrar ajuda")
       ("i,input", "Arquivo de entrada", cxxopts::value<std::string>())
       ("c,config", "Arquivo de configuração", cxxopts::value<std::string>())
-      ("o,output", "Arquivo de saída", cxxopts::value<std::string>());
+      ("o,output", "Arquivo de saída", cxxopts::value<std::string>())
+      ("m,mode", "Modo de execução", cxxopts::value<std::string>());
 
     options.parse(argc, argv);
 
     if (options.count("help"))
       std::cout << usage << "\n";
-    else
+    else {
+      std::string mode{ "horario" };
+      if (options.count("mode"))
+        mode = options["mode"].as<std::string>();
+
       run(options["config"].as<std::string>(), 
           options["input"].as<std::string>(),
-          options["output"].as<std::string>());
+          options["output"].as<std::string>(),
+          mode);
+    }
 
     return 0;
 

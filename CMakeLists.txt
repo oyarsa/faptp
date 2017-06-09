@@ -22,6 +22,7 @@ set(faptp-lib_INCLUDE
     include/faptp-lib/Disciplina.h
     include/faptp-lib/Grade.h
     include/faptp-lib/Horario.h
+    include/faptp-lib/Modelo.h
     include/faptp-lib/Output.h
     include/faptp-lib/Professor.h
     include/faptp-lib/ProfessorDisciplina.h
@@ -46,6 +47,7 @@ set(faptp-lib_SOURCE
     src/faptp-lib/Disciplina.cpp
     src/faptp-lib/Grade.cpp
     src/faptp-lib/Horario.cpp
+    src/faptp-lib/Modelo.cpp
     src/faptp-lib/Output.cpp
     src/faptp-lib/Professor.cpp
     src/faptp-lib/ProfessorDisciplina.cpp
