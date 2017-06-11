@@ -147,11 +147,13 @@ void run(const std::string& conf, const std::string& input,
     else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
     else /* WDJU */ return wdju(r, json["parametros"]);
   }();
+  
+  if (!solucao) {
+    Output::writeError("Solução infactível", out);
+    return;
+  }
+
   r.gerarGrade(solucao.get());
-
-  std::cout << "Grade FO: " << solucao->calculaFOSomaCarga() << "\n";
-  std::cout << "Horario FO: " << solucao->calculaFOSoftConstraints() << "\n";
-
   Output::writeJson(*solucao, out);
 }
 

@@ -175,3 +175,13 @@ Output::writeJson(const Solucao& solucao, const std::string& outfile)
   std::ofstream out{ outfile };
   out << raiz;
 }
+
+void
+Output::writeError(const std::string& msg, const std::string& outfile)
+{
+  Json::Value value;
+  value["erro"] = msg;
+
+  std::ofstream out{ outfile };
+  out << value;
+}
