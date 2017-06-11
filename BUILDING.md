@@ -15,7 +15,7 @@ Pré-requisito: Python (com pip) e Cmake (2.8+)
     > cmake -G "Visual Studio 15"
     > cmake --build . --config Release
 
-## Ubuntu 16.04 (GCC 5.4.2)
+## Ubuntu 16.04 (GCC 5.4)
 
     # apt update
     # apt install pip build-essential cmake

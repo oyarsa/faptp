@@ -37,15 +37,18 @@ Implementa os algoritmos descritos em Silva et al., 2016 e Silva e Cunha, 2017. 
 - Ejection Chain
 
 ### Dependências
-- C++17 (testado com Visual C++ 2017)
+- C++14 (testado com Visual C++ 2017 e GCC 5.4)
 - Bibliotecas:
-	- JsonCpp
-	- fmt
+  - JsonCpp
+  - fmt
   - CPR
   - CxxOpts
 	* O gerenciador de pacotes Conan é utilizado, com as dependências descritas em conanfile.txt
 - Se o modelo matemático for utilizado (configurar com MODELO = True no CMakeLists.txt), uma instalação
   do CPLEX é necessária, assim como uma copia do repositório ModeloGrade na mesma pasta do faPTP
+
+### Compilação
+Instruções de compilação no arquivo BUILDING.md.
 
 ### Orientações
 - O código é escrito em C++14. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
