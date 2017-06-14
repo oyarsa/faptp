@@ -1,158 +1,182 @@
-#include <faptp-lib/Disciplina.h>
 #include <faptp-lib/Modelo.h>
-#include <faptp-lib/Resolucao.h>
-#include <faptp-lib/Professor.h>
-#include <faptp-lib/Semana.h>
 #include <algorithm>
-#include <iterator>
+#include <limits>
+#include <numeric>
+#include <gurobi_c++.h>
 
-constexpr auto num_constraints = 9;
+namespace {
 
-Modelo::Modelo(const Resolucao& res)
-  : num_dias_{ static_cast<std::size_t>(dias_semana_util) },
-    num_horarios_{ static_cast<std::size_t>(res.getBlocosTamanho()) },
-    num_professores_{ res.getProfessores().size() },
-    num_disciplinas_{ res.getDisciplinas().size() },
-    num_camadas_{ static_cast<std::size_t>(res.getCamadasTamanho()) },
-    pesos_constraints_(num_constraints),
-    habilitado_(num_professores_, std::vector<char>(num_disciplinas_)),
-    pertence_periodo_(num_disciplinas_, std::vector<char>(num_camadas_)),
-    disponivel_(num_professores_, 
-               std::vector<std::vector<char>>(num_horarios_, 
-                                              std::vector<char>(num_dias_))),
-    dificil_(num_disciplinas_),
-    preferencia_(num_professores_, std::vector<char>(num_disciplinas_)),
-    aulas_desejadas_(num_professores_),
-    horas_contrato_(num_professores_),
-    carga_horaria_(num_disciplinas_),
-    oferecida_(num_disciplinas_, true),
-    aulas_geminadas_(num_disciplinas_)
-{
-  auto camadas = atribuir_camadas(res.getDisciplinas());
-  std::transform(begin(camadas), end(camadas), std::back_inserter(periodos_),
-                 [](auto& p) { return p.first;  });
+template <typename T>
+using Vec = std::vector<T>;
 
-  const auto& discs = res.getDisciplinas();
-  std::transform(begin(discs), end(discs), std::back_inserter(disciplinas_),
-                 [](auto& d) { return d->getId(); });
+template <typename T>
+using Vec2D = Vec<Vec<T>>;
 
-  const auto& profs = res.getProfessores();
-  std::transform(begin(profs), end(profs), std::back_inserter(professores_),
-                 [](auto& p) { return p.second->getId(); });
+template <typename T>
+using Vec3D = Vec<Vec<Vec<T>>>;
 
-  carregar_pesos(res.pesos_soft);
-  carregar_habilitacoes(discs, profs);
-  carregar_periodos(discs);
-  carregar_disponibilidade(profs);
-  carregar_dificeis(discs);
-  carregar_preferencias(discs, profs);
+template <typename T>
+using Vec4D = Vec<Vec<Vec<Vec<T>>>>;
 
-  std::transform(begin(profs), end(profs), begin(aulas_desejadas_),
-                 [](auto& p) { return p.second->preferenciaAulas(); });
-
-  std::transform(begin(profs), end(profs), begin(horas_contrato_),
-                 [](auto& p) { return p.second->credito_maximo(); });
-
-  std::transform(begin(discs), end(discs), begin(carga_horaria_),
-                 [](auto d) { return d->getCargaHoraria(); });
-
-  // Todas as disciplinas são oferecidas. `oferecidas_` é inicializado com tudo true.
-
-  std::transform(begin(discs), end(discs), begin(aulas_geminadas_),
-                 [](auto d) { return d->getCargaHoraria() / 2; });
+template <typename T, typename Func>
+Vec<T> vec(std::size_t x, Func init)
+{ 
+  auto v = Vec<T>(x);
+  std::generate(begin(v), end(v), init);
 }
 
-void
-Modelo::carregar_pesos(const std::unordered_map<std::string, double>& pesos)
-{
-  pesos_constraints_[0] = pesos.at("Janelas");
-  pesos_constraints_[1] = pesos.at("IntervalosTrabalho");
-  pesos_constraints_[2] = pesos.at("NumDiasAula");
-  pesos_constraints_[3] = pesos.at("AulasSabado");
-  pesos_constraints_[4] = pesos.at("AulasSeguidas");
-  pesos_constraints_[5] = pesos.at("AulasSeguidasDificil");
-  pesos_constraints_[6] = pesos.at("AulaDificilUltimoHorario");
-  pesos_constraints_[7] = pesos.at("PreferenciasProfessores");
-  pesos_constraints_[8] = pesos.at("AulasProfessores");
+template <typename T, typename Func>
+Vec2D<T> vec(std::size_t x, std::size_t y, Func init)
+{ 
+  return Vec2D<T>(x, vec<T>(y, init));
 }
 
-void
-Modelo::carregar_habilitacoes(
-  const std::vector<Disciplina*>& disciplinas, 
-  const std::unordered_map<std::string, Professor*>& professores)
-{
-  auto i = 0;
-  auto j = 0;
-
-  for (auto& par : professores) {
-    auto p = par.second;
-    for (auto d : disciplinas) {
-      habilitado_[i][j] = p->haveCompetencia(d->getId());
-      j++;
-    }
-    i++;
-  }
+template <typename T, typename Func>
+Vec3D<T> vec(std::size_t x, std::size_t y, std::size_t z, Func init)
+{ 
+  return Vec3D<T>(x, vec<T>(y, z, init));
 }
 
-void
-Modelo::carregar_periodos(const std::vector<Disciplina*>& disciplinas)
-{
-  auto camadas = atribuir_camadas(disciplinas);
-
-  for (auto i = 0u; i < disciplinas.size(); i++) {
-    for (auto j = 0u; i < camadas.size(); j++) {
-      pertence_periodo_[i][j] = j == camadas[disciplinas[i]->getPeriodo()];
-    }
-  }
+template <typename T, typename Func>
+Vec4D<T> vec(std::size_t w, std::size_t x, std::size_t y, 
+                  std::size_t z, Func init)
+{ 
+  return Vec4D<T>(w, vec<T>(x, y, z, init));
 }
 
-std::unordered_map<std::string, std::size_t>
-Modelo::atribuir_camadas(const std::vector<Disciplina*>& disciplinas)
-{
-  std::unordered_map<std::string, std::size_t> m;
-  auto next = 0;
-
-  for (auto d : disciplinas) {
-    if (!m[d->getPeriodo()]) m[d->getPeriodo()] = next++;
-  }
-
-  return m;
+template <typename Container>
+GRBLinExpr sum(const Container& c)
+{ 
+  return std::accumulate(begin(c), end(c), GRBLinExpr(0.0));
 }
 
-void
-Modelo::carregar_disponibilidade(
-  const std::unordered_map<std::string, Professor*>& professores)
-{
-  auto p = 0;
-  for (auto& par : professores) {
-    for (auto i = 0u; i < num_horarios_; i++) {
-      for (auto j = 0u; j < num_dias_; j++) {
-        disponivel_[p][i][j] = par.second->isDiaDisponivel(j, i);
-      }
-    }
-    p++;
-  }
+template <typename Container2D>
+GRBLinExpr sum2D(const Container2D& c)
+{ 
+  return std::accumulate(
+    begin(c), end(c), GRBLinExpr(0.0),
+    [](auto acc, const auto& el) { return acc + sum(el); });
 }
 
-void
-Modelo::carregar_dificeis(const std::vector<Disciplina*>& disciplinas)
-{
-  for (auto i = 0u; i < disciplinas.size(); i++) {
-    dificil_[i] = disciplinas[i]->isDificil();
-  }
+constexpr auto inf = std::numeric_limits<double>::infinity();
+
 }
 
-void
-Modelo::carregar_preferencias(const std::vector<Disciplina*>& disciplinas, const std::unordered_map<std::string, Professor*>& professores)
-{
-  auto i = 0;
-  auto j = 0;
+namespace gurobi {
 
-  for (auto& p : professores) {
-    for (auto d : disciplinas) {
-      preferencia_[i][j] = p.second->isDiscPreferencia(d->getId());
-      j++;
-    }
-    i++;
-  }
+GRBEnv make_env()
+{
+  return GRBEnv{ };
 }
+
+GRBModel make_model(const GRBEnv& env)
+{
+  return GRBModel{ env };
+}
+
+GRBVar add_bin_var(GRBModel& model)
+{
+  return model.addVar(0, 1, 0, GRB_BINARY);
+}
+
+GRBVar add_int_var(GRBModel& model)
+{
+  return model.addVar(0, inf, 0, GRB_INTEGER);
+}
+
+void set_min_objective(GRBModel& model, GRBLinExpr obj)
+{
+  model.setObjective(obj, GRB_MINIMIZE);
+}
+
+void add_constraint(GRBModel& model, GRBTempConstr& constr)
+{
+  model.addConstr(constr);
+}
+
+template<typename... Args>
+inline auto dvar(Args&&... args)->decltype(vec<GRBVar>(std::forward<Args>(args)...))
+{
+  return vec<GRBVar>(std::forward<Args>(args)...);
+}
+
+}
+
+
+// TODO: Mover funções genéricas para uma classe static
+// e usar a classe como parâmetro do template para o modelo
+// (a la numeric_limits<T>)
+
+#ifdef GUROBI_ENABLED
+Json::Value 
+modelo_gurobi(const DadosModelo& dados)
+{
+  using namespace gurobi; 
+
+  const auto C = dados.num_camadas();
+  const auto P = dados.num_professores();
+  const auto D = dados.num_disciplinas();
+  const auto I = dados.num_horarios();
+  const auto J = dados.num_dias();
+  const auto Ja = dados.num_horarios() - 2;
+  const auto Jb = dados.num_dias() - 2;
+  const auto pi = dados.pesos_constraints();
+
+  auto env = make_env();
+  auto model = make_model(env);
+
+  const auto bin_var = [&model]() { return add_bin_var(model); };
+  const auto int_var = [&model]() { return add_int_var(model); };
+
+  auto x = dvar(P, D, I, bin_var);
+  auto r = dvar(C, I, J, int_var);
+  auto alfa1 = dvar(Ja, C, I, J, bin_var);
+  auto alfa = dvar(C, int_var);
+  auto w = dvar(P, J, bin_var);
+  auto beta1 = dvar(Jb, P, J, bin_var);
+  auto beta = dvar(P, int_var);
+  auto g = dvar(C, J, bin_var);
+  auto gama = dvar(C, int_var);
+  auto delta = dvar(C, int_var);
+  auto epsilon = dvar(D, J, int_var);
+  auto teta = dvar(J, C, int_var);
+  auto capa = dvar(C, J, bin_var);
+  auto lambda = dvar(P, int_var);
+  auto mi = dvar(P, int_var);
+  auto Lec = dvar(P, D, bin_var);
+  auto gem = dvar(P, D, I, J, bin_var);
+
+  auto janelas = sum(alfa);
+  auto intervalos = sum(beta);
+  auto compacto = sum(gama);
+  auto sabados = sum(delta);
+  auto seguidas = sum2D(epsilon);
+  auto dificeis_seguidas = sum2D(teta);
+  auto dificeis_ultimo = sum2D(capa);
+  auto pref_disc = sum(lambda);
+  auto pref_aula = sum(mi);
+
+  auto objetivo =
+    pi[0] * janelas +
+    pi[1] * intervalos +
+    pi[2] * compacto +
+    pi[3] * sabados +
+    pi[4] * seguidas +
+    pi[5] * dificeis_seguidas +
+    pi[6] * dificeis_ultimo +
+    pi[7] * pref_disc +
+    pi[8] * pref_aula;
+
+  set_min_objective(model, objetivo);
+
+  return {};
+}
+#endif
+
+#ifdef CPLEX_ENABLED
+Json::Value 
+modelo_cplex(const DadosModelo& dados)
+{
+  return {};
+}
+#endif

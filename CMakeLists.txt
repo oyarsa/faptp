@@ -2,12 +2,16 @@ project(faPTP)
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_STANDARD 14)
-set(MODELO FALSE)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-if (MODELO)
+option(Modelo "Incluir Modelo matemático da grade" OFF)
+option(GUROBI "Utilizar solver Gurobi para gerar o horário" ON)
+option(CPLEX "Utilizar solver Gurobi para gerar o horário" OFF)
+
+if (Modelo)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
-    add_definitions(-DIL_STD -DMODELO)
+    add_definitions(-DIL_STD -DModelo)
 endif()
 
 include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
@@ -16,9 +20,15 @@ conan_basic_setup()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
+if (GUROBI)
+	include_directories($ENV{GUROBI_HOME}/include)
+	add_definitions(-DGUROBI_ENABLED)
+endif()
+
 set(faptp-lib_INCLUDE
     include/faptp-lib/Aleatorio.h
     include/faptp-lib/AlunoPerfil.h
+    include/faptp-lib/DadosModelo.h
     include/faptp-lib/Disciplina.h
     include/faptp-lib/Grade.h
     include/faptp-lib/Horario.h
@@ -44,6 +54,7 @@ set(faptp-lib_INCLUDE
 set(faptp-lib_SOURCE
     src/faptp-lib/Aleatorio.cpp
     src/faptp-lib/AlunoPerfil.cpp
+    src/faptp-lib/DadosModelo.cpp
     src/faptp-lib/Disciplina.cpp
     src/faptp-lib/Grade.cpp
     src/faptp-lib/Horario.cpp
@@ -70,6 +81,26 @@ set(faptp-lib_FILES
 add_library(faptp-lib ${faptp-lib_FILES})
 target_link_libraries(faptp-lib ${CONAN_LIBS})
 
+if(MSVC)
+	set(GUROBI_LIB_RELEASE "gurobi_c++mt2015.lib")
+	set(GUROBI_LIB_DEBUG "gurobi_c++mtd2015.lib")
+	set(GUROBI_LIB_C "gurobi70.lib")
+else()
+	set(GUROBI_LIB_RELEASE "libgurobi_c++.a")
+	set(GUROBI_LIB_DEBUG "libgurobi_c++.a")
+	set(GUROBI_LIB_C "libgurobi70.so")
+endif()
+
+set(GUROBI_LIB_RELEASE "$ENV{GUROBI_HOME}/lib/${GUROBI_LIB_RELEASE}")
+set(GUROBI_LIB_DEBUG "$ENV{GUROBI_HOME}/lib/${GUROBI_LIB_DEBUG}")
+set(GUROBI_LIB_C "$ENV{GUROBI_HOME}/lib/${GUROBI_LIB_C}")
+
+if (GUROBI)
+	target_link_libraries(faptp-lib
+		debug "${GUROBI_LIB_DEBUG}"
+		optimized "${GUROBI_LIB_RELEASE}")
+	target_link_libraries(faptp-lib "${GUROBI_LIB_C}")
+endif()
 
 set(faptp-exp_INCLUDE
 	include/faptp-exp/experimento.h
@@ -113,6 +144,6 @@ else()
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-if (MODELO)
-  target_link_libraries(faptp-lib modelo-grade-lib)
+if (Modelo)
+  target_link_libraries(faptp-lib Modelo-grade-lib)
 endif()
