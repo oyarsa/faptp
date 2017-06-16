@@ -118,6 +118,37 @@ struct Gurobi {
   }
 };
 
+/**
+  concept Solver
+
+  Tipos associados:
+    Env_t: contexto do Solver. Ex. IloEnv, GRBEnv.
+    Model_t: objeto do modelo, criado a partir do contexto.
+    Var_t: variável de decisão.
+    Expr_t: expressão, composta por constantes e variáveis de decisão
+            associadas por operadores.
+    Constr_t: restrição, formada por expressões e operadores de comparação.
+
+  Funções:
+    Env_t make_env()
+      Inicializa o solver.
+
+    Model_t make_model(const Env_t& env)
+      Cria um novo modelo a partir do contexto.
+
+    Var_t add_bin_var(Model_t& model)
+      Cria uma nova variável de decisão binária.
+
+    Var_t add_int_var(Model_t& model)
+      Cria uma nova variável de decisão inteira.
+
+    void set_min_objective(Model_t& model, Expr_t obj)
+      Configura o objetivo do modelo como minimização.
+
+    void add_constraint(Model_t& const Constr_t& constr)
+      Adiciona uma restrição ao modelo.
+*/
+
 template <typename Solver>
 Json::Value 
 solve(const DadosModelo& dados)
@@ -229,8 +260,8 @@ solve(const DadosModelo& dados)
 
   //    Restrições
   // Disponibilidade do professor
-  for (auto i : rI) {
-    for (auto j : rJ) {
+  for (auto i : rI) 
+    for (auto j : rJ) 
       for (auto p : rP) {
         auto soma = Solver::Expr_t{ 0 };
         for (auto d : rD) {
@@ -238,96 +269,66 @@ solve(const DadosModelo& dados)
         }
         Solver::add_constraint(model, soma <= A[p][i][j]);
       }
-    }
-  }
 
   // Conflito de aulas em um período
-  for (auto i : rI) {
-    for (auto j : rJ) {
+  for (auto i : rI) 
+    for (auto j : rJ) 
       for (auto c : rC) {
         auto soma = Solver::Expr_t{ 0 };
-        for (auto p : rP) {
-          for (auto d : rD) {
+        for (auto p : rP) 
+          for (auto d : rD) 
             soma += x[p][d][i][j] * H[d][c];
-          }
-        }
         Solver::add_constraint(model, soma <= 1);
       }
-    }
-  }
 
   // Capacitação do professor
-  for (auto p : rP) {
-    for (auto d : rD) {
-      for (auto i : rI) {
-        for (auto j : rJ) {
-          auto constr = x[p][d][i][j] <= h[p][d];
-          Solver::add_constraint(model, constr);
-        }
-      }
-    }
-  }
+  for (auto p : rP) 
+    for (auto d : rD) 
+      for (auto i : rI) 
+        for (auto j : rJ) 
+          Solver::add_constraint(model, x[p][d][i][j] <= h[p][d]);
 
   // Impedem que uma disciplina tenha mais de um professor associado
-  for (auto p : rP) {
-    for (auto d : rD) {
-      for (auto i : rI) { 
-        for (auto j : rJ) { 
-          auto constr = Lec[p][d] >= x[p][d][i][j];
-          Solver::add_constraint(model, constr);
-        }
-      }
-    }
-  }
+  for (auto p : rP) 
+    for (auto d : rD) 
+      for (auto i : rI)  
+        for (auto j : rJ) 
+          Solver::add_constraint(model, Lec[p][d] >= x[p][d][i][j]);
 
-  for (auto p : rP) {
+  for (auto p : rP) 
     for (auto d : rD) {
       auto soma = Solver::Expr_t{ 0 };
-      for (auto i : rI) { 
-        for (auto j : rJ) {
+      for (auto i : rI) 
+        for (auto j : rJ) 
           soma += x[p][d][i][j];
-        }
-      }
-      auto constr = Lec[p][d] <= soma;
-      Solver::add_constraint(model, constr);
+      Solver::add_constraint(model, Lec[p][d] <= soma);
     }
-  }
 
   for (auto d : rD) {
     auto soma = Solver::Expr_t{ 0 };
-    for (auto p : rP) {
+    for (auto p : rP) 
       soma += Lec[p][d];
-    }
-    auto constr = soma == O[d];
-    Solver::add_constraint(model, constr);
+    Solver::add_constraint(model, soma == O[d]);
   }
 
   // Contrato do professor
   for (auto p : rP) { 
     auto soma = Solver::Expr_t{ 0 };
-    for (auto d : rD) {
-      for (auto i : rI) {
-        for (auto j : rJ) {
+    for (auto d : rD) 
+      for (auto i : rI) 
+        for (auto j : rJ) 
           soma += x[p][d][i][j];
-        }
-      }
-    }
-    auto constr = soma <= N[p];
-    Solver::add_constraint(model, constr);
+    Solver::add_constraint(model, soma <= N[p]);
   }
 
   // Carga horária das disciplinas
   for (auto d : rD) {
     auto soma = Solver::Expr_t{ 0 };
-    for (auto p : rP) {
-      for (auto i : rI) {
-        for (auto j : rJ) {
+    for (auto p : rP) 
+      for (auto i : rI) 
+        for (auto j : rJ) 
           soma += x[p][d][i][j];
-        }
-      }
-    }
-    auto constr = soma == (K[d] * O[d]);
-    Solver::add_constraint(model, constr);
+    Solver::add_constraint(model, soma == (K[d] * O[d]));
   }
 
   return {};
