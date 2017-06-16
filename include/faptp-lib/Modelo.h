@@ -1,11 +1,12 @@
 #pragma once
 
 #include <faptp-lib/DadosModelo.h>
+#include <numeric>
 #include <json/json.h>
 #include <range/range.hpp>
 
 #ifdef GUROBI_ENABLED
-  #include <gurobi_c++.h>
+  #include <faptp-lib/Gurobi.h>
 #endif
 
 namespace detail {
@@ -22,30 +23,35 @@ using Vec3D = Vec<Vec<Vec<T>>>;
 template <typename T>
 using Vec4D = Vec<Vec<Vec<Vec<T>>>>;
 
-template <typename T, typename Func>
-Vec<T> vec(std::size_t x, Func init)
+template <typename Func>
+auto vec(std::size_t x, Func init)
 { 
+  using T = decltype(init());
   auto v = Vec<T>(x);
   std::generate(begin(v), end(v), init);
+  return v;
 }
 
-template <typename T, typename Func>
-Vec2D<T> vec(std::size_t x, std::size_t y, Func init)
+template <typename Func>
+auto vec(std::size_t x, std::size_t y, Func init)
 { 
-  return Vec2D<T>(x, vec<T>(y, init));
+  using T = decltype(init());
+  return Vec2D<T>(x, vec(y, init));
 }
 
-template <typename T, typename Func>
-Vec3D<T> vec(std::size_t x, std::size_t y, std::size_t z, Func init)
+template <typename Func>
+auto vec(std::size_t x, std::size_t y, std::size_t z, Func init)
 { 
-  return Vec3D<T>(x, vec<T>(y, z, init));
+  using T = decltype(init());
+  return Vec3D<T>(x, vec(y, z, init));
 }
 
-template <typename T, typename Func>
-Vec4D<T> vec(std::size_t w, std::size_t x, std::size_t y, 
+template <typename Func>
+auto vec(std::size_t w, std::size_t x, std::size_t y, 
                   std::size_t z, Func init)
 { 
-  return Vec4D<T>(w, vec<T>(x, y, z, init));
+  using T = decltype(init());
+  return Vec4D<T>(w, vec(x, y, z, init));
 }
 
 constexpr auto inf = std::numeric_limits<double>::infinity();
@@ -63,60 +69,8 @@ typename Solver::Expr_t sum2D(const Container2D& c)
     [](auto acc, const auto& el) { return acc + sum<Solver>(el); });
 }
 
-template<typename Solver, typename... Args>
-static auto 
-dvar(Args&&... args) 
--> decltype(detail::vec<typename Solver::Var_t>(std::forward<Args>(args)...))
-{
-  return detail::vec<typename Solver::Var_t>(std::forward<Args>(args)...);
-}
-
 } // namespace detail
 
-#ifdef GUROBI_ENABLED
-struct Gurobi {
-  using Env_t = GRBEnv;
-  using Model_t = GRBModel;
-  using Var_t = GRBVar;
-  using Expr_t = GRBLinExpr;
-  using Constr_t = GRBTempConstr;
-
-  static Env_t 
-  make_env()
-  {
-    return GRBEnv{ };
-  }
-
-  static Model_t 
-  make_model(const Env_t& env)
-  {
-    return GRBModel{ env };
-  }
-
-  static Var_t 
-  add_bin_var(Model_t& model)
-  {
-    return model.addVar(0, 1, 0, GRB_BINARY);
-  }
-
-  static Var_t 
-  add_int_var(Model_t& model)
-  {
-    return model.addVar(0, detail::inf, 0, GRB_INTEGER);
-  }
-
-  static void 
-  set_min_objective(Model_t& model, Expr_t obj)
-  {
-    model.setObjective(obj, GRB_MINIMIZE);
-  }
-
-  static void 
-  add_constraint(Model_t& model, const Constr_t& constr)
-  {
-    model.addConstr(constr);
-  }
-};
 
 /**
   concept Solver
@@ -124,7 +78,8 @@ struct Gurobi {
   Tipos associados:
     Env_t: contexto do Solver. Ex. IloEnv, GRBEnv.
     Model_t: objeto do modelo, criado a partir do contexto.
-    Var_t: variável de decisão.
+    BinVar_t: variável de decisão binária.
+    IntVar_t: variável de decisão inteira.
     Expr_t: expressão, composta por constantes e variáveis de decisão
             associadas por operadores.
     Constr_t: restrição, formada por expressões e operadores de comparação.
@@ -136,10 +91,10 @@ struct Gurobi {
     Model_t make_model(const Env_t& env)
       Cria um novo modelo a partir do contexto.
 
-    Var_t add_bin_var(Model_t& model)
+    BinVar_t add_bin_var(Model_t& model)
       Cria uma nova variável de decisão binária.
 
-    Var_t add_int_var(Model_t& model)
+    IntVar_t add_int_var(Model_t& model)
       Cria uma nova variável de decisão inteira.
 
     void set_min_objective(Model_t& model, Expr_t obj)
@@ -198,39 +153,39 @@ solve(const DadosModelo& dados)
 
   //    Variáveis de decisão
   // D agendada no horário (I, J) para o professor P
-  auto x = dvar<Solver>(P, D, I, J, bin_var);
+  auto x = vec(P, D, I, J, bin_var);
   // Se a C tem aula em (I, J)
-  auto r = dvar<Solver>(C, I, J, int_var);
+  auto r = vec(C, I, J, int_var);
   // Se existe uma janela de tamanho Ja começando em (I, J) para C
-  auto alfa1 = dvar<Solver>(Ja, C, I, J, bin_var);
+  auto alfa1 = vec(Ja, C, I, J, bin_var);
   // Número de janelas para turma C
-  auto alfa = dvar<Solver>(C, int_var);
+  auto alfa = vec(C, int_var);
   // Se o professor P dá aula em J
-  auto w = dvar<Solver>(P, J, bin_var);
+  auto w = vec(P, J, bin_var);
   // Se existe uma janela de tamanho Jb começando em J para P
-  auto beta1 = dvar<Solver>(Jb, P, J, bin_var);
+  auto beta1 = vec(Jb, P, J, bin_var);
   // Número de intervalos de trabalho para o professor P
-  auto beta = dvar<Solver>(P, int_var);
+  auto beta = vec(P, int_var);
   // Se a turma C possui aula em J
-  auto g = dvar<Solver>(C, J, bin_var);
+  auto g = vec(C, J, bin_var);
   // Número de dias de aula em C
-  auto gama = dvar<Solver>(C, int_var);
+  auto gama = vec(C, int_var);
   // Número de aulas que C tem aos sábados
-  auto delta = dvar<Solver>(C, int_var);
+  auto delta = vec(C, int_var);
   // Número de aulas seguidas de D em J
-  auto epsilon = dvar<Solver>(D, J, int_var);
+  auto epsilon = vec(D, J, int_var);
   // Número de aulas difíceis em J para C
-  auto teta = dvar<Solver>(J, C, int_var);
+  auto teta = vec(J, C, int_var);
   // Se existe aula difícil no último horário de C em J
-  auto capa = dvar<Solver>(C, J, bin_var);
+  auto capa = vec(C, J, bin_var);
   // Número de disciplinas atribuídas a P que não são de sua preferência
-  auto lambda = dvar<Solver>(P, int_var);
+  auto lambda = vec(P, int_var);
   // Número de aulas que excedem a preferência de P
-  auto mi = dvar<Solver>(P, int_var);
+  auto mi = vec(P, int_var);
   // Professor P lecionará a disciplina D
-  auto Lec = dvar<Solver>(P, D, bin_var);
+  auto Lec = vec(P, D, bin_var);
   // Indica se uma aula geminada começa em (I, J).
-  auto gem = dvar<Solver>(P, D, I, J, bin_var);
+  auto gem = vec(P, D, I, J, bin_var);
 
   //    Objetivo
   // Termos
@@ -333,7 +288,6 @@ solve(const DadosModelo& dados)
 
   return {};
 }
-#endif
 
 Json::Value
 modelo(const DadosModelo& dados)

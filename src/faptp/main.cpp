@@ -7,6 +7,9 @@
 #include <faptp-lib/Semana.h>
 #include <faptp-lib/WDJU.h>
 
+#include <faptp-lib/DadosModelo.h>
+#include <faptp-lib/Modelo.h>
+
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -124,6 +127,10 @@ void run(const std::string& conf, const std::string& input,
     .perfilTamanho(numeroAlunos)
     .timeout(timeout * 1000)
     .tipoFo(fo) };
+
+  // TODO: Remover
+  auto dados = DadosModelo{ r };
+  auto rv = modelo(dados);
 
   r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();

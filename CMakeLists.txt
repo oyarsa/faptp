@@ -51,6 +51,18 @@ set(faptp-lib_INCLUDE
     include/faptp-lib/Timer.h
     )
 
+if (GUROBI)
+	set(faptp-lib_INCLUDE 
+		${faptp-lib_INCLUDE}
+		include/faptp-lib/Gurobi.h )
+endif()
+
+if (CPLEX)
+	set(faptp-lib_INCLUDE 
+		${faptp-lib_INCLUDE}
+		include/faptp-lib/Cplex.h )
+endif()
+
 set(faptp-lib_SOURCE
     src/faptp-lib/Aleatorio.cpp
     src/faptp-lib/AlunoPerfil.cpp
@@ -58,7 +70,6 @@ set(faptp-lib_SOURCE
     src/faptp-lib/Disciplina.cpp
     src/faptp-lib/Grade.cpp
     src/faptp-lib/Horario.cpp
-    src/faptp-lib/Modelo.cpp
     src/faptp-lib/Output.cpp
     src/faptp-lib/Professor.cpp
     src/faptp-lib/ProfessorDisciplina.cpp
