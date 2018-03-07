@@ -72,6 +72,7 @@ public:
     Configuracao& numMaximoIteracoesSemEvolucaoGRASP(int n);
     Configuracao& timeout(long long t);
     Configuracao& tipoFo(TipoFo tipo);
+    Configuracao& numThreads(int n);
 private:
     friend class Resolucao;
     std::string filename_ = "input.json";
@@ -98,6 +99,7 @@ private:
     int numMaxIterSemEvoGRASP_ = 5;
     long long timeout_ = 60'000;
     TipoFo tipoFo_ = TipoFo::Soma_carga;
+    int numThreads_ = 1;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -241,5 +243,11 @@ inline Configuracao& Configuracao::timeout(long long t)
 inline Configuracao& Configuracao::tipoFo(TipoFo tipo)
 {
     tipoFo_ = tipo;
+    return *this;
+}
+
+inline Configuracao & Configuracao::numThreads(int n)
+{
+    numThreads_ = n;
     return *this;
 }

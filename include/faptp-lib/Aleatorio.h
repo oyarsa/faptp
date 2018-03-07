@@ -4,6 +4,7 @@
 namespace aleatorio
 {
 int randomInt();
+void initRandom(int numThreads);
 }
 
 #endif // ALEATORIO_H

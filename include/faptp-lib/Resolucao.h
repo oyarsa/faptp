@@ -16,6 +16,7 @@
 
 #include <json/json.h>
 #include <faptp-lib/Configuracao.h>
+#include <mutex>
 
 class Professor;
 
@@ -57,12 +58,14 @@ public:
     [[deprecated]]
     double start(bool input);
     long long timeout() const;
+    int numThreads() const;
 
     int getBlocosTamanho() const;
     const std::map<std::string, std::vector<Disciplina*>>&
         getPeriodoXDisciplinas() const;
     int getCamadasTamanho() const;
     void setTimeout(long timeout);
+    void setNumThreads(int numThreads);
 
     Solucao* gerarHorarioAG();
     Solucao* gerarHorarioAG2();
@@ -198,6 +201,7 @@ private:
     std::chrono::high_resolution_clock::time_point tempoInicio;
     std::ostringstream log;
     long long timeout_;
+    int numThreads_;
 
     void carregarDados();
     void carregarDadosProfessores();
@@ -231,7 +235,7 @@ private:
 
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop, int populacaoMax) const;
-    std::vector<Solucao*> gerarHorarioAGMutacao(std::vector<Solucao*>& pop);
+    std::vector<Solucao*> gerarHorarioAGMutacao(const std::vector<Solucao*>& pop) const;
     std::vector<Solucao*> gerarHorarioAGMutacaoExper(std::vector<Solucao*>& pop,
                                                      Configuracao::TipoMutacao tipoMut);
     Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
@@ -270,12 +274,12 @@ private:
 
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
     bool gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-                     std::unordered_map<std::string, int>& creditos_alocados_prof);
+                     std::unordered_map<std::string, int>& creditos_alocados_prof) const;
     bool geraProfessorDisciplina(Solucao* sol, Disciplina* disc,
-                                 int camada, std::unordered_map<std::string, int>& creditos_alocados_prof);
-    bool geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada);
-    std::unique_ptr<Solucao> gerarSolucaoAleatoria();
-    std::unique_ptr<Solucao> gerarSolucaoAleatoriaNotNull();
+                                 int camada, std::unordered_map<std::string, int>& creditos_alocados_prof) const;
+    bool geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada) const;
+    std::unique_ptr<Solucao> gerarSolucaoAleatoria() const;
+    std::unique_ptr<Solucao> gerarSolucaoAleatoriaNotNull() const;
 
     std::vector<Solucao*> gerarSolucoesAleatorias(int numSolucoes);
     std::vector<Solucao*> gerarSolucoesAleatorias2(int numSolucoes);
@@ -285,7 +289,7 @@ private:
     void gerarHorarioAGEvoluiPopulacaoExper(std::vector<Solucao*>& pop,
                                             Configuracao::TipoCruzamento tipoCruz,
                                             std::vector<Solucao*>& pais);
-    void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop);
+    void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop) const;
     void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& pop,
                                           Configuracao::TipoMutacao tipoMut);
     // Verifica se a nova população possui uma solução melhor que a anterior

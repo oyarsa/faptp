@@ -16,6 +16,7 @@
 
 #include <json/json.h>
 #include <cxxopts.hpp>
+#include <fmt/format.h>
 
 constexpr auto infinito = static_cast<int>(1e9);
 
@@ -42,7 +43,12 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-  return r.gerarHorarioAG()->clone();
+  Timer t;
+  auto sol = r.gerarHorarioAG()->clone();
+  const auto time = t.elapsed();
+  fmt::print("Tempo: {}ms\n", time);
+
+  return sol;
 }
 
 std::unique_ptr<Solucao> sails(Resolucao& r, const Json::Value& json)
@@ -119,6 +125,12 @@ void run(const std::string& conf, const std::string& input,
     if (x == "pref") return Configuracao::TipoFo::Soft_constraints;
     else return Configuracao::TipoFo::Soma_carga;
   }();
+  const auto numThreads = [&json]{
+    if (json.isMember("NumThreads")) {
+      return json["NumThreads"].asInt();
+    }
+    return 1;
+  }();
 
   Resolucao r{ Configuracao()
     .arquivoEntrada(input)
@@ -126,11 +138,12 @@ void run(const std::string& conf, const std::string& input,
     .camadaTamanho(numeroPeriodos)
     .perfilTamanho(numeroAlunos)
     .timeout(timeout * 1000)
-    .tipoFo(fo) };
+    .tipoFo(fo)
+    .numThreads(numThreads) };
 
-  // TODO: Remover
+  /*// TODO: Remover
   auto dados = DadosModelo{ r };
-  auto rv = modelo(dados);
+  auto rv = modelo(dados);*/
 
   r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();

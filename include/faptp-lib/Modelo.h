@@ -290,7 +290,7 @@ solve(const DadosModelo& dados)
 }
 
 Json::Value
-modelo(const DadosModelo& dados)
+inline modelo(const DadosModelo& dados)
 {
 #ifdef GUROBI_ENABLED
   return solve<Gurobi>(dados);

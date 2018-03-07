@@ -1,5 +1,7 @@
+#include <vector>
 #include <random>
 #include <chrono>
+#include <omp.h>
 
 #include <faptp-lib/Aleatorio.h>
 
@@ -35,9 +37,13 @@ private:
 };
 
 Aleatorio::Aleatorio() 
-  : dist_{ 0, max_random_ },
-    seed_{ static_cast<Seed>(Relogio::now().time_since_epoch().count()) },
-    gerador_ { seed_ } {}
+  : dist_{ 0, max_random_ }
+{
+  const auto now = Relogio::now().time_since_epoch().count();
+  const auto thread_number = omp_get_thread_num();
+  seed_ = static_cast<Seed>(now + thread_number);
+  gerador_ = std::mt19937(seed_);
+}
 
 std::mt19937 Aleatorio::geradorAleatorio() const
 {
@@ -49,9 +55,16 @@ int Aleatorio::randomInt()
     return dist_(gerador_);
 }
 
+static std::vector<Aleatorio> generators;
+
+void aleatorio::initRandom(int numThreads)
+{
+  generators = std::vector<Aleatorio>(numThreads);
+}
+
 int aleatorio::randomInt()
 {
-    static Aleatorio a;
-    return a.randomInt();
+  const auto thread_number = omp_get_thread_num();
+  return generators[thread_number].randomInt();
 }
 

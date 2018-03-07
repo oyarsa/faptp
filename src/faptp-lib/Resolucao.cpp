@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <stack>
 #include <set>
-
+#include <omp.h>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -52,24 +52,20 @@ Resolucao::Resolucao(const Configuracao& c)
       , maxIterSemEvoGrasp(c.numMaxIterSemEvoGRASP_)
       , blocosTamanho(c.blocoTam_)
       , camadasTamanho(c.camadaTam_)
+      , pesos_soft(Solucao::pesos_padrao)
       , perfisTamanho(c.perfilTam_)
       , arquivoEntrada(c.filename_)
-      , professores()
-      , disciplinas()
-      , periodoXdisciplina()
-      , alunoPerfis()
-      , professorDisciplinas()
-      , solucao(nullptr)
-      , jsonRoot()
-      , timeout_(c.timeout_)
       , horarioTipoFo(c.tipoFo_)
-      , pesos_soft(Solucao::pesos_padrao)
+      , solucao(nullptr)
+      , timeout_(c.timeout_)
+      , numThreads_(c.numThreads_)
 #ifdef MODELO
       , curso(nullptr)
       , alunos()
       , tempoLimiteModelo(c.tempoLimMod_)
 #endif
 {
+    aleatorio::initRandom(numThreads());
     carregarDados();
 }
 
@@ -85,6 +81,7 @@ Resolucao::Resolucao(int pBlocosTamanho, int pCamadasTamanho, int pPerfisTamanho
       , alunos()
 #endif
 {
+    aleatorio::initRandom(numThreads());
     carregarDados();
 }
 
@@ -105,6 +102,7 @@ Resolucao::~Resolucao()
         delete par.second;
     }
 
+    #pragma omp critical (destructor)
     for (auto& par : professorDisciplinas) {
         delete par.second;
     }
@@ -361,8 +359,13 @@ int Resolucao::getCamadasTamanho() const
 
 void Resolucao::setTimeout(long timeout)
 {
-  (void)timeout;
   this->timeout_ = timeout;
+}
+
+void
+Resolucao::setNumThreads(int numThreads)
+{
+  numThreads_ = numThreads;
 }
 
 void Resolucao::carregarSolucaoOld()
@@ -1524,22 +1527,29 @@ void Resolucao::gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop, 
     pop.resize(populacaoMax);
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(std::vector<Solucao*>& pop)
+std::vector<Solucao*> Resolucao::gerarHorarioAGMutacao(const std::vector<Solucao*>& pop) const
 {
     std::vector<Solucao*> genesX;
 
-    for (auto j = 0u; j < pop.size(); j++) {
-        const auto porcentagem = Util::randomDouble();
+    #pragma omp parallel num_threads(numThreads_)
+    {
+      std::vector<Solucao*> genes_priv;
 
-        if (porcentagem <= horarioMutacaoProbabilidade) {
-            //printf("pai: %g\n", populacao[j]->getFO());
-            auto solucaoTemp = gerarHorarioAGMutacao(pop[j]);
+      #pragma omp for nowait
+      for (auto j = 0; j < static_cast<int>(pop.size()); j++) {
+          const auto porcentagem = Util::randomDouble();
 
-            if (solucaoTemp) {
-                //printf("filho: %g\n\n", solucaoTemp->getFO());
-                genesX.push_back(solucaoTemp);
-            }
-        }
+          if (porcentagem <= horarioMutacaoProbabilidade) {
+              auto solucaoTemp = gerarHorarioAGMutacao(pop[j]);
+
+              if (solucaoTemp) {
+                  genes_priv.push_back(solucaoTemp);
+              }
+          }
+      }
+
+      #pragma omp critical (genes)
+      genesX.insert(genesX.end(), genes_priv.begin(), genes_priv.end());
     }
 
     return genesX;
@@ -1710,7 +1720,7 @@ void Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
             novaGrade = GRASP(aluno, sol);
             gradeCache = novaGrade;
         }
-        auto fo = novaGrade->getFO();
+        novaGrade->getFO();
 
         sol->insertGrade(novaGrade);
     }
@@ -2382,7 +2392,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 
 bool Resolucao::
 gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-            std::unordered_map<std::string, int>& creditos_alocados_prof)
+            std::unordered_map<std::string, int>& creditos_alocados_prof) const
 {
     auto num_discs = discs.size();
     auto num_disc_visitadas = 0u;
@@ -2412,7 +2422,7 @@ bool Resolucao::geraProfessorDisciplina(
     Disciplina* disc,
     int camada,
     std::unordered_map<std::string, int>& creditos_alocados_prof
-)
+) const
 {
     auto& profs = disc->professoresCapacitados;
     auto num_profs = profs.size();
@@ -2444,17 +2454,18 @@ bool Resolucao::geraAlocacao(
     Solucao* sol,
     Disciplina* disc,
     Professor* prof,
-    int camada)
+    int camada) const
 {
-    //puts("aloc");
-    //printf("camada: %d\n", camada);
-    //printf("disc: %s\nprof: %s\n", disc->nome.c_str(), prof->nome.c_str());
-    //printf("id: %s\n", disc->id.c_str());
-    auto pdId = "pr" + prof->id + "di" + disc->id;
-    if (!professorDisciplinas[pdId]) {
+    const auto pdId = "pr" + prof->id + "di" + disc->id;
+    ProfessorDisciplina* pd = nullptr;
+    #pragma omp critical (updateProfDisc)
+    {
+      if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
         professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
+      }
+      pd = professorDisciplinas[pdId];
     }
-    auto pd = professorDisciplinas[pdId];
+      
     sol->horario->discCamada[disc->id] = camada;
 
     auto creditos_alocados_disc = 0;
@@ -2522,7 +2533,7 @@ bool Resolucao::geraAlocacao(
     return succ;
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria()
+std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria() const
 {
     auto solucaoRnd = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
                                                 perfisTamanho, *this, horarioTipoFo);
@@ -2549,7 +2560,6 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria()
         solucaoRnd->camada_periodo[rnd_per] = it->first;
         auto& discs = it->second;
 
-        //printf("c: %s\n", it->first.c_str());
         const auto success = gerarCamada(solucaoRnd.get(), rnd_per, discs,
                                    creditos_alocados_prof);
         if (!success) {
@@ -2577,17 +2587,18 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias2(int numSolucoes)
 {
     std::vector<Solucao*> solucoes(numSolucoes);
-    for (auto& s : solucoes) {
-        s = gerarSolucaoAleatoriaNotNull().release();
+    #pragma omp parallel for num_threads(numThreads_)
+    for (auto i = 0; i < numSolucoes; i++) {
+        solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
     }
     return solucoes;
 }
 
-std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull()
+std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoriaNotNull() const
 {
     std::unique_ptr<Solucao> s {};
     while (!s) {
-        s = std::move(gerarSolucaoAleatoria());
+        s = gerarSolucaoAleatoria();
     }
     s->calculaFO();
     return s;
@@ -2623,10 +2634,18 @@ gerarHorarioAGEfetuaCruzamento(std::vector<Solucao*>& pop, int numCruz)
 {
     std::vector<Solucao*> prole {};
 
-    for (auto j = 0; j < numCruz; j++) {
-        auto parVencedor = gerarHorarioAGTorneioPar(pop);
-        auto filhos = gerarHorarioAGCruzamento(parVencedor);
-        prole.insert(end(prole), begin(filhos), end(filhos));
+    #pragma omp parallel num_threads(numThreads_)
+    {
+      std::vector<Solucao*> prole_priv;
+
+      #pragma omp for nowait
+      for (auto j = 0; j < numCruz; j++) {
+          const auto parVencedor = gerarHorarioAGTorneioPar(pop);
+          auto filhos = gerarHorarioAGCruzamento(parVencedor);
+          prole_priv.insert(end(prole_priv), begin(filhos), end(filhos));
+      }
+      #pragma omp critical (prole)
+      prole.insert(prole.end(), prole_priv.begin(), prole_priv.end());
     }
 
     Util::insert_sorted(pop, begin(prole), end(prole),
@@ -2644,7 +2663,7 @@ void Resolucao::gerarHorarioAGEvoluiPopulacaoExper(
                         SolucaoComparaMaior());
 }
 
-void Resolucao::gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop)
+void Resolucao::gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop) const
 {
     auto geneX = gerarHorarioAGMutacao(pop);
     Util::insert_sorted(pop, begin(geneX), end(geneX),
@@ -3369,14 +3388,18 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         // Remove todas as ocorrências da alocãção, guardando suas posições
         int camada{};
         tie(std::ignore, std::ignore, camada) = sol.horario->getCoords(aloc_pos);
-        auto posicoes_aloc = remove_aloc_memorizando(*viz, aloc, camada);
+        const auto posicoes_aloc = remove_aloc_memorizando(*viz, aloc, camada);
 
         // Modifica a alocação para o novo professor
-        auto pdId = "pr" + novo_prof->id + "di" + aloc->disciplina->id;
-        if (!professorDisciplinas[pdId]) {
+        const auto pdId = "pr" + novo_prof->id + "di" + aloc->disciplina->id;
+        ProfessorDisciplina* pd = nullptr;
+        #pragma omp critical (updateProfDisc)
+        {
+          if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
             professorDisciplinas[pdId] = new ProfessorDisciplina(novo_prof, aloc->disciplina);
+          }
+          pd = professorDisciplinas[pdId];
         }
-        auto pd = professorDisciplinas[pdId];
         // Reinsere com a nova alocação
         const auto ok = reinsere_alocacoes(*viz, posicoes_aloc, pd, camada);
         if (ok) {
@@ -3385,7 +3408,6 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         }
     }
 
-    //puts("ops rm");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3806,4 +3828,10 @@ long long
 Resolucao::timeout() const
 {
   return timeout_;
+}
+
+int
+Resolucao::numThreads() const
+{
+  return numThreads_;
 }
