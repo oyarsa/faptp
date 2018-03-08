@@ -102,7 +102,6 @@ Resolucao::~Resolucao()
         delete par.second;
     }
 
-    #pragma omp critical (destructor)
     for (auto& par : professorDisciplinas) {
         delete par.second;
     }
@@ -2580,7 +2579,6 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
         currSolucao->calculaFO();
         solucoes.push_back(currSolucao.release());
     }
-    //puts("\n");
     return solucoes;
 }
 

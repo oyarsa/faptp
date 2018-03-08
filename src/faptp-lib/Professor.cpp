@@ -19,7 +19,7 @@ void Professor::init(const std::string& pNome, const std::string& pId)
     preferenciaNumAulas = 24;
 }
 
-std::string Professor::getId() const
+const std::string& Professor::getId() const
 {
     return id;
 }
@@ -29,7 +29,7 @@ int Professor::getNumDisponibilidade() const
     return numDisponibilidade;
 }
 
-std::string Professor::getNome() const
+const std::string& Professor::getNome() const
 {
     return nome;
 }

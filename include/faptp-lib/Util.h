@@ -292,6 +292,12 @@ std::string get_computer_name();
 /// @returns String contendo todo o conteúdo de `file`.
 std::string read_whole_file(std::istream& file);
 
+/// Lê o valor de uma variável de ambiente.
+/// 
+/// @param var Variável de ambiente a ser lida.
+/// @return String contendo o valor da variável `var`.
+std::string get_env_var(const std::string& var);
+
 } // namespace Util
 
 #endif /* UTIL_H */

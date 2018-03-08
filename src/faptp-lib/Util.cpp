@@ -156,3 +156,14 @@ Util::read_whole_file(std::istream& file)
   return { std::istreambuf_iterator<char>{file},
            std::istreambuf_iterator<char>{} };
 }
+
+std::string
+Util::get_env_var(const std::string& var)
+{
+  const auto env_var = getenv(var.c_str());
+  if (!env_var) {
+    throw std::invalid_argument{ fmt::format("Variavel {} nao existe", var) };
+  }
+
+  return env_var;
+}

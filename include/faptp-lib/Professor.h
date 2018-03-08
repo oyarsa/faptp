@@ -20,9 +20,9 @@ public:
     Professor(const std::string& pNome);
     Professor(const std::string& pNome, const std::string& pId);
 
-    std::string getId() const;
+    const std::string& getId() const;
 
-    std::string getNome() const;
+    const std::string& getNome() const;
 
     int getNumDisponibilidade() const;
     void setNome(const std::string& pNome);
