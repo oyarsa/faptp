@@ -53,6 +53,8 @@ public:
 
     bool isDificil() const;
 
+    std::size_t id_hash() const;
+
 private:
     std::string id;
     std::string turma;
@@ -70,7 +72,13 @@ private:
     std::unordered_set<std::string> equivalentes;
     std::vector<Professor*> professoresCapacitados;
     bool dificil;
+    std::size_t idHash;
 };
+
+inline std::size_t Disciplina::id_hash() const
+{
+  return idHash;
+}
 
 #endif /* DISCIPLINA_H */
 

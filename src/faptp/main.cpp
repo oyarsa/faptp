@@ -43,10 +43,7 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-  Timer t;
   auto sol = r.gerarHorarioAG()->clone();
-  const auto time = t.elapsed();
-  fmt::print("Tempo: {}ms\n", time);
 
   return sol;
 }
@@ -177,6 +174,91 @@ void run(const std::string& conf, const std::string& input,
   Output::writeJson(*solucao, out);
 }
 
+long long average(const std::vector<long long>& timings)
+{
+  return std::accumulate(begin(timings), end(timings), 0ll) / timings.size();
+}
+
+long long median(std::vector<long long> v)
+{
+  std::nth_element(v.begin(), v.begin() + v.size()/2, v.end());
+  return v[v.size() / 2];
+}
+
+void run_many(const std::string& conf, const std::string& input,
+              const std::string& out, const std::string& mode, 
+              const int num_repetitions)
+{
+  (void) out;
+  Json::Value json;
+  {
+    std::ifstream file{ conf };
+    file >> json;
+  }
+
+  dias_semana_util = json["numeroDiasLetivos"].asInt();
+  const auto numero_horarios = json["numeroHorarios"].asInt();
+  const auto numero_alunos = json["numeroAlunos"].asInt();
+  const auto numero_periodos = json["numeroPeriodos"].asInt();
+  const auto timeout = json["tempo"].asInt();
+  const auto fo = [&json]() {
+    auto x = json["fo"].asString();
+    if (x == "pref") return Configuracao::TipoFo::Soft_constraints;
+    else return Configuracao::TipoFo::Soma_carga;
+  }();
+  const auto num_threads = [&json] {
+    if (json.isMember("NumThreads")) {
+      return json["NumThreads"].asInt();
+    }
+    return 1;
+  }();
+
+  Resolucao r{ Configuracao()
+    .arquivoEntrada(input)
+    .blocoTamanho(numero_horarios)
+    .camadaTamanho(numero_periodos)
+    .perfilTamanho(numero_alunos)
+    .timeout(timeout * 1000)
+    .tipoFo(fo)
+    .numThreads(num_threads) };
+
+  r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
+  r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
+  r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
+
+  auto restricoes = {
+    "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado",
+    "AulasSeguidas", "AulasSeguidasDificil", "AulaDificilUltimoHorario",
+    "PreferenciasProfessores", "AulasProfessores"
+  };
+
+  for (auto k : restricoes)
+    r.pesos_soft[k] = json["pesos"][k].asDouble();
+
+  auto algoritmo = json["algoritmo"].asString();
+
+  const auto run_algorithm = [&]() {
+    if (mode == "grade") return r.carregarSolucao(input);
+    else if (algoritmo == "AG") return ag(r, json["parametros"]);
+    else if (algoritmo == "HySST") return  hysst(r, json["parametros"]);
+    else if (algoritmo == "SA-ILS") return sails(r, json["parametros"]);
+    else /* WDJU */ return wdju(r, json["parametros"]);
+  };
+
+  std::vector<long long> timings(num_repetitions);
+
+  for (auto i = 0; i < num_repetitions; i++) {
+    Timer t;
+    const auto s = run_algorithm();
+    timings[i] = t.elapsed();
+    fmt::print("{}: {}ms - FO: {}\n", i, t.elapsed(), s->getFO());
+  }
+
+  fmt::print("\n");
+  fmt::print("Media  : {}\n", average(timings));
+  fmt::print("Mediana: {}\n", median(timings));
+}
+
 const auto usage = R"(
 Forma de usar: 
   faptp -h | --help
@@ -215,7 +297,8 @@ int main(int argc, char* argv[])
       ("i,input", "Arquivo de entrada", cxxopts::value<std::string>())
       ("c,config", "Arquivo de configuração", cxxopts::value<std::string>())
       ("o,output", "Arquivo de saída", cxxopts::value<std::string>())
-      ("m,mode", "Modo de execução", cxxopts::value<std::string>());
+      ("m,mode", "Modo de execução", cxxopts::value<std::string>())
+      ("r,repetitions", "Número de repetições", cxxopts::value<int>());
 
     options.parse(argc, argv);
 
@@ -226,10 +309,18 @@ int main(int argc, char* argv[])
       if (options.count("mode"))
         mode = options["mode"].as<std::string>();
 
-      run(options["config"].as<std::string>(), 
-          options["input"].as<std::string>(),
-          options["output"].as<std::string>(),
-          mode);
+      if (options.count("repetitions")) {
+        run_many(options["config"].as<std::string>(), 
+                options["input"].as<std::string>(),
+                options["output"].as<std::string>(),
+                mode, options["repetitions"].as<int>());
+      } else {
+        run(options["config"].as<std::string>(), 
+            options["input"].as<std::string>(),
+            options["output"].as<std::string>(),
+            mode);
+      }
+
     }
 
     return 0;

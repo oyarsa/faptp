@@ -202,7 +202,7 @@ bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplin
             professorDisciplinaTemp = nullptr;
 
             get3DMatrix(x, triDimensional);
-            camada = horario->discCamada[pDisciplina->id];
+            camada = horario->disc_camada_[pDisciplina->id_hash()];
 
             viavel = isViable(pDisciplina, camada);
             if (viavel) {
@@ -229,7 +229,7 @@ bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplin
 
 bool Grade::insert(Disciplina* pDisciplina)
 {
-    const auto camada = horario->discCamada[pDisciplina->id];
+    const auto camada = horario->disc_camada_[pDisciplina->id_hash()];
     const auto viavel = isViable(pDisciplina, camada);
     if (!viavel) {
         return false;

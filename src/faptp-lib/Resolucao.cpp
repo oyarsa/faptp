@@ -410,7 +410,7 @@ Resolucao::carregarSolucao(const Json::Value& horarios)
       auto pdId = professor + disciplina;
       auto disc = disciplinas[disciplinasIndex[disciplina]];
 
-      sol->horario->discCamada[disc->getId()] = camada;
+      sol->horario->disc_camada_[disc->id_hash()] = camada;
 
       if (!professorDisciplinas[pdId]) {
         professorDisciplinas[pdId] = new ProfessorDisciplina( 
@@ -2465,7 +2465,7 @@ bool Resolucao::geraAlocacao(
       pd = professorDisciplinas[pdId];
     }
       
-    sol->horario->discCamada[disc->id] = camada;
+    sol->horario->disc_camada_[disc->id_hash()] = camada;
 
     auto creditos_alocados_disc = 0;
     const auto num_slots = dias_semana_util * blocosTamanho;

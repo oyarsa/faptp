@@ -64,5 +64,15 @@ inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
     return pBloco + pDia * blocosTamanho + pCamada * blocosTamanho * dias_semana_util;
 }
 
+inline ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada) const
+{
+  return at(getPosition(pDia, pBloco, pCamada));
+}
+
+inline ProfessorDisciplina* Representacao::at(int position) const
+{
+  return matriz[position];
+}
+
 #endif /* REPRESENTACAO_H */
 

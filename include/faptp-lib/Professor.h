@@ -43,6 +43,8 @@ public:
     void addDiscPreferencia(std::string disc);
 
     int credito_maximo() const;
+
+    std::size_t id_hash() const;
 private:
     std::string id;
 
@@ -56,11 +58,19 @@ private:
     std::unordered_set<std::string> preferenciasDisciplina;
     int preferenciaNumAulas;
 
+    std::size_t idHash;
+
     void init(const std::string& pNome, const std::string& pId);
 
   static bool isDiaValido(int dia);
     void setDiaDisponivel(int dia, int bloco, bool value);
 };
+
+inline std::size_t
+Professor::id_hash() const
+{
+  return idHash;
+}
 
 #endif /* PROFESSOR_H */
 

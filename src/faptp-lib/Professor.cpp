@@ -16,6 +16,7 @@ void Professor::init(const std::string& pNome, const std::string& pId)
 {
     setNome(pNome);
     id = pId;
+    idHash = std::hash<std::string>{}(id);
     preferenciaNumAulas = 24;
 }
 

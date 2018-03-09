@@ -23,7 +23,9 @@ Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriod
       coRequisitos(),
       equivalentes(),
       professoresCapacitados(),
-      dificil(false) {}
+      dificil(false),
+      idHash(std::hash<std::string>{}(pId))
+{}
 
 const std::string& Disciplina::getId() const
 {
