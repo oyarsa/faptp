@@ -1,5 +1,5 @@
 #include <iostream>
-#include <unordered_map>
+#include <hash_map.h>
 
 #include <faptp-lib/Grade.h>
 #include <faptp-lib/Resolucao.h>
@@ -7,7 +7,7 @@
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
              const std::vector<Disciplina*>& pDisciplinasCurso,
-             const std::unordered_map<std::string, int>& pDiscToIndex)
+             const hash_map<std::string, int>& pDiscToIndex)
     : Representacao(pBlocosTamanho, 1)
       , aluno(pAlunoPerfil)
       , horario(pHorario)
@@ -74,7 +74,7 @@ Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
   for (const auto& coreq : corequisitos) {
     const auto& equivalentes = getDisciplina(coreq)->equivalentes;
 
-    const auto cursou = find_first_of(
+    const auto cursou = std::find_first_of(
       begin(equivalentes), end(equivalentes),
       begin(cursadas), end(cursadas)) != end(equivalentes);
 
@@ -108,7 +108,7 @@ Grade::havePreRequisitos(const Disciplina* const pDisciplina)
   for (const auto& prereq : pre_requisitos) {
     const auto& equivalentes = getDisciplina(prereq)->equivalentes;
     // Se não foi encontrado, retorna falso
-    const auto passou = find_first_of(
+    const auto passou = std::find_first_of(
       begin(equivalentes), end(equivalentes),
       begin(aprovadas), end(aprovadas)) != end(equivalentes);
     if (!passou) {
@@ -297,7 +297,7 @@ double Grade::getFO2()
     }
     fo = 0;
 
-    std::unordered_map<std::string, int> discAvaliada;
+    hash_map<std::string, int> discAvaliada;
     const auto turmaAluno = aluno->turma;
     const auto periodoAluno = aluno->periodo;
 

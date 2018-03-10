@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
+#include <hash_map.h>
 #include <vector>
 
 class Resolucao;
@@ -34,25 +34,25 @@ public:
   const std::vector<int>& aulas_geminadas() const;
 
 private:
-  void carregar_pesos(const std::unordered_map<std::string, double>& pesos);
+  void carregar_pesos(const hash_map<std::string, double>& pesos);
 
   void carregar_habilitacoes(
     const std::vector<Disciplina*>& disciplinas, 
-    const std::unordered_map<std::string, Professor*>& professores);
+    const hash_map<std::string, Professor*>& professores);
 
   void carregar_periodos(const std::vector<Disciplina*>& disciplinas);
 
-  static std::unordered_map<std::string, std::size_t> 
+  static hash_map<std::string, std::size_t> 
   atribuir_camadas( const std::vector<Disciplina*>& disciplinas);
 
   void carregar_disponibilidade(
-    const std::unordered_map<std::string, Professor*>& professores);
+    const hash_map<std::string, Professor*>& professores);
   
   void carregar_dificeis(const std::vector<Disciplina*>& disciplinas);
 
   void carregar_preferencias(
     const std::vector<Disciplina*>& disciplinas,
-    const std::unordered_map<std::string, Professor*>& professores);
+    const hash_map<std::string, Professor*>& professores);
 
   std::size_t num_dias_;
   std::size_t num_horarios_;

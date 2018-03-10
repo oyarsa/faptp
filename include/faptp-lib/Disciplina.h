@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <unordered_set>
+#include <hash_map.h>
 
 #include "Professor.h"
 
@@ -67,9 +67,9 @@ private:
     int capacidade;
     int alocados;
     bool ofertada;
-    std::unordered_set<std::string> preRequisitos;
-    std::unordered_set<std::string> coRequisitos;
-    std::unordered_set<std::string> equivalentes;
+    hash_set<std::string> preRequisitos;
+    hash_set<std::string> coRequisitos;
+    hash_set<std::string> equivalentes;
     std::vector<Professor*> professoresCapacitados;
     bool dificil;
     std::size_t idHash;

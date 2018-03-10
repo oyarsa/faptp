@@ -3,14 +3,13 @@
 #include <fstream>
 #include <numeric>
 #include <iostream>
-#include <unordered_map>
+#include <hash_map.h>
 #include <algorithm>
 #include <chrono>
 #include <iterator>
 #include <iomanip>
 #include <stack>
 #include <set>
-#include <omp.h>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -309,7 +308,7 @@ void Resolucao::carregarAlunoPerfis()
         const auto& restantes = alunoPerfil->restante;
         std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
             [&restantes](Disciplina* d) {
-                return find_if(begin(restantes), end(restantes),
+                return std::find_if(begin(restantes), end(restantes),
                     [&d](const std::string& x) {
                         return x == d->id;
                 }) != end(restantes);
@@ -1706,7 +1705,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(const Solucao* pSolucao) const
 
 void Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
 {
-    std::unordered_map<long long, Grade*> gradesGeradas{};
+    hash_map<long long, Grade*> gradesGeradas{};
 
     for (auto& par : alunoPerfis) {
         auto aluno = par.second;
@@ -1774,7 +1773,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 }
 
 Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-                                                      std::unordered_set<std::string>::const_iterator current)
+                                                      hash_set<std::string>::const_iterator current)
 {
     Grade* bestGrade = new Grade(*pGrade);
     Grade* currentGrade {nullptr};
@@ -2192,7 +2191,7 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 #ifdef MODELO
     auto horarioBin = converteHorario(pSolucao);
     auto total = 0.0;
-    std::unordered_map<long long, Grade*> gradesGeradas;
+    hash_map<long long, Grade*> gradesGeradas;
 
     for (const auto& aluno : alunos) {
         auto currAluno = alunoPerfis[aluno.nome()];
@@ -2293,7 +2292,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
             continue;
         }
 
-        std::unordered_set<Professor*> professoresCapacitados(
+        hash_set<Professor*> professoresCapacitados(
             begin(profDisc->disciplina->professoresCapacitados),
             end(profDisc->disciplina->professoresCapacitados));
         if (professoresCapacitados.size() < 2) {
@@ -2345,7 +2344,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
 void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
 {
     // Imprime FO e Hash de todas as soluções e determina frequência dos hashes
-    std::unordered_map<std::size_t, int> freq;
+    hash_map<std::size_t, int> freq;
     printf("iteracao: %d\n", iter);
     log << "iteracao: " << iter << "\n";
 
@@ -2391,7 +2390,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 
 bool Resolucao::
 gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-            std::unordered_map<std::string, int>& creditos_alocados_prof) const
+            hash_map<std::string, int>& creditos_alocados_prof) const
 {
     auto num_discs = discs.size();
     auto num_disc_visitadas = 0u;
@@ -2420,7 +2419,7 @@ bool Resolucao::geraProfessorDisciplina(
     Solucao* sol,
     Disciplina* disc,
     int camada,
-    std::unordered_map<std::string, int>& creditos_alocados_prof
+    hash_map<std::string, int>& creditos_alocados_prof
 ) const
 {
     auto& profs = disc->professoresCapacitados;
@@ -2536,7 +2535,7 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria() const
 {
     auto solucaoRnd = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
                                                 perfisTamanho, *this, horarioTipoFo);
-    std::unordered_map<std::string, int> creditos_alocados_prof;
+    hash_map<std::string, int> creditos_alocados_prof;
 
     auto num_periodos = periodoXdisciplina.size();
     auto num_per_visitados = 0u;
@@ -3019,7 +3018,7 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
 
 
 std::vector<std::string> Resolucao::inverterPMXRepr(
-    const std::unordered_map<std::string, std::vector<int>>& mapping
+    const hash_map<std::string, std::vector<int>>& mapping
 ) const
 {
     auto camada_tamanho = blocosTamanho * dias_semana_util;
@@ -3047,7 +3046,7 @@ Resolucao::crossoverPMXCriarRepr(
     const auto comeco_camada = pai1.horario->getPosition(0, 0, camada);
     const auto fim_camada = comeco_camada + camada_tamanho;
 
-    std::unordered_map<std::string, std::vector<int>> repr;
+    hash_map<std::string, std::vector<int>> repr;
     std::vector<int> novo_pai1(camada_tamanho);
     std::vector<int> novo_pai2(camada_tamanho);
 
@@ -3371,7 +3370,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         ProfessorDisciplina* aloc{nullptr};
         std::tie(aloc_pos, aloc) = get_random_notnull_aloc(*viz);
 
-        std::unordered_set<Professor*> professores_capacitados(
+        hash_set<Professor*> professores_capacitados(
             begin(aloc->disciplina->professoresCapacitados),
             end(aloc->disciplina->professoresCapacitados));
 
@@ -3393,7 +3392,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         ProfessorDisciplina* pd = nullptr;
         #pragma omp critical (updateProfDisc)
         {
-          if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
+          if (professorDisciplinas.find(pdId) == professorDisciplinas.end()) {
             professorDisciplinas[pdId] = new ProfessorDisciplina(novo_prof, aloc->disciplina);
           }
           pd = professorDisciplinas[pdId];
@@ -3477,7 +3476,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     auto camada = Util::randomBetween(0, camadasTamanho);
     auto viz = std::make_unique<Solucao>(sol);
 
-    std::unordered_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
+    hash_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
     std::vector<ProfessorDisciplina*> eventos(num_disc_per, nullptr);
 
     for (auto j = 0; j < num_disc_per; j++) {
@@ -3593,7 +3592,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     return std::move(*max_element(begin(solucoes), end(solucoes), SolucaoUGreater()));
 }
 
-const std::unordered_map<std::string, Professor*>& Resolucao::getProfessores() const
+const hash_map<std::string, Professor*>& Resolucao::getProfessores() const
 {
     return professores;
 }

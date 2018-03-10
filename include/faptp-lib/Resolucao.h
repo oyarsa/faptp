@@ -4,8 +4,8 @@
 #include <memory>
 #include <chrono>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include <hash_map.h>
+#include <hash_map.h>
 #include <string>
 #include <sstream>
 
@@ -53,9 +53,7 @@ public:
     Resolucao(const Configuracao& c);
     virtual ~Resolucao();
 
-    [[deprecated]]
     double start();
-    [[deprecated]]
     double start(bool input);
     long long timeout() const;
     int numThreads() const;
@@ -110,7 +108,7 @@ public:
     std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
-    const std::unordered_map<std::string, Professor*>& getProfessores() const;
+    const hash_map<std::string, Professor*>& getProfessores() const;
     const std::vector<Disciplina*>& getDisciplinas() const;
     /*
          Parâmetros da execução da solução
@@ -136,7 +134,7 @@ public:
     // FO utilizada
     Configuracao::TipoFo horarioTipoFo;
     // Mapa dos pesos das restrições
-    std::unordered_map<std::string, double> pesos_soft;
+    hash_map<std::string, double> pesos_soft;
 
     int horarioIteracao;
 
@@ -185,12 +183,12 @@ private:
     int camadasTamanho;
     int perfisTamanho;
     std::string arquivoEntrada;
-    std::unordered_map<std::string, Professor*> professores;
+    hash_map<std::string, Professor*> professores;
     std::vector<Disciplina*> disciplinas;
-    std::unordered_map<std::string, int> disciplinasIndex;
+    hash_map<std::string, int> disciplinasIndex;
     std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
-    std::unordered_map<std::string, AlunoPerfil*> alunoPerfis;
-    mutable std::unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    hash_map<std::string, AlunoPerfil*> alunoPerfis;
+    mutable hash_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
 #ifdef MODELO
@@ -208,7 +206,6 @@ private:
     void carregarDadosDisciplinas();
     void carregarAlunoPerfis();
     void carregarDadosProfessorDisciplinas();
-    [[deprecated("Use carregarSolucao")]]
     void carregarSolucaoOld();
     std::unique_ptr<Solucao> carregarSolucao(const Json::Value& horarios);
 
@@ -247,7 +244,7 @@ private:
     double gerarGradeTipoGuloso(Solucao*& pSolucao);
 
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-                                               std::unordered_set<std::string>::const_iterator current);
+                                               hash_set<std::string>::const_iterator current);
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao);
 
@@ -274,9 +271,9 @@ private:
 
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
     bool gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-                     std::unordered_map<std::string, int>& creditos_alocados_prof) const;
+                     hash_map<std::string, int>& creditos_alocados_prof) const;
     bool geraProfessorDisciplina(Solucao* sol, Disciplina* disc,
-                                 int camada, std::unordered_map<std::string, int>& creditos_alocados_prof) const;
+                                 int camada, hash_map<std::string, int>& creditos_alocados_prof) const;
     bool geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada) const;
     std::unique_ptr<Solucao> gerarSolucaoAleatoria() const;
     std::unique_ptr<Solucao> gerarSolucaoAleatoriaNotNull() const;
@@ -361,7 +358,7 @@ private:
     std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>>
         crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
     std::vector<std::string> inverterPMXRepr(
-        const std::unordered_map<std::string, std::vector<int>>& mapping) const;
+        const hash_map<std::string, std::vector<int>>& mapping) const;
     std::vector<int> crossoverPMXSwap(const std::vector<int>& pai1,
                                       const std::vector<int>& pai2,
                                       int xbegin, int xend) const;

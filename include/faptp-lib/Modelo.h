@@ -143,6 +143,12 @@ solve(const DadosModelo& dados)
   const auto& O = dados.oferecida();
   const auto& B = dados.aulas_geminadas();
 
+  // Pra silenciar warnings de variáveis não usadas
+  (void) G;
+  (void) F;
+  (void) Q;
+  (void) B;
+
   // Ambiente
   auto env = Solver::make_env();
   auto model = Solver::make_model(env);

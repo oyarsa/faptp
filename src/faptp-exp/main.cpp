@@ -87,4 +87,5 @@ main(int argc, char* argv[])
      fmt::print("Erro ao ler argumentos: {}", e.what());
      return 1;
    }
+
 }

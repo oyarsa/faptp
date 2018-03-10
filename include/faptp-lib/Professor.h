@@ -7,7 +7,7 @@
 #include <map>
 
 #include <faptp-lib/UUID.h>
-#include <unordered_set>
+#include <hash_map.h>
 
 class Professor
 {
@@ -55,7 +55,7 @@ private:
     int numDisponibilidade;
 
     std::map<std::string, double> competencias;
-    std::unordered_set<std::string> preferenciasDisciplina;
+    hash_set<std::string> preferenciasDisciplina;
     int preferenciaNumAulas;
 
     std::size_t idHash;

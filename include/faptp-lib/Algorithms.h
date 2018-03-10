@@ -2,7 +2,7 @@
 #define SORTTEMPLATE_H
 
 #include <string>
-#include <unordered_set>
+#include <hash_map.h>
 #include <faptp-lib/Disciplina.h>
 #include <faptp-lib/ProfessorDisciplina.h>
 #include <faptp-lib/Solucao.h>

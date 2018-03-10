@@ -5,7 +5,7 @@
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Aleatorio.h>
 
-const std::unordered_map<std::string, double> Solucao::pesos_padrao {
+const hash_map<std::string, double> Solucao::pesos_padrao {
   { "Janelas", 2 },
   { "IntervalosTrabalho", 1.5 },
   { "NumDiasAula", 3.5 },
@@ -134,9 +134,9 @@ Solucao::FO_t Solucao::getFO() const
     return *fo;
 }
 
-std::unordered_map<std::string, int> Solucao::reportarViolacoes() const
+hash_map<std::string, int> Solucao::reportarViolacoes() const
 {
-    std::unordered_map<std::string, int> m;
+    hash_map<std::string, int> m;
 
     m["Janelas"] = horario->contaJanelas();
     m["Intervalos"] = horario->intervalosTrabalho(res.getProfessores());

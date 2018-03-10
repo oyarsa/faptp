@@ -216,7 +216,7 @@ int Horario::intervalosTrabalhoProf(std::size_t professor) const
 }
 
 int Horario::intervalosTrabalho(
-    const std::unordered_map<std::string, Professor*>& professores
+    const hash_map<std::string, Professor*>& professores
 ) const
 {
     auto intervalos = 0;
@@ -376,12 +376,14 @@ int Horario::aulaDificilUltimoHorario() const
 int Horario::preferenciasProfessor(const Professor& professor) const
 {
     auto num = 0;
-    std::unordered_map<std::size_t, bool> percorrido;
+    hash_map<std::size_t, bool> percorrido;
 
+    // TODO: Substituir por um loop só 
     for (auto c = 0; c < camadasTamanho; c++) {
         for (auto d = 0; d < dias_semana_util; d++) {
             for (auto b = 0; b < blocosTamanho; b++) {
                 const auto pd = at(d, b, c);
+                // TODO: Quebrar essa if pra ver qual o gargalo
                 if (!pd || pd->getProfessor()->id_hash() != professor.id_hash()) {
                     continue;
                 }
@@ -401,7 +403,7 @@ int Horario::preferenciasProfessor(const Professor& professor) const
 }
 
 int Horario::preferenciasProfessores(
-    const std::unordered_map<std::string, Professor*>& professores
+    const hash_map<std::string, Professor*>& professores
 ) const
 {
     auto num = 0;
@@ -431,7 +433,7 @@ int Horario::aulasProfessor(std::size_t professor, int preferencia) const
 }
 
 int Horario::aulasProfessores(
-    const std::unordered_map<std::string, Professor*>& professores
+    const hash_map<std::string, Professor*>& professores
 ) const
 {
     auto num = 0;
@@ -441,13 +443,13 @@ int Horario::aulasProfessores(
     return num;
 }
 
-std::unordered_map<std::string, ProfessorDisciplina*>
+hash_map<std::string, ProfessorDisciplina*>
 Horario::getAlocFromDiscNames(int camada) const
 {
     const auto camada_inicio = getPosition(0, 0, camada);
     const auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
 
-    std::unordered_map<std::string, ProfessorDisciplina*> alocs;
+    hash_map<std::string, ProfessorDisciplina*> alocs;
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
         const auto pd = at(i);

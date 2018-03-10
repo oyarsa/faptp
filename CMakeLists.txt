@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 option(Modelo "Incluir Modelo matemático da grade" OFF)
 option(GUROBI "Utilizar solver Gurobi para gerar o horário" ON)
 option(CPLEX "Utilizar solver Gurobi para gerar o horário" OFF)
+option(TSL_Robin "Utilizar hash map tsl::robin" ON)
 
 if (Modelo)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
@@ -23,6 +24,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 if (GUROBI)
 	include_directories($ENV{GUROBI_HOME}/include)
 	add_definitions(-DGUROBI_ENABLED)
+endif()
+
+if (TSL_Robin)
+    add_definitions(-DUSE_TSL_ROBIN_MAP)
 endif()
 
 set(faptp-lib_INCLUDE
@@ -49,6 +54,7 @@ set(faptp-lib_INCLUDE
     include/faptp-lib/WDJU.h
     include/faptp-lib/HySST.h
     include/faptp-lib/Timer.h
+    include/hash_map.h
     )
 
 if (GUROBI)
@@ -145,13 +151,13 @@ else()
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT ${VC_OPTIMIZATIONS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
-	# Nível alto de warnings e compilação paralela, assim como C++17
+	# Nível alto de warnings e compilação paralela, assim como C++14
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP /std:c++14")
 
 	# Link Time Codegen
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG")
-	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG /ignore:4075")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG /ignore:4075")
+	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG /ignore:4075")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 

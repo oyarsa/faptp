@@ -2,7 +2,7 @@
 #define    ALUNOPERFIL_H
 
 #include <string>
-#include <unordered_set>
+#include <hash_map.h>
 
 #include <faptp-lib/Disciplina.h>
 
@@ -43,9 +43,9 @@ private:
     std::string periodo;
     double peso;
     long long hash;
-    std::unordered_set<std::string> cursadas;
-    std::unordered_set<std::string> aprovadas;
-    std::unordered_set<std::string> restante;
+    hash_set<std::string> cursadas;
+    hash_set<std::string> aprovadas;
+    hash_set<std::string> restante;
     std::vector<Disciplina*> restanteOrd;
 };
 

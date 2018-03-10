@@ -1,7 +1,7 @@
 #ifndef HORARIO_H
 #define HORARIO_H
 
-#include <unordered_map>
+#include <hash_map.h>
 #include "Representacao.h"
 
 class Horario : public Representacao
@@ -21,25 +21,25 @@ public:
     bool insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force) override;
     void clearSlot(int pDia, int pBloco, int pCamada) override;
     void clearCamada(int camada);
-    std::unordered_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
+    hash_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
 
     std::size_t getHash();
 
     int contaJanelas() const;
-    int intervalosTrabalho(const std::unordered_map<std::string, Professor*>& professores) const;
+    int intervalosTrabalho(const hash_map<std::string, Professor*>& professores) const;
     int numDiasAula() const;
     int aulasSabado() const;
     int aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const;
     int aulasSeguidasDificil() const;
     int aulaDificilUltimoHorario() const;
     int preferenciasProfessores(
-        const std::unordered_map<std::string, Professor*>& professores) const;
+        const hash_map<std::string, Professor*>& professores) const;
     int aulasProfessores(
-        const std::unordered_map<std::string, Professor*>& professores) const;
+        const hash_map<std::string, Professor*>& professores) const;
 private:
-    std::unordered_map<std::size_t, int> disc_camada_;
-    std::unordered_map<std::size_t, int> creditos_alocados_disc_;
-    std::unordered_map<std::size_t, int> creditos_alocados_prof_;
+    hash_map<std::size_t, int> disc_camada_;
+    hash_map<std::size_t, int> creditos_alocados_disc_;
+    hash_map<std::size_t, int> creditos_alocados_prof_;
     std::size_t hash_;
 
     int contaJanelasDia(int dia, int camada) const;
