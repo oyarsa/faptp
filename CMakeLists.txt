@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 option(Modelo "Incluir Modelo matemático da grade" OFF)
 option(GUROBI "Utilizar solver Gurobi para gerar o horário" ON)
 option(CPLEX "Utilizar solver Gurobi para gerar o horário" OFF)
-option(TSL_Robin "Utilizar hash map tsl::robin" ON)
+option(TSL_Hash "Utilizar hash map externo" ON)
 
 if (Modelo)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
@@ -26,8 +26,8 @@ if (GUROBI)
 	add_definitions(-DGUROBI_ENABLED)
 endif()
 
-if (TSL_Robin)
-    add_definitions(-DUSE_TSL_ROBIN_MAP)
+if (TSL_Hash)
+    add_definitions(-DUSE_TSL_HASHMAP)
 endif()
 
 set(faptp-lib_INCLUDE

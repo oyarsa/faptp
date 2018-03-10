@@ -373,63 +373,46 @@ int Horario::aulaDificilUltimoHorario() const
     return num;
 }
 
-int Horario::preferenciasProfessor(const Professor& professor) const
+int Horario::preferenciasProfessores() const
 {
     auto num = 0;
-    hash_map<std::size_t, bool> percorrido;
+    const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
 
-    // TODO: Substituir por um loop só 
-    for (auto c = 0; c < camadasTamanho; c++) {
-        for (auto d = 0; d < dias_semana_util; d++) {
-            for (auto b = 0; b < blocosTamanho; b++) {
-                const auto pd = at(d, b, c);
-                // TODO: Quebrar essa if pra ver qual o gargalo
-                if (!pd || pd->getProfessor()->id_hash() != professor.id_hash()) {
-                    continue;
-                }
+    hash_set<std::size_t> percorrido;
 
-                const auto& disc = pd->getDisciplina()->id_hash();
-                if (percorrido[disc]) {
-                    continue;
-                }
+    for (auto i = 0; i < matrix_size; i++) {
+      const auto pd = at(i);
+      if (!pd) {
+        continue;
+      }
 
-                percorrido[disc] = true;
-                num += !professor.isDiscPreferencia(pd->getDisciplina()->getId());
-            }
-        }
-    }
+      const auto professor = pd->getProfessor();
+      const auto disc = pd->getDisciplina()->id_hash();
 
-    return num;
-}
+      if (percorrido.count(disc)) {
+        continue;
+      }
 
-int Horario::preferenciasProfessores(
-    const hash_map<std::string, Professor*>& professores
-) const
-{
-    auto num = 0;
-    for (const auto& p : professores) {
-        num += preferenciasProfessor(*p.second);
+      percorrido.insert(disc);
+      num += !professor->isDiscPreferencia(pd->getDisciplina()->getId());
     }
     return num;
 }
 
-int Horario::aulasProfessor(std::size_t professor, int preferencia) const
+int Horario::aulasProfessor(const std::size_t professor, const int preferencia) const
 {
-    auto num = 0;
+  const auto matrix_size = camadasTamanho * dias_semana_util*blocosTamanho;
+  auto num = 0;
 
-    for (auto c = 0; c < camadasTamanho; c++) {
-        for (auto d = 0; d < dias_semana_util; d++) {
-            for (auto b = 0; b < blocosTamanho; b++) {
-                const auto pd = at(d, b, c);
-                if (pd && pd->getProfessor()->id_hash() == professor) {
-                    num++;
-                }
-            }
-        }
+  for (auto i = 0; i < matrix_size; i++) {
+    const auto pd = at(i);
+    if (pd && pd->getProfessor()->id_hash() == professor) {
+      num++;
     }
+  }
 
-    const auto excesso = num - preferencia;
-    return std::max(excesso, 0);
+  const auto excesso = num - preferencia;
+  return std::max(excesso, 0);
 }
 
 int Horario::aulasProfessores(

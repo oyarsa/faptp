@@ -80,5 +80,71 @@ inline std::size_t Disciplina::id_hash() const
   return idHash;
 }
 
+inline const std::string& Disciplina::getId() const
+{
+  return id;
+}
+
+inline const std::string& Disciplina::getNome() const
+{
+  return nome;
+}
+
+inline void Disciplina::setNome(const std::string& pNome)
+{
+  nome = pNome;
+}
+
+inline const std::string& Disciplina::getPeriodo()
+{
+  return periodo;
+}
+
+inline void Disciplina::setPeriodo(const std::string& pPeriodo)
+{
+  periodo = pPeriodo;
+}
+
+inline const std::string& Disciplina::getCurso()
+{
+  return curso;
+}
+
+inline void Disciplina::setCurso(const std::string& pCurso)
+{
+  curso = pCurso;
+}
+
+inline int Disciplina::getCargaHoraria() const
+{
+  return cargaHoraria;
+}
+
+inline void Disciplina::setCargaHoraria(int pCargaHoraria)
+{
+  cargaHoraria = pCargaHoraria;
+}
+
+inline int Disciplina::getAulasSemana()
+{
+  return aulasSemana;
+}
+
+inline int Disciplina::getCreditos()
+{
+  return getAulasSemana();
+}
+
+inline void Disciplina::addPreRequisito(const std::string& pDisciplina)
+{
+  preRequisitos.insert(pDisciplina);
+}
+
+inline bool Disciplina::isPreRequisito(const std::string& pDisciplina)
+{
+  return preRequisitos.find(pDisciplina) != end(preRequisitos);
+}
+
+
 #endif /* DISCIPLINA_H */
 

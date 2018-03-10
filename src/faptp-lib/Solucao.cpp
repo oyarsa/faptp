@@ -112,7 +112,7 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
     pesos.at("AulasSeguidas") * h.aulasSeguidas(res.getDisciplinas()) +
     pesos.at("AulasSeguidasDificil") * h.aulasSeguidasDificil() +
     pesos.at("AulaDificilUltimoHorario") * h.aulaDificilUltimoHorario() +
-    pesos.at("PreferenciasProfessores") * h.preferenciasProfessores(res.getProfessores()) + 
+    pesos.at("PreferenciasProfessores") * h.preferenciasProfessores() + 
     pesos.at("AulasProfessores") * h.aulasProfessores(res.getProfessores());
 
   return -fo_;
@@ -145,7 +145,7 @@ hash_map<std::string, int> Solucao::reportarViolacoes() const
     m["Seguidas"] = horario->aulasSeguidas(res.getDisciplinas());
     m["Seguidas Dificil"] = horario->aulasSeguidasDificil();
     m["Dificil Ultimo Horario"] = horario->aulaDificilUltimoHorario();
-    m["Preferencias disc"] = horario->preferenciasProfessores(res.getProfessores());
+    m["Preferencias disc"] = horario->preferenciasProfessores();
     m["Preferencias aulas"] = horario->aulasProfessores(res.getProfessores());
 
     return m;

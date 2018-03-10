@@ -26,5 +26,18 @@ private:
     Disciplina* disciplina;
 };
 
+
+inline Disciplina* ProfessorDisciplina::getDisciplina() const
+{
+    return disciplina;
+}
+
+inline Professor* ProfessorDisciplina::getProfessor() const
+{
+    return professor;
+}
+
+
+
 #endif /* PROFESSORDISCIPLINA_H */
 

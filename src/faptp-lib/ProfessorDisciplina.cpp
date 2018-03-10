@@ -11,14 +11,3 @@ ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor,
     : id(pId)
       , professor(pProfessor)
       , disciplina(pDisciplina) {}
-
-Disciplina* ProfessorDisciplina::getDisciplina() const
-{
-    return disciplina;
-}
-
-Professor* ProfessorDisciplina::getProfessor() const
-{
-    return professor;
-}
-

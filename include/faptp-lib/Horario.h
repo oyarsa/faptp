@@ -32,8 +32,7 @@ public:
     int aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const;
     int aulasSeguidasDificil() const;
     int aulaDificilUltimoHorario() const;
-    int preferenciasProfessores(
-        const hash_map<std::string, Professor*>& professores) const;
+    int preferenciasProfessores() const;
     int aulasProfessores(
         const hash_map<std::string, Professor*>& professores) const;
 private:
@@ -61,8 +60,6 @@ private:
 
     bool aulaDificilUltimoHorarioDia(int dia, int camada) const;
     int aulaDificilUltimoHorarioCamada(int camada) const;
-
-    int preferenciasProfessor(const Professor& professor) const;
 
     int aulasProfessor(std::size_t professor, int preferencia) const;
 };
