@@ -624,15 +624,44 @@ Solucao* Resolucao::gerarHorarioAG()
     auto iter = 0;
 
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
-        ultimaIteracao = iter;
-        //logPopulacao(populacao, iter);
+      ultimaIteracao = iter;
+      //logPopulacao(populacao, iter);
 
-        gerarHorarioAGEfetuaCruzamento(populacao, numCruz);
-        gerarHorarioAGEfetuaMutacao(populacao);
-        gerarHorarioAGSobrevivenciaElitismo(populacao);
-        gerarHorarioAGVerificaEvolucao(populacao, iter);
+      #pragma omp parallel num_threads(numThreads_)
+      {
+        std::vector<Solucao*> prole;
 
-        iter++;
+        #pragma omp for nowait
+        for (auto i = 0; i < numCruz; i++) {
+          // Cruzamento
+          const auto pais = gerarHorarioAGTorneioPar(populacao);
+          auto filhos = gerarHorarioAGCruzamento(pais);
+
+          // Mutação
+          for (auto j = 0u; j < filhos.size(); j++) {
+            const auto chance = Util::randomDouble();
+            if (chance <= horarioMutacaoProbabilidade) {
+              auto s = gerarHorarioAGMutacao(filhos[j]);
+              if (s) {
+                delete filhos[j];
+                filhos[j] = s;
+              }
+            }
+          }
+
+          prole.insert(prole.end(), filhos.begin(), filhos.end());
+        }
+
+        #pragma omp critical
+        populacao.insert(populacao.end(), prole.begin(), prole.end());
+      }
+
+      std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+
+      gerarHorarioAGSobrevivenciaElitismo(populacao);
+      gerarHorarioAGVerificaEvolucao(populacao, iter);
+
+      iter++;
     }
 
     // Captura a melhor solução da população, deletando o resto
