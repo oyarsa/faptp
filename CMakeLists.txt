@@ -5,21 +5,23 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 option(Modelo "Incluir Modelo matemático da grade" OFF)
-option(GUROBI "Utilizar solver Gurobi para gerar o horário" ON)
+option(GUROBI "Utilizar solver Gurobi para gerar o horário" OFF)
 option(CPLEX "Utilizar solver Gurobi para gerar o horário" OFF)
 option(TSL_Hash "Utilizar hash map externo" ON)
+
+find_package(OpenMP REQUIRED)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
 
 if (Modelo)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ModeloGrade ${CMAKE_CURRENT_BINARY_DIR}/ModeloGrade)
     add_definitions(-DIL_STD -DModelo)
 endif()
-
-include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
 if (GUROBI)
 	include_directories($ENV{GUROBI_HOME}/include)
@@ -40,36 +42,6 @@ set(faptp-lib_INCLUDE
     include/faptp-lib/Modelo.h
     include/faptp-lib/Output.h
     include/faptp-lib/Professor.h
-    include/faptp-lib/ProfessorDisciplina.h
-    include/faptp-lib/Representacao.h
-    include/faptp-lib/Resolucao.h
-    include/faptp-lib/Semana.h
-    include/faptp-lib/Solucao.h
-    include/faptp-lib/Util.h
-    include/faptp-lib/UUID.h
-    include/faptp-lib/Algorithms.h
-    include/faptp-lib/Configuracao.h
-    include/faptp-lib/SA.h
-    include/faptp-lib/ILS.h
-    include/faptp-lib/WDJU.h
-    include/faptp-lib/HySST.h
-    include/faptp-lib/Timer.h
-    include/hash_map.h
-    )
-
-if (GUROBI)
-	set(faptp-lib_INCLUDE
-		${faptp-lib_INCLUDE}
-		include/faptp-lib/Gurobi.h )
-endif()
-
-if (CPLEX)
-	set(faptp-lib_INCLUDE
-		${faptp-lib_INCLUDE}
-		include/faptp-lib/Cplex.h )
-endif()
-
-set(faptp-lib_SOURCE
     src/faptp-lib/Aleatorio.cpp
     src/faptp-lib/AlunoPerfil.cpp
     src/faptp-lib/DadosModelo.cpp
@@ -93,10 +65,12 @@ set(faptp-lib_SOURCE
 
 set(faptp-lib_FILES
     ${faptp-lib_INCLUDE}
-    ${faptp-lib_SOURCE})
+    ${faptp-lib_SOURCE}
+	src/json/jsoncpp.cpp
+    src/fmt/format.cc
+    src/fmt/posix.cc)
 
 add_library(faptp-lib ${faptp-lib_FILES})
-target_link_libraries(faptp-lib ${CONAN_LIBS})
 
 if(MSVC)
 	set(GUROBI_LIB_RELEASE "gurobi_c++mt2015.lib")
@@ -132,12 +106,16 @@ set(faptp-exp_FILES
 	${faptp-exp_SOURCE})
 
 add_executable(faptp-exp ${faptp-exp_FILES})
-target_link_libraries(faptp-exp ${CONAN_LIBS})
+target_link_libraries(faptp-exp ${CURL_LIBRARIES})
 target_link_libraries(faptp-exp faptp-lib)
 
 add_executable(faptp src/faptp/main.cpp)
-target_link_libraries(faptp ${CONAN_LIBS})
 target_link_libraries(faptp faptp-lib)
+
+# Habilita OpenMP
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 if (NOT MSVC)
     target_link_libraries(faptp-exp pthread)
@@ -160,12 +138,6 @@ else()
 	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG /ignore:4075")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
-
-# Habilita OpenMP
-find_package(OpenMP REQUIRED)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 if (Modelo)
   target_link_libraries(faptp-lib Modelo-grade-lib)

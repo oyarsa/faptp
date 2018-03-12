@@ -1,5 +1,6 @@
 #include <cxxopts.hpp>
 #include <fmt/format.h>
+#include <curl/curl.h>
 
 #include <faptp-exp/experimento.h>
 
@@ -32,8 +33,10 @@ Onde:
 )";
 
 int
-main(int argc, char* argv[])
+main(int argc, const char** argv)
 {
+   curl_global_init(CURL_GLOBAL_ALL);
+
    const auto timeout = 60 * 60 * 1000;
 
    if (argc == 1) {
@@ -57,17 +60,17 @@ main(int argc, char* argv[])
        ("s,server", "Servidor para submissao dos resultados",
         cxxopts::value<std::string>());
      
-     options.parse(argc, argv);
+     const auto result = options.parse(argc, argv);
 
-     if (options.count("help")) {
+     if (result.count("help")) {
        std::cout << usage << "\n";
        return 0;
      }
 
-     auto algo = options["algo"].as<std::string>();
-     auto entrada = options["input"].as<std::string>();
-     auto configuracao = options["config"].as<std::string>();
-     auto servidor = options["server"].as<std::string>();
+     const auto algo = result["algo"].as<std::string>();
+     const auto entrada = result["input"].as<std::string>();
+     const auto configuracao = result["config"].as<std::string>();
+     const auto servidor = result["server"].as<std::string>();
 
      if (algo == "ag") {
        experimento::ag_cli(entrada, configuracao, servidor, timeout);

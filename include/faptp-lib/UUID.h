@@ -10,12 +10,16 @@
 
 #include <string>
 
+namespace fagoc {
+
 class UUID
 {
 public:
-    UUID() = default;
-    static std::string GenerateUuid();
+  UUID() = default;
+  static std::string GenerateUuid();
 };
+
+}
 
 #endif /* UUID_H */
 

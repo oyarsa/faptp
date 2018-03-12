@@ -11,7 +11,7 @@
 
 #include <faptp-lib/UUID.h>
 
-std::string UUID::GenerateUuid()
+std::string fagoc::UUID::GenerateUuid()
 {
     const int UUID_LENGTH = 40;
     std::string uuid_code;

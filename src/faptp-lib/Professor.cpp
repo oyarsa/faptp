@@ -3,7 +3,7 @@
 
 Professor::Professor(const std::string& pNome) : creditoMaximo(), numDisponibilidade()
 {
-    std::string pId = UUID::GenerateUuid();
+    std::string pId = fagoc::UUID::GenerateUuid();
     init(pNome, pId);
 }
 

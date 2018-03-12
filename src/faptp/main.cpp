@@ -284,7 +284,7 @@ Onde:
                   o horário pronto.
 )";
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
   try {
     cxxopts::Options options{
@@ -300,24 +300,24 @@ int main(int argc, char* argv[])
       ("m,mode", "Modo de execução", cxxopts::value<std::string>())
       ("r,repetitions", "Número de repetições", cxxopts::value<int>());
 
-    options.parse(argc, argv);
+    const auto result = options.parse(argc, argv);
 
-    if (options.count("help"))
+    if (result.count("help"))
       std::cout << usage << "\n";
     else {
       std::string mode{ "horario" };
-      if (options.count("mode"))
-        mode = options["mode"].as<std::string>();
+      if (result.count("mode"))
+        mode = result["mode"].as<std::string>();
 
-      if (options.count("repetitions")) {
-        run_many(options["config"].as<std::string>(), 
-                options["input"].as<std::string>(),
-                options["output"].as<std::string>(),
-                mode, options["repetitions"].as<int>());
+      if (result.count("repetitions")) {
+        run_many(result["config"].as<std::string>(), 
+                result["input"].as<std::string>(),
+                result["output"].as<std::string>(),
+                mode, result["repetitions"].as<int>());
       } else {
-        run(options["config"].as<std::string>(), 
-            options["input"].as<std::string>(),
-            options["output"].as<std::string>(),
+        run(result["config"].as<std::string>(), 
+            result["input"].as<std::string>(),
+            result["output"].as<std::string>(),
             mode);
       }
 

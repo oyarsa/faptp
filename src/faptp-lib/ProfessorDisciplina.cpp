@@ -1,7 +1,7 @@
 #include <faptp-lib/ProfessorDisciplina.h>
 
 ProfessorDisciplina::ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina)
-    : id(UUID::GenerateUuid())
+    : id(fagoc::UUID::GenerateUuid())
       , professor(pProfessor)
       , disciplina(pDisciplina) {}
 

@@ -5,8 +5,8 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <stdexcept>
 
-#include <cpr/cpr.h>
 #include <fmt/format.h>
 
 #include <iostream>
@@ -19,6 +19,8 @@
 #include <faptp-lib/WDJU.h>
 #include <faptp-lib/HySST.h>
 #include <faptp-lib/ILS.h>
+
+#include <curl/curl.h>
 
 /*
 * PARÂMETROS DE CONFIGURAÇÃO *
@@ -49,30 +51,37 @@ constexpr auto infinito = static_cast<int>(1e9);
 
 void
 upload_result(const std::string& id, const std::string& resultado,
-              int num_config, const std::string& servidor)
+              const int num_config, const std::string& servidor)
 {
+  const auto payload = fmt::format("result={}&nome={}", resultado, id);
+
   for (auto i = 0; i < num_tentativas_upload; i++) {
     std::this_thread::sleep_for(std::chrono::seconds(segundos_espera));
 
-    auto r = cpr::Post(cpr::Url{ servidor },
-                       cpr::Payload{ { "result", resultado },
-                         { "nome", id } });
-
-    if (r.error.code == cpr::ErrorCode::OK) {
-      std::cout << num_config << ") " << id << ": enviado com sucesso\n\n";
-      return;
-    } else {
-      std::cout << num_config << ") tentativa " << i + 1 << " falhou: "
-          << r.error.message << "\n\n";
+    const auto curl = curl_easy_init();
+    if (!curl) {
+      throw std::logic_error{ "Impossível inicializar CURL" };
     }
+
+    curl_easy_setopt(curl, CURLOPT_URL, servidor.c_str());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+
+    const auto rv = curl_easy_perform(curl);
+
+    if (rv != CURLE_OK) {
+      fmt::print("{}) {}: enviado com sucesso\n\n", num_config, id);
+      return;
+    } 
+
+    fmt::print("{}) tentativa {} falhou: {}\n\n", num_config, i + 1,
+               curl_easy_strerror(rv));
   }
 
-  std::cout << num_config << ") Erro ao enviar " << id
-      << ". Salvo em 'falhas/'\n";
+  fmt::print("{}) Erro ao enviar {}. Salvo em 'falhas/'\n", num_config, id);
 
-  auto path = Util::join_path({ "falhas" });
+  const auto path = Util::join_path({ "falhas" });
   Util::create_folder(path);
-  auto filename = path + std::string{ id } + ".txt";
+  const auto filename = path + std::string{ id } + ".txt";
 
   std::ofstream out_file{ filename };
   out_file << resultado;

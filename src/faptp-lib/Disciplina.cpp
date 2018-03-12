@@ -4,7 +4,7 @@
 #include <faptp-lib/Util.h>
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
-    : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, UUID::GenerateUuid(),
+    : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, fagoc::UUID::GenerateUuid(),
                  pTurma, pCapacidade, pPeriodoMinimo) {}
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pId, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
