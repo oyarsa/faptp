@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <iomanip>
 #include <fmt/time.h>
+#include <fastrange.h>
+#include <tuple>
 #include <faptp-lib/Util.h>
 #include <faptp-lib/Aleatorio.h>
 
@@ -17,15 +19,16 @@ constexpr int Util::getPosition(int y, int x, int z, int Y, int Z)
 
 void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, int Z)
 {
+    const auto pos = static_cast<int>(pLinear);
     const auto tamanho = X * Y * Z;
 
-    const auto dia = ((pLinear % tamanho) / Y) % X;
+    const auto dia = ((pos % tamanho) / Y) % X;
     const auto bloco = ((pLinear % tamanho) % Y);
     const auto camada = pLinear / (X * Y);
 
-    triDimensional[0] = static_cast<int>(bloco); 
-    triDimensional[1] = static_cast<int>(dia);
-    triDimensional[2] = static_cast<int>(camada);
+    triDimensional[0] = bloco; 
+    triDimensional[1] = dia;
+    triDimensional[2] = camada;
     
 
     /*auto dia = pLinear % X;
@@ -66,17 +69,13 @@ std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()
     return std::chrono::high_resolution_clock::now();
 }
 
-int Util::randomBetween(int min, int max)
+int Util::randomBetween(int a, int b)
 {
-    if (max < min) {
-        throw std::logic_error{"Minimo maior que maximo em randomBetween"};
-    }
+  int min, max;
+  std::tie(min, max) = std::minmax(a, b);
 
-    if (max == min) {
-        return max;
-    }
-
-    return aleatorio::randomInt() % (max - min) + min;
+  const auto rand = aleatorio::randomUInt();
+  return fastrange32(rand, max - min) + min;
 }
 
 double Util::randomDouble()

@@ -15,16 +15,17 @@ public:
     Aleatorio& operator=(const Aleatorio&) = delete;
     Aleatorio(const Aleatorio&) = delete;
 
-    //! \brief Gera um numero aleatorio de 0 a 32767 a partir de uma distribuicao uniforme
-    //! \return Int na faixa 0 <= x <= 32767
+    //! \brief Gera um numero aleatorio de 0 a 2^31 - 1 a partir de uma distribuicao uniforme
+    //! \return Int na faixa 0 <= x <= 2^31 - 1.
     int randomInt();
+    uint32_t randomUInt();
 
 private:
     uint32_t state_;
 };
 
-//! Constante para maior valor a ser gerado. Igual ao RAND_MAX padrao
-constexpr uint32_t max_random = 32767;
+//! Constante para maior valor a ser gerado. Igual 2^31 - 1.
+constexpr uint32_t max_random = 2147483647;
 
 Aleatorio::Aleatorio() 
 {
@@ -35,12 +36,18 @@ Aleatorio::Aleatorio()
 
 int Aleatorio::randomInt()
 {
+  return randomUInt() & max_random;
+}
+
+uint32_t
+Aleatorio::randomUInt()
+{
   uint32_t x = state_;
   x ^= x << 13;
   x ^= x >> 17;
   x ^= x << 5;
   state_ = x;
-  return x & max_random;
+  return state_;
 }
 
 static std::vector<Aleatorio> generators;
@@ -54,5 +61,12 @@ int aleatorio::randomInt()
 {
   const auto thread_number = omp_get_thread_num();
   return generators[thread_number].randomInt();
+}
+
+uint32_t
+aleatorio::randomUInt()
+{
+  thread_local const auto thread_number = omp_get_thread_num();
+  return generators[thread_number].randomUInt();
 }
 

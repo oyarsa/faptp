@@ -42,6 +42,7 @@ set(faptp-lib_INCLUDE
     include/faptp-lib/Modelo.h
     include/faptp-lib/Output.h
     include/faptp-lib/Professor.h
+    include/faptp-lib/Util.h
     src/faptp-lib/Aleatorio.cpp
     src/faptp-lib/AlunoPerfil.cpp
     src/faptp-lib/DadosModelo.cpp

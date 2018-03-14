@@ -115,7 +115,7 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
   auto aulas_prof = pesos.at("AulasProfessores");
 
   auto fo1 = janelas * h.contaJanelas();
-  auto fo2 = intervalos * h.intervalosTrabalho(res.getProfessores());
+  auto fo2 = intervalos * h.intervalosTrabalho();
   auto fo3 = dias_aula * h.numDiasAula();
   auto fo4 = aulas_sabdo * h.aulasSabado();
   auto fo5 = aulas_seguidas * h.aulasSeguidas(res.getDisciplinas());
@@ -150,7 +150,7 @@ hash_map<std::string, int> Solucao::reportarViolacoes() const
     hash_map<std::string, int> m;
 
     m["Janelas"] = horario->contaJanelas();
-    m["Intervalos"] = horario->intervalosTrabalho(res.getProfessores());
+    m["Intervalos"] = horario->intervalosTrabalho();
     m["Dias de Aula"] = horario->numDiasAula();
     m["Sabado"] = horario->aulasSabado();
     m["Seguidas"] = horario->aulasSeguidas(res.getDisciplinas());

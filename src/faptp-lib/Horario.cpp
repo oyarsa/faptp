@@ -3,7 +3,6 @@
 #include <faptp-lib/Horario.h>
 #include <faptp-lib/Semana.h>
 
-
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho)
   : Representacao(pBlocosTamanho, pCamadasTamanho), 
     disc_camada_(Disciplina::max_hash()),
@@ -179,54 +178,53 @@ int Horario::contaJanelas() const
     return janelas;
 }
 
-bool Horario::isProfDia(
+int Horario::intervalosTrabalhoProf(
   std::size_t professor,
-  int dia
+  const std::vector<std::vector<char>>& prof_dia
 ) const
 {
-    for (auto c = 0; c < camadasTamanho; c++) {
-        for (auto b = 0; b < blocosTamanho; b++) {
-            const auto pd = at(dia, b, c);
-            if (pd && pd->getProfessor()->id_hash() == professor) {
-                return true;
-            }
-        }
+  auto intervalos = 0;
+  auto contando = false;
+  auto contador = 0;
+
+  for (auto j = 0; j < dias_semana_util; j++) {
+    if (prof_dia[professor][j]) {
+      if (!contando) {
+        contando = true;
+      }
+      if (contando && contador > 0) {
+        intervalos += contador;
+        contador = 0;
+      }
+    } else if (contando) {
+      contador++;
     }
-    return false;
+  }
+
+  return intervalos;
 }
 
-int Horario::intervalosTrabalhoProf(std::size_t professor) const
+int Horario::intervalosTrabalho() const
 {
-     auto intervalos = 0;
-     auto contando = false;
-     auto contador = 0;
+  std::vector<std::vector<char>> prof_dia(
+    Professor::max_hash(), std::vector<char>(dias_semana_util));
 
-     for (auto j = 0; j < dias_semana_util; j++) {
-         if (isProfDia(professor, j)) {
-             if (!contando) {
-                 contando = true;
-             }
-             if (contando && contador > 0) {
-                 intervalos += contador;
-                 contador = 0;
-             }
-         } else if (contando) {
-             contador++;
-         }
-     }
+  for (auto c = 0; c < camadasTamanho; c++) {
+    for (auto d = 0; d < dias_semana_util; d++) {
+      for (auto b = 0; b < blocosTamanho; b++) {
+        const auto pd = at(d, b, c);
+        if (!pd) continue;
 
-     return intervalos;
-}
-
-int Horario::intervalosTrabalho(
-    const hash_map<std::string, Professor*>& professores
-) const
-{
-    auto intervalos = 0;
-    for (const auto& p : professores) {
-        intervalos += intervalosTrabalhoProf(p.second->id_hash());
+        prof_dia[pd->getProfessor()->id_hash()][d] = 1;
+      }
     }
-    return intervalos;
+  }
+
+  auto intervalos = 0;
+  for (auto p = 0; p < Professor::max_hash(); p++) {
+    intervalos += intervalosTrabalhoProf(p, prof_dia);
+  }
+  return intervalos;
 }
 
 bool Horario::isAulaDia(int dia, int camada) const
@@ -401,22 +399,6 @@ int Horario::preferenciasProfessores() const
       num += !professor->isDiscPreferencia(disc);
     }
     return num;
-}
-
-int Horario::aulasProfessor(const std::size_t professor, const int preferencia) const
-{
-  const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
-  auto num = 0;
-
-  for (auto i = 0; i < matrix_size; i++) {
-    const auto pd = at(i);
-    if (pd && pd->getProfessor()->id_hash() == professor) {
-      num++;
-    }
-  }
-
-  const auto excesso = num - preferencia;
-  return std::max(excesso, 0);
 }
 
 int Horario::aulasProfessores(

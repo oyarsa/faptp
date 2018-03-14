@@ -26,7 +26,7 @@ public:
     std::size_t getHash();
 
     int contaJanelas() const;
-    int intervalosTrabalho(const hash_map<std::string, Professor*>& professores) const;
+    int intervalosTrabalho() const;
     int numDiasAula() const;
     int aulasSabado() const;
     int aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const;
@@ -45,7 +45,8 @@ private:
     int contaJanelasCamada(int camada) const;
 
     bool isProfDia(std::size_t professor, int dia) const;
-    int intervalosTrabalhoProf(std::size_t professor) const;
+    int intervalosTrabalhoProf(std::size_t professor,
+                               const std::vector<std::vector<char>>& prof_dia) const;
 
     bool isAulaDia(int dia, int camada) const;
     int numDiasAulaCamada(int camada) const;
