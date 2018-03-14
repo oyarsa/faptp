@@ -2,11 +2,10 @@
 #define    PROFESSOR_H
 
 #include <string>
-#include <cstring>
 #include <vector>
 #include <map>
 
-#include <faptp-lib/UUID.h>
+#include <atomic>
 #include <hash_map.h>
 
 class Professor
@@ -39,13 +38,17 @@ public:
     int preferenciaAulas() const;
     void setPreferenciaAulas(int num);
 
-    bool isDiscPreferencia(const std::string& disc) const;
-    void addDiscPreferencia(std::string disc);
+    bool isDiscPreferencia(std::size_t disc) const;
+    void addDiscPreferencia(std::size_t disc);
 
     int credito_maximo() const;
 
     std::size_t id_hash() const;
+
+    static std::size_t max_hash();
 private:
+    static std::atomic_size_t Next_code;
+
     std::string id;
 
     std::string nome;
@@ -55,7 +58,7 @@ private:
     int numDisponibilidade;
 
     std::map<std::string, double> competencias;
-    hash_set<std::string> preferenciasDisciplina;
+    std::vector<char> preferenciasDisciplina;
     int preferenciaNumAulas;
 
     std::size_t idHash;
@@ -70,6 +73,12 @@ inline std::size_t
 Professor::id_hash() const
 {
   return idHash;
+}
+
+inline std::size_t
+Professor::max_hash()
+{
+  return Next_code;
 }
 
 #endif /* PROFESSOR_H */

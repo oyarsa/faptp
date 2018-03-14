@@ -1,13 +1,21 @@
 #include <faptp-lib/Professor.h>
 #include <faptp-lib/Semana.h>
+#include <faptp-lib/UUID.h>
+#include <faptp-lib/ProfessorDisciplina.h>
 
-Professor::Professor(const std::string& pNome) : creditoMaximo(), numDisponibilidade()
+std::atomic_size_t Professor::Next_code = 0;
+
+Professor::Professor(const std::string& pNome) 
+: creditoMaximo(), numDisponibilidade(), 
+  preferenciasDisciplina(Disciplina::max_hash())
 {
     std::string pId = fagoc::UUID::GenerateUuid();
     init(pNome, pId);
 }
 
-Professor::Professor(const std::string& pNome, const std::string& pId) : creditoMaximo(), numDisponibilidade()
+Professor::Professor(const std::string& pNome, const std::string& pId) 
+: creditoMaximo(), numDisponibilidade(),
+  preferenciasDisciplina(Disciplina::max_hash())
 {
     init(pNome, pId);
 }
@@ -16,7 +24,7 @@ void Professor::init(const std::string& pNome, const std::string& pId)
 {
     setNome(pNome);
     id = pId;
-    idHash = std::hash<std::string>{}(id);
+    idHash = Next_code++;
     preferenciaNumAulas = 24;
 }
 
@@ -97,15 +105,15 @@ Professor::setPreferenciaAulas(int num)
 }
 
 bool
-Professor::isDiscPreferencia(const std::string& disc) const
+Professor::isDiscPreferencia(std::size_t disc) const
 {
-  return preferenciasDisciplina.find(disc) != end(preferenciasDisciplina);
+  return preferenciasDisciplina[disc];
 }
 
 void
-Professor::addDiscPreferencia(std::string disc)
+Professor::addDiscPreferencia(std::size_t disc)
 {
-  preferenciasDisciplina.insert(std::move(disc));
+  preferenciasDisciplina[disc] = true;
 }
 
 int Professor::credito_maximo() const

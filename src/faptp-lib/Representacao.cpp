@@ -1,7 +1,6 @@
 #include <faptp-lib/Representacao.h>
 
 #include <algorithm>
-#include <cmath>
 
 #include <faptp-lib/Algorithms.h>
 #include <faptp-lib/Semana.h>
@@ -33,8 +32,6 @@ Representacao& Representacao::operator=(const Representacao& outro)
 
     return *this;
 }
-
-Representacao::~Representacao() {}
 
 void Representacao::initMatriz()
 {

@@ -15,6 +15,15 @@ struct DisciplinaCargaHorariaDesc
     }
 };
 
+template<typename T>
+struct HashComparison
+{
+  bool operator()(const T* a, const T* b) 
+  {
+    return a->id_hash() < b->id_hash();
+  }
+};
+
 struct ProfessorDisciplinaCargaHorariaDesc
 {
     bool operator()(const ProfessorDisciplina* a, const ProfessorDisciplina* b)

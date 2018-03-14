@@ -245,7 +245,7 @@ DadosModelo::carregar_preferencias(const std::vector<Disciplina*>& disciplinas, 
 
   for (auto& p : professores) {
     for (auto d : disciplinas) {
-      preferencia_[i][j] = p.second->isDiscPreferencia(d->getId());
+      preferencia_[i][j] = p.second->isDiscPreferencia(d->id_hash());
       j++;
     }
     i++;

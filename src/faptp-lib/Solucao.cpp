@@ -104,16 +104,27 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
   const auto& h = *horario;
   const auto& pesos = res.pesos_soft;
 
-  auto fo_ =
-    pesos.at("Janelas") * h.contaJanelas() + 
-    pesos.at("IntervalosTrabalho") * h.intervalosTrabalho(res.getProfessores()) + 
-    pesos.at("NumDiasAula") * h.numDiasAula() +
-    pesos.at("AulasSabado") * h.aulasSabado() +
-    pesos.at("AulasSeguidas") * h.aulasSeguidas(res.getDisciplinas()) +
-    pesos.at("AulasSeguidasDificil") * h.aulasSeguidasDificil() +
-    pesos.at("AulaDificilUltimoHorario") * h.aulaDificilUltimoHorario() +
-    pesos.at("PreferenciasProfessores") * h.preferenciasProfessores() + 
-    pesos.at("AulasProfessores") * h.aulasProfessores(res.getProfessores());
+  auto janelas = pesos.at("Janelas");
+  auto intervalos = pesos.at("IntervalosTrabalho");
+  auto dias_aula = pesos.at("NumDiasAula");
+  auto aulas_sabdo = pesos.at("AulasSabado");
+  auto aulas_seguidas = pesos.at("AulasSeguidas");
+  auto aulas_seguidas_dif = pesos.at("AulasSeguidasDificil");
+  auto aula_dificil = pesos.at("AulaDificilUltimoHorario");
+  auto pref = pesos.at("PreferenciasProfessores");
+  auto aulas_prof = pesos.at("AulasProfessores");
+
+  auto fo1 = janelas * h.contaJanelas();
+  auto fo2 = intervalos * h.intervalosTrabalho(res.getProfessores());
+  auto fo3 = dias_aula * h.numDiasAula();
+  auto fo4 = aulas_sabdo * h.aulasSabado();
+  auto fo5 = aulas_seguidas * h.aulasSeguidas(res.getDisciplinas());
+  auto fo6 = aulas_seguidas_dif * h.aulasSeguidasDificil();
+  auto fo7 = aula_dificil * h.aulaDificilUltimoHorario();
+  auto fo8 = pref * h.preferenciasProfessores();
+  auto fo9 = aulas_prof * h.aulasProfessores(res.getProfessores());
+
+  auto fo_ = fo1 + fo2 + fo3 + fo4 + fo5 + fo6 + fo7 + fo8 + fo9;
 
   return -fo_;
 }

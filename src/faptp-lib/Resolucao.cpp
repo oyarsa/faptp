@@ -31,6 +31,14 @@
 #include <faptp-lib/WDJU.h>
 #include <faptp-lib/HySST.h>
 
+//#define MYASSERT_ON
+
+#ifdef MYASSERT_ON
+  #define MYASSERT(cond, msg) if (!(cond)) throw msg
+#else
+  #define MYASSERT(cond, msg) 
+#endif
+
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
       , horarioTorneioPares(c.numTorneioPares_)
@@ -202,8 +210,11 @@ void Resolucao::carregarDadosProfessores()
         }
 
         const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
-        for (const auto& d_id : preferencias)
-            professores[id]->addDiscPreferencia(d_id.asString());
+        for (const auto& d_id : preferencias) {
+            const auto d_hash = disciplinasIndex[d_id.asString()];
+            professores[id]->addDiscPreferencia(d_hash);
+          
+        }
 
         professores[id]->preferenciaNumAulas =
             jsonProfessores[k].get("preferenciaHoras", 
@@ -440,19 +451,12 @@ std::vector<Disciplina*> Resolucao::ordenarDisciplinas()
 
 std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas)
 {
-    sort(begin(pDisciplinas), end(pDisciplinas), DisciplinaCargaHorariaDesc());
+    sort(begin(pDisciplinas), end(pDisciplinas), HashComparison<Disciplina>{});
     return pDisciplinas;
 }
 
 void Resolucao::atualizarDisciplinasIndex()
 {
-    // auto dIter = disciplinas.begin();
-    // disciplinasIndex.clear();
-
-    // for (int i = 0; dIter != end(disciplinas); ++dIter, i++) {
-    //     disciplinasIndex[(*dIter)->id] = i;
-    // }
-
     for (size_t i = 0; i < disciplinas.size(); i++) {
         disciplinasIndex[disciplinas[i]->id] = static_cast<int>(i);
     }
@@ -617,6 +621,12 @@ Solucao* Resolucao::gerarHorarioAG()
 
     tempoInicio = Util::now();
     populacao = gerarHorarioAGPopulacaoInicial2();
+
+    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
+    for (auto& x : populacao) {
+      MYASSERT(x->getHorario().getMatriz().size() == matrix_size, "init");
+    }
+
     foAlvo = populacao[0]->getFO();
     iteracaoAlvo = -1;
     tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
@@ -627,24 +637,30 @@ Solucao* Resolucao::gerarHorarioAG()
       ultimaIteracao = iter;
       //logPopulacao(populacao, iter);
 
+      std::vector<Solucao*> proxima_geracao;
+
       #pragma omp parallel num_threads(numThreads_)
       {
         std::vector<Solucao*> prole;
 
-        #pragma omp for nowait 
+        #pragma omp for nowait
         for (auto i = 0; i < numCruz; i++) {
           // Cruzamento
           const auto pais = gerarHorarioAGTorneioPar(populacao);
+          MYASSERT(pais[0]->getHorario().getMatriz().size() == matrix_size, "pai1");
+          MYASSERT(pais[1]->getHorario().getMatriz().size() == matrix_size, "pai2");
           auto filhos = gerarHorarioAGCruzamento(pais);
 
           // Mutação
-          for (auto j = 0u; j < filhos.size(); j++) {
+          for (auto& filho : filhos) {
+            MYASSERT(filho->getHorario().getMatriz().size() == matrix_size, "filho");
             const auto chance = Util::randomDouble();
             if (chance <= horarioMutacaoProbabilidade) {
-              auto s = gerarHorarioAGMutacao(filhos[j]);
+              auto s = gerarHorarioAGMutacao(filho);
               if (s) {
-                delete filhos[j];
-                filhos[j] = s;
+                MYASSERT(s->getHorario().getMatriz().size() == matrix_size, "mut");
+                delete filho;
+                filho = s;
               }
             }
           }
@@ -653,12 +669,20 @@ Solucao* Resolucao::gerarHorarioAG()
         }
 
         #pragma omp critical
-        populacao.insert(populacao.end(), prole.begin(), prole.end());
+        proxima_geracao.insert(proxima_geracao.end(), prole.begin(), prole.end());
       }
+
+      populacao.insert(populacao.end(), proxima_geracao.begin(), 
+                       proxima_geracao.end());
 
       std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
 
       gerarHorarioAGSobrevivenciaElitismo(populacao);
+
+      for (auto x : populacao) {
+          MYASSERT(x->getHorario().getMatriz().size() == matrix_size, "elitismo");
+      }
+
       gerarHorarioAGVerificaEvolucao(populacao, iter);
 
       iter++;
@@ -1064,8 +1088,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao)
 {
-    auto pai1 = selecaoTorneio(solucoesPopulacao);
-    auto pai2 = selecaoTorneio(solucoesPopulacao);
+    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
+    const auto pai1 = selecaoTorneio(solucoesPopulacao);
+    MYASSERT(pai1->getHorario().getMatriz().size() == matrix_size, "cruz_pai1");
+    const auto pai2 = selecaoTorneio(solucoesPopulacao);
+    MYASSERT(pai2->getHorario().getMatriz().size() == matrix_size, "cruz_pai2");
 
     return {pai1, pai2};
 }
@@ -3168,6 +3195,10 @@ Solucao* Resolucao::crossoverCicloCamada(
     int camadaCruz
 ) const
 {
+  const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
+  MYASSERT(pai1.horario->getMatriz().size() == matrix_size, "pai1");
+  MYASSERT(pai2.horario->getMatriz().size() == matrix_size, "pai2");
+
     const auto tam_camada = dias_semana_util * blocosTamanho;
     std::vector<int> pos_visitados(tam_camada);
     auto num_visitados = 0;
@@ -3237,7 +3268,7 @@ Solucao* Resolucao::crossoverCicloCamada(
     // Gera máscara do crossover
     std::vector<int> xmask(tam_camada);
     for (auto i = 0u; i < xmask.size(); i++) {
-        auto ciclo = pos_visitados[i] - 1;
+        const auto ciclo = pos_visitados[i] - 1;
         xmask[i] = mask[ciclo];
     }
 
@@ -3246,7 +3277,7 @@ Solucao* Resolucao::crossoverCicloCamada(
 
     // Efetua cruzamento
     for (auto i = 0; i < tam_camada; i++) {
-        auto curr_slot = comeco_camada + i;
+        const auto curr_slot = comeco_camada + i;
         ProfessorDisciplina* pd {nullptr};
 
         int dia, bloco, camada;
@@ -3291,7 +3322,7 @@ Solucao* Resolucao::crossoverCiclo(
         num_camadas_visitadas++;
         camadas_visitadas[camada] = true;
 
-        auto filho = crossoverCicloCamada(pai1, pai2, camada);
+        const auto filho = crossoverCicloCamada(pai1, pai2, camada);
         if (filho) {
             return filho;
         }
@@ -3309,10 +3340,14 @@ Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 
 Solucao* Resolucao::selecaoTorneio(const std::vector<Solucao*>& pop) const
 {
+    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
     auto best = *Util::randomChoice(pop);
+    MYASSERT(best->getHorario().getMatriz().size() == matrix_size, "best");
 
     for (auto i = 1; i < horarioTorneioPopulacao; i++) {
         auto challenger = *Util::randomChoice(pop);
+        MYASSERT(challenger->getHorario().getMatriz().size() == matrix_size, 
+                 "challenger");
         if (challenger->getFO() > best->getFO()) {
             best = challenger;
         }

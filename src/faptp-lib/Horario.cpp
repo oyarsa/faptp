@@ -1,11 +1,15 @@
-#include <iostream>
 #include <sstream>
 
 #include <faptp-lib/Horario.h>
 #include <faptp-lib/Semana.h>
 
+
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho)
-    : Representacao(pBlocosTamanho, pCamadasTamanho), hash_(0) {}
+  : Representacao(pBlocosTamanho, pCamadasTamanho), 
+    disc_camada_(Disciplina::max_hash()),
+    creditos_alocados_disc_(Disciplina::max_hash()),
+    creditos_alocados_prof_(Professor::max_hash()),
+    hash_(0) {}
 
 Horario::Horario(const Horario& outro)
     : Representacao(outro), disc_camada_(outro.disc_camada_),
@@ -25,10 +29,9 @@ Horario& Horario::operator=(const Horario& outro)
 
 bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& professor) const
 {
-    const auto creditos = creditos_alocados_prof_.find(professor.id_hash());
+    const auto creditos = creditos_alocados_prof_[professor.id_hash()];
     if (!professor.isDiaDisponivel(pDia, pBloco)
-        || (creditos != end(creditos_alocados_prof_)
-           && creditos->second >= professor.credito_maximo())) {
+        || creditos >= professor.credito_maximo()) {
         return true;
     }
 
@@ -60,8 +63,8 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
     const auto pos = getPosition(dia, bloco, camada);
     const auto disc = pd->disciplina;
 
-    const auto creditos = creditos_alocados_disc_.find(disc->id_hash());
-    if (creditos != end(creditos_alocados_disc_) && creditos->second >= disc->cargaHoraria) {
+    const auto creditos = creditos_alocados_disc_[disc->id_hash()];
+    if (creditos >= disc->cargaHoraria) {
         return false;
     }
 
@@ -278,7 +281,7 @@ int Horario::aulasSabado() const
 int Horario::aulasSeguidasDiscDia(const std::size_t disciplina, int dia) const
 {
     auto num = 0;
-    const auto camada = disc_camada_.at(disciplina);
+    const auto camada = disc_camada_[disciplina];
 
     for (auto b = 0; b < blocosTamanho; b++) {
         const auto pd = at(dia, b, camada);
@@ -307,6 +310,7 @@ int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
             num += aulasSeguidasDisc(disc->id_hash());
         }
     }
+
     return num;
 }
 
@@ -378,7 +382,7 @@ int Horario::preferenciasProfessores() const
     auto num = 0;
     const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
 
-    hash_set<std::size_t> percorrido;
+    std::vector<char> percorrido(Disciplina::max_hash());
 
     for (auto i = 0; i < matrix_size; i++) {
       const auto pd = at(i);
@@ -389,19 +393,19 @@ int Horario::preferenciasProfessores() const
       const auto professor = pd->getProfessor();
       const auto disc = pd->getDisciplina()->id_hash();
 
-      if (percorrido.count(disc)) {
+      if (percorrido[disc]) {
         continue;
       }
 
-      percorrido.insert(disc);
-      num += !professor->isDiscPreferencia(pd->getDisciplina()->getId());
+      percorrido[disc] = true;
+      num += !professor->isDiscPreferencia(disc);
     }
     return num;
 }
 
 int Horario::aulasProfessor(const std::size_t professor, const int preferencia) const
 {
-  const auto matrix_size = camadasTamanho * dias_semana_util*blocosTamanho;
+  const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
   auto num = 0;
 
   for (auto i = 0; i < matrix_size; i++) {
@@ -419,11 +423,32 @@ int Horario::aulasProfessores(
     const hash_map<std::string, Professor*>& professores
 ) const
 {
-    auto num = 0;
-    for (const auto& p : professores) {
-        num += aulasProfessor(p.second->id_hash(), p.second->preferenciaAulas());
+  const auto matrix_size = camadasTamanho * dias_semana_util*blocosTamanho;
+
+  std::vector<int> aulas(Professor::max_hash());
+
+  for (auto i = 0; i < matrix_size; i++) {
+    const auto pd = at(i);
+    if (pd) {
+      aulas[pd->getProfessor()->id_hash()]++;
     }
-    return num;
+  }
+
+  std::vector<int> preferencias(Professor::max_hash());
+
+  for (const auto& p : professores) {
+    const auto& prof = *p.second;
+    preferencias[prof.id_hash()] = prof.preferenciaAulas();
+  }
+
+  auto num = 0;
+
+  for (auto i = 0; i < Professor::max_hash(); i++) {
+    const auto excesso = aulas[i] - preferencias[i];
+    num += std::max(excesso, 0);
+  }
+
+  return num;
 }
 
 hash_map<std::string, ProfessorDisciplina*>

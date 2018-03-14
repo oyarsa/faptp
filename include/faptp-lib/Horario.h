@@ -36,9 +36,9 @@ public:
     int aulasProfessores(
         const hash_map<std::string, Professor*>& professores) const;
 private:
-    hash_map<std::size_t, int> disc_camada_;
-    hash_map<std::size_t, int> creditos_alocados_disc_;
-    hash_map<std::size_t, int> creditos_alocados_prof_;
+    std::vector<int> disc_camada_;
+    std::vector<int> creditos_alocados_disc_;
+    std::vector<int> creditos_alocados_prof_;
     std::size_t hash_;
 
     int contaJanelasDia(int dia, int camada) const;

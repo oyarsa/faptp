@@ -2,6 +2,9 @@
 
 #include <faptp-lib/Disciplina.h>
 #include <faptp-lib/Util.h>
+#include <faptp-lib/UUID.h>
+
+std::atomic_size_t Disciplina::Next_code = 0;
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
     : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, fagoc::UUID::GenerateUuid(),
@@ -24,7 +27,7 @@ Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriod
       equivalentes(),
       professoresCapacitados(),
       dificil(false),
-      idHash(std::hash<std::string>{}(pId))
+      idHash(Next_code++)
 {}
 
 void

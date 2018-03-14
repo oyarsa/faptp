@@ -15,7 +15,7 @@ public:
     Representacao(int pBlocosTamanho, int pCamadasTamanho);
     Representacao(const Representacao& outro);
     Representacao& operator=(const Representacao& outro);
-    virtual ~Representacao();
+    virtual ~Representacao() = default;
 
     int getPosition(int pDia, int pBloco, int pCamada) const;
 

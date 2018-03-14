@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <atomic>
 #include <hash_map.h>
 
 #include "Professor.h"
@@ -55,7 +56,11 @@ public:
 
     std::size_t id_hash() const;
 
+    static std::size_t max_hash();
+
 private:
+    static std::atomic_size_t Next_code;
+
     std::string id;
     std::string turma;
     std::string nome;
@@ -145,6 +150,11 @@ inline bool Disciplina::isPreRequisito(const std::string& pDisciplina)
   return preRequisitos.find(pDisciplina) != end(preRequisitos);
 }
 
+inline std::size_t
+Disciplina::max_hash()
+{
+  return Next_code;
+}
 
 #endif /* DISCIPLINA_H */
 
