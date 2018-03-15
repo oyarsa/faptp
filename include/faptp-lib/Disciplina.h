@@ -153,7 +153,7 @@ inline bool Disciplina::isPreRequisito(const std::string& pDisciplina)
 inline std::size_t
 Disciplina::max_hash()
 {
-  return Next_code;
+  return Next_code + 1;
 }
 
 #endif /* DISCIPLINA_H */

@@ -3,7 +3,7 @@
 #include <faptp-lib/UUID.h>
 #include <faptp-lib/ProfessorDisciplina.h>
 
-std::atomic_size_t Professor::Next_code = 0;
+std::atomic_size_t Professor::Next_code = 1;
 
 Professor::Professor(const std::string& pNome) 
 : creditoMaximo(), numDisponibilidade(), 

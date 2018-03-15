@@ -179,7 +179,7 @@ int Horario::contaJanelas() const
 }
 
 int Horario::intervalosTrabalhoProf(
-  std::size_t professor,
+  const std::size_t professor,
   const std::vector<std::vector<char>>& prof_dia
 ) const
 {
@@ -206,8 +206,12 @@ int Horario::intervalosTrabalhoProf(
 
 int Horario::intervalosTrabalho() const
 {
-  std::vector<std::vector<char>> prof_dia(
+  thread_local std::vector<std::vector<char>> prof_dia(
     Professor::max_hash(), std::vector<char>(dias_semana_util));
+
+  for (auto& v : prof_dia) {
+    std::fill(v.begin(), v.end(), 0);
+  }
 
   for (auto c = 0; c < camadasTamanho; c++) {
     for (auto d = 0; d < dias_semana_util; d++) {
@@ -302,14 +306,37 @@ int Horario::aulasSeguidasDisc(const std::size_t disciplina) const
 
 int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
 {
-    auto num = 0;
-    for (auto& disc : disciplinas) {
-        if (disc->ofertada) {
-            num += aulasSeguidasDisc(disc->id_hash());
-        }
-    }
+  thread_local std::vector<std::vector<int>> dias_discs(
+    dias_semana_util, std::vector<int>(Disciplina::max_hash()));
 
-    return num;
+  for (auto& v : dias_discs) {
+    std::fill(v.begin(), v.end(), 0);
+  }
+
+  for (auto c = 0; c < camadasTamanho; c++) {
+    for (auto d = 0; d < dias_semana_util; d++) {
+      for (auto b = 0; b < blocosTamanho; b++) {
+        const auto pd = at(d, b, c);
+        if (!pd) continue;
+
+        dias_discs[d][pd->getDisciplina()->id_hash()]++;
+      }
+    }
+  }
+
+  auto num = 0;
+
+  for (auto dia = 0; dia < dias_semana_util; dia++) {
+    for (auto disc = 0u; disc < Disciplina::max_hash(); disc++) {
+      //num += std::max(dias_discs[dia][disc] - 2, 0);
+      const auto x = dias_discs[dia][disc];
+      if (x > 2) {
+        num += x - 2;
+      }
+    }
+  }
+
+  return num;
 }
 
 int Horario::aulasSeguidasDificilDia(int dia, int camada) const
@@ -378,11 +405,11 @@ int Horario::aulaDificilUltimoHorario() const
 int Horario::preferenciasProfessores() const
 {
     auto num = 0;
-    const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
 
-    std::vector<char> percorrido(Disciplina::max_hash());
+    thread_local std::vector<char> percorrido(Disciplina::max_hash());
+    std::fill(percorrido.begin(), percorrido.end(), 0);
 
-    for (auto i = 0; i < matrix_size; i++) {
+    for (auto i = 0u; i < matriz.size(); i++) {
       const auto pd = at(i);
       if (!pd) {
         continue;
@@ -405,18 +432,18 @@ int Horario::aulasProfessores(
     const hash_map<std::string, Professor*>& professores
 ) const
 {
-  const auto matrix_size = camadasTamanho * dias_semana_util*blocosTamanho;
+  thread_local std::vector<int> aulas(Professor::max_hash());
+  std::fill(aulas.begin(), aulas.end(), 0);
 
-  std::vector<int> aulas(Professor::max_hash());
-
-  for (auto i = 0; i < matrix_size; i++) {
+  for (auto i = 0u; i < matriz.size(); i++) {
     const auto pd = at(i);
     if (pd) {
       aulas[pd->getProfessor()->id_hash()]++;
     }
   }
 
-  std::vector<int> preferencias(Professor::max_hash());
+  thread_local std::vector<int> preferencias(Professor::max_hash());
+  //std::fill(preferencias.begin(), preferencias.end(), 0); // Desnecessário?
 
   for (const auto& p : professores) {
     const auto& prof = *p.second;
@@ -425,7 +452,7 @@ int Horario::aulasProfessores(
 
   auto num = 0;
 
-  for (auto i = 0; i < Professor::max_hash(); i++) {
+  for (auto i = 0u; i < Professor::max_hash(); i++) {
     const auto excesso = aulas[i] - preferencias[i];
     num += std::max(excesso, 0);
   }

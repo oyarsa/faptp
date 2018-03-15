@@ -78,7 +78,7 @@ Professor::id_hash() const
 inline std::size_t
 Professor::max_hash()
 {
-  return Next_code;
+  return Next_code + 1;
 }
 
 #endif /* PROFESSOR_H */

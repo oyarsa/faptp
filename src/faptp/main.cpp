@@ -250,8 +250,11 @@ void run_many(const std::string& conf, const std::string& input,
   for (auto i = 0; i < num_repetitions; i++) {
     Timer t;
     const auto s = run_algorithm();
-    timings[i] = t.elapsed();
-    fmt::print("{}: {}ms - FO: {}\n", i, t.elapsed(), s->getFO());
+    const auto tempo = t.elapsed();
+    timings[i] = tempo;
+    const auto t_por_iter = tempo * 1. / r.ultimaIteracao;
+    fmt::print("{}: {}ms - FO: {} - Iter: {} - Ms/Iter: {}\n", 
+               i, tempo, s->getFO(), r.ultimaIteracao, t_por_iter);
   }
 
   fmt::print("\n");
