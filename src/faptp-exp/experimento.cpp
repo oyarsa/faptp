@@ -108,7 +108,7 @@ get_auto_file_name()
 }
 
 void
-print_violacoes(const hash_map<std::string, int>& m)
+print_violacoes(const tsl::robin_map<std::string, int>& m)
 {
   for (auto& p : m) {
     std::cout << p.first << " = " << p.second << "\n";

@@ -10,7 +10,7 @@ Pré-requisito: Vcpkg e Cmake (2.8+)
     > cd faptp
     > mkdir _build
     > cd _build..
-    > cmake -G "Visual Studio 15" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT$\scripts\buildsystems\vcpkg.cmake
+    > cmake -G "Visual Studio 15 Win64" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT$\scripts\buildsystems\vcpkg.cmake
     > cmake --build . --config Release
 
 ## Ubuntu 16.04 (GCC 5.4)

@@ -1,7 +1,7 @@
 #ifndef HORARIO_H
 #define HORARIO_H
 
-#include <hash_map.h>
+#include <tsl/robin_map.h>
 #include "Representacao.h"
 
 class Horario : public Representacao
@@ -21,7 +21,7 @@ public:
     bool insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force) override;
     void clearSlot(int pDia, int pBloco, int pCamada) override;
     void clearCamada(int camada);
-    hash_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
+    tsl::robin_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
 
     std::size_t getHash();
 
@@ -29,12 +29,12 @@ public:
     int intervalosTrabalho() const;
     int numDiasAula() const;
     int aulasSabado() const;
-    int aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const;
+    int aulasSeguidas() const;
     int aulasSeguidasDificil() const;
     int aulaDificilUltimoHorario() const;
     int preferenciasProfessores() const;
     int aulasProfessores(
-        const hash_map<std::string, Professor*>& professores) const;
+        const tsl::robin_map<std::string, Professor*>& professores) const;
 private:
     std::vector<int> disc_camada_;
     std::vector<int> creditos_alocados_disc_;
@@ -46,7 +46,7 @@ private:
 
     bool isProfDia(std::size_t professor, int dia) const;
     int intervalosTrabalhoProf(std::size_t professor,
-                               const std::vector<std::vector<char>>& prof_dia) const;
+                               const std::vector<std::vector<uint8_t>>& prof_dia) const;
 
     bool isAulaDia(int dia, int camada) const;
     int numDiasAulaCamada(int camada) const;

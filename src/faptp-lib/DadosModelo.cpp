@@ -2,7 +2,7 @@
 #include <faptp-lib/DadosModelo.h>
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Professor.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 #include <algorithm>
 #include <iterator>
 
@@ -158,7 +158,7 @@ const std::vector<int>& DadosModelo::aulas_geminadas() const
 }
 
 void
-DadosModelo::carregar_pesos(const hash_map<std::string, double>& pesos)
+DadosModelo::carregar_pesos(const tsl::robin_map<std::string, double>& pesos)
 {
   pesos_constraints_[0] = pesos.at("Janelas");
   pesos_constraints_[1] = pesos.at("IntervalosTrabalho");
@@ -174,7 +174,7 @@ DadosModelo::carregar_pesos(const hash_map<std::string, double>& pesos)
 void
 DadosModelo::carregar_habilitacoes(
   const std::vector<Disciplina*>& disciplinas, 
-  const hash_map<std::string, Professor*>& professores)
+  const tsl::robin_map<std::string, Professor*>& professores)
 {
   auto i = 0;
   auto j = 0;
@@ -201,10 +201,10 @@ DadosModelo::carregar_periodos(const std::vector<Disciplina*>& disciplinas)
   }
 }
 
-hash_map<std::string, std::size_t>
+tsl::robin_map<std::string, std::size_t>
 DadosModelo::atribuir_camadas(const std::vector<Disciplina*>& disciplinas)
 {
-  hash_map<std::string, std::size_t> m;
+  tsl::robin_map<std::string, std::size_t> m;
   auto next = 0;
 
   for (auto d : disciplinas) {
@@ -216,7 +216,7 @@ DadosModelo::atribuir_camadas(const std::vector<Disciplina*>& disciplinas)
 
 void
 DadosModelo::carregar_disponibilidade(
-  const hash_map<std::string, Professor*>& professores)
+  const tsl::robin_map<std::string, Professor*>& professores)
 {
   auto p = 0;
   for (auto& par : professores) {
@@ -238,7 +238,7 @@ DadosModelo::carregar_dificeis(const std::vector<Disciplina*>& disciplinas)
 }
 
 void
-DadosModelo::carregar_preferencias(const std::vector<Disciplina*>& disciplinas, const hash_map<std::string, Professor*>& professores)
+DadosModelo::carregar_preferencias(const std::vector<Disciplina*>& disciplinas, const tsl::robin_map<std::string, Professor*>& professores)
 {
   auto i = 0;
   auto j = 0;

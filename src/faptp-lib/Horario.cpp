@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include <faptp-lib/Horario.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 
 Horario::Horario(int pBlocosTamanho, int pCamadasTamanho)
   : Representacao(pBlocosTamanho, pCamadasTamanho), 
@@ -180,7 +180,7 @@ int Horario::contaJanelas() const
 
 int Horario::intervalosTrabalhoProf(
   const std::size_t professor,
-  const std::vector<std::vector<char>>& prof_dia
+  const std::vector<std::vector<uint8_t>>& prof_dia
 ) const
 {
   auto intervalos = 0;
@@ -206,11 +206,11 @@ int Horario::intervalosTrabalhoProf(
 
 int Horario::intervalosTrabalho() const
 {
-  thread_local std::vector<std::vector<char>> prof_dia(
-    Professor::max_hash(), std::vector<char>(dias_semana_util));
+  thread_local std::vector<std::vector<uint8_t>> prof_dia(
+    Professor::max_hash(), std::vector<uint8_t>(dias_semana_util));
 
   for (auto& v : prof_dia) {
-    std::fill(v.begin(), v.end(), 0);
+    std::fill(v.begin(), v.end(), static_cast<uint8_t>(0));
   }
 
   for (auto c = 0; c < camadasTamanho; c++) {
@@ -225,7 +225,7 @@ int Horario::intervalosTrabalho() const
   }
 
   auto intervalos = 0;
-  for (auto p = 0; p < Professor::max_hash(); p++) {
+  for (auto p = 0u; p < Professor::max_hash(); p++) {
     intervalos += intervalosTrabalhoProf(p, prof_dia);
   }
   return intervalos;
@@ -304,7 +304,7 @@ int Horario::aulasSeguidasDisc(const std::size_t disciplina) const
     return num;
 }
 
-int Horario::aulasSeguidas(const std::vector<Disciplina*>& disciplinas) const
+int Horario::aulasSeguidas() const
 {
   thread_local std::vector<std::vector<int>> dias_discs(
     dias_semana_util, std::vector<int>(Disciplina::max_hash()));
@@ -406,8 +406,8 @@ int Horario::preferenciasProfessores() const
 {
     auto num = 0;
 
-    thread_local std::vector<char> percorrido(Disciplina::max_hash());
-    std::fill(percorrido.begin(), percorrido.end(), 0);
+    thread_local std::vector<uint8_t> percorrido(Disciplina::max_hash());
+    std::fill(percorrido.begin(), percorrido.end(), static_cast<uint8_t>(0));
 
     for (auto i = 0u; i < matriz.size(); i++) {
       const auto pd = at(i);
@@ -429,7 +429,7 @@ int Horario::preferenciasProfessores() const
 }
 
 int Horario::aulasProfessores(
-    const hash_map<std::string, Professor*>& professores
+    const tsl::robin_map<std::string, Professor*>& professores
 ) const
 {
   thread_local std::vector<int> aulas(Professor::max_hash());
@@ -443,7 +443,6 @@ int Horario::aulasProfessores(
   }
 
   thread_local std::vector<int> preferencias(Professor::max_hash());
-  //std::fill(preferencias.begin(), preferencias.end(), 0); // Desnecessário?
 
   for (const auto& p : professores) {
     const auto& prof = *p.second;
@@ -460,13 +459,13 @@ int Horario::aulasProfessores(
   return num;
 }
 
-hash_map<std::string, ProfessorDisciplina*>
+tsl::robin_map<std::string, ProfessorDisciplina*>
 Horario::getAlocFromDiscNames(int camada) const
 {
     const auto camada_inicio = getPosition(0, 0, camada);
     const auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
 
-    hash_map<std::string, ProfessorDisciplina*> alocs;
+    tsl::robin_map<std::string, ProfessorDisciplina*> alocs;
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
         const auto pd = at(i);

@@ -1,9 +1,9 @@
 #include <faptp-lib/Professor.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 #include <faptp-lib/UUID.h>
 #include <faptp-lib/ProfessorDisciplina.h>
 
-std::atomic_size_t Professor::Next_code = 1;
+std::atomic_size_t Professor::Next_code{ 1 };
 
 Professor::Professor(const std::string& pNome) 
 : creditoMaximo(), numDisponibilidade(), 

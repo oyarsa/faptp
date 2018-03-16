@@ -17,14 +17,14 @@ constexpr int Util::getPosition(int y, int x, int z, int Y, int Z)
     return (x + (y * Y) + (z * Y * Z));
 }
 
-void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, int Z)
+void Util::get3DMatrix(std::size_t pLinear, int triDimensional[3], int X, int Y, 
+                       [[maybe_unused]] int Z)
 {
     const auto pos = static_cast<int>(pLinear);
-    const auto tamanho = X * Y * Z;
 
-    const auto dia = (pos / Y) % X;
-    const auto bloco = pLinear % Y;
-    const auto camada = pLinear / (X * Y);
+    const auto dia = pos / Y % X;
+    const auto bloco = pos % Y;
+    const auto camada = pos / (X * Y);
 
     triDimensional[0] = bloco; 
     triDimensional[1] = dia;
@@ -128,11 +128,9 @@ std::string Util::get_computer_name()
     TCHAR buf[info_buffer_size];
     DWORD len = info_buffer_size;
     if (!GetComputerName(buf, &len)) {
-      fprintf(stderr, "Erro ao recuperar o nome do computador: %d\n", GetLastError());
+      fmt::print(stderr, "Erro ao recuperar o nome do computador: {}", GetLastError());
       exit(1);
     }
-
-    printf("Name: %s, %lu\n", buf, len);
 
     return buf;
 #else

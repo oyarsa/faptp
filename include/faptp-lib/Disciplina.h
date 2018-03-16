@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
-#include <hash_map.h>
+#include <tsl/hopscotch_set.h>
 
 #include "Professor.h"
 
@@ -72,9 +72,9 @@ private:
     int capacidade;
     int alocados;
     bool ofertada;
-    hash_set<std::string> preRequisitos;
-    hash_set<std::string> coRequisitos;
-    hash_set<std::string> equivalentes;
+    tsl::hopscotch_set<std::string> preRequisitos;
+    tsl::hopscotch_set<std::string> coRequisitos;
+    tsl::hopscotch_set<std::string> equivalentes;
     std::vector<Professor*> professoresCapacitados;
     bool dificil;
     std::size_t idHash;

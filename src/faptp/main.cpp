@@ -4,7 +4,7 @@
 #include <faptp-lib/Output.h>
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/SA.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 #include <faptp-lib/WDJU.h>
 
 #include <faptp-lib/DadosModelo.h>
@@ -15,8 +15,8 @@
 #include <memory>
 
 #include <json/json.h>
-#include <cxxopts.hpp>
 #include <fmt/format.h>
+#include <cxxopts.hpp>
 
 constexpr auto infinito = static_cast<int>(1e9);
 
@@ -287,6 +287,24 @@ Onde:
                   o horário pronto.
 )";
 
+void 
+check_argument(const std::string& argument, const cxxopts::ParseResult& result)
+{
+  if (result.count(argument) == 0) {
+    fmt::print("Argumento necessario: {}", argument);
+    exit(1);
+  }
+}
+
+void 
+check_arguments(const std::initializer_list<std::string> arguments,
+                const cxxopts::ParseResult& result)
+{
+  for (const auto& arg : arguments) {
+    check_argument(arg, result);
+  }
+}
+
 int main(int argc, const char* argv[])
 {
   try {
@@ -308,20 +326,21 @@ int main(int argc, const char* argv[])
     if (result.count("help"))
       std::cout << usage << "\n";
     else {
+      check_arguments({ "config", "input", "output" }, result);
+
       std::string mode{ "horario" };
       if (result.count("mode"))
         mode = result["mode"].as<std::string>();
 
+      const auto config = result["config"].as<std::string>();
+      const auto input = result["input"].as<std::string>();
+      const auto output = result["output"].as<std::string>();
+
       if (result.count("repetitions")) {
-        run_many(result["config"].as<std::string>(), 
-                result["input"].as<std::string>(),
-                result["output"].as<std::string>(),
-                mode, result["repetitions"].as<int>());
+        const auto repetitons = result["repetitions"].as<int>();
+        run_many(config, input, output, mode, repetitons);
       } else {
-        run(result["config"].as<std::string>(), 
-            result["input"].as<std::string>(),
-            result["output"].as<std::string>(),
-            mode);
+        run(config, input, output, mode);
       }
 
     }

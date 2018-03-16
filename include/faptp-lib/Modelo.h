@@ -110,6 +110,7 @@ solve(const DadosModelo& dados)
 {
   using namespace detail;
   using range = Range::basic_range<std::size_t>;
+  using Expr_t = typename Solver::Expr_t;
 
   //    Dados de entrada
   // Quantidades
@@ -224,18 +225,19 @@ solve(const DadosModelo& dados)
   for (auto i : rI) 
     for (auto j : rJ) 
       for (auto p : rP) {
-        auto soma = Solver::Expr_t{ 0 };
+        auto soma = Expr_t{ 0 };
         for (auto d : rD) {
           soma += x[p][d][i][j];
         }
         Solver::add_constraint(model, soma <= A[p][i][j]);
       }
+      
 
   // Conflito de aulas em um período
   for (auto i : rI) 
     for (auto j : rJ) 
       for (auto c : rC) {
-        auto soma = Solver::Expr_t{ 0 };
+        auto soma = Expr_t{ 0 };
         for (auto p : rP) 
           for (auto d : rD) 
             soma += x[p][d][i][j] * H[d][c];
@@ -258,7 +260,7 @@ solve(const DadosModelo& dados)
 
   for (auto p : rP) 
     for (auto d : rD) {
-      auto soma = Solver::Expr_t{ 0 };
+      auto soma = Expr_t{ 0 };
       for (auto i : rI) 
         for (auto j : rJ) 
           soma += x[p][d][i][j];
@@ -266,7 +268,7 @@ solve(const DadosModelo& dados)
     }
 
   for (auto d : rD) {
-    auto soma = Solver::Expr_t{ 0 };
+    auto soma = Expr_t{ 0 };
     for (auto p : rP) 
       soma += Lec[p][d];
     Solver::add_constraint(model, soma == O[d]);
@@ -274,7 +276,7 @@ solve(const DadosModelo& dados)
 
   // Contrato do professor
   for (auto p : rP) { 
-    auto soma = Solver::Expr_t{ 0 };
+    auto soma = Expr_t{ 0 };
     for (auto d : rD) 
       for (auto i : rI) 
         for (auto j : rJ) 
@@ -284,7 +286,7 @@ solve(const DadosModelo& dados)
 
   // Carga horária das disciplinas
   for (auto d : rD) {
-    auto soma = Solver::Expr_t{ 0 };
+    auto soma = Expr_t{ 0 };
     for (auto p : rP) 
       for (auto i : rI) 
         for (auto j : rJ) 
@@ -296,7 +298,7 @@ solve(const DadosModelo& dados)
 }
 
 Json::Value
-inline modelo(const DadosModelo& dados)
+inline modelo([[maybe_unused]] const DadosModelo& dados)
 {
 #ifdef GUROBI_ENABLED
   return solve<Gurobi>(dados);

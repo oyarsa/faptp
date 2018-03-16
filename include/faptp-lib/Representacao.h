@@ -6,7 +6,7 @@
 #include <tuple>
 #include <faptp-lib/ProfessorDisciplina.h>
 #include <faptp-lib/Util.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 
 class Representacao
 {
@@ -29,7 +29,7 @@ public:
 
     // Bloco, dia, camada
     void get3DMatrix(std::size_t pLinear, int triDimensional[3]);
-    // Bloco, dia, camada
+    // Dia, bloco, camada
     std::tuple<int, int, int> getCoords(std::size_t pLinear) const;
 
     std::vector<ProfessorDisciplina*>::iterator getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina);
@@ -51,12 +51,8 @@ protected:
 
     int size;
 
-    std::vector<std::string> blocos;
-    std::vector<std::string> camadas;
-
     std::vector<ProfessorDisciplina*> matriz;
-
-    void initMatriz();
+    std::vector<std::tuple<int, int, int>> coordenadas;
 };
 
 inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const
@@ -72,6 +68,16 @@ inline ProfessorDisciplina* Representacao::at(int pDia, int pBloco, int pCamada)
 inline ProfessorDisciplina* Representacao::at(int position) const
 {
   return matriz[position];
+}
+
+inline std::tuple<int, int, int> 
+Representacao::getCoords(std::size_t pLinear) const
+{
+  //int coord[3];
+  //Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
+
+  //return std::make_tuple(coord[1], coord[0], coord[2]);
+  return coordenadas[pLinear];
 }
 
 #endif /* REPRESENTACAO_H */

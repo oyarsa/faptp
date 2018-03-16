@@ -4,8 +4,8 @@
 #include <memory>
 #include <chrono>
 #include <vector>
-#include <hash_map.h>
-#include <hash_map.h>
+#include <tsl/robin_map.h>
+#include <tsl/hopscotch_set.h>
 #include <string>
 #include <sstream>
 
@@ -108,7 +108,7 @@ public:
     std::unique_ptr<Solucao> permute_resources(const Solucao& sol) const;
     std::unique_ptr<Solucao> kempe_move(const Solucao& sol) const;
 
-    const hash_map<std::string, Professor*>& getProfessores() const;
+    const tsl::robin_map<std::string, Professor*>& getProfessores() const;
     const std::vector<Disciplina*>& getDisciplinas() const;
     /*
          Parâmetros da execução da solução
@@ -124,8 +124,8 @@ public:
     // Horário cruzamento
     double horarioCruzamentoPorcentagem = 0;
     int horarioCruzamentoFilhos = 2;
-    int horarioCruzamentoDias;
-    double horarioCruzamentoCamadas;
+    int horarioCruzamentoDias{};
+    double horarioCruzamentoCamadas{};
     int horarioCruzamentoTentativasMax = 1;
     // Operador de cruzamento selecionado
     Configuracao::TipoCruzamento horarioTipoCruzamento;
@@ -134,7 +134,7 @@ public:
     // FO utilizada
     Configuracao::TipoFo horarioTipoFo;
     // Mapa dos pesos das restrições
-    hash_map<std::string, double> pesos_soft;
+    tsl::robin_map<std::string, double> pesos_soft;
 
     int horarioIteracao;
 
@@ -152,10 +152,10 @@ public:
     double gradeGraspTempoConstrucao;
 
     // Solução alvo, a iteração em que ela foi alcançada primeiro e o tempo
-    double foAlvo;
-    int iteracaoAlvo;
-    long long tempoAlvo;
-    std::size_t hashAlvo;
+    double foAlvo{};
+    int iteracaoAlvo{};
+    long long tempoAlvo{};
+    std::size_t hashAlvo{};
 
     void logExperimentos();
 
@@ -165,30 +165,30 @@ public:
 
     // Número de iterações máximo que o AG continuará sem evoluir a solução
     int maxIterSemEvolAG;
-    int ultimaIteracao;
+    int ultimaIteracao{};
     // Número de iterações máximo que o GRASP continuará sem evoluir a grade
     int maxIterSemEvoGrasp;
 
     static const int numcruz = 6;
-    int contadorIguaisCruz[numcruz];
-    int contadorIguaisMut[numcruz];
-    int contadorMelhoresCruz[numcruz];
-    int contadorMelhoresMut[numcruz];
-    long long tempoTotalCruz[numcruz];
-    long long tempoTotalMut[numcruz];
-    long long tempoTotalSelec;
-    long long tempoTotalElit;
+    int contadorIguaisCruz[numcruz]{};
+    int contadorIguaisMut[numcruz]{};
+    int contadorMelhoresCruz[numcruz]{};
+    int contadorMelhoresMut[numcruz]{};
+    long long tempoTotalCruz[numcruz]{};
+    long long tempoTotalMut[numcruz]{};
+    long long tempoTotalSelec{};
+    long long tempoTotalElit{};
 private:
     int blocosTamanho;
     int camadasTamanho;
     int perfisTamanho;
     std::string arquivoEntrada;
-    hash_map<std::string, Professor*> professores;
+    tsl::robin_map<std::string, Professor*> professores;
     std::vector<Disciplina*> disciplinas;
-    hash_map<std::string, int> disciplinasIndex;
+    tsl::robin_map<std::string, int> disciplinasIndex;
     std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
-    hash_map<std::string, AlunoPerfil*> alunoPerfis;
-    mutable hash_map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    tsl::robin_map<std::string, AlunoPerfil*> alunoPerfis;
+    mutable tsl::robin_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
 #ifdef MODELO
@@ -200,6 +200,7 @@ private:
     std::ostringstream log;
     long long timeout_;
     int numThreads_;
+    std::vector<Solucao*> populacao;
 
     void carregarDados();
     void carregarDadosProfessores();
@@ -244,7 +245,7 @@ private:
     double gerarGradeTipoGuloso(Solucao*& pSolucao);
 
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-                                               hash_set<std::string>::const_iterator current);
+                                               tsl::hopscotch_set<std::string>::const_iterator current);
     Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep);
     double gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao);
 
@@ -271,9 +272,9 @@ private:
 
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial2();
     bool gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-                     hash_map<std::string, int>& creditos_alocados_prof) const;
+                     tsl::robin_map<std::string, int>& creditos_alocados_prof) const;
     bool geraProfessorDisciplina(Solucao* sol, Disciplina* disc,
-                                 int camada, hash_map<std::string, int>& creditos_alocados_prof) const;
+                                 int camada, tsl::robin_map<std::string, int>& creditos_alocados_prof) const;
     bool geraAlocacao(Solucao* sol, Disciplina* disc, Professor* prof, int camada) const;
     std::unique_ptr<Solucao> gerarSolucaoAleatoria() const;
     std::unique_ptr<Solucao> gerarSolucaoAleatoriaNotNull() const;
@@ -297,7 +298,6 @@ private:
     std::unique_ptr<Grade> vizinhoGrasp(const Grade& grade) const;
     void buscaLocal(std::unique_ptr<Grade>& grade) const;
     Grade* GRASP(AlunoPerfil* alunoPerfil, Solucao* solucao) const;
-;
 
     /*
      * Helpers dos movimentos de resource
@@ -358,7 +358,7 @@ private:
     std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>>
         crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
     std::vector<std::string> inverterPMXRepr(
-        const hash_map<std::string, std::vector<int>>& mapping) const;
+        const tsl::robin_map<std::string, std::vector<int>>& mapping) const;
     std::vector<int> crossoverPMXSwap(const std::vector<int>& pai1,
                                       const std::vector<int>& pai2,
                                       int xbegin, int xend) const;
@@ -369,7 +369,6 @@ private:
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
     void printCamada(const Solucao& s, int camada) const;
-    std::vector<Solucao*> populacao;
 };
 
 #endif /* RESOLUCAO_H */

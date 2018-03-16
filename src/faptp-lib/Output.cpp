@@ -10,7 +10,7 @@
 #include <fstream>
 #include <json/json.h>
 #include <faptp-lib/Output.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 
 void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
 {

@@ -1,13 +1,13 @@
 #include <iostream>
-#include <hash_map.h>
+#include <tsl/robin_map.h>
 
 #include <faptp-lib/Grade.h>
 #include <faptp-lib/Resolucao.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
              const std::vector<Disciplina*>& pDisciplinasCurso,
-             const hash_map<std::string, int>& pDiscToIndex)
+             const tsl::robin_map<std::string, int>& pDiscToIndex)
     : Representacao(pBlocosTamanho, 1)
       , aluno(pAlunoPerfil)
       , horario(pHorario)
@@ -297,7 +297,7 @@ double Grade::getFO2()
     }
     fo = 0;
 
-    hash_map<std::string, int> discAvaliada;
+    tsl::robin_map<std::string, int> discAvaliada;
     const auto turmaAluno = aluno->turma;
     const auto periodoAluno = aluno->periodo;
 

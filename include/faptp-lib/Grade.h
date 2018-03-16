@@ -18,7 +18,7 @@ class Grade : public Representacao
 public:
     Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
           const std::vector<Disciplina*>& pDisciplinasCurso,
-          const hash_map<std::string, int>& pDiscToIndex);
+          const tsl::robin_map<std::string, int>& pDiscToIndex);
     Grade(const Grade& outro);
     Grade& operator=(const Grade&) = delete;
     virtual ~Grade();
@@ -43,7 +43,7 @@ private:
     std::vector<Disciplina*> disciplinasAdicionadas;
 
     const std::vector<Disciplina*>& disciplinasCurso;
-    const hash_map<std::string, int>& discToIndex;
+    const tsl::robin_map<std::string, int>& discToIndex;
 
     //! Guarda a função objetiva dessa grade, vale 0 se ainda não foi definida
     double fo;

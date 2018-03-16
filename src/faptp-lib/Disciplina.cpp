@@ -4,7 +4,7 @@
 #include <faptp-lib/Util.h>
 #include <faptp-lib/UUID.h>
 
-std::atomic_size_t Disciplina::Next_code = 1;
+std::atomic_size_t Disciplina::Next_code{ 1 };
 
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
     : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, fagoc::UUID::GenerateUuid(),

@@ -43,6 +43,11 @@ THE SOFTWARE.
 #define CXXOPTS_HAS_OPTIONAL
 #endif
 
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable:4267)
+#endif
+
 namespace cxxopts
 {
   static constexpr struct {
@@ -2001,5 +2006,9 @@ Options::group_help(const std::string& group) const
 }
 
 }
+
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 #endif //CXXOPTS_HPP_INCLUDED

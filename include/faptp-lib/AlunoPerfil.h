@@ -2,7 +2,8 @@
 #define    ALUNOPERFIL_H
 
 #include <string>
-#include <hash_map.h>
+#include <tsl/robin_map.h>
+#include <tsl/hopscotch_set.h>
 
 #include <faptp-lib/Disciplina.h>
 
@@ -43,9 +44,9 @@ private:
     std::string periodo;
     double peso;
     long long hash;
-    hash_set<std::string> cursadas;
-    hash_set<std::string> aprovadas;
-    hash_set<std::string> restante;
+    tsl::hopscotch_set<std::string> cursadas;
+    tsl::hopscotch_set<std::string> aprovadas;
+    tsl::hopscotch_set<std::string> restante;
     std::vector<Disciplina*> restanteOrd;
 };
 

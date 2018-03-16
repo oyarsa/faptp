@@ -45,8 +45,10 @@
 #include <utility>
 #include <vector>
 
-#pragma warning(push)
-#pragma warning(disable:4717)
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable:4717)
+#endif
 
 #if (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9))
 #define TSL_NO_RANGE_ERASE_WITH_CONST_ITERATOR
@@ -1873,6 +1875,8 @@ private:
 
 } // end namespace tsl
 
-#pragma warning(pop)
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif
 
 #endif

@@ -3,41 +3,43 @@
 #include <algorithm>
 
 #include <faptp-lib/Algorithms.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
+#include <fmt/format.h>
 
 Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho)
+  : blocosTamanho{ pBlocosTamanho },
+    camadasTamanho{ pCamadasTamanho },
+    size{ blocosTamanho * camadasTamanho * dias_semana_util },
+    matriz(size),
+    coordenadas(size)
 {
-    blocosTamanho = pBlocosTamanho;
-    camadasTamanho = pCamadasTamanho;
-
-    initMatriz();
+  auto i = 0;
+  for (auto c = 0; c < camadasTamanho; c++) {
+    for (auto d = 0; d < dias_semana_util; d++) {
+      for (auto b = 0; b < blocosTamanho; b++) {
+        coordenadas[i] = { d, b, c };
+        i++;
+      }
+    }
+  }
 }
 
 Representacao::Representacao(const Representacao& outro)
     : blocosTamanho(outro.blocosTamanho)
       , camadasTamanho(outro.camadasTamanho)
       , size(outro.size)
-      , blocos(outro.blocos)
-      , camadas(outro.camadas)
-      , matriz(outro.matriz) {}
+      , matriz(outro.matriz)
+      , coordenadas(outro.coordenadas) {}
 
 Representacao& Representacao::operator=(const Representacao& outro)
 {
     blocosTamanho = outro.blocosTamanho;
     camadasTamanho = outro.camadasTamanho;
     size = outro.size;
-    blocos = outro.blocos;
-    camadas = outro.camadas;
     matriz = outro.matriz;
+    coordenadas = outro.coordenadas;
 
     return *this;
-}
-
-void Representacao::initMatriz()
-{
-    size = (camadasTamanho * blocosTamanho * dias_semana_util);
-
-    matriz.resize(size, nullptr);
 }
 
 const std::vector<ProfessorDisciplina*>& Representacao::getMatriz() const
@@ -61,14 +63,6 @@ bool Representacao::insert(int dia, int bloco, int camada, ProfessorDisciplina* 
 void Representacao::get3DMatrix(std::size_t pLinear, int triDimensional[3])
 {
     Util::get3DMatrix(pLinear, triDimensional, dias_semana_util, blocosTamanho, camadasTamanho);
-}
-
-std::tuple<int, int, int> Representacao::getCoords(std::size_t pLinear) const
-{
-    int coord[3];
-    Util::get3DMatrix(pLinear, coord, dias_semana_util, blocosTamanho, camadasTamanho);
-
-    return std::make_tuple(coord[1], coord[0], coord[2]);
 }
 
 std::vector<ProfessorDisciplina*>::iterator Representacao::getFirstDisciplina(std::vector<ProfessorDisciplina*>::iterator iter, std::vector<ProfessorDisciplina*>::iterator iterEnd, Disciplina* pDisciplina)

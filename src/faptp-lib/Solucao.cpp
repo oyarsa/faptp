@@ -5,7 +5,7 @@
 #include <faptp-lib/Resolucao.h>
 #include <faptp-lib/Aleatorio.h>
 
-const hash_map<std::string, double> Solucao::pesos_padrao {
+const tsl::robin_map<std::string, double> Solucao::pesos_padrao {
   { "Janelas", 2 },
   { "IntervalosTrabalho", 1.5 },
   { "NumDiasAula", 3.5 },
@@ -31,7 +31,7 @@ Solucao::Solucao(
     , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
     , grades()
     , gradesLength(0)
-    , fo(std::experimental::nullopt)
+    , fo(std::nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
 {}
@@ -118,7 +118,7 @@ Solucao::FO_t Solucao::calculaFOSoftConstraints() const
   auto fo2 = intervalos * h.intervalosTrabalho();
   auto fo3 = dias_aula * h.numDiasAula();
   auto fo4 = aulas_sabdo * h.aulasSabado();
-  auto fo5 = aulas_seguidas * h.aulasSeguidas(res.getDisciplinas());
+  auto fo5 = aulas_seguidas * h.aulasSeguidas();
   auto fo6 = aulas_seguidas_dif * h.aulasSeguidasDificil();
   auto fo7 = aula_dificil * h.aulaDificilUltimoHorario();
   auto fo8 = pref * h.preferenciasProfessores();
@@ -145,15 +145,15 @@ Solucao::FO_t Solucao::getFO() const
     return *fo;
 }
 
-hash_map<std::string, int> Solucao::reportarViolacoes() const
+tsl::robin_map<std::string, int> Solucao::reportarViolacoes() const
 {
-    hash_map<std::string, int> m;
+    tsl::robin_map<std::string, int> m;
 
     m["Janelas"] = horario->contaJanelas();
     m["Intervalos"] = horario->intervalosTrabalho();
     m["Dias de Aula"] = horario->numDiasAula();
     m["Sabado"] = horario->aulasSabado();
-    m["Seguidas"] = horario->aulasSeguidas(res.getDisciplinas());
+    m["Seguidas"] = horario->aulasSeguidas();
     m["Seguidas Dificil"] = horario->aulasSeguidasDificil();
     m["Dificil Ultimo Horario"] = horario->aulaDificilUltimoHorario();
     m["Preferencias disc"] = horario->preferenciasProfessores();

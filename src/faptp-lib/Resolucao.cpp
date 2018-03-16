@@ -1,9 +1,10 @@
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <faptp-lib/Resolucao.h>
 #include <fstream>
 #include <numeric>
 #include <iostream>
-#include <hash_map.h>
+#include <tsl/robin_map.h>
 #include <algorithm>
 #include <chrono>
 #include <iterator>
@@ -23,21 +24,13 @@
 #include <faptp-lib/Solucao.h>
 #include <faptp-lib/Algorithms.h>
 #include <faptp-lib/Util.h>
-#include <faptp-lib/Semana.h>
+#include <faptp-lib/Constantes.h>
 #include <faptp-lib/Aleatorio.h>
 #include <faptp-lib/Output.h>
 #include <faptp-lib/SA.h>
 #include <faptp-lib/ILS.h>
 #include <faptp-lib/WDJU.h>
 #include <faptp-lib/HySST.h>
-
-//#define MYASSERT_ON
-
-#ifdef MYASSERT_ON
-  #define MYASSERT(cond, msg) if (!(cond)) throw msg
-#else
-  #define MYASSERT(cond, msg) 
-#endif
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
@@ -46,6 +39,8 @@ Resolucao::Resolucao(const Configuracao& c)
       , horarioCruzamentoPorcentagem(c.porcentCruz_)
       , horarioTipoCruzamento(c.tipoCruz_)
       , horarioTipoMutacao(c.tipoMut_)
+      , horarioTipoFo(c.tipoFo_)
+      , pesos_soft(Solucao::pesos_padrao)
       , horarioIteracao(c.numIter_)
       , horarioMutacaoProbabilidade(c.mutProb_)
       , horarioMutacaoTentativas(c.mutTentativas_)
@@ -59,10 +54,8 @@ Resolucao::Resolucao(const Configuracao& c)
       , maxIterSemEvoGrasp(c.numMaxIterSemEvoGRASP_)
       , blocosTamanho(c.blocoTam_)
       , camadasTamanho(c.camadaTam_)
-      , pesos_soft(Solucao::pesos_padrao)
       , perfisTamanho(c.perfilTam_)
       , arquivoEntrada(c.filename_)
-      , horarioTipoFo(c.tipoFo_)
       , solucao(nullptr)
       , timeout_(c.timeout_)
       , numThreads_(c.numThreads_)
@@ -622,11 +615,6 @@ Solucao* Resolucao::gerarHorarioAG()
     tempoInicio = Util::now();
     populacao = gerarHorarioAGPopulacaoInicial2();
 
-    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
-    for (auto& x : populacao) {
-      MYASSERT(x->getHorario().getMatriz().size() == matrix_size, "init");
-    }
-
     foAlvo = populacao[0]->getFO();
     iteracaoAlvo = -1;
     tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
@@ -647,18 +635,14 @@ Solucao* Resolucao::gerarHorarioAG()
         for (auto i = 0; i < numCruz; i++) {
           // Cruzamento
           const auto pais = gerarHorarioAGTorneioPar(populacao);
-          MYASSERT(pais[0]->getHorario().getMatriz().size() == matrix_size, "pai1");
-          MYASSERT(pais[1]->getHorario().getMatriz().size() == matrix_size, "pai2");
           auto filhos = gerarHorarioAGCruzamento(pais);
 
           // Mutação
           for (auto& filho : filhos) {
-            MYASSERT(filho->getHorario().getMatriz().size() == matrix_size, "filho");
             const auto chance = Util::randomDouble();
             if (chance <= horarioMutacaoProbabilidade) {
               auto s = gerarHorarioAGMutacao(filho);
               if (s) {
-                MYASSERT(s->getHorario().getMatriz().size() == matrix_size, "mut");
                 delete filho;
                 filho = s;
               }
@@ -678,11 +662,6 @@ Solucao* Resolucao::gerarHorarioAG()
       std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
 
       gerarHorarioAGSobrevivenciaElitismo(populacao);
-
-      for (auto x : populacao) {
-          MYASSERT(x->getHorario().getMatriz().size() == matrix_size, "elitismo");
-      }
-
       gerarHorarioAGVerificaEvolucao(populacao, iter);
 
       iter++;
@@ -1088,11 +1067,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao)
 {
-    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
     const auto pai1 = selecaoTorneio(solucoesPopulacao);
-    MYASSERT(pai1->getHorario().getMatriz().size() == matrix_size, "cruz_pai1");
     const auto pai2 = selecaoTorneio(solucoesPopulacao);
-    MYASSERT(pai2->getHorario().getMatriz().size() == matrix_size, "cruz_pai2");
 
     return {pai1, pai2};
 }
@@ -1143,8 +1119,6 @@ std::vector<Solucao*>
 Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(
   const Solucao* solucaoPai1, const Solucao* solucaoPai2)
 {
-    //puts("Constr");
-    //printf("pais: %g %gradeCache\n", solucaoPai1->fo, solucaoPai2->fo);
     std::vector<Solucao*> filhos;
     std::vector<ProfessorDisciplina*> matrizBackup;
 
@@ -1235,7 +1209,6 @@ Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(
             }
         }
         filho->calculaFO();
-        //printf("filho: %g\n", filho->getFO());
         filhos.push_back(filho);
         numFilhos++;
     } while (numFilhos <= horarioCruzamentoFilhos);
@@ -1310,8 +1283,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2)
 {
-    //puts("subsbloco");
-    //printf("pais: %g %gradeCache\n", solucaoPai1->fo, solucaoPai2->fo);
     int dia, bloco, camada;
     auto filho1 = new Solucao(*solucaoPai1);
     auto filho2 = new Solucao(*solucaoPai2);
@@ -1525,8 +1496,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 
     filho1->calculaFO();
     filho2->calculaFO();
-    //printf("filho: %g\n", filho1->fo);
-    //printf("filho: %g\n\n", filho2->fo);
     return {filho1, filho2};
 }
 
@@ -1655,7 +1624,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacaoExper(std::vector<Solucao*
 
 Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
 {
-    //printf("pai: %g\n", pSolucao->fo);
 
     for (auto i = 0; i < horarioMutacaoTentativas; i++) {
         auto mut = std::make_unique<Solucao>(*pSolucao);
@@ -1761,7 +1729,7 @@ Solucao* Resolucao::gerarHorarioAGMutacao(const Solucao* pSolucao) const
 
 void Resolucao::gerarGradeTipoGrasp2(Solucao* sol) const
 {
-    hash_map<long long, Grade*> gradesGeradas{};
+    tsl::robin_map<long long, Grade*> gradesGeradas{};
 
     for (auto& par : alunoPerfis) {
         auto aluno = par.second;
@@ -1829,7 +1797,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 }
 
 Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-                                                      hash_set<std::string>::const_iterator current)
+                                                      tsl::hopscotch_set<std::string>::const_iterator current)
 {
     Grade* bestGrade = new Grade(*pGrade);
     Grade* currentGrade {nullptr};
@@ -2195,7 +2163,7 @@ void Resolucao::teste()
     while (!sol) {
         sol = std::move(gerarSolucaoAleatoria());
     }
-    printf("hash: %zu\n", sol->getHash());
+    fmt::print("hash: {}\n", sol->getHash());
 
     // bench grasp
     auto n = 5;
@@ -2247,7 +2215,7 @@ double Resolucao::gerarGradeTipoModelo(Solucao* pSolucao)
 #ifdef MODELO
     auto horarioBin = converteHorario(pSolucao);
     auto total = 0.0;
-    hash_map<long long, Grade*> gradesGeradas;
+    tsl::robin_map<long long, Grade*> gradesGeradas;
 
     for (const auto& aluno : alunos) {
         auto currAluno = alunoPerfis[aluno.nome()];
@@ -2348,7 +2316,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
             continue;
         }
 
-        hash_set<Professor*> professoresCapacitados(
+        tsl::hopscotch_set<Professor*> professoresCapacitados(
             begin(profDisc->disciplina->professoresCapacitados),
             end(profDisc->disciplina->professoresCapacitados));
         if (professoresCapacitados.size() < 2) {
@@ -2400,33 +2368,31 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
 void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
 {
     // Imprime FO e Hash de todas as soluções e determina frequência dos hashes
-    hash_map<std::size_t, int> freq;
-    printf("iteracao: %d\n", iter);
-    log << "iteracao: " << iter << "\n";
+    tsl::robin_map<std::size_t, int> freq;
+    fmt::print("iteracao: {}\n", iter);
+    fmt::print(log, "iteracao: {}\n", iter);
 
-    printf("%-8s %s\n", "FO", "Hash");
-    log << std::left << std::setw(8) << "FO" << " Hash\n";
+    fmt::print("{:<8} {}\n", "FO", "Hash");
+    fmt::print(log, "{:<8} {}\n", "FO", "Hash");
+
     for (const auto& individuo : pop) {
-        auto hash = std::to_string(individuo->getHash());
-        log << std::left << std::setw(8) << individuo->getFO()
-                << " " << hash << "\n";
-        printf("%-8g %s\n", individuo->getFO(), hash.c_str());
+        const auto hash = std::to_string(individuo->getHash());
+        fmt::print("{:<8} {}\n", individuo->getFO(), hash);
+        fmt::print(log, "{:<8} {}\n", individuo->getFO(), hash);
         freq[individuo->getHash()]++;
     }
 
-    printf("\n%-11s %-5s %s\n", "Hash", "Freq", "%");
-    log << std::left << std::setw(11) << "Hash" << std::setw(5)
-            << "Freq" << " %\n";
+    fmt::print("\n{:<11} {:<5} {}", "Hash", "Freq", "%");
+    fmt::print(log, "\n{:<11} {:<5} {}", "Hash", "Freq", "%");
 
     for (const auto& par : freq) {
-        auto porc = par.second * 1. / pop.size() * 100;
-        log << std::left << std::setw(11) << std::left << par.first
-                << std::setw(5) << par.second << porc << "\n";
-        printf("%-11zu %-5d %g\n", par.first, par.second, porc);
+        const auto porcentagem = par.second * 1. / pop.size() * 100;
+        fmt::print("{:<11} {:<5} {}", par.first, par.second, porcentagem);
+        fmt::print(log, "{:<11} {:<5} {}", par.first, par.second, porcentagem);
     }
 
-    log << "\n\n";
-    printf("\n\n");
+    fmt::print("\n\n");
+    fmt::print(log, "\n\n");
 }
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
@@ -2446,7 +2412,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 
 bool Resolucao::
 gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
-            hash_map<std::string, int>& creditos_alocados_prof) const
+            tsl::robin_map<std::string, int>& creditos_alocados_prof) const
 {
     auto num_discs = discs.size();
     auto num_disc_visitadas = 0u;
@@ -2475,7 +2441,7 @@ bool Resolucao::geraProfessorDisciplina(
     Solucao* sol,
     Disciplina* disc,
     int camada,
-    hash_map<std::string, int>& creditos_alocados_prof
+    tsl::robin_map<std::string, int>& creditos_alocados_prof
 ) const
 {
     auto& profs = disc->professoresCapacitados;
@@ -2591,7 +2557,7 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria() const
 {
     auto solucaoRnd = std::make_unique<Solucao>(blocosTamanho, camadasTamanho,
                                                 perfisTamanho, *this, horarioTipoFo);
-    hash_map<std::string, int> creditos_alocados_prof;
+    tsl::robin_map<std::string, int> creditos_alocados_prof;
 
     auto num_periodos = periodoXdisciplina.size();
     auto num_per_visitados = 0u;
@@ -3074,7 +3040,7 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
 
 
 std::vector<std::string> Resolucao::inverterPMXRepr(
-    const hash_map<std::string, std::vector<int>>& mapping
+    const tsl::robin_map<std::string, std::vector<int>>& mapping
 ) const
 {
     auto camada_tamanho = blocosTamanho * dias_semana_util;
@@ -3102,7 +3068,7 @@ Resolucao::crossoverPMXCriarRepr(
     const auto comeco_camada = pai1.horario->getPosition(0, 0, camada);
     const auto fim_camada = comeco_camada + camada_tamanho;
 
-    hash_map<std::string, std::vector<int>> repr;
+    tsl::robin_map<std::string, std::vector<int>> repr;
     std::vector<int> novo_pai1(camada_tamanho);
     std::vector<int> novo_pai2(camada_tamanho);
 
@@ -3195,10 +3161,6 @@ Solucao* Resolucao::crossoverCicloCamada(
     int camadaCruz
 ) const
 {
-  const auto matrix_size = camadasTamanho * dias_semana_util * blocosTamanho;
-  MYASSERT(pai1.horario->getMatriz().size() == matrix_size, "pai1");
-  MYASSERT(pai2.horario->getMatriz().size() == matrix_size, "pai2");
-
     const auto tam_camada = dias_semana_util * blocosTamanho;
     std::vector<int> pos_visitados(tam_camada);
     auto num_visitados = 0;
@@ -3340,14 +3302,10 @@ Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 
 Solucao* Resolucao::selecaoTorneio(const std::vector<Solucao*>& pop) const
 {
-    const auto matrix_size = dias_semana_util * blocosTamanho * camadasTamanho;
     auto best = *Util::randomChoice(pop);
-    MYASSERT(best->getHorario().getMatriz().size() == matrix_size, "best");
 
     for (auto i = 1; i < horarioTorneioPopulacao; i++) {
         auto challenger = *Util::randomChoice(pop);
-        MYASSERT(challenger->getHorario().getMatriz().size() == matrix_size, 
-                 "challenger");
         if (challenger->getFO() > best->getFO()) {
             best = challenger;
         }
@@ -3434,7 +3392,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         ProfessorDisciplina* aloc{nullptr};
         std::tie(aloc_pos, aloc) = get_random_notnull_aloc(*viz);
 
-        hash_set<Professor*> professores_capacitados(
+        tsl::hopscotch_set<Professor*> professores_capacitados(
             begin(aloc->disciplina->professoresCapacitados),
             end(aloc->disciplina->professoresCapacitados));
 
@@ -3540,7 +3498,7 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     auto camada = Util::randomBetween(0, camadasTamanho);
     auto viz = std::make_unique<Solucao>(sol);
 
-    hash_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
+    tsl::hopscotch_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
     std::vector<ProfessorDisciplina*> eventos(num_disc_per, nullptr);
 
     for (auto j = 0; j < num_disc_per; j++) {
@@ -3627,12 +3585,12 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
             const auto e21 = sol.horario->at(d_e2, b_e2, j);
             const auto e22 = sol.horario->at(d_e2, b_e2 + 1, j);
 
-            if (e11 && e21 && e11->getProfessor() == e21->getProfessor()
-                || e11 && e22 && e11->getProfessor() == e22->getProfessor()
-                || e12 && e21 && e12->getProfessor() == e21->getProfessor()
-                || e12 && e22 && e12->getProfessor() == e22->getProfessor()
-                || e11 && e21 && e11->getDisciplina()->getPeriodo()
-                    == e21->getDisciplina()->getPeriodo()) {
+            if ((e11 && e21 && e11->getProfessor() == e21->getProfessor())
+                || (e11 && e22 && e11->getProfessor() == e22->getProfessor())
+                || (e12 && e21 && e12->getProfessor() == e21->getProfessor())
+                || (e12 && e22 && e12->getProfessor() == e22->getProfessor())
+                || (e11 && e21 && e11->getDisciplina()->getPeriodo()
+                      == e21->getDisciplina()->getPeriodo())) {
                 grafo[i].push_back(camadasTamanho + j);
                 grafo[camadasTamanho + j].push_back(i);
             }
@@ -3656,7 +3614,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     return std::move(*max_element(begin(solucoes), end(solucoes), SolucaoUGreater()));
 }
 
-const hash_map<std::string, Professor*>& Resolucao::getProfessores() const
+const tsl::robin_map<std::string, Professor*>& Resolucao::getProfessores() const
 {
     return professores;
 }
