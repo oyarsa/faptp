@@ -1,5 +1,7 @@
 _build/
 .build/
+.idea/
+cmake-build*
 .vs/
 .conan/
 docs/
