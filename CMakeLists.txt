@@ -112,25 +112,22 @@ endif()
 target_link_libraries(faptp-lib PRIVATE jsoncpp_lib)
 target_link_libraries(faptp-lib PUBLIC fmt::fmt)
 
+target_compile_features(faptp-lib PUBLIC cxx_std_17)
+
 if(NOT MSVC)
     target_link_libraries(faptp-exp PRIVATE pthread)
-    set(GCC_OPTIMIZATIONS "-Ofast -march=native -mavx")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_OPTIMIZATIONS}")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${GCC_OPTIMIZATIONS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wpedantic -std=c++17")
+    target_compile_options(faptp-lib PUBLIC
+    	$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-Ofast -mavx>)
+
+    target_compile_options(faptp PRIVATE -Wall -Wpedantic)
+    target_compile_options(faptp-lib PRIVATE -Wall -Wpedantic)
+    target_compile_options(faptp-exp PRIVATE -Wall -Wpedantic)
 else()
-	# Otimizações e configuração do runtime para estático
-    set(INTEL_OPTIMIZATIONS "/O2 /Oi /Ot /GL /Ob2 /arch:AVX /fp:fast")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT ${INTEL_OPTIMIZATIONS}")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT ${INTEL_OPTIMIZATIONS}")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+	target_compile_options(faptp-lib PUBLIC
+		$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:/O2 /Oi /Ot /GL /Ob2 /arch\:AVX /fp\:fast /MT>)
+	target_compile_options(faptp-lib PUBLIC $<$<CONFIG:Debug>:/MTd>)
 
-	# Nível alto de warnings e compilação paralela, assim como C++14
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /MP /std:c++17")
-
-	# Link Time Codegen
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG /ignore:4075")
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG /ignore:4075")
-	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG /ignore:4075")
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	target_compile_options(faptp PRIVATE /W4 /MP)
+	target_compile_options(faptp-lib PRIVATE /W4 /MP)
+	target_compile_options(faptp-exp PRIVATE /W4 /MP)
 endif()
