@@ -1,4 +1,4 @@
-#include <faptp-exp/experimento.h>
+#include "experimento.h"
 
 #include <fstream>
 #include <sstream>
@@ -71,7 +71,7 @@ upload_result(const std::string& id, const std::string& resultado,
     if (rv != CURLE_OK) {
       fmt::print("{}) {}: enviado com sucesso\n\n", num_config, id);
       return;
-    } 
+    }
 
     fmt::print("{}) tentativa {} falhou: {}\n\n", num_config, i + 1,
                curl_easy_strerror(rv));

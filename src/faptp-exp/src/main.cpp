@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 #include <curl/curl.h>
 
-#include <faptp-exp/experimento.h>
+#include "experimento.h"
 
 const auto usage = R"(
 Usage:
@@ -22,7 +22,7 @@ Onde:
 
     CONF
         Arquivo de configuracao. Se for 'auto', ira pegar o numero do arquivo
-        de acordo com o numero da maquina, buscando numa pasta 'config'. Por 
+        de acordo com o numero da maquina, buscando numa pasta 'config'. Por
         exemplo, uma maquina de nome 'XXX-01' ira gerar o caminho 'config\1.txt'.
 
     SERVER
@@ -55,11 +55,11 @@ main(int argc, const char** argv)
        ("h,help", "Mostrar ajuda")
        ("a,algo", "Algoritmo", cxxopts::value<std::string>())
        ("i,input", "Arquvo de entrada", cxxopts::value<std::string>())
-       ("c,config", "Arquivo de configuracao", 
+       ("c,config", "Arquivo de configuracao",
         cxxopts::value<std::string>()->default_value("auto"))
        ("s,server", "Servidor para submissao dos resultados",
         cxxopts::value<std::string>());
-     
+
      const auto result = options.parse(argc, argv);
 
      if (result.count("help")) {
