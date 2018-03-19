@@ -631,7 +631,7 @@ Solucao* Resolucao::gerarHorarioAG()
       {
         std::vector<Solucao*> prole;
 
-        #pragma omp for nowait schedule(dynamic)
+        #pragma omp for nowait
         for (auto i = 0; i < numCruz; i++) {
           // Cruzamento
           const auto pais = gerarHorarioAGTorneioPar(populacao);

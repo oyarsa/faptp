@@ -166,7 +166,7 @@ void run(const std::string& conf, const std::string& input,
   }();
   
   if (!solucao) {
-    Output::writeError("Solução infactível", out);
+    Output::writeError("Soluï¿½ï¿½o infactï¿½vel", out);
     return;
   }
 
@@ -174,22 +174,24 @@ void run(const std::string& conf, const std::string& input,
   Output::writeJson(*solucao, out);
 }
 
-long long average(const std::vector<long long>& timings)
+template<typename Number>
+Number average(const std::vector<Number>& timings)
 {
-  return std::accumulate(begin(timings), end(timings), 0ll) / timings.size();
+  return std::accumulate(begin(timings), end(timings), Number{0}) / timings.size();
 }
 
-long long median(std::vector<long long> v)
+template <typename Number>
+Number median(std::vector<Number> v)
 {
   std::nth_element(v.begin(), v.begin() + v.size()/2, v.end());
   return v[v.size() / 2];
 }
 
 void run_many(const std::string& conf, const std::string& input,
-              const std::string& out, const std::string& mode, 
+              [[maybe_unused]] const std::string&out,
+              const std::string& mode,
               const int num_repetitions)
 {
-  (void) out;
   Json::Value json;
   {
     std::ifstream file{ conf };
@@ -246,20 +248,24 @@ void run_many(const std::string& conf, const std::string& input,
   };
 
   std::vector<long long> timings(num_repetitions);
+  std::vector<double> iter_timings(num_repetitions);
 
   for (auto i = 0; i < num_repetitions; i++) {
     Timer t;
     const auto s = run_algorithm();
+
     const auto tempo = t.elapsed();
     timings[i] = tempo;
     const auto t_por_iter = tempo * 1. / r.ultimaIteracao;
-    fmt::print("{}: {}ms - FO: {} - Iter: {} - Ms/Iter: {}\n", 
+    iter_timings[i] = t_por_iter;
+
+    fmt::print("{}: {}ms - FO: {} - Iter: {} - Ms/Iter: {}\n",
                i, tempo, s->getFO(), r.ultimaIteracao, t_por_iter);
   }
 
   fmt::print("\n");
-  fmt::print("Media  : {}\n", average(timings));
-  fmt::print("Mediana: {}\n", median(timings));
+  fmt::print("Media  : {} ({})\n", average(timings), average(iter_timings));
+  fmt::print("Mediana: {} ({})\n", median(timings), median(iter_timings));
 }
 
 const auto usage = R"(
@@ -275,16 +281,16 @@ Onde:
       Arquivo JSON com os dados de entrada.
 
   -c, --config
-      Arquivo JSON com os dados de configuração do algoritmo.
+      Arquivo JSON com os dados de configuraï¿½ï¿½o do algoritmo.
 
   -o, --output
-      Nome do arquivo de saída a ser gerado com os resultados.
+      Nome do arquivo de saï¿½da a ser gerado com os resultados.
 
   -m, --mode
-      Modo de execução: 
-        * horario : geração da matriz de horários. Default.
-        * grade : geração das grades dos alunos. A entrada deve conter
-                  o horário pronto.
+      Modo de execuï¿½ï¿½o: 
+        * horario : geraï¿½ï¿½o da matriz de horï¿½rios. Default.
+        * grade : geraï¿½ï¿½o das grades dos alunos. A entrada deve conter
+                  o horï¿½rio pronto.
 )";
 
 void 
@@ -310,16 +316,16 @@ int main(int argc, const char* argv[])
   try {
     cxxopts::Options options{
       "faPTP",
-      "Geração de matrizes de horário para instituições de ensino superior privadas"
+      "Geraï¿½ï¿½o de matrizes de horï¿½rio para instituiï¿½ï¿½es de ensino superior privadas"
     };
 
     options.add_options()
       ("h,help", "Mostrar ajuda")
       ("i,input", "Arquivo de entrada", cxxopts::value<std::string>())
-      ("c,config", "Arquivo de configuração", cxxopts::value<std::string>())
-      ("o,output", "Arquivo de saída", cxxopts::value<std::string>())
-      ("m,mode", "Modo de execução", cxxopts::value<std::string>())
-      ("r,repetitions", "Número de repetições", cxxopts::value<int>());
+      ("c,config", "Arquivo de configuraï¿½ï¿½o", cxxopts::value<std::string>())
+      ("o,output", "Arquivo de saï¿½da", cxxopts::value<std::string>())
+      ("m,mode", "Modo de execuï¿½ï¿½o", cxxopts::value<std::string>())
+      ("r,repetitions", "Nï¿½mero de repetiï¿½ï¿½es", cxxopts::value<int>());
 
     const auto result = options.parse(argc, argv);
 
