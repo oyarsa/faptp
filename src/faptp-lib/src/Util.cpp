@@ -5,6 +5,7 @@
 #include <fmt/time.h>
 #include <fastrange.h>
 #include <tuple>
+#include <omp.h>
 #include <faptp-lib/Util.h>
 #include <faptp-lib/Aleatorio.h>
 
@@ -60,19 +61,25 @@ std::chrono::time_point<std::chrono::high_resolution_clock> Util::now()
     return std::chrono::high_resolution_clock::now();
 }
 
-int Util::randomBetween(int a, int b)
+int Util::random(int a, int b)
+{
+  return random(a, b, omp_get_thread_num());
+}
+
+int
+Util::random(int a, int b, int thread_id)
 {
   int min, max;
   std::tie(min, max) = std::minmax(a, b);
 
-  const auto rand = aleatorio::randomUInt();
+  const auto rand = aleatorio::randomUInt(thread_id);
   return fastrange32(rand, max - min) + min;
 }
 
 double Util::randomDouble()
 {
     constexpr auto max_random = 32767;
-    return static_cast<double>(randomBetween(0, max_random)) / max_random;
+    return static_cast<double>(random(0, max_random)) / max_random;
 }
 
 std::string Util::join_path(const std::vector<std::string>& folders, const std::string& file)
@@ -155,3 +162,4 @@ Util::get_env_var(const std::string& var)
 
   return env_var;
 }
+

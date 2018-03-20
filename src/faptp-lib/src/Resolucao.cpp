@@ -926,18 +926,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
             colisaoProfessor.clear();
 
             while (discs.size() != 0) {
-                randInt = 0;
-
-                /**
-                 * TODO: implementar aleatoriedade uniforme
-                 */
-                switch (0) {
-                    case 0:
-                        randInt = aleatorio::randomInt() % discs.size();
-                        break;
-                    case 1:
-                        break;
-                }
+                randInt = Util::random(0, static_cast<int>(discs.size()));
 
                 disciplinaAleatoria = discs[randInt];
                 dId = disciplinaAleatoria->getId();
@@ -946,7 +935,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
                 if (!disciplinaXprofessorDisciplina[dId]) {
 
                     do {
-                        randInt = aleatorio::randomInt() % disciplinaAleatoria->professoresCapacitados.size();
+                        randInt = Util::random(0, static_cast<int>(disciplinaAleatoria->professoresCapacitados.size()));
 
                         professorSelecionado = disciplinaAleatoria->professoresCapacitados[randInt];
                         pId = professorSelecionado->getId();
@@ -1084,7 +1073,7 @@ Resolucao::gerarHorarioAGTorneio(std::vector<Solucao*>& solucoesPopulacao) const
       * solucoesPopulacao.size();
 
   while (torneioCandidatos.size() <= populacaoTorneioMax && solucoesPopulacao.size() != 0) {
-    const auto randInt = aleatorio::randomInt() % solucoesPopulacao.size();
+    const auto randInt = Util::random(0, static_cast<int>(solucoesPopulacao.size()));
 
     const auto randomFO = solucoesPopulacao[randInt]->getFO();
     if (vencedorFO < randomFO) {
@@ -1140,14 +1129,14 @@ Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(
 
         for (int i = 0; i < camadasMax; i++) {
 
-            camadaPeriodo = aleatorio::randomInt() % camadasTamanho;
+            camadaPeriodo = Util::random(0, camadasTamanho);
 
             for (int j = 0, tentativas = 0; j < horarioCruzamentoDias;) {
                 success = false;
 
-                // De segunda a s�bado
-                diaSemana = aleatorio::randomInt() % 6;
-                blocoHorario = aleatorio::randomInt() % blocosTamanho;
+                // De segunda a sábado
+                diaSemana = Util::random(0, dias_semana_util);
+                blocoHorario = Util::random(0, blocosTamanho);
 
                 posicao = filho->horario->getPosition(diaSemana, blocoHorario, camadaPeriodo);
 
@@ -1254,7 +1243,7 @@ int Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) cons
 // retorna ao original, e a próxima será tentada
 std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, Solucao* pai2)
 {
-    const auto camadaCruz = aleatorio::randomInt() % camadasTamanho;
+    const auto camadaCruz = Util::random(0, camadasTamanho);
     auto filho1 = new Solucao(*pai1);
     auto filho2 = new Solucao(*pai2);
 
@@ -1293,9 +1282,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 
     // Escolhe posição de cruzamento. Se estiver no meio um bloco tenta de novo
     do {
-        auto pos = aleatorio::randomInt() % mat1.size();
+        const auto pos = Util::random(0, static_cast<int>(mat1.size()));
         int coord[3];
-        filho1->horario->get3DMatrix(pos, coord);
+        filho1->horario->get3DMatrix((size_t) pos, coord);
         dia = coord[1];
         bloco = coord[0];
         camada = coord[2];
@@ -1585,9 +1574,9 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGMutacaoExper(std::vector<Solucao*
 
     double porcentagem {};
 
-    // Muta��o dos populacao
+    // Mutacao da populacao
     for (auto j = 0u; j < pop.size(); j++) {
-        porcentagem = (aleatorio::randomInt() % 100) / 100.0;
+        porcentagem = Util::random(0, 100) / 100.0;
 
         if (porcentagem <= horarioMutacaoProbabilidade) {
             switch (tipoMut) {
@@ -1627,14 +1616,14 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
 
     for (auto i = 0; i < horarioMutacaoTentativas; i++) {
         auto mut = std::make_unique<Solucao>(*pSolucao);
-        const auto camadaX = aleatorio::randomInt() % camadasTamanho;
+        const auto camadaX = Util::random(0, camadasTamanho);
 
-        const auto diaX1 = aleatorio::randomInt() % dias_semana_util;
-        const auto blocoX1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        const auto diaX1 = Util::random(0, dias_semana_util);
+        const auto blocoX1 = 2 * Util::random(0, blocosTamanho/2);
         const auto x1 = mut->horario->getPosition(diaX1, blocoX1, camadaX);
 
-        const auto diaX2 = aleatorio::randomInt() % dias_semana_util;
-        const auto blocoX2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        const auto diaX2 = Util::random(0, dias_semana_util);
+        const auto blocoX2 = 2 * Util::random(0, blocosTamanho/2);
         const auto x2 = mut->horario->getPosition(diaX2, blocoX2, camadaX);
 
         if (swapSlots(*mut, x1, x2) && swapSlots(*mut, x1 + 1, x2 + 1)) {
@@ -1897,7 +1886,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(
     while (apRestante.size() != 0 && dIterStart != apRestante.end()
         && disponivel != adicionados) {
         const auto distancia = getIntervaloAlfaGrasp(apRestante);
-        const auto rand = Util::randomBetween(0, distancia);
+        const auto rand = Util::random(0, distancia);
         auto current = apRestante.begin();
         std::advance(current, rand);
         auto disciplina = *current;
@@ -1967,13 +1956,13 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
 
             auto disciplinasSize = grade->disciplinasAdicionadas.size();
             disciplinasRemoveMax = static_cast<int>(ceil(disciplinasSize * 1));
-            disciplinasRemoveRand = Util::randomBetween(1, disciplinasRemoveMax);
+            disciplinasRemoveRand = Util::random(1, disciplinasRemoveMax);
 
             for (int j = 0; j < disciplinasRemoveRand; j++) {
                 ProfessorDisciplina* professorDisciplinaRemovido = NULL;
 
                 disciplinasSize = grade->disciplinasAdicionadas.size();
-                random = Util::randomBetween(0, static_cast<int>(disciplinasSize));
+                random = Util::random(0, static_cast<int>(disciplinasSize));
                 grade->remove2(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
 
                 // Se houve uma remo��o
@@ -2031,8 +2020,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
             auto disciplinasRestantes = alunoPerfil->restante;
 
             for (int j = 0; j < (i + 1); j++) {
-                auto random = Util::randomBetween(0,
-                    static_cast<int>(currentGrade->disciplinasAdicionadas.size()));
+                auto random = Util::random(0, static_cast<int>(currentGrade->disciplinasAdicionadas.size()));
                 if (random == -1) {
                     break;
                 }
@@ -2310,7 +2298,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
         auto mut = std::make_unique<Solucao>(pSolucao);
 
         // Determina aleatoriamente qual disciplina terá seu professor substituído
-        auto idx = aleatorio::randomInt() % mut->horario->matriz.size();
+        const auto idx = Util::random(0, static_cast<int>(mut->horario->matriz.size()));
         auto profDisc = mut->horario->matriz[idx];
         if (!profDisc) {
             continue;
@@ -2325,7 +2313,7 @@ Resolucao::gerarHorarioAGMutacaoSubstProf(const Solucao& pSolucao) const
 
         // Encontra um professor substituto, que não seja o original
         professoresCapacitados.erase(profDisc->professor);
-        auto rand = aleatorio::randomInt() % professoresCapacitados.size();
+        const auto rand = Util::random(0, static_cast<int>(professoresCapacitados.size()));
         auto current = begin(professoresCapacitados);
         std::advance(current, rand);
         auto prof = *current;
@@ -2421,7 +2409,7 @@ gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
     while (num_disc_visitadas < num_discs) {
         int rnd_disc;
         do {
-            rnd_disc = aleatorio::randomInt() % num_discs;
+            rnd_disc = Util::random(0, static_cast<int>(num_discs));
         } while (disc_visitadas[rnd_disc]);
 
         disc_visitadas[rnd_disc] = true;
@@ -2453,7 +2441,7 @@ bool Resolucao::geraProfessorDisciplina(
     while (!success && num_prof_visitados < num_profs) {
         int rnd_prof;
         do {
-            rnd_prof = aleatorio::randomInt() % num_profs;
+            rnd_prof = Util::random(0, static_cast<int>(num_profs));
         } while (prof_visitados[rnd_prof]);
 
         prof_visitados[rnd_prof] = true;
@@ -2502,16 +2490,16 @@ bool Resolucao::geraAlocacao(
 
         while (!success_prof && num_slot_visitados < num_slots) {
             do {
-                dia = aleatorio::randomInt() % dias_semana_util;
+                dia = Util::random(0, dias_semana_util);
                 // Se restante for maior que um, deve alocar um bloco de duas disciplinas
                 // em um horário par. Para isso se gera um número até a metade do número
                 // de blocos e multiplica por dois. Ex: 4 blocos, serão gerados números 0 ou 1,
                 // que possibilitam o bloco 0 ou 2.
                 if (restante > 1) {
-                    bloco = 2 * (aleatorio::randomInt() % (blocosTamanho / 2));
+                    bloco = 2 * Util::random(0, blocosTamanho / 2);
                 } else {
                     // Se não for o caso, qualquer bloco serve
-                    bloco = aleatorio::randomInt() % blocosTamanho;
+                    bloco = Util::random(0, blocosTamanho);
                 }
             } while (slots_visitados[dia][bloco]);
 
@@ -2568,7 +2556,7 @@ std::unique_ptr<Solucao> Resolucao::gerarSolucaoAleatoria() const
         // Escolhe um período. Escolhe outro se já for percorrido.
         int rnd_per;
         do {
-            rnd_per = aleatorio::randomInt() % num_periodos;
+            rnd_per = Util::random(0, static_cast<int>(num_periodos));
         } while (periodos_visitados[rnd_per]);
 
         periodos_visitados[rnd_per] = true;
@@ -2810,7 +2798,7 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
     Disciplina* discremovida {nullptr};
 
     if (!adicionadas.empty()) {
-        auto rand = aleatorio::randomInt() % adicionadas.size();
+        const auto rand = Util::random(0, static_cast<int>(adicionadas.size()));
         discremovida = currGrade->remove(adicionadas[rand]);
     }
 
@@ -2957,7 +2945,7 @@ Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
         const auto camada = [&] {
             int n;
             do {
-                n = Util::randomBetween(0, camadasTamanho);
+                n = Util::random(0, camadasTamanho);
             } while (camadas_visitadas[n]);
             return n;
         }();
@@ -2979,11 +2967,11 @@ std::pair<int, int> Resolucao::getCrossoverPoints(
     int camada
 ) const
 {
-    const auto dia1 = Util::randomBetween(0, dias_semana_util);
-    const auto dia2 = Util::randomBetween(0, dias_semana_util);
+    const auto dia1 = Util::random(0, dias_semana_util);
+    const auto dia2 = Util::random(0, dias_semana_util);
 
-    const auto bloco1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
-    const auto bloco2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+    const auto bloco1 = 2 *Util::random(0, blocosTamanho/2);
+    const auto bloco2 = 2 *Util::random(0, blocosTamanho/2);
 
     const auto x1 = pai.horario->getPosition(dia1, bloco1, camada);
     const auto x2 = pai.horario->getPosition(dia2, bloco2, camada);
@@ -3021,7 +3009,7 @@ Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
         const auto camada = [&] {
             int n {};
             do {
-                n = Util::randomBetween(0, camadasTamanho);
+                n = Util::random(0, camadasTamanho);
             } while (camadas_visitadas[n]);
             return n;
         }();
@@ -3173,7 +3161,7 @@ Solucao* Resolucao::crossoverCicloCamada(
         auto ponto = [&] {
             int x;
             do {
-                x = Util::randomBetween(0, tam_camada);
+                x = Util::random(0, tam_camada);
             } while (pos_visitados[x]);
             return x;
         }();
@@ -3224,7 +3212,7 @@ Solucao* Resolucao::crossoverCicloCamada(
     // Gera máscara inicial
     std::vector<int> mask(num_ciclos);
     for (auto& x : mask) {
-        x = Util::randomBetween(0, 2);
+        x = Util::random(0, 2);
     }
 
     // Gera máscara do crossover
@@ -3276,7 +3264,7 @@ Solucao* Resolucao::crossoverCiclo(
         const auto camada = [&] {
             int x;
             do {
-                x = Util::randomBetween(0, camadasTamanho);
+                x = Util::random(0, camadasTamanho);
             } while (camadas_visitadas[x]);
             return x;
         }();
@@ -3297,7 +3285,7 @@ Disciplina*
 Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 {
     const auto distancia = getIntervaloAlfaGrasp(restantes);
-    return restantes[Util::randomBetween(0, distancia)];
+    return restantes[Util::random(0, distancia)];
 }
 
 Solucao* Resolucao::selecaoTorneio(const std::vector<Solucao*>& pop) const
@@ -3319,13 +3307,13 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
     for (auto i = 0; i < horarioMutacaoTentativas; i++) {
         auto viz = std::make_unique<Solucao>(sol);
 
-        const auto camada = Util::randomBetween(0, camadasTamanho);
+        const auto camada = Util::random(0, camadasTamanho);
 
-        const auto d_e1 = Util::randomBetween(0, dias_semana_util);
-        const auto b_e1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        const auto d_e1 = Util::random(0, dias_semana_util);
+        const auto b_e1 = 2 *Util::random(0, blocosTamanho/2);
 
-        const auto d_e2 = Util::randomBetween(0, dias_semana_util);
-        const auto b_e2 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        const auto d_e2 = Util::random(0, dias_semana_util);
+        const auto b_e2 = 2 *Util::random(0, blocosTamanho/2);
 
         if (swap_blocos(*viz, std::make_tuple(d_e1, b_e1),
                         std::make_tuple(d_e2, b_e2), camada)) {
@@ -3343,9 +3331,9 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
         auto viz = std::make_unique<Solucao>(sol);
         auto& horario = *viz->horario;
 
-        auto camada = Util::randomBetween(0, camadasTamanho);
-        auto dia = Util::randomBetween(0, dias_semana_util);
-        auto bloco = 2 * Util::randomBetween(0, blocosTamanho / 2);
+        auto camada = Util::random(0, camadasTamanho);
+        auto dia = Util::random(0, dias_semana_util);
+        auto bloco = 2 *Util::random(0, blocosTamanho/2);
 
         auto e1 = horario.at(dia, bloco, camada);
         auto e2 = horario.at(dia, bloco + 1, camada);
@@ -3493,9 +3481,8 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     constexpr auto max_per = 3;
     const auto aulas_semana = blocosTamanho * dias_semana_util;
 
-    auto num_disc_per = std::min(max_per, Util::randomBetween(
-                                 0, aulas_semana / 2));
-    auto camada = Util::randomBetween(0, camadasTamanho);
+    auto num_disc_per = std::min(max_per, Util::random(0, aulas_semana/2));
+    auto camada = Util::random(0, camadasTamanho);
     auto viz = std::make_unique<Solucao>(sol);
 
     tsl::hopscotch_set<std::pair<int, int>, Util::hash_pair<int, int>> posicoes{};
@@ -3509,8 +3496,8 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
         int bloco{};
 
         do {
-            dia = Util::randomBetween(0, dias_semana_util);
-            bloco = Util::randomBetween(0, blocosTamanho);
+            dia = Util::random(0, dias_semana_util);
+            bloco = Util::random(0, blocosTamanho);
 
             tie(std::ignore, inserido) = posicoes.emplace(dia, bloco);
         } while (!inserido);
@@ -3554,15 +3541,15 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
 std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
 {
     // Seleciona dois timeslots t1 = (d1, b1) e t2 = (d2, b2)
-    auto d_e1 = Util::randomBetween(0, dias_semana_util);
-    auto b_e1 = 2 * Util::randomBetween(0, blocosTamanho / 2);
+    auto d_e1 = Util::random(0, dias_semana_util);
+    auto b_e1 = 2 *Util::random(0, blocosTamanho/2);
 
     int d_e2, b_e2;
     std::tie(d_e2, b_e2) = [&] {
         int d, b;
         do {
-            d = Util::randomBetween(0, dias_semana_util);
-            b = 2 * Util::randomBetween(0, blocosTamanho / 2);
+            d = Util::random(0, dias_semana_util);
+            b = 2 *Util::random(0, blocosTamanho/2);
         } while (d == d_e1 && b == b_e1);
 
         return std::make_pair(d, b);
@@ -3668,7 +3655,7 @@ std::pair<int, ProfessorDisciplina*> Resolucao::get_random_notnull_aloc(
     ProfessorDisciplina* aloc{nullptr};
     int pos;
     while (!aloc) {
-        pos = Util::randomBetween(0, static_cast<int>(sol.horario->matriz.size()));
+        pos = Util::random(0, static_cast<int>(sol.horario->matriz.size()));
         aloc = sol.horario->at(pos);
     }
     return {pos, aloc};

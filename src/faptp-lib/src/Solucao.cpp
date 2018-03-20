@@ -140,7 +140,7 @@ Solucao::FO_t Solucao::getFO()
 Solucao::FO_t Solucao::getFO() const
 {
     if (!fo) {
-        throw std::runtime_error{"FO não calculada"};
+        throw std::runtime_error{"FO nï¿½o calculada"};
     }
     return *fo;
 }

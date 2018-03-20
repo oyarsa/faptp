@@ -77,7 +77,15 @@ std::chrono::time_point<std::chrono::high_resolution_clock> now();
 /// @param min Limitante inferior do intervalo.
 /// @param max Limitante superior do intervalo.
 /// @return Um inteiro em [min, max).
-int randomBetween(int min, int max);
+int random(int min, int max);
+
+/// Gera um inteiro aleatório entre min e max.
+///
+/// @param min Limitante inferior do intervalo.
+/// @param max Limitante superior do intervalo.
+/// @param thread_id ID da thread em execução.
+/// @return Um inteiro em [min, max).
+int random(int min, int max, int thread_id);
 
 /// Gera um double aleatório entre 0 e 1.
 ///
@@ -202,7 +210,7 @@ template <typename Container>
 auto
 randomChoice(Container& c)
 {
-  const auto n = randomBetween(0, static_cast<int>(c.size()));
+  const auto n = random(0, static_cast<int>(c.size()));
   auto it = begin(c);
   std::advance(it, n);
   return it;

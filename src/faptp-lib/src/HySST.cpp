@@ -7,7 +7,7 @@
 #include <faptp-lib/Solucao.h>
 #include <faptp-lib/Timer.h>
 
-// Implementação
+// Implementaï¿½ï¿½o
 
 struct HySST::Impl
 {
@@ -244,9 +244,9 @@ HySST::Impl::Time_slot HySST::Impl::pick_place(const Solucao& solucao) const
   while (num_slots_percorridos < num_slots) {
     auto s = 0;
     do {
-      const auto d = Util::randomBetween(0, dias_semana_util);
-      const auto b = 2 * Util::randomBetween(0, res.getBlocosTamanho() / 2);
-      const auto k = Util::randomBetween(0, res.getCamadasTamanho());
+      const auto d = Util::random(0, dias_semana_util);
+      const auto b = 2 *Util::random(0, res.getBlocosTamanho()/2);
+      const auto k = Util::random(0, res.getCamadasTamanho());
       s = horario.getPosition(d, b, k);
     } while (slots_percorridos[s]);
 
@@ -273,8 +273,8 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
     int dia, bloco, camada;
     std::tie(dia, bloco, camada) = slot;
 
-    auto novo_dia = Util::randomBetween(0, dias_semana_util);
-    auto novo_bloco = 2 * Util::randomBetween(0, res.getBlocosTamanho()/2);
+    auto novo_dia = Util::random(0, dias_semana_util);
+    auto novo_bloco = 2 *Util::random(0, res.getBlocosTamanho()/2);
 
     auto pd1 = horario.at(novo_dia, novo_bloco, camada);
     auto pd2 = horario.at(novo_dia, novo_bloco+1, camada);

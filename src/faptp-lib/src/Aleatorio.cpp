@@ -59,14 +59,26 @@ void aleatorio::initRandom(int numThreads)
 
 int aleatorio::randomInt()
 {
-  const auto thread_number = omp_get_thread_num();
-  return generators[thread_number].randomInt();
+  thread_local const auto thread_number = omp_get_thread_num();
+  return randomInt(thread_number);
 }
 
 uint32_t
 aleatorio::randomUInt()
 {
   thread_local const auto thread_number = omp_get_thread_num();
-  return generators[thread_number].randomUInt();
+  return randomUInt(thread_number);
+}
+
+uint32_t
+aleatorio::randomUInt(int thread_id)
+{
+  return generators[thread_id].randomUInt();
+}
+
+int
+aleatorio::randomInt(int thread_id)
+{
+  return generators[thread_id].randomInt();
 }
 
