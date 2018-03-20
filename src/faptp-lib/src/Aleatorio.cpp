@@ -42,11 +42,9 @@ int Aleatorio::randomInt()
 uint32_t
 Aleatorio::randomUInt()
 {
-  uint32_t x = state_;
-  x ^= x << 13;
-  x ^= x >> 17;
-  x ^= x << 5;
-  state_ = x;
+  state_ ^= state_ << 13;
+  state_ ^= state_ >> 17;
+  state_ ^= state_ << 5;
   return state_;
 }
 

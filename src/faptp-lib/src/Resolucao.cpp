@@ -31,6 +31,7 @@
 #include <faptp-lib/ILS.h>
 #include <faptp-lib/WDJU.h>
 #include <faptp-lib/HySST.h>
+#include <omp.h>
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
@@ -606,6 +607,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoExper(const std::vector
     return filhos;
 }
 
+static thread_local int this_thread_id = 0;
+
 Solucao* Resolucao::gerarHorarioAG()
 {
     const auto numCruz = std::max(
@@ -629,6 +632,7 @@ Solucao* Resolucao::gerarHorarioAG()
 
       #pragma omp parallel num_threads(numThreads_)
       {
+        this_thread_id = omp_get_thread_num();
         std::vector<Solucao*> prole;
 
         #pragma omp for nowait
@@ -2490,16 +2494,16 @@ bool Resolucao::geraAlocacao(
 
         while (!success_prof && num_slot_visitados < num_slots) {
             do {
-                dia = Util::random(0, dias_semana_util);
+                dia = Util::random(0, dias_semana_util, this_thread_id);
                 // Se restante for maior que um, deve alocar um bloco de duas disciplinas
                 // em um horário par. Para isso se gera um número até a metade do número
                 // de blocos e multiplica por dois. Ex: 4 blocos, serão gerados números 0 ou 1,
                 // que possibilitam o bloco 0 ou 2.
                 if (restante > 1) {
-                    bloco = 2 * Util::random(0, blocosTamanho / 2);
+                    bloco = 2 * Util::random(0, blocosTamanho / 2, this_thread_id);
                 } else {
                     // Se não for o caso, qualquer bloco serve
-                    bloco = Util::random(0, blocosTamanho);
+                    bloco = Util::random(0, blocosTamanho, this_thread_id);
                 }
             } while (slots_visitados[dia][bloco]);
 
@@ -3161,7 +3165,7 @@ Solucao* Resolucao::crossoverCicloCamada(
         auto ponto = [&] {
             int x;
             do {
-                x = Util::random(0, tam_camada);
+                x = Util::random(0, tam_camada, this_thread_id);
             } while (pos_visitados[x]);
             return x;
         }();
@@ -3212,7 +3216,7 @@ Solucao* Resolucao::crossoverCicloCamada(
     // Gera máscara inicial
     std::vector<int> mask(num_ciclos);
     for (auto& x : mask) {
-        x = Util::random(0, 2);
+        x = Util::random(0, 2, this_thread_id);
     }
 
     // Gera máscara do crossover
@@ -3264,7 +3268,7 @@ Solucao* Resolucao::crossoverCiclo(
         const auto camada = [&] {
             int x;
             do {
-                x = Util::random(0, camadasTamanho);
+                x = Util::random(0, camadasTamanho, this_thread_id);
             } while (camadas_visitadas[x]);
             return x;
         }();
@@ -3307,13 +3311,13 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
     for (auto i = 0; i < horarioMutacaoTentativas; i++) {
         auto viz = std::make_unique<Solucao>(sol);
 
-        const auto camada = Util::random(0, camadasTamanho);
+        const auto camada = Util::random(0, camadasTamanho, this_thread_id);
 
-        const auto d_e1 = Util::random(0, dias_semana_util);
-        const auto b_e1 = 2 *Util::random(0, blocosTamanho/2);
+        const auto d_e1 = Util::random(0, dias_semana_util, this_thread_id);
+        const auto b_e1 = 2 *Util::random(0, blocosTamanho/2, this_thread_id);
 
-        const auto d_e2 = Util::random(0, dias_semana_util);
-        const auto b_e2 = 2 *Util::random(0, blocosTamanho/2);
+        const auto d_e2 = Util::random(0, dias_semana_util, this_thread_id);
+        const auto b_e2 = 2 *Util::random(0, blocosTamanho/2, this_thread_id);
 
         if (swap_blocos(*viz, std::make_tuple(d_e1, b_e1),
                         std::make_tuple(d_e2, b_e2), camada)) {
