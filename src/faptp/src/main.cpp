@@ -264,6 +264,7 @@ void run_many(const std::string& conf, const std::string& input,
   }
 
   fmt::print("\n");
+  fmt::print("{} threads\n", r.numThreads());
   fmt::print("Media  : {} ({})\n", average(timings), average(iter_timings));
   fmt::print("Mediana: {} ({})\n", median(timings), median(iter_timings));
 }
