@@ -17,6 +17,7 @@ find_package(fmt REQUIRED)
 #find_package(OpenMP REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(CURL REQUIRED)
+find_package(tbb REQUIRED)
 
 # Bibliotecas
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "Build examples for CXXOpts")

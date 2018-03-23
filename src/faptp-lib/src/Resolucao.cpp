@@ -12,6 +12,9 @@
 #include <stack>
 #include <set>
 
+#include <tbb/concurrent_vector.h>
+#include <tbb/parallel_sort.h>
+
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
     #include <modelo-grade/modelo_solver.h>
@@ -611,53 +614,53 @@ static thread_local int this_thread_id = 0;
 
 Solucao* Resolucao::gerarHorarioAG()
 {
-    kmp_set_blocktime(0);
-    const auto numCruz = std::max(
-        1,
-        static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
+  const auto numCruz = std::max(
+      1,
+      static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
 
-    tempoInicio = Util::now();
-    populacao = gerarHorarioAGPopulacaoInicial2();
+  tempoInicio = Util::now();
+  populacao = gerarHorarioAGPopulacaoInicial2();
 
-    foAlvo = populacao[0]->getFO();
-    iteracaoAlvo = -1;
-    tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
-    Timer t;
-    auto iter = 0;
+  foAlvo = populacao[0]->getFO();
+  iteracaoAlvo = -1;
+  tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
+  Timer t;
+  auto iter = 0;
 
   std::vector<std::vector<Solucao*>> proxima_geracao(numThreads_);
 
-    while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
-      ultimaIteracao = iter;
-      //logPopulacao(populacao, iter);
+  #pragma omp parallel num_threads(numThreads_)
+  while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
+    //logPopulacao(populacao, iter);
 
-      #pragma omp parallel num_threads(numThreads_)
-      {
-        this_thread_id = omp_get_thread_num();
-        auto& prole = proxima_geracao[this_thread_id];
-        prole.clear();
+    this_thread_id = omp_get_thread_num();
+    auto& prole = proxima_geracao[this_thread_id];
+    prole.clear();
 
-        #pragma omp for nowait schedule(dynamic, 1)
-        for (auto i = 0; i < numCruz; i++) {
-          // Cruzamento
-          const auto pais = gerarHorarioAGTorneioPar(populacao);
-          auto filhos = gerarHorarioAGCruzamento(pais);
+    #pragma omp for schedule(guided)
+    for (auto i = 0; i < numCruz; i++) {
+      // Cruzamento
+      const auto pais = gerarHorarioAGTorneioPar(populacao);
+      auto filhos = gerarHorarioAGCruzamento(pais);
 
-          // Mutação
-          for (auto& filho : filhos) {
-            const auto chance = Util::randomDouble();
-            if (chance <= horarioMutacaoProbabilidade) {
-              auto s = gerarHorarioAGMutacao(filho);
-              if (s) {
-                delete filho;
-                filho = s;
-              }
-            }
+      // Mutação
+      for (auto& filho : filhos) {
+        const auto chance = Util::randomDouble();
+        if (chance <= horarioMutacaoProbabilidade) {
+          auto s = gerarHorarioAGMutacao(filho);
+          if (s) {
+            delete filho;
+            filho = s;
           }
-
-          prole.insert(prole.end(), filhos.begin(), filhos.end());
         }
       }
+
+      prole.insert(prole.end(), filhos.begin(), filhos.end());
+    }
+
+    #pragma omp single
+    {
+      ultimaIteracao = iter;
 
       for (auto& v : proxima_geracao) {
         populacao.insert(populacao.end(), v.begin(), v.end());
@@ -670,20 +673,21 @@ Solucao* Resolucao::gerarHorarioAG()
 
       iter++;
     }
+  }
 
-    // Captura a melhor solução da população, deletando o resto
-    gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
-    auto solucaoAG = populacao[0];
+  // Captura a melhor solução da população, deletando o resto
+  gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
+  auto solucaoAG = populacao[0];
 
-    // Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
-    // o que causa problemas com a escrita do html.
-    if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
-        reinsereGrades(solucaoAG);
-    }
+  // Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
+  // o que causa problemas com a escrita do html.
+  if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
+      reinsereGrades(solucaoAG);
+  }
 
-    solucao = solucaoAG;
+  solucao = solucaoAG;
 
-    return solucaoAG;
+  return solucaoAG;
 }
 
 Solucao* Resolucao::gerarHorarioAG2()
