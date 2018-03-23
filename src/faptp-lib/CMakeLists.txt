@@ -49,10 +49,15 @@ target_include_directories(faptp-lib PUBLIC include)
 
 target_link_libraries(faptp-lib PRIVATE jsoncpp_lib)
 target_link_libraries(faptp-lib PUBLIC fmt::fmt)
-target_link_libraries(faptp-lib PRIVATE OpenMP::OpenMP_CXX)
+#target_link_libraries(faptp-lib PRIVATE OpenMP::OpenMP_CXX)
 target_link_libraries(faptp-lib PUBLIC tsl)
 target_link_libraries(faptp-lib PUBLIC range)
-target_link_libraries(faptp-lib PUBLIC fastrange)
+target_link_libraries(faptp-lib PRIVATE fastrange)
+target_link_libraries(faptp-lib PUBLIC optional)
 
 target_compile_features(faptp-lib PUBLIC cxx_std_17)
 target_compile_definitions(faptp-lib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
+target_compile_options(faptp-lib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:-openmp>)
+target_compile_options(faptp-lib PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fopenmp>)
+target_compile_options(faptp-lib PRIVATE $<$<CXX_COMPILER_ID:Intel>:-Qopenmp>)
+

@@ -611,6 +611,7 @@ static thread_local int this_thread_id = 0;
 
 Solucao* Resolucao::gerarHorarioAG()
 {
+    kmp_set_blocktime(0);
     const auto numCruz = std::max(
         1,
         static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
@@ -624,18 +625,19 @@ Solucao* Resolucao::gerarHorarioAG()
     Timer t;
     auto iter = 0;
 
+  std::vector<std::vector<Solucao*>> proxima_geracao(numThreads_);
+
     while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
       ultimaIteracao = iter;
       //logPopulacao(populacao, iter);
 
-      std::vector<Solucao*> proxima_geracao;
-
       #pragma omp parallel num_threads(numThreads_)
       {
         this_thread_id = omp_get_thread_num();
-        std::vector<Solucao*> prole;
+        auto& prole = proxima_geracao[this_thread_id];
+        prole.clear();
 
-        #pragma omp for nowait
+        #pragma omp for nowait schedule(dynamic, 1)
         for (auto i = 0; i < numCruz; i++) {
           // Cruzamento
           const auto pais = gerarHorarioAGTorneioPar(populacao);
@@ -655,13 +657,11 @@ Solucao* Resolucao::gerarHorarioAG()
 
           prole.insert(prole.end(), filhos.begin(), filhos.end());
         }
-
-        #pragma omp critical
-        proxima_geracao.insert(proxima_geracao.end(), prole.begin(), prole.end());
       }
 
-      populacao.insert(populacao.end(), proxima_geracao.begin(),
-                       proxima_geracao.end());
+      for (auto& v : proxima_geracao) {
+        populacao.insert(populacao.end(), v.begin(), v.end());
+      }
 
       std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
 
@@ -2389,17 +2389,9 @@ void Resolucao::logPopulacao(const std::vector<Solucao*>& pop, int iter)
 
 std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial2()
 {
-    /*    std::vector<Solucao*> populacaoInical;
-
-        auto solucoes = gerarSolucoesAleatorias(horarioPopulacaoInicial);
-        Util::insert_sorted(populacaoInical, begin(solucoes), end(solucoes),
-                            SolucaoComparaMaior());
-
-        return populacaoInical;*/
-
-    auto solucoes = gerarSolucoesAleatorias2(horarioPopulacaoInicial);
-    std::sort(begin(solucoes), end(solucoes), SolucaoComparaMaior());
-    return solucoes;
+  auto solucoes = gerarSolucoesAleatorias2(horarioPopulacaoInicial);
+  std::sort(begin(solucoes), end(solucoes), SolucaoComparaMaior());
+  return solucoes;
 }
 
 bool Resolucao::
@@ -2469,14 +2461,10 @@ bool Resolucao::geraAlocacao(
     int camada) const
 {
     const auto pdId = "pr" + prof->id + "di" + disc->id;
-    ProfessorDisciplina* pd = nullptr;
-    #pragma omp critical (updateProfDisc)
-    {
-      if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
-        professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
-      }
-      pd = professorDisciplinas[pdId];
+    if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
+      professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
     }
+    auto pd = professorDisciplinas[pdId];
 
     sol->horario->disc_camada_[disc->id_hash()] = camada;
 
@@ -2598,7 +2586,6 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias2(int numSolucoes)
 {
     std::vector<Solucao*> solucoes(numSolucoes);
-    #pragma omp parallel for num_threads(numThreads_)
     for (auto i = 0; i < numSolucoes; i++) {
         solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
     }

@@ -69,7 +69,8 @@ int Util::random(int a, int b)
 int
 Util::random(int a, int b, int thread_id)
 {
-  const auto [min, max] = std::minmax(a, b);
+  int min, max;
+  std::tie(min, max) = std::minmax(a, b);
 
   const auto rand = aleatorio::randomUInt(thread_id);
   return fastrange32(rand, max - min) + min;
