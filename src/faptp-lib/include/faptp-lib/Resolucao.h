@@ -96,11 +96,11 @@ public:
 #endif
     std::string getLog() const;
 
-    // Converte a matriz tridimensional do horário em uma matriz bidimensional
-    // de binários para o modelo
+    // Converte a matriz tridimensional do horï¿½rio em uma matriz bidimensional
+    // de binï¿½rios para o modelo
     std::vector<std::vector<char>> converteHorario(Solucao* pSolucao) const;
 
-    // Operadores de vizinhança
+    // Operadores de vizinhanï¿½a
     std::unique_ptr<Solucao> event_swap(const Solucao& sol) const;
     std::unique_ptr<Solucao> event_move(const Solucao& sol) const;
     std::unique_ptr<Solucao> resource_swap(const Solucao& sol) const;
@@ -111,17 +111,17 @@ public:
     const tsl::robin_map<std::string, Professor*>& getProfessores() const;
     const std::vector<Disciplina*>& getDisciplinas() const;
     /*
-         Parâmetros da execução da solução
+         Parï¿½metros da execuï¿½ï¿½o da soluï¿½ï¿½o
          */
-    // Horário população inicial
+    // Horï¿½rio populaï¿½ï¿½o inicial
     int horarioPopulacaoInicial;
     int horarioProfessorColisaoMax = 2;
 
-    // Horário torneio
+    // Horï¿½rio torneio
     double horarioTorneioPares;
     double horarioTorneioPopulacao;
 
-    // Horário cruzamento
+    // Horï¿½rio cruzamento
     double horarioCruzamentoPorcentagem = 0;
     int horarioCruzamentoFilhos = 2;
     int horarioCruzamentoDias{};
@@ -129,20 +129,20 @@ public:
     int horarioCruzamentoTentativasMax = 1;
     // Operador de cruzamento selecionado
     Configuracao::TipoCruzamento horarioTipoCruzamento;
-    // Operador de mutação selecionado
+    // Operador de mutaï¿½ï¿½o selecionado
     Configuracao::TipoMutacao horarioTipoMutacao;
     // FO utilizada
     Configuracao::TipoFo horarioTipoFo;
-    // Mapa dos pesos das restrições
+    // Mapa dos pesos das restriï¿½ï¿½es
     tsl::robin_map<std::string, double> pesos_soft;
 
     int horarioIteracao;
 
-    // Horário mutação
+    // Horï¿½rio mutaï¿½ï¿½o
     double horarioMutacaoProbabilidade;
     int horarioMutacaoTentativas;
 
-    // Grade tipo de construção
+    // Grade tipo de construï¿½ï¿½o
     Configuracao::TipoGrade gradeTipoConstrucao;
     double gradeAlfa;
 
@@ -151,7 +151,7 @@ public:
     int gradeGraspVizinhos;
     double gradeGraspTempoConstrucao;
 
-    // Solução alvo, a iteração em que ela foi alcançada primeiro e o tempo
+    // Soluï¿½ï¿½o alvo, a iteraï¿½ï¿½o em que ela foi alcanï¿½ada primeiro e o tempo
     double foAlvo{};
     int iteracaoAlvo{};
     long long tempoAlvo{};
@@ -159,14 +159,14 @@ public:
 
     void logExperimentos();
 
-    // Porcentagem de soluções aleatórias que serão criadas e adicionadas à população
-    // à cada iteração
+    // Porcentagem de soluï¿½ï¿½es aleatï¿½rias que serï¿½o criadas e adicionadas ï¿½ populaï¿½ï¿½o
+    // ï¿½ cada iteraï¿½ï¿½o
     double porcentagemSolucoesAleatorias;
 
-    // Número de iterações máximo que o AG continuará sem evoluir a solução
+    // Nï¿½mero de iteraï¿½ï¿½es mï¿½ximo que o AG continuarï¿½ sem evoluir a soluï¿½ï¿½o
     int maxIterSemEvolAG;
     int ultimaIteracao{};
-    // Número de iterações máximo que o GRASP continuará sem evoluir a grade
+    // Nï¿½mero de iteraï¿½ï¿½es mï¿½ximo que o GRASP continuarï¿½ sem evoluir a grade
     int maxIterSemEvoGrasp;
 
     static const int numcruz = 6;
@@ -290,7 +290,7 @@ private:
     void gerarHorarioAGEfetuaMutacao(std::vector<Solucao*>& pop) const;
     void gerarHorarioAGEfetuaMutacaoExper(std::vector<Solucao*>& pop,
                                           Configuracao::TipoMutacao tipoMut);
-    // Verifica se a nova população possui uma solução melhor que a anterior
+    // Verifica se a nova populaï¿½ï¿½o possui uma soluï¿½ï¿½o melhor que a anterior
     void gerarHorarioAGVerificaEvolucao(std::vector<Solucao*>& pop, int iteracaoAtual);
 
     std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil,
@@ -303,20 +303,20 @@ private:
      * Helpers dos movimentos de resource
     */
 
-    // Remove as instâncias de `aloc` na camada `camada` da solução `sol`,
+    // Remove as instï¿½ncias de `aloc` na camada `camada` da soluï¿½ï¿½o `sol`,
     // salvando os lugares em pares (dia, bloco)
     std::vector<std::pair<int, int>> remove_aloc_memorizando(
         Solucao& sol, ProfessorDisciplina* aloc, int camada) const;
 
-    // Reinsere um ProfessorDisciplina `aloc` na camada `camada` da solução
-    // `sol`, nas posições registradas por `posicoes_aloc`
+    // Reinsere um ProfessorDisciplina `aloc` na camada `camada` da soluï¿½ï¿½o
+    // `sol`, nas posiï¿½ï¿½es registradas por `posicoes_aloc`
     bool reinsere_alocacoes(
         Solucao& sol, const std::vector<std::pair<int, int>>& posicoes_aloc,
         ProfessorDisciplina* aloc, int camada) const;
 
-    // Retorna uma par (posição, alocação), onde a posição é gerada aleatoriamente,
-    // a alocação é aquela presente nessa posição na matriz da solução `sol`
-    // e não é nula
+    // Retorna uma par (posiï¿½ï¿½o, alocaï¿½ï¿½o), onde a posiï¿½ï¿½o ï¿½ gerada aleatoriamente,
+    // a alocaï¿½ï¿½o ï¿½ aquela presente nessa posiï¿½ï¿½o na matriz da soluï¿½ï¿½o `sol`
+    // e nï¿½o ï¿½ nula
     std::pair<int, ProfessorDisciplina*> get_random_notnull_aloc(
         const Solucao& sol) const;
 
@@ -369,6 +369,8 @@ private:
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
     void printCamada(const Solucao& s, int camada) const;
+
+    struct Iter;
 };
 
 #endif /* RESOLUCAO_H */
