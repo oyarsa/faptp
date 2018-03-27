@@ -627,17 +627,15 @@ Solucao* Resolucao::gerarHorarioAG()
   Timer t;
   auto iter = 0;
 
-  std::vector<std::vector<Solucao*>> proxima_geracao(numThreads_);
+  std::vector<Solucao*> proxima_geracao;
 
   #pragma omp parallel num_threads(numThreads_)
   while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
-    //logPopulacao(populacao, iter);
-
     this_thread_id = omp_get_thread_num();
-    auto& prole = proxima_geracao[this_thread_id];
+    thread_local std::vector<Solucao*> prole;
     prole.clear();
 
-    #pragma omp for schedule(guided)
+    #pragma omp for schedule(dynamic, 1) nowait
     for (auto i = 0; i < numCruz; i++) {
       // Cruzamento
       const auto pais = gerarHorarioAGTorneioPar(populacao);
@@ -658,18 +656,33 @@ Solucao* Resolucao::gerarHorarioAG()
       prole.insert(prole.end(), filhos.begin(), filhos.end());
     }
 
+    #pragma omp critical (prole)
+    proxima_geracao.insert(proxima_geracao.end(), prole.begin(), prole.end());
+
+    #pragma omp barrier
+
+    #pragma omp single
+    {
+      populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
+      proxima_geracao.clear();
+      std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+    }
+
+    #pragma omp for schedule(dynamic, 1)
+    for (auto i = horarioPopulacaoInicial; i < populacao.size(); i++) {
+      delete populacao[i];
+    }
+
     #pragma omp single
     {
       ultimaIteracao = iter;
 
-      for (auto& v : proxima_geracao) {
-        populacao.insert(populacao.end(), v.begin(), v.end());
+      populacao.resize(horarioPopulacaoInicial);
+
+      if (populacao[0]->getFO() > foAlvo) {
+        iteracaoAlvo = iter;
+        foAlvo = populacao[0]->getFO();
       }
-
-      std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
-
-      gerarHorarioAGSobrevivenciaElitismo(populacao);
-      gerarHorarioAGVerificaEvolucao(populacao, iter);
 
       iter++;
     }
