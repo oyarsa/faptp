@@ -15,6 +15,12 @@
 #include <tbb/parallel_for_each.h>
 #include <tbb/parallel_reduce.h>
 #include <tbb/parallel_sort.h>
+#include <tbb/task_scheduler_init.h>
+
+#if _WIN32 || _WIN64
+  #define NOMINMAX
+#endif
+#include <tbb/mutex.h>
 
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
@@ -650,6 +656,8 @@ struct Resolucao::Iter {
 
 Solucao* Resolucao::gerarHorarioAG()
 {
+  tbb::task_scheduler_init tsi(numThreads_);
+
   const auto numCruz = std::max(
       1,
       static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
@@ -2469,6 +2477,8 @@ bool Resolucao::geraProfessorDisciplina(
     return success;
 }
 
+tbb::mutex prof_disc_mutex;
+
 bool Resolucao::geraAlocacao(
     Solucao* sol,
     Disciplina* disc,
@@ -2476,10 +2486,15 @@ bool Resolucao::geraAlocacao(
     int camada) const
 {
     const auto pdId = "pr" + prof->id + "di" + disc->id;
-    if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
-      professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
+
+    ProfessorDisciplina* pd;
+    {
+      tbb::mutex::scoped_lock lock(prof_disc_mutex);
+      if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
+          professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
+      }
+      pd = professorDisciplinas[pdId];
     }
-    auto pd = professorDisciplinas[pdId];
 
     sol->horario->disc_camada_[disc->id_hash()] = camada;
 
@@ -2601,9 +2616,12 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias2(int numSolucoes)
 {
     std::vector<Solucao*> solucoes(numSolucoes);
-    for (auto i = 0; i < numSolucoes; i++) {
-        solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
-    }
+    //for (auto i = 0; i < numSolucoes; i++) {
+    //    solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
+    //}
+    tbb::parallel_for(0, numSolucoes, [&](int i) {
+      solucoes[i]  = gerarSolucaoAleatoriaNotNull().release();
+    });
     return solucoes;
 }
 
