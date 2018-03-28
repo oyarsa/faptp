@@ -306,12 +306,10 @@ int Horario::aulasSeguidasDisc(const std::size_t disciplina) const
 
 int Horario::aulasSeguidas() const
 {
-  thread_local std::vector<std::vector<int>> dias_discs(
-    dias_semana_util, std::vector<int>(Disciplina::max_hash()));
+  thread_local std::vector<int8_t> dias_discs(
+      dias_semana_util * Disciplina::max_hash());
 
-  for (auto& v : dias_discs) {
-    std::fill(v.begin(), v.end(), 0);
-  }
+  std::fill(dias_discs.begin(), dias_discs.end(), -2);
 
   for (auto c = 0; c < camadasTamanho; c++) {
     for (auto d = 0; d < dias_semana_util; d++) {
@@ -319,21 +317,15 @@ int Horario::aulasSeguidas() const
         const auto pd = at(d, b, c);
         if (!pd) continue;
 
-        dias_discs[d][pd->getDisciplina()->id_hash()]++;
+        const auto pos = d * Disciplina::max_hash() + pd->getDisciplina()->id_hash();
+        dias_discs[pos]++;
       }
     }
   }
 
   auto num = 0;
-
-  for (auto dia = 0; dia < dias_semana_util; dia++) {
-    for (auto disc = 0u; disc < Disciplina::max_hash(); disc++) {
-      //num += std::max(dias_discs[dia][disc] - 2, 0);
-      const auto x = dias_discs[dia][disc];
-      if (x > 2) {
-        num += x - 2;
-      }
-    }
+  for (const auto x : dias_discs) {
+    num += std::max(x, static_cast<int8_t>(0));
   }
 
   return num;
