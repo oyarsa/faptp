@@ -369,8 +369,6 @@ private:
 
     Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
     void printCamada(const Solucao& s, int camada) const;
-
-    struct Iter;
 };
 
 #endif /* RESOLUCAO_H */

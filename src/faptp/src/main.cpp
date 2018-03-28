@@ -1,5 +1,3 @@
-#include <tbb/tbbmalloc_proxy.h>
-
 #include <faptp-lib/Configuracao.h>
 #include <faptp-lib/HySST.h>
 #include <faptp-lib/ILS.h>

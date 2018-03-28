@@ -12,16 +12,6 @@
 #include <stack>
 #include <set>
 
-#include <tbb/parallel_for_each.h>
-#include <tbb/parallel_reduce.h>
-#include <tbb/parallel_sort.h>
-#include <tbb/task_scheduler_init.h>
-
-#if _WIN32 || _WIN64
-  #define NOMINMAX
-#endif
-#include <tbb/mutex.h>
-
 #ifdef MODELO
     #include <modelo-grade/arquivos.h>
     #include <modelo-grade/modelo_solver.h>
@@ -619,45 +609,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoExper(const std::vector
 
 static thread_local int this_thread_id = 0;
 
-struct Resolucao::Iter {
-  Resolucao& res;
-  std::vector<Solucao*> prole;
-
-  Iter(Resolucao& r) : res(r), prole{} {}
-  Iter(Iter& i, tbb::split) : res(i.res), prole{} {}
-
-  void operator()(const tbb::blocked_range<int>& r) {
-    this_thread_id = omp_get_thread_num();
-
-    for (auto x = r.begin(); x != r.end(); ++x) {
-      // Cruzamento
-      const auto pais = res.gerarHorarioAGTorneioPar(res.populacao);
-      auto filhos = res.gerarHorarioAGCruzamento(pais);
-
-      // Mutação
-      for (auto& filho : filhos) {
-        const auto chance = Util::randomDouble();
-        if (chance <= res.horarioMutacaoProbabilidade) {
-          auto s = res.gerarHorarioAGMutacao(filho);
-          if (s) {
-            delete filho;
-            filho = s;
-          }
-        }
-      }
-      prole.insert(prole.end(), filhos.begin(), filhos.end());
-    }
-  }
-
-  void join(Iter& rhs) {
-      prole.insert(prole.end(), rhs.prole.begin(), rhs.prole.end());
-  }
-};
-
 Solucao* Resolucao::gerarHorarioAG()
 {
-  tbb::task_scheduler_init tsi(numThreads_);
-
   const auto numCruz = std::max(
       1,
       static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
@@ -671,27 +624,63 @@ Solucao* Resolucao::gerarHorarioAG()
   Timer t;
   auto iter = 0;
 
+  std::vector<Solucao*> proxima_geracao;
+
+  #pragma omp parallel num_threads(numThreads_)
   while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
-    Iter it(*this);
-    tbb::parallel_reduce(tbb::blocked_range<int>(0, numCruz), it);
-    const auto& proxima_geracao = it.prole;
+    this_thread_id = omp_get_thread_num();
+    thread_local std::vector<Solucao*> prole;
+    prole.clear();
 
-    populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
-    tbb::parallel_sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+    #pragma omp for schedule(dynamic, 1) nowait
+    for (auto i = 0; i < numCruz; i++) {
+      // Cruzamento
+      const auto pais = gerarHorarioAGTorneioPar(populacao);
+      auto filhos = gerarHorarioAGCruzamento(pais);
 
-    tbb::parallel_for_each(populacao.begin() + horarioPopulacaoInicial, populacao.end(),
-                           [](Solucao* s) { delete s; });
-
-    ultimaIteracao = iter;
-
-    populacao.resize(horarioPopulacaoInicial);
-
-    if (populacao[0]->getFO() > foAlvo) {
-      iteracaoAlvo = iter;
-      foAlvo = populacao[0]->getFO();
+      // Mutação
+      for (auto& filho : filhos) {
+        const auto chance = Util::randomDouble();
+        if (chance <= horarioMutacaoProbabilidade) {
+          auto s = gerarHorarioAGMutacao(filho);
+          if (s) {
+            delete filho;
+            filho = s;
+          }
+        }
+      }
+      prole.insert(prole.end(), filhos.begin(), filhos.end());
     }
 
-    iter++;
+    #pragma omp critical (prole)
+    proxima_geracao.insert(proxima_geracao.end(), prole.begin(), prole.end());
+
+    #pragma omp barrier
+
+    #pragma omp single
+    {
+      populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
+      std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+    }
+
+    #pragma omp for schedule(dynamic, 1)
+    for (auto i = horarioPopulacaoInicial; i < static_cast<int>(populacao.size()); i++) {
+        delete populacao[i];
+    }
+
+    #pragma omp single
+    {
+      ultimaIteracao = iter;
+      proxima_geracao.clear();
+      populacao.resize(horarioPopulacaoInicial);
+
+      if (populacao[0]->getFO() > foAlvo) {
+          iteracaoAlvo = iter;
+          foAlvo = populacao[0]->getFO();
+      }
+
+      iter++;
+    }
   }
 
   // Captura a melhor solução da população, deletando o resto
@@ -2477,8 +2466,6 @@ bool Resolucao::geraProfessorDisciplina(
     return success;
 }
 
-tbb::mutex prof_disc_mutex;
-
 bool Resolucao::geraAlocacao(
     Solucao* sol,
     Disciplina* disc,
@@ -2488,8 +2475,8 @@ bool Resolucao::geraAlocacao(
     const auto pdId = "pr" + prof->id + "di" + disc->id;
 
     ProfessorDisciplina* pd;
+    #pragma omp critical (updateProfDisc)
     {
-      tbb::mutex::scoped_lock lock(prof_disc_mutex);
       if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
           professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
       }
@@ -2616,12 +2603,10 @@ std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias(int numSolucoes)
 std::vector<Solucao*> Resolucao::gerarSolucoesAleatorias2(int numSolucoes)
 {
     std::vector<Solucao*> solucoes(numSolucoes);
-    //for (auto i = 0; i < numSolucoes; i++) {
-    //    solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
-    //}
-    tbb::parallel_for(0, numSolucoes, [&](int i) {
-      solucoes[i]  = gerarSolucaoAleatoriaNotNull().release();
-    });
+    #pragma omp parallel for schedule(dynamic, 1)
+    for (auto i = 0; i < numSolucoes; i++) {
+        solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
+    }
     return solucoes;
 }
 
