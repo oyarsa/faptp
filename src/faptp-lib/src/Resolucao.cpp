@@ -2474,14 +2474,10 @@ bool Resolucao::geraAlocacao(
 {
     const auto pdId = "pr" + prof->id + "di" + disc->id;
 
-    ProfessorDisciplina* pd;
-    #pragma omp critical (updateProfDisc)
-    {
-      if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
-          professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
-      }
-      pd = professorDisciplinas[pdId];
+    if (professorDisciplinas.find(pdId) == end(professorDisciplinas)) {
+        professorDisciplinas[pdId] = new ProfessorDisciplina(prof, disc);
     }
+    auto pd = professorDisciplinas[pdId];
 
     sol->horario->disc_camada_[disc->id_hash()] = camada;
 
@@ -3408,14 +3404,10 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
 
         // Modifica a alocação para o novo professor
         const auto pdId = "pr" + novo_prof->id + "di" + aloc->disciplina->id;
-        ProfessorDisciplina* pd = nullptr;
-        #pragma omp critical (updateProfDisc)
-        {
-          if (professorDisciplinas.find(pdId) == professorDisciplinas.end()) {
-            professorDisciplinas[pdId] = new ProfessorDisciplina(novo_prof, aloc->disciplina);
-          }
-          pd = professorDisciplinas[pdId];
+        if (professorDisciplinas.find(pdId) == professorDisciplinas.end()) {
+          professorDisciplinas[pdId] = new ProfessorDisciplina(novo_prof, aloc->disciplina);
         }
+        auto pd = professorDisciplinas[pdId];
         // Reinsere com a nova alocação
         const auto ok = reinsere_alocacoes(*viz, posicoes_aloc, pd, camada);
         if (ok) {
