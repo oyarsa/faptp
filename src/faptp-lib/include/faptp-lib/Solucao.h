@@ -5,7 +5,7 @@
 #include <array>
 #include <memory>
 
-#include <optional.hpp>
+#include <optional>
 
 #include "Horario.h"
 #include "Grade.h"
@@ -52,7 +52,7 @@ private:
     tsl::robin_map<std::string, Grade*> grades;
 
     int gradesLength;
-	std::experimental::optional<FO_t> fo;
+	std::optional<FO_t> fo;
     const Resolucao& res;
     Configuracao::TipoFo tipo_fo;
 

@@ -31,7 +31,7 @@ Solucao::Solucao(
     , horario(std::make_unique<Horario>(blocosTamanho, camadasTamanho))
     , grades()
     , gradesLength(0)
-    , fo(std::experimental::nullopt)
+    , fo(std::nullopt)
     , res(res) 
     , tipo_fo(tipo_fo)
 {}

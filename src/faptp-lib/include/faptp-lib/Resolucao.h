@@ -8,7 +8,6 @@
 #include <tsl/hopscotch_set.h>
 #include <string>
 #include <sstream>
-#include <tbb/concurrent_unordered_map.h>
 
 #ifdef MODELO
     #include <modelo-grade/aluno.h>
@@ -188,7 +187,7 @@ private:
     tsl::robin_map<std::string, int> disciplinasIndex;
     std::map<std::string, std::vector<Disciplina*>> periodoXdisciplina;
     tsl::robin_map<std::string, AlunoPerfil*> alunoPerfis;
-    mutable tbb::concurrent_unordered_map<std::string, ProfessorDisciplina*> professorDisciplinas;
+    mutable tsl::robin_map<std::string, ProfessorDisciplina*> professorDisciplinas;
     Solucao* solucao;
     Json::Value jsonRoot;
 #ifdef MODELO

@@ -14,10 +14,9 @@ endif()
 add_compile_options("$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:${OPTIMISATION_OPTIONS}>")
 
 find_package(fmt REQUIRED)
-#find_package(OpenMP REQUIRED)
+find_package(OpenMP REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(CURL REQUIRED)
-find_package(tbb REQUIRED)
 
 # Bibliotecas
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "Build examples for CXXOpts")
@@ -25,7 +24,6 @@ add_subdirectory(lib/cxxopts)
 add_subdirectory(lib/fastrange)
 add_subdirectory(lib/range)
 add_subdirectory(lib/tsl)
-add_subdirectory(lib/optional)
 
 # Módulos
 add_subdirectory(src/faptp)
