@@ -43,7 +43,7 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-  auto sol = r.gerarHorarioAGPar1()->clone();
+  auto sol = r.gerarHorarioAG()->clone();
 
   return sol;
 }
@@ -267,8 +267,8 @@ void run_many(const std::string& conf, const std::string& input,
 
   fmt::print("\n");
   fmt::print("{} threads\n", r.numThreads());
-  fmt::print("Media  : {} ({})\n", average(timings), average(iter_timings));
-  fmt::print("Mediana: {} ({})\n", median(timings), median(iter_timings));
+  fmt::print("Media  : {} - {}\n", average(timings), average(iter_timings));
+  fmt::print("Mediana: {} - {}\n", median(timings), median(iter_timings));
 }
 
 const auto usage = R"(

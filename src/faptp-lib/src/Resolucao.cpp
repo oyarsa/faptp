@@ -645,9 +645,15 @@ Solucao* Resolucao::gerarHorarioAGPar1()
       proxima_geracao.insert(proxima_geracao.end(), filhos.begin(), filhos.end());
     }
 
+    #pragma omp parallel for num_threads(numThreads_) schedule(dynamic, 1)
+    for (auto i = 0; i < static_cast<int>(proxima_geracao.size()); i++) {
+      proxima_geracao[i]->calculaFO();
+    }
+
     populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
     std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
 
+    #pragma omp parallel for num_threads(numThreads_) schedule(dynamic, 1)
     for (auto i = horarioPopulacaoInicial; i < static_cast<int>(populacao.size()); i++) {
       delete populacao[i];
     }
@@ -718,6 +724,11 @@ Solucao* Resolucao::gerarHorarioAG()
           }
         }
       }
+
+      for (auto s : filhos) {
+          s->calculaFO();
+      }
+
       prole.insert(prole.end(), filhos.begin(), filhos.end());
     }
 
