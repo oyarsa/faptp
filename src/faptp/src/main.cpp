@@ -43,7 +43,7 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
 
-  auto sol = r.gerarHorarioAG()->clone();
+  auto sol = r.gerarHorarioAGPar1()->clone();
 
   return sol;
 }
@@ -250,6 +250,8 @@ void run_many(const std::string& conf, const std::string& input,
   std::vector<long long> timings(num_repetitions);
   std::vector<double> iter_timings(num_repetitions);
 
+  fmt::print("N,Tempo (ms),FO,Iter,Ms/Iter\n");
+
   for (auto i = 0; i < num_repetitions; i++) {
     Timer t;
     const auto s = run_algorithm();
@@ -259,7 +261,7 @@ void run_many(const std::string& conf, const std::string& input,
     const auto t_por_iter = tempo * 1. / r.ultimaIteracao;
     iter_timings[i] = t_por_iter;
 
-    fmt::print("{}: {}ms - FO: {} - Iter: {} - Ms/Iter: {}\n",
+    fmt::print("{},{},{},{},{}\n",
                i, tempo, s->getFO(), r.ultimaIteracao, t_por_iter);
   }
 

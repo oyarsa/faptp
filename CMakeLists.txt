@@ -4,10 +4,13 @@ project(faPTP
 	    LANGUAGES CXX)
 
 if (MSVC)
-	add_compile_options(/W4 /MP)
+    add_compile_options(/W4 /MP)
     set(OPTIMISATION_OPTIONS /O2 /Oi /Ot /Ob2 /arch:AVX /fp:fast)
 else()
 	add_compile_options(-Wall -Wpedantic)
+    if ((CMAKE_BUILD_TYPE MATCHES Debug) OR (CMAKE_BUILD_TYPE MATCHES RelWithDebInfo))
+        add_compile_options(-g -fno-omit-frame-pointer)
+    endif()
     set(OPTIMISATION_OPTIONS -Ofast -mavx)
 endif()
 

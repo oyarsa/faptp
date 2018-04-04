@@ -75,7 +75,11 @@ std::unique_ptr<Solucao> WDJU::gerar_vizinho(const Solucao& solucao) const
     };
 
     switch (*Util::randomChoice(movimentos)) {
-    case Resolucao::Vizinhanca::ES: return res_.event_swap(solucao);
+    case Resolucao::Vizinhanca::ES: {
+      auto s = res_.event_swap(solucao);
+      s->calculaFO();
+      return s;
+    }
     case Resolucao::Vizinhanca::EM: return res_.event_move(solucao);
     case Resolucao::Vizinhanca::RS: return res_.resource_swap(solucao);
     case Resolucao::Vizinhanca::RM: return res_.resource_move(solucao);

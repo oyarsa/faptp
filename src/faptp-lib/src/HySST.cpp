@@ -163,7 +163,11 @@ std::unique_ptr<Solucao> HySST::Impl::aplicar_heuristica(
 )
 {
     switch (llh) {
-        case Resolucao::Vizinhanca::ES: return res.event_swap(solucao);
+        case Resolucao::Vizinhanca::ES: {
+          auto s = res.event_swap(solucao);
+          s->calculaFO();
+          return s;
+        }
         case Resolucao::Vizinhanca::EM: return res.event_move(solucao);
         case Resolucao::Vizinhanca::RS: return res.resource_swap(solucao);
         case Resolucao::Vizinhanca::RM: return res.resource_move(solucao);

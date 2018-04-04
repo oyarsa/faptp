@@ -65,6 +65,7 @@ public:
     void setNumThreads(int numThreads);
 
     Solucao* gerarHorarioAG();
+    Solucao* gerarHorarioAGPar1();
     Solucao* gerarHorarioAG2();
     Solucao* gerarHorarioAG3();
 

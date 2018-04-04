@@ -609,6 +609,75 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoExper(const std::vector
 
 static thread_local int this_thread_id = 0;
 
+Solucao* Resolucao::gerarHorarioAGPar1()
+{
+  const auto numCruz = std::max(
+      1, static_cast<int>(horarioPopulacaoInicial * horarioCruzamentoPorcentagem));
+
+  tempoInicio = Util::now();
+  populacao = gerarHorarioAGPopulacaoInicial2();
+
+  foAlvo = populacao[0]->getFO();
+  iteracaoAlvo = -1;
+  tempoAlvo = Util::chronoDiff(Util::now(), tempoInicio);
+  Timer t;
+  auto iter = 0;
+
+  while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
+    std::vector<Solucao*> proxima_geracao;
+
+    for (auto i = 0; i < numCruz; i++) {
+      // Cruzamento
+      const auto pais = gerarHorarioAGTorneioPar(populacao);
+      auto filhos = gerarHorarioAGCruzamento(pais);
+
+      // Mutação
+      for (auto& filho : filhos) {
+        const auto chance = Util::randomDouble();
+        if (chance <= horarioMutacaoProbabilidade) {
+          auto s = gerarHorarioAGMutacao(filho);
+          if (s) {
+            delete filho;
+            filho = s;
+          }
+        }
+      }
+      proxima_geracao.insert(proxima_geracao.end(), filhos.begin(), filhos.end());
+    }
+
+    populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
+    std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+
+    for (auto i = horarioPopulacaoInicial; i < static_cast<int>(populacao.size()); i++) {
+      delete populacao[i];
+    }
+
+    ultimaIteracao = iter;
+    populacao.resize(horarioPopulacaoInicial);
+
+    if (populacao[0]->getFO() > foAlvo) {
+      iteracaoAlvo = iter;
+      foAlvo = populacao[0]->getFO();
+    }
+
+    iter++;
+  }
+
+  // Captura a melhor solução da população, deletando o resto
+  gerarHorarioAGSobrevivenciaElitismo(populacao, 1);
+  auto solucaoAG = populacao[0];
+
+  // Se as grades foram resolvidas pelo modelo, suas matrizes estão vazias,
+  // o que causa problemas com a escrita do html.
+  if (gradeTipoConstrucao == Configuracao::TipoGrade::modelo) {
+      reinsereGrades(solucaoAG);
+  }
+
+  solucao = solucaoAG;
+
+  return solucaoAG;
+}
+
 Solucao* Resolucao::gerarHorarioAG()
 {
   const auto numCruz = std::max(
@@ -1213,11 +1282,9 @@ Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(
                 }
             }
         }
-        filho->calculaFO();
         filhos.push_back(filho);
         numFilhos++;
     } while (numFilhos <= horarioCruzamentoFilhos);
-    //puts("\n");
 
     return filhos;
 }
@@ -1271,13 +1338,11 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
     success2 += cruzaCamada(filho2, pai1, camadaCruz);
 
     if (success1 > 0) {
-        filho1->calculaFO();
         solucoes.push_back(filho1);
     } else {
         delete filho1;
     }
     if (success2 > 0) {
-        filho2->calculaFO();
         solucoes.push_back(filho2);
     } else {
         delete filho2;
@@ -1499,8 +1564,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
         filho2 = fallback2.release();
     }
 
-    filho1->calculaFO();
-    filho2->calculaFO();
     return {filho1, filho2};
 }
 
@@ -1643,7 +1706,6 @@ Solucao* Resolucao::gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao)
         const auto x2 = mut->horario->getPosition(diaX2, blocoX2, camadaX);
 
         if (swapSlots(*mut, x1, x2) && swapSlots(*mut, x1 + 1, x2 + 1)) {
-            mut->calculaFO();
             return mut.release();
         }
     }
@@ -1724,7 +1786,6 @@ Solucao* Resolucao::gerarHorarioAGMutacao(const Solucao* pSolucao) const
 {
     switch (horarioTipoMutacao) {
         case Configuracao::TipoMutacao::substiui_disciplina:
-            //return gerarHorarioAGMutacaoSubstDisc(pSolucao);
             return event_swap(*pSolucao).release();
         case Configuracao::TipoMutacao::substitui_professor:
             return gerarHorarioAGMutacaoSubstProf(*pSolucao);
@@ -2941,7 +3002,6 @@ Solucao* Resolucao::crossoverOrdemCamada(
         pai2idx = Util::warpIntervalo(pai2idx + 1, tamCamada, comecoCamada);
     }
 
-    filho->calculaFO();
     return filho.release();
 }
 
@@ -3148,7 +3208,6 @@ Solucao* Resolucao::crossoverPMXCamada(
         }
     }
 
-    filho->calculaFO();
     return filho.release();
 }
 
@@ -3257,7 +3316,6 @@ Solucao* Resolucao::crossoverCicloCamada(
         }
     }
 
-    filho->calculaFO();
     return filho.release();
 }
 
@@ -3326,7 +3384,6 @@ std::unique_ptr<Solucao> Resolucao::event_swap(const Solucao& sol) const
 
         if (swap_blocos(*viz, std::make_tuple(d_e1, b_e1),
                         std::make_tuple(d_e2, b_e2), camada)) {
-            viz->calculaFO();
             return viz;
         }
     }
@@ -3375,7 +3432,6 @@ std::unique_ptr<Solucao> Resolucao::event_move(const Solucao& sol) const
         }
     }
 
-//    puts("ops em");
     return std::make_unique<Solucao>(sol);
 }
 
@@ -3474,12 +3530,11 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
         const auto ok_e2 = reinsere_alocacoes(*viz, posicoes_e2, e2, camada_e2);
         if (ok_e2) {
-            viz->getFO();
+            viz->calculaFO();
             return viz;
         }
     }
 
-    //puts("ops rs");
     return std::make_unique<Solucao>(sol);
 }
 
