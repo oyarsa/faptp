@@ -213,22 +213,22 @@ private:
     std::vector<Disciplina*> ordenarDisciplinas();
     std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
     void atualizarDisciplinasIndex();
-    std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
+    std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor) const;
     std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
                                                         Configuracao::TipoCruzamento tipoCruz);
     std::vector<Solucao*> gerarHorarioAGPopulacaoInicial();
-    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao);
+    std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio(std::vector<Solucao*>& solucoesPopulacao) const;
     Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const;
 
-    std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(const Solucao* solucaoPai1, const Solucao* solucaoPai2);
-    bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG);
-    bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG);
+    std::vector<Solucao*> gerarHorarioAGCruzamentoConstrutivoReparo(const Solucao* solucaoPai1, const Solucao* solucaoPai2) const;
+    bool gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG) const;
+    bool gerarHorarioAGCruzamentoAleatorioReparo(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG) const;
 
     int cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) const;
-    std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao* pai1, Solucao* pai2);
+    std::vector<Solucao*> gerarHorarioAGCruzamentoSimples(Solucao* pai1, Solucao* pai2) const;
 
-    std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2);
+    std::vector<Solucao*> gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2) const;
 
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop);
     void gerarHorarioAGSobrevivenciaElitismo(std::vector<Solucao*>& pop, int populacaoMax) const;
@@ -346,14 +346,14 @@ private:
     std::vector<ProfessorDisciplina*>
     getSubTour(const Solucao& pai, int xbegin, int xend) const;
     Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
-                                  int camadaCruz);
-    Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2);
+                                  int camadaCruz) const;
+    Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2) const;
     std::pair<int, int> getCrossoverPoints(const Solucao& pai, int camada) const;
     bool insereSubTour(const std::vector<ProfessorDisciplina*>& genes,
-                       Solucao& filho, int xbegin);
-    Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
+                       Solucao& filho, int xbegin) const;
+    Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2) const;
     Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
-                                int camadaCruz);
+                                int camadaCruz) const;
     std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>>
         crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
     std::vector<std::string> inverterPMXRepr(

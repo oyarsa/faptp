@@ -14,14 +14,10 @@ class ProfessorDisciplina
     friend class Resolucao;
 public:
     ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina);
-    ProfessorDisciplina(Professor* pProfessor, Disciplina* pDisciplina,
-                        const std::string& pId);
 
     Disciplina* getDisciplina() const;
     Professor* getProfessor() const;
 private:
-    std::string id;
-
     Professor* professor;
     Disciplina* disciplina;
 };

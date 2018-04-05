@@ -272,8 +272,7 @@ void Resolucao::carregarDadosProfessorDisciplinas()
 
         ProfessorDisciplina* professorDisciplina = new ProfessorDisciplina(
             professores[professor],
-            disciplinas[disciplinasIndex[disciplina]],
-            id);
+            disciplinas[disciplinasIndex[disciplina]]);
 
         /**
          * TODO: recuperar peso do v�nculo do professor com a disciplina do arquivo de entrada
@@ -417,8 +416,7 @@ Resolucao::carregarSolucao(const Json::Value& horarios)
       sol->horario->disc_camada_[disc->id_hash()] = camada;
 
       if (!professorDisciplinas[pdId]) {
-        professorDisciplinas[pdId] = new ProfessorDisciplina(
-          professores[professor], disc, pdId);
+        professorDisciplinas[pdId] = new ProfessorDisciplina(professores[professor], disc);
       }
 
       auto ok = sol->horario->insert(dia, bloco, camada, professorDisciplinas[pdId]);
@@ -456,7 +454,7 @@ void Resolucao::atualizarDisciplinasIndex()
     }
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor)
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor) const
 {
     std::vector<Solucao*> filhos {};
 
@@ -972,7 +970,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
 
                     pdId = "pr" + pId + "di" + dId;
                     if (!professorDisciplinas[pdId]) {
-                        professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[profNum], disciplinaAleatoria, pdId);
+                        professorDisciplinas[pdId] = new ProfessorDisciplina(disciplinaAleatoria->professoresCapacitados[profNum], disciplinaAleatoria);
                     }
 
                     disciplinaXprofessorDisciplina[dId] = professorDisciplinas[pdId];
@@ -1075,7 +1073,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGPopulacaoInicial()
     return solucoesAG;
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao)
+std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao) const
 {
     const auto pai1 = selecaoTorneio(solucoesPopulacao);
     const auto pai2 = selecaoTorneio(solucoesPopulacao);
@@ -1127,7 +1125,7 @@ Solucao* Resolucao::gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const
 // de cada vez e reparar a solução se uma restrição for violada
 std::vector<Solucao*>
 Resolucao::gerarHorarioAGCruzamentoConstrutivoReparo(
-  const Solucao* solucaoPai1, const Solucao* solucaoPai2)
+  const Solucao* solucaoPai1, const Solucao* solucaoPai2) const
 {
     std::vector<Solucao*> filhos;
     std::vector<ProfessorDisciplina*> matrizBackup;
@@ -1260,7 +1258,7 @@ int Resolucao::cruzaCamada(Solucao*& filho, const Solucao* pai, int camada) cons
 // do filho pelos do pai a partir de certo ponto de corte. Se durante uma
 // operação em uma dessas camadas for violada alguma restrição, aquela camada
 // retorna ao original, e a próxima será tentada
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, Solucao* pai2)
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, Solucao* pai2) const
 {
     const auto camadaCruz = Util::random(0, camadasTamanho);
     auto filho1 = new Solucao(*pai1);
@@ -1287,7 +1285,7 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSimples(Solucao* pai1, 
     return solucoes;
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2)
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* solucaoPai1, Solucao* solucaoPai2) const
 {
     int dia, bloco, camada;
     auto filho1 = new Solucao(*solucaoPai1);
@@ -1504,7 +1502,8 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoSubstBloco(Solucao* sol
 }
 
 
-bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG)
+bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(
+    Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG) const
 {
     bool success = false;
     ProfessorDisciplina* g = solucaoFilho->horario->at(diaG, blocoG, camadaG);
@@ -1521,7 +1520,8 @@ bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparoBloco(Solucao*& solucaoFi
     return false;
 }
 
-bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparo(Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG)
+bool Resolucao::gerarHorarioAGCruzamentoAleatorioReparo(
+    Solucao*& solucaoFilho, int diaG, int blocoG, int camadaG) const
 {
     if (gerarHorarioAGCruzamentoAleatorioReparoBloco(solucaoFilho, diaG, blocoG, camadaG)) {
         return true;
@@ -2881,7 +2881,7 @@ void Resolucao::printCamada(const Solucao& s, int camada) const
 Solucao* Resolucao::crossoverOrdemCamada(
     const Solucao& pai1,
     const Solucao& pai2,
-    int camadaCruz)
+    int camadaCruz) const
 {
     // Gera o ponto de cruzamento e encontra as coordenadas dele na matriz 3D
     int xbegin, xend;
@@ -2941,7 +2941,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
     return filho.release();
 }
 
-Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
+Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2) const
 {
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -2991,7 +2991,7 @@ bool Resolucao::insereSubTour(
     const std::vector<ProfessorDisciplina*>& genes,
     Solucao& filho,
     int xbegin
-)
+) const
 {
     for (auto i = 0u; i < genes.size(); i++) {
         int bloco, dia, camada;
@@ -3005,7 +3005,7 @@ bool Resolucao::insereSubTour(
     return true;
 }
 
-Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
+Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2) const
 {
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -3114,7 +3114,7 @@ Solucao* Resolucao::crossoverPMXCamada(
     const Solucao& pai1,
     const Solucao& pai2,
     int camadaCruz
-)
+) const
 {
     std::vector<std::string> repr;
     std::vector<int> novo_pai1;
