@@ -36,12 +36,24 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   r.horarioTorneioPopulacao = json["NTour"].asInt();
   r.maxIterSemEvolAG = json["AGIter"].asInt();
   r.horarioTipoCruzamento = [&json]() {
-    auto x = json["CruzOper"];
+    const auto x = json["CruzOper"].asString();
     if (x == "CX") return Configuracao::TipoCruzamento::ciclo;
-    if (x == "OX") return Configuracao::TipoCruzamento::ordem;
+    else if (x == "OX") return Configuracao::TipoCruzamento::ordem;
     else /* PMX */ return Configuracao::TipoCruzamento::pmx; 
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
+  r.versaoAg = [&json]() {
+    const auto x = json.get("VersaoAG", "Serial").asString();
+    if (x == "Paralelo")
+      return Configuracao::Versao_AG::Paralelo;
+    else if (x == "Single")
+      return Configuracao::Versao_AG::Serial;
+    else {
+      fmt::print("Versao do AG invalida");
+      std::exit(1);
+    }
+  }();
+  r.setNumThreadsAG(json.get("NumThreadsAG", 1).asInt());
 
   auto sol = r.gerarHorarioAG()->clone();
 
@@ -122,12 +134,6 @@ void run(const std::string& conf, const std::string& input,
     if (x == "pref") return Configuracao::TipoFo::Soft_constraints;
     else return Configuracao::TipoFo::Soma_carga;
   }();
-  const auto numThreads = [&json]{
-    if (json.isMember("NumThreads")) {
-      return json["NumThreads"].asInt();
-    }
-    return 1;
-  }();
 
   Resolucao r{ Configuracao()
     .arquivoEntrada(input)
@@ -135,16 +141,25 @@ void run(const std::string& conf, const std::string& input,
     .camadaTamanho(numeroPeriodos)
     .perfilTamanho(numeroAlunos)
     .timeout(timeout * 1000)
-    .tipoFo(fo)
-    .numThreads(numThreads) };
-
-  /*// TODO: Remover
-  auto dados = DadosModelo{ r };
-  auto rv = modelo(dados);*/
+    .tipoFo(fo) };
 
   r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
   r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
+  r.versaoGrasp = [&json]() {
+    const auto x = json["parametros"].get("VersaoGRASP", "Serial");
+    if (x == "Serial")
+      return Configuracao::Versao_GRASP::Serial;
+    else if (x == "Paralelo")
+      return Configuracao::Versao_GRASP::Paralelo;
+    else if (x == "ProdutorConsumidor")
+      return Configuracao::Versao_GRASP::ProdutorConsumidor;
+    else
+      return Configuracao::Versao_GRASP::Paralelo_ProdutoConsumidor;
+  }();
+  r.setNumThreadsGRASP(json["parametros"].get("NumThreadsGRASP", 1).asInt());
+  r.setNumParesProdutorConsumidor(
+      json["parametros"].get("NumParesProdutorConsumidor", 1).asInt());
 
   auto restricoes = {
     "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado", 
@@ -208,12 +223,6 @@ void run_many(const std::string& conf, const std::string& input,
     if (x == "pref") return Configuracao::TipoFo::Soft_constraints;
     else return Configuracao::TipoFo::Soma_carga;
   }();
-  const auto num_threads = [&json] {
-    if (json.isMember("NumThreads")) {
-      return json["NumThreads"].asInt();
-    }
-    return 1;
-  }();
 
   Resolucao r{ Configuracao()
     .arquivoEntrada(input)
@@ -221,12 +230,29 @@ void run_many(const std::string& conf, const std::string& input,
     .camadaTamanho(numero_periodos)
     .perfilTamanho(numero_alunos)
     .timeout(timeout * 1000)
-    .tipoFo(fo)
-    .numThreads(num_threads) };
+    .tipoFo(fo) };
 
   r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
   r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
+  r.versaoGrasp = [&json]() {
+    const auto x = json["parametros"].get("VersaoGRASP", "Serial");
+    if (x == "Single")
+      return Configuracao::Versao_GRASP::Serial;
+    else if (x == "Paralelo")
+      return Configuracao::Versao_GRASP::Paralelo;
+    else if (x == "ProdutorConsumidor")
+      return Configuracao::Versao_GRASP::ProdutorConsumidor;
+    else if (x == "Paralelo_ProdutorConsumidor")
+      return Configuracao::Versao_GRASP::Paralelo_ProdutoConsumidor;
+    else {
+      fmt::print("Versao do GRASP invalida\n");
+      std::exit(1);
+    }
+  }();
+  r.setNumThreadsGRASP(json["parametros"].get("NumThreadsGRASP", 1).asInt());
+  r.setNumParesProdutorConsumidor(
+      json["parametros"].get("NumParesProdutorConsumidor", 1).asInt());
 
   auto restricoes = {
     "Janelas", "IntervalosTrabalho", "NumDiasAula", "AulasSabado",
@@ -247,10 +273,52 @@ void run_many(const std::string& conf, const std::string& input,
     else /* WDJU */ return wdju(r, json["parametros"]);
   };
 
+  fmt::print("Algoritmo: {}\n", algoritmo);
+  const auto tipo_fo = [&] {
+    switch (r.horarioTipoFo)  {
+      case Configuracao::TipoFo::Soma_carga:
+        return "Grade";
+      case Configuracao::TipoFo::Soft_constraints:
+        return "Preferencias";
+    }
+    return "";
+  }();
+  fmt::print("FO: {}\n", tipo_fo);
+
+  const auto versao_ag = [&] {
+    switch (r.versaoAg)  {
+      case Configuracao::Versao_AG::Serial:
+        return "Serial";
+      case Configuracao::Versao_AG::Paralelo:
+        return "Paralelo";
+    }
+    return "";
+  }();
+  if (algoritmo == "AG") {
+    fmt::print("Versao AG: {}\n", versao_ag);
+  }
+
+  const auto versao_grasp = [&] {
+    switch (r.versaoGrasp) {
+      case Configuracao::Versao_GRASP::Serial:
+        return "Serial";
+      case Configuracao::Versao_GRASP::Paralelo:
+        return "Paralelo";
+      case Configuracao::Versao_GRASP::ProdutorConsumidor:
+        return "ProdutorConsumidor";
+      case Configuracao::Versao_GRASP::Paralelo_ProdutoConsumidor:
+        return "Paralelo_ProdutoConsumidor";
+    }
+    return "";
+  }();
+  if (r.horarioTipoFo == Configuracao::TipoFo::Soma_carga) {
+    fmt::print("Versao GRASP: {}\n", versao_grasp);
+  }
+
   std::vector<long long> timings(num_repetitions);
   std::vector<double> iter_timings(num_repetitions);
 
-  fmt::print("N,Tempo (ms),FO,Iter,Ms/Iter\n");
+  fmt::print("\nN,Tempo (ms),FO,Iter,Ms/Iter\n");
 
   for (auto i = 0; i < num_repetitions; i++) {
     Timer t;
@@ -266,7 +334,10 @@ void run_many(const std::string& conf, const std::string& input,
   }
 
   fmt::print("\n");
-  fmt::print("{} threads\n", r.numThreads());
+  fmt::print("NumThreads:\n");
+  fmt::print("    AG: {}\n", r.numThreadsAG());
+  fmt::print("    GRASP: {}\n", r.numThreadsGRASP());
+  fmt::print("    PC: {}\n\n", r.numThreadsProdutorConsumidor());
   fmt::print("Media  : {} - {}\n", average(timings), average(iter_timings));
   fmt::print("Mediana: {} - {}\n", median(timings), median(iter_timings));
 }

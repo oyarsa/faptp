@@ -19,10 +19,10 @@ public:
         crescente
     };
 
-    // Simples é operador novo, que só cruza a camada inteira
-    // Construtivo_reparo é o antigo
+    // Simples ï¿½ operador novo, que sï¿½ cruza a camada inteira
+    // Construtivo_reparo ï¿½ o antigo
     // Substitui_bloco forma listas de disciplinas a serem trocadas, mantendo
-    // blocos unidos (Timóteo 2002)
+    // blocos unidos (Timï¿½teo 2002)
     enum class TipoCruzamento
     {
         simples,
@@ -33,8 +33,8 @@ public:
         pmx
     };
 
-    // SubstDisc é o operador antigo, que troca disciplinas de lugar
-    // SubstProf é o operador novo, que modifica quem leciona uma disciplina
+    // SubstDisc ï¿½ o operador antigo, que troca disciplinas de lugar
+    // SubstProf ï¿½ o operador novo, que modifica quem leciona uma disciplina
     enum class TipoMutacao
     {
         substiui_disciplina,
@@ -45,6 +45,18 @@ public:
     {
         Soma_carga,
         Soft_constraints
+    };
+
+    enum class Versao_AG {
+      Serial,
+      Paralelo
+    };
+
+    enum class Versao_GRASP {
+      Serial,
+      Paralelo,
+      ProdutorConsumidor,
+      Paralelo_ProdutoConsumidor
     };
 
     Configuracao() = default;
@@ -72,7 +84,11 @@ public:
     Configuracao& numMaximoIteracoesSemEvolucaoGRASP(int n);
     Configuracao& timeout(long long t);
     Configuracao& tipoFo(TipoFo tipo);
-    Configuracao& numThreads(int n);
+    Configuracao& versaoAg(Versao_AG versao);
+    Configuracao& versaoGrasp(Versao_GRASP versao);
+    Configuracao& numThreadsAG(int n);
+    Configuracao& numThreadsGRASP(int n);
+    Configuracao& numParesProdutoConsumidor(int n);
 private:
     friend class Resolucao;
     std::string filename_ = "input.json";
@@ -99,7 +115,11 @@ private:
     int numMaxIterSemEvoGRASP_ = 5;
     long long timeout_ = 60'000;
     TipoFo tipoFo_ = TipoFo::Soma_carga;
-    int numThreads_ = 1;
+    Versao_AG versaoAg_ = Versao_AG::Serial;
+    Versao_GRASP versaoGrasp_ = Versao_GRASP::Serial;
+    int numThreadsAG_ = 1;
+    int numThreadsGRASP_ = 1;
+    int numParesProdutorConsumidor_ = 1;
 };
 
 inline Configuracao& Configuracao::arquivoEntrada(const std::string& filename)
@@ -246,8 +266,37 @@ inline Configuracao& Configuracao::tipoFo(TipoFo tipo)
     return *this;
 }
 
-inline Configuracao & Configuracao::numThreads(int n)
+inline Configuracao&
+Configuracao::versaoAg(Configuracao::Versao_AG versao)
 {
-    numThreads_ = n;
+  versaoAg_ = versao;
+  return *this;
+}
+
+inline Configuracao&
+Configuracao::versaoGrasp(Configuracao::Versao_GRASP versao)
+{
+  versaoGrasp_ = versao;
+  return *this;
+}
+
+inline Configuracao&
+Configuracao::numThreadsAG(int n)
+{
+    numThreadsAG_ = n;
+    return *this;
+}
+
+inline Configuracao&
+Configuracao::numThreadsGRASP(int n)
+{
+    numThreadsGRASP_ = n;
+    return *this;
+}
+
+inline Configuracao&
+Configuracao::numParesProdutoConsumidor(int n)
+{
+    numParesProdutorConsumidor_ = n;
     return *this;
 }
