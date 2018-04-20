@@ -37,6 +37,8 @@ public:
 
     double getFO();
 
+    ProfessorDisciplina* at(int dia, int bloco);
+
 private:
     AlunoPerfil* aluno;
     Horario* horario;

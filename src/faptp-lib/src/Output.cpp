@@ -88,7 +88,7 @@ void Output::writeHtml(Solucao* pSolucao, const std::string& savePath)
         for (int j = 0; j < pSolucao->blocosTamanho; j++) {
             saida << "<tr>";
             for (int k = 0; k < dias_semana_util; k++) {
-                const auto pd = gradeAtual->at(k, j, 0);
+                const auto pd = gradeAtual->at(k, j);
                 if (pd) {
                     saida << "<td>" << pd->getDisciplina()->getNome() << "<br>"
                             << "<b>" << pd->getDisciplina()->getId() << "</b>"
@@ -156,7 +156,7 @@ Output::writeJson(const Solucao& solucao, const std::string& outfile)
 
     for (auto b = 0; b < solucao.blocosTamanho; b++) {
       for (auto d = 0; d < dias_semana_util; d++) {
-        const auto pd = grade->at(d, b, 0);
+        const auto pd = grade->at(d, b);
         if (pd) {
           Json::Value e;
           e["disciplina"] = pd->getDisciplina()->getId();

@@ -4,6 +4,18 @@
 #include <tsl/robin_map.h>
 #include "Representacao.h"
 
+struct TimeSlot
+{
+  int dia;
+  int bloco;
+  int camada;
+
+  explicit TimeSlot(const std::tuple<int, int, int>& tuple);
+  TimeSlot(int dia, int bloco, int camada);
+
+  std::tuple<int, int, int> toTuple() const;
+};
+
 class Horario : public Representacao
 {
     friend class Resolucao;
@@ -35,11 +47,15 @@ public:
     int preferenciasProfessores() const;
     int aulasProfessores(
         const tsl::robin_map<std::string, Professor*>& professores) const;
+
+    const std::vector<TimeSlot>&
+    getTimeSlotsDisciplina(const Disciplina* disc) const;
 private:
     std::vector<int> disc_camada_;
     std::vector<int> creditos_alocados_disc_;
     std::vector<int> creditos_alocados_prof_;
     std::size_t hash_;
+    std::vector<std::vector<TimeSlot>> timeslots_disciplinas_;
 
     int contaJanelasDia(int dia, int camada) const;
     int contaJanelasCamada(int camada) const;

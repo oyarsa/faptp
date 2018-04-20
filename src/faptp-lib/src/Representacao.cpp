@@ -6,23 +6,43 @@
 #include <faptp-lib/Constantes.h>
 #include <fmt/format.h>
 
-Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho)
-  : blocosTamanho{ pBlocosTamanho },
-    camadasTamanho{ pCamadasTamanho },
-    size{ blocosTamanho * camadasTamanho * dias_semana_util },
-    matriz(size),
-    coordenadas(size)
+static std::vector<std::tuple<int, int, int>>
+gerar_coordenadas(int camadasTamanho, int numDias, int blocosTamanho)
 {
+  const auto size = blocosTamanho * camadasTamanho * numDias;
+  std::vector<std::tuple<int, int, int>> coordenadas(size);
+
   auto i = 0;
   for (auto c = 0; c < camadasTamanho; c++) {
-    for (auto d = 0; d < dias_semana_util; d++) {
+    for (auto d = 0; d < numDias; d++) {
       for (auto b = 0; b < blocosTamanho; b++) {
         coordenadas[i] = { d, b, c };
         i++;
       }
     }
   }
+
+  return coordenadas;
 }
+
+static const std::vector<std::tuple<int, int, int>>&
+get_coordenadas(int camadasTamanho, int numDias, int blocosTamanho)
+{
+  static auto camadas_ = camadasTamanho;
+  static auto num_dias_ = numDias;
+  static auto blocos_ = blocosTamanho;
+  static auto coordenadas = gerar_coordenadas(camadas_, num_dias_, blocos_);
+
+  return coordenadas;
+}
+
+Representacao::Representacao(int pBlocosTamanho, int pCamadasTamanho)
+  : blocosTamanho{ pBlocosTamanho },
+    camadasTamanho{ pCamadasTamanho },
+    size{ blocosTamanho * camadasTamanho * dias_semana_util },
+    matriz(size),
+    coordenadas(get_coordenadas(pCamadasTamanho, dias_semana_util, pBlocosTamanho))
+{}
 
 Representacao::Representacao(const Representacao& outro)
     : blocosTamanho(outro.blocosTamanho)
@@ -37,7 +57,6 @@ Representacao& Representacao::operator=(const Representacao& outro)
     camadasTamanho = outro.camadasTamanho;
     size = outro.size;
     matriz = outro.matriz;
-    coordenadas = outro.coordenadas;
 
     return *this;
 }
@@ -47,12 +66,14 @@ const std::vector<ProfessorDisciplina*>& Representacao::getMatriz() const
     return matriz;
 }
 
-bool Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
+bool
+Representacao::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
 {
-    return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
+  return insert(pDia, pBloco, pCamada, pProfessorDisciplina, false);
 }
 
-bool Representacao::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
+bool
+Representacao::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
   (void)force;
   int position = getPosition(dia, bloco, camada);

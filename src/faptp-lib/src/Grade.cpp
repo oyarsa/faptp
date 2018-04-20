@@ -118,30 +118,20 @@ Grade::havePreRequisitos(const Disciplina* const pDisciplina)
 
 bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
 {
-    // Percorre a grade do aluno inteira procurando slots da disciplina atual
-    // e verificando se já estão ocupados por alguma outra
+  // Percorre a grade do aluno inteira procurando slots da disciplina atual
+  // e verificando se já estão ocupados por alguma outra
 
-    // Quais são os slots dessa disciplina?
-    // Tem alguém neles?
-    for (auto i = 0; i < dias_semana_util; i++) {
-        for (auto j = 0; j < blocosTamanho; j++) {
-            const auto currPosHorario = getPosition(i, j, pCamada);
-            const auto currPosGrade = getPosition(i, j, 0);
-            const auto currPd = horario->matriz[currPosHorario];
+  // Timeslots ocupados pela disciplina
+  const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
 
-            if (!currPd || currPd->disciplina != pDisciplina)
-                continue;
-
-            // Se o slot não for nulo é porque já tem alguém lá. Logo,
-            // há uma colisão
-            if (matriz[currPosGrade]) {
-                return false;
-            }
-
-        }
+  for (const auto& slot : slots) {
+    // Se tem algum PD não nulo no slot, existe uma colisão
+    if (at(slot.dia, slot.bloco)) {
+      return false;
     }
+  }
 
-    return true;
+  return true;
 }
 
 bool Grade::isViable(const Disciplina* pDisciplina, int pCamada)
@@ -300,5 +290,11 @@ double Grade::getFO()
     }
 
     return fo;
+}
+
+ProfessorDisciplina*
+Grade::at(int dia, int bloco)
+{
+  return Representacao::at(dia, bloco, 0);
 }
 

@@ -52,7 +52,7 @@ protected:
     int size;
 
     std::vector<ProfessorDisciplina*> matriz;
-    std::vector<std::tuple<int, int, int>> coordenadas;
+    const std::vector<std::tuple<int, int, int>>& coordenadas;
 };
 
 inline int Representacao::getPosition(int pDia, int pBloco, int pCamada) const

@@ -8,13 +8,15 @@ Horario::Horario(int pBlocosTamanho, int pCamadasTamanho)
     disc_camada_(Disciplina::max_hash()),
     creditos_alocados_disc_(Disciplina::max_hash()),
     creditos_alocados_prof_(Professor::max_hash()),
-    hash_(0) {}
+    hash_(0),
+    timeslots_disciplinas_(Disciplina::max_hash()) {}
 
 Horario::Horario(const Horario& outro)
     : Representacao(outro), disc_camada_(outro.disc_camada_),
       creditos_alocados_disc_(outro.creditos_alocados_disc_), 
       creditos_alocados_prof_(outro.creditos_alocados_prof_),
-      hash_(0) {}
+      hash_(0),
+      timeslots_disciplinas_(outro.timeslots_disciplinas_) {}
 
 Horario& Horario::operator=(const Horario& outro)
 {
@@ -23,6 +25,7 @@ Horario& Horario::operator=(const Horario& outro)
     creditos_alocados_prof_ = outro.creditos_alocados_prof_;
     hash_ = 0;
     disc_camada_ = outro.disc_camada_;
+    timeslots_disciplinas_ = outro.timeslots_disciplinas_;
     return *this;
 }
 
@@ -44,7 +47,8 @@ bool Horario::colisaoProfessorAlocado(int pDia, int pBloco, const Professor& pro
     return false;
 }
 
-bool Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
+bool
+Horario::insert(int pDia, int pBloco, int pCamada, ProfessorDisciplina* pProfessorDisciplina)
 {
     if (!pProfessorDisciplina) {
         return true;
@@ -77,7 +81,8 @@ bool Horario::isViable(int dia, int bloco, int camada, ProfessorDisciplina* pd) 
     return false;
 }
 
-bool Horario::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
+bool
+Horario::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force)
 {
     const auto position = getPosition(dia, bloco, camada);
     const auto disc = pd->disciplina;
@@ -92,6 +97,10 @@ bool Horario::insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bo
         if (!professorAlocado || force) {
             creditos_alocados_disc_[disc->id_hash()]++;
             creditos_alocados_prof_[prof->id_hash()]++;
+
+            const auto dhash = pd->getDisciplina()->id_hash();
+            timeslots_disciplinas_[dhash].emplace_back(dia, bloco, camada);
+
             return Representacao::insert(dia, bloco, camada, pd, force);
         }
     }
@@ -442,4 +451,27 @@ Horario::getAlocFromDiscNames(int camada) const
     }
 
     return alocs;
+}
+
+const std::vector<TimeSlot>&
+Horario::getTimeSlotsDisciplina(const Disciplina* disc) const
+{
+  return timeslots_disciplinas_[disc->id_hash()];
+}
+
+TimeSlot::TimeSlot(const std::tuple<int, int, int>& tuple)
+  : dia(std::get<0>(tuple))
+  , bloco(std::get<1>(tuple))
+  , camada(std::get<2>(tuple))
+{}
+
+TimeSlot::TimeSlot(int dia, int bloco, int camada)
+  : dia(dia)
+  , bloco(bloco)
+  , camada(camada)
+{}
+
+std::tuple<int, int, int> TimeSlot::toTuple() const
+{
+  return std::make_tuple(dia, bloco, camada);
 }
