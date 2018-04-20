@@ -42,12 +42,7 @@ public:
 private:
     AlunoPerfil* aluno;
     Horario* horario;
-
-    std::vector<ProfessorDisciplina*> professorDisciplinas;
-    std::vector<std::string> problemas;
-    ProfessorDisciplina* professorDisciplinaTemp;
     std::vector<Disciplina*> disciplinasAdicionadas;
-
     const std::vector<Disciplina*>& disciplinasCurso;
 
     //! Guarda a fun��o objetiva dessa grade, vale 0 se ainda n�o foi definida

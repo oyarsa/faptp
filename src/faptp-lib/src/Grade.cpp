@@ -10,23 +10,15 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
     : Representacao(pBlocosTamanho, 1)
       , aluno(pAlunoPerfil)
       , horario(pHorario)
-      , professorDisciplinas()
-      , problemas()
-      , professorDisciplinaTemp(nullptr)
       , disciplinasAdicionadas()
       , disciplinasCurso(pDisciplinasCurso)
       , fo(-1)
-{
-    disciplinasAdicionadas.reserve(dias_semana_util * blocosTamanho);
-}
+{}
 
 Grade::Grade(const Grade& outro)
     : Representacao(outro)
       , aluno(outro.aluno)
       , horario(outro.horario)
-      , professorDisciplinas(outro.professorDisciplinas)
-      , problemas(outro.problemas)
-      , professorDisciplinaTemp(nullptr)
       , disciplinasAdicionadas(outro.disciplinasAdicionadas)
       , disciplinasCurso(outro.disciplinasCurso)
       , fo(outro.fo) {}
@@ -37,9 +29,7 @@ Disciplina* Grade::getDisciplina(std::size_t disciplina)
 }
 
 Grade::~Grade()
-{
-    professorDisciplinaTemp = nullptr;
-}
+{}
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 {
@@ -179,6 +169,7 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
 
     bool viavel = false;
     bool first = true;
+    ProfessorDisciplina* professorDisciplinaTemp = nullptr;
 
     if (find(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina) == disciplinasAdicionadas.end()) {
         while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
@@ -192,16 +183,6 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
             viavel = isViable(pDisciplina, camada);
             if (viavel) {
                 add(pDisciplina, camada);
-            }
-            if (viavel || force) {
-                if (professorDisciplinaTemp != nullptr) {
-                    professorDisciplinas.push_back(professorDisciplinaTemp);
-                }
-            }
-            if (!viavel && force) {
-                if (professorDisciplinaTemp != nullptr) {
-                    problemas.push_back(professorDisciplinaTemp->disciplina->id);
-                }
             }
 
             first = false;
@@ -252,8 +233,6 @@ Disciplina* Grade::removeOld(Disciplina* pDisciplina, ProfessorDisciplina*& pPro
     int x = getFirstDisciplina(pDisciplina, matriz);
 
     pProfessorDisciplina = NULL;
-
-    problemas.erase(std::remove(problemas.begin(), problemas.end(), pDisciplina->id), problemas.end());
 
     while (x >= 0) {
 
