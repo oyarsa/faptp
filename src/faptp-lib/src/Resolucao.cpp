@@ -36,6 +36,20 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <blockingconcurrentqueue.h>
+
+using Util::dbg;
+
+thread_local int this_thread_id = 0;
+
+template <typename ...Args>
+void thdbg(std::string_view format, Args...args)
+{
+  if constexpr (Util::kPrintDebug) {
+    fmt::print("> [{}] ", this_thread_id);
+    fmt::print(args...);
+  }
+}
 
 Resolucao::Resolucao(const Configuracao& c)
     : horarioPopulacaoInicial(c.popInicial_)
@@ -213,20 +227,20 @@ void Resolucao::carregarDadosProfessores()
 
         const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
         for (const auto& d_id : preferencias) {
-            const auto d_hash = disciplinasIndex[d_id.asString()];
-            professores[id]->addDiscPreferencia(d_hash);
+            const auto d = getDisciplinaById(d_id.asString());
+            professores[id]->addDiscPreferencia(d->id_hash());
 
         }
 
-        professores[id]->preferenciaNumAulas =
-            jsonProfessores[k].get("preferenciaHoras",
-                                   professores[id]->credito_maximo()).asInt();
+        professores[id]->preferenciaNumAulas = jsonProfessores[k].get(
+            "preferenciaHoras", professores[id]->credito_maximo()).asInt();
     }
 }
 
 void Resolucao::carregarDadosDisciplinas()
 {
     const auto& jsonDisciplinas = jsonRoot["disciplinas"];
+    tsl::robin_map<std::string, std::size_t> disc_nome_to_code;
 
     for (auto i = 0u; i < jsonDisciplinas.size(); i++) {
         const auto id = jsonDisciplinas[i]["id"].asString();
@@ -241,32 +255,38 @@ void Resolucao::carregarDadosDisciplinas()
         const auto periodoMinimo = jsonDisciplinas[i]["periodominimo"].asString();
 
         Disciplina* disciplina = new Disciplina(nome, cargahoraria, periodo, curso, id, turma, capacidade, periodoMinimo);
+        disc_nome_to_code[nome] = disciplina->id_hash();
         disciplina->ofertada = jsonDisciplinas[i]["ofertada"].asBool();
         disciplina->dificil = jsonDisciplinas[i].get("dificil", false).asBool();
 
+        disciplina->equivalentes.push_back(disciplina->id_hash());
+
         const auto& corequisitos = jsonDisciplinas[i]["corequisitos"];
         for (auto j = 0u; j < corequisitos.size(); j++) {
-            disciplina->coRequisitos.insert(corequisitos[j].asString());
+            const auto code = disc_nome_to_code[corequisitos[j].asString()];
+            disciplina->coRequisitos.push_back(code);
         }
 
         const auto& prerequisitos = jsonDisciplinas[i]["prerequisitos"];
         for (auto j = 0u; j < prerequisitos.size(); j++) {
-            disciplina->preRequisitos.insert(prerequisitos[j].asString());
+            const auto code = disc_nome_to_code[prerequisitos[j].asString()];
+            disciplina->preRequisitos.push_back(code);
         }
 
         const auto& equivalentes = jsonDisciplinas[i]["equivalentes"];
         for (auto j = 0u; j < equivalentes.size(); j++) {
-            disciplina->equivalentes.insert(equivalentes[j].asString());
+            const auto code = disc_nome_to_code[equivalentes[j].asString()];
+            disciplina->equivalentes.push_back(code);
         }
-        disciplina->equivalentes.insert(nome);
 
         disciplinas.push_back(disciplina);
         if (disciplina->ofertada) {
-            periodoXdisciplina[curso + turma + periodo].push_back(disciplina);
+            const auto key = fmt::format("{}{}{}", curso, turma, periodo);
+            periodoXdisciplina[key].push_back(disciplina);
         }
     }
 
-    disciplinas = ordenarDisciplinas();
+    atualizarDisciplinasIndex();
 }
 
 void Resolucao::carregarDadosProfessorDisciplinas()
@@ -279,9 +299,7 @@ void Resolucao::carregarDadosProfessorDisciplinas()
         const auto disciplina = jsonProfessorDisciplinas[i]["disciplina"].asString();
 
         ProfessorDisciplina* professorDisciplina = new ProfessorDisciplina(
-            professores[professor],
-            disciplinas[disciplinasIndex[disciplina]],
-            id);
+            professores[professor], getDisciplinaById(disciplina), id);
 
         double competenciaPeso = 1.0;
         professorDisciplina->professor->addCompetencia(disciplina, competenciaPeso);
@@ -304,14 +322,14 @@ void Resolucao::carregarAlunoPerfis()
 
         const auto& jsonRestantes = jsonAlunoPerfis[i]["restantes"];
         for (auto j = 0u; j < jsonRestantes.size(); j++) {
-            Disciplina* disciplina = disciplinas[disciplinasIndex[jsonRestantes[j].asString()]];
+            Disciplina* disciplina = getDisciplinaById(jsonRestantes[j].asString());
             alunoPerfil->addRestante(disciplina);
         }
 
         const auto& jsonCursadas = jsonAlunoPerfis[i]["cursadas"];
         for (auto j = 0u; j < jsonCursadas.size(); j++) {
-            std::string cursada = jsonCursadas[j].asString();
-            alunoPerfil->addCursada(cursada);
+            Disciplina* disciplina = getDisciplinaById(jsonCursadas[j].asString());
+            alunoPerfil->addCursada(disciplina->id_hash());
         }
 
         std::vector<Disciplina*> aprovadas;
@@ -319,15 +337,15 @@ void Resolucao::carregarAlunoPerfis()
         std::remove_copy_if(begin(disciplinas), end(disciplinas), back_inserter(aprovadas),
             [&restantes](Disciplina* d) {
                 return std::find_if(begin(restantes), end(restantes),
-                    [&d](const std::string& x) {
-                        return x == d->id;
+                    [&d](std::size_t x) {
+                        return x == d->id_hash();
                 }) != end(restantes);
         });
 
-        auto& aprovadasNomes = alunoPerfil->aprovadas;
-
+        auto& aprovadasIdHashes = alunoPerfil->aprovadas;
+        dbg("AP: {} Size: {}\n", alunoPerfil->id, aprovadasIdHashes.size());
         for (const auto& aprovada : aprovadas) {
-            aprovadasNomes.insert(aprovada->id);
+            aprovadasIdHashes.push_back(aprovada->id_hash());
         }
 
         alunoPerfis[id] = alunoPerfil;
@@ -417,7 +435,7 @@ Resolucao::carregarSolucao(const Json::Value& horarios)
       auto camada = i;
 
       auto pdId = professor + disciplina;
-      auto disc = disciplinas[disciplinasIndex[disciplina]];
+      auto disc = getDisciplinaById(disciplina);
 
       sol->horario->disc_camada_[disc->id_hash()] = camada;
 
@@ -434,29 +452,22 @@ Resolucao::carregarSolucao(const Json::Value& horarios)
   return sol;
 }
 
-Disciplina* Resolucao::getDisciplinaByName(const std::string& nomeDisc)
+Disciplina* Resolucao::getDisciplinaById(const std::string& disc_id)
 {
-    return disciplinas[disciplinasIndex[nomeDisc]];
-}
-
-std::vector<Disciplina*> Resolucao::ordenarDisciplinas()
-{
-    disciplinas = ordenarDisciplinas(disciplinas);
-
-    atualizarDisciplinasIndex();
-
-    return disciplinas;
-}
-
-std::vector<Disciplina*> Resolucao::ordenarDisciplinas(std::vector<Disciplina*> pDisciplinas)
-{
-    sort(begin(pDisciplinas), end(pDisciplinas), HashComparison<Disciplina>{});
-    return pDisciplinas;
+    return disciplinas[disciplinasIndex[disc_id]];
 }
 
 void Resolucao::atualizarDisciplinasIndex()
 {
+    disciplinasIndex.clear();
     for (size_t i = 0; i < disciplinas.size(); i++) {
+        const auto d = disciplinas[i];
+        if (d->id_hash() != i + 1) {
+            fmt::print("Problema nos indices das disciplinas: \n");
+            fmt::print("    Disciplina: {}\n", d->getNome());
+            fmt::print("    Indice: {}\n", i);
+            fmt::print("    Codigo: {}\n\n", d->id_hash());
+        }
         disciplinasIndex[disciplinas[i]->id] = static_cast<int>(i);
     }
 }
@@ -611,8 +622,6 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamentoExper(const std::vector
 
     return filhos;
 }
-
-static thread_local int this_thread_id = 0;
 
 Solucao* Resolucao::gerarHorarioAG()
 {
@@ -1205,11 +1214,8 @@ Resolucao::swap_blocos(Solucao& sol, const std::tuple<int, int>& t1,
                        const std::tuple<int, int>& t2,
                        int camada) const
 {
-  int d_e1{}, b_e1{};
-  std::tie(d_e1, b_e1) = t1;
-
-  int d_e2{}, b_e2{};
-  std::tie(d_e2, b_e2) = t2;
+  const auto [d_e1, b_e1] = t1;
+  const auto [d_e2, b_e2] = t2;
 
   auto e11 = sol.horario->at(d_e1, b_e1, camada);
   sol.horario->clearSlot(d_e1, b_e1, camada);
@@ -1229,9 +1235,9 @@ Resolucao::swap_blocos(Solucao& sol, const std::tuple<int, int>& t1,
 
 bool Resolucao::swapSlots(Solucao& sol, int posX1, int posX2) const
 {
-    int diaX1, blocoX1, diaX2, blocoX2, camadaX;
-    std::tie(diaX1, blocoX1, camadaX) = sol.horario->getCoords(posX1);
-    std::tie(diaX2, blocoX2, std::ignore) = sol.horario->getCoords(posX2);
+    const auto [diaX1, blocoX1, camadaX] = sol.horario->getCoords(posX1);
+    const auto [diaX2, blocoX2, camadaX2] = sol.horario->getCoords(posX2);
+    (void) camadaX2;
 
     auto pdX1 = sol.horario->at(posX1);
     auto pdX2 = sol.horario->at(posX2);
@@ -1262,11 +1268,8 @@ bool Resolucao::swapSlots(Solucao& sol, int posX1, int posX2) const
     sol.horario->clearSlot(diaX1, blocoX1, camadaX);
     sol.horario->clearSlot(diaX2, blocoX2, camadaX);
 
-    if (sol.horario->insert(diaX1, blocoX1, camadaX, pdX2)
-        && sol.horario->insert(diaX2, blocoX2, camadaX, pdX1)) {
-        return true;
-    }
-    return false;
+    return sol.horario->insert(diaX1, blocoX1, camadaX, pdX2)
+        && sol.horario->insert(diaX2, blocoX2, camadaX, pdX1);
 }
 
 Solucao* Resolucao::gerarHorarioAGMutacao(const Solucao* pSolucao) const
@@ -1331,7 +1334,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
     for (; apIter != apIterEnd; ++apIter) {
         auto alunoPerfil = alunoPerfis[apIter->first];
 
-        apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas, disciplinasIndex);
+        apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas);
 
         auto apRestante = alunoPerfil->restante;
         auto apCursadas = alunoPerfil->cursadas;
@@ -1340,7 +1343,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
         auto dIterEnd = apRestante.end();
 
         for (; dIter != dIterEnd; ++dIter) {
-            apGrade->insert(getDisciplinaByName(*dIter));
+            apGrade->insert(getDisciplinaByCode(*dIter));
         }
 
         pSolucao->insertGrade(apGrade);
@@ -1350,7 +1353,7 @@ double Resolucao::gerarGradeTipoGuloso(Solucao*& pSolucao)
 }
 
 Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-                                                      tsl::hopscotch_set<std::string>::const_iterator current)
+                                                      std::vector<std::size_t>::const_iterator current)
 {
     Grade* bestGrade = new Grade(*pGrade);
     Grade* currentGrade {nullptr};
@@ -1364,7 +1367,7 @@ Grade* Resolucao::gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep
     for (auto it = current; it != std::end(disciplinasRestantes); ++it) {
         currentGrade = new Grade(*pGrade);
 
-        viavel = currentGrade->insert(getDisciplinaByName(*it));
+        viavel = currentGrade->insert(getDisciplinaByCode(*it));
         if (viavel) {
 
             if (deep != maxDeep) {
@@ -1410,8 +1413,7 @@ double Resolucao::gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao)
         auto apRestante = alunoPerfil->restante;
 
         apGrade = gerarGradeTipoCombinacaoConstrutiva(
-            new Grade(blocosTamanho, alunoPerfil, horario,
-                      disciplinas, disciplinasIndex),
+            new Grade(blocosTamanho, alunoPerfil, horario, disciplinas),
             static_cast<int>(apRestante.size()));
 
         pSolucao->insertGrade(apGrade);
@@ -1455,7 +1457,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(
         std::advance(current, rand);
         auto disciplina = *current;
 
-        if (pGrade->insert(disciplina, professorDisciplinasIgnorar)) {
+        if (pGrade->insertOld(disciplina, professorDisciplinasIgnorar)) {
             adicionados++;
         }
         apRestante.erase(current);
@@ -1479,8 +1481,7 @@ void Resolucao::gerarGradeTipoGraspConstrucao(Solucao* pSolucao)
 
         alunoPerfil = alunoPerfis[apIter->first];
 
-        apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas,
-                            disciplinasIndex);
+        apGrade = new Grade(blocosTamanho, alunoPerfil, horario, disciplinas);
 
         gerarGradeTipoGraspConstrucao(apGrade);
 
@@ -1527,7 +1528,7 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoAleatorio(Solucao* pSolucao)
 
                 disciplinasSize = grade->disciplinasAdicionadas.size();
                 random = Util::random(0, static_cast<int>(disciplinasSize));
-                grade->remove2(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
+                grade->removeOld(grade->disciplinasAdicionadas[random], professorDisciplinaRemovido);
 
                 // Se houve uma remo��o
                 if (professorDisciplinaRemovido != NULL) {
@@ -2109,10 +2110,10 @@ void Resolucao::reinsereGrades(Solucao* sol) const
     // adicionadas e depois resetá-las para a inserção funcionar.
     for (auto& par : sol->grades) {
         auto& grade = *par.second;
-        std::vector<Disciplina*> disc_add_copy {};
+        std::vector<Disciplina*> disc_add_copy;
         std::swap(disc_add_copy, grade.disciplinasAdicionadas);
         for (auto& disc : disc_add_copy) {
-            grade.insert(disc, {}, true);
+            grade.insert(disc);
         }
     }
 }
@@ -2251,7 +2252,7 @@ std::unique_ptr<Grade>
 Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, const Solucao* sol) const
 {
     auto novaGrade = std::make_unique<Grade>(
-        blocosTamanho, alunoPerfil, sol->horario.get(), disciplinas, disciplinasIndex);
+        blocosTamanho, alunoPerfil, sol->horario.get(), disciplinas);
     const auto horariosMax = (dias_semana_util - 2) * blocosTamanho;
     auto adicionados = 0;
     auto restantes = alunoPerfil->restanteOrd;
@@ -2337,15 +2338,23 @@ Resolucao::getSubTour(const Solucao& pai, int xbegin, int xend) const
     return subtour;
 }
 
+static std::string
+pd_name(const ProfessorDisciplina* pd)
+{
+  if (pd) {
+      return pd->getDisciplina()->getId();
+  } else {
+      return "null";
+  }
+}
+
 void Resolucao::printCamada(const Solucao& s, int camada) const
 {
     const auto camada_tamanho = dias_semana_util * blocosTamanho;
     const auto comeco_camada = s.horario->getPosition(0, 0, camada);
 
     for (auto i = comeco_camada; i < comeco_camada + camada_tamanho; i++) {
-        const auto pd = s.horario->at(i);
-        const auto nome = pd ? pd->getDisciplina()->getId() : "null";
-        std::cout << nome << " ";
+        std::cout << pd_name(s.horario->at(i)) << " ";
     }
     std::cout << "\n\n";
 }
@@ -2356,8 +2365,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
     int camadaCruz)
 {
     // Gera o ponto de cruzamento e encontra as coordenadas dele na matriz 3D
-    int xbegin, xend;
-    std::tie(xbegin, xend) = getCrossoverPoints(pai1, camadaCruz);
+    const auto [xbegin, xend] = getCrossoverPoints(pai1, camadaCruz);
 
     // Gera o vector de genes entre os pontos de cruzamento
     auto genes = getSubTour(pai1, xbegin, xend);
@@ -2397,8 +2405,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
         }
 
         // Adquire as coordenadas da disciplina no pai1
-        int bloco, dia, camada;
-        std::tie(dia, bloco, camada) = filho->horario->getCoords(pai1idx);
+        const auto [dia, bloco, camada] = filho->horario->getCoords(pai1idx);
         auto currPd = pai2.horario->matriz[pai2idx];
 
         // Tenta inserir a disciplina do pai2 nas coordenadas do pai1
@@ -2466,8 +2473,7 @@ bool Resolucao::insereSubTour(
 )
 {
     for (auto i = 0u; i < genes.size(); i++) {
-        int bloco, dia, camada;
-        std::tie(dia, bloco, camada) = filho.horario->getCoords(i + xbegin);
+        auto [dia, bloco, camada] = filho.horario->getCoords(i + xbegin);
         auto currPd = genes[i];
 
         if (currPd && !filho.horario->insert(dia, bloco, camada, currPd)) {
@@ -2538,16 +2544,14 @@ Resolucao::crossoverPMXCriarRepr(
     std::vector<int> novo_pai2(camada_tamanho);
 
     for (auto i = comeco_camada; i < fim_camada; i++) {
-        const auto pd = pai1.horario->at(i);
-        const auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        const auto nome = pd_name(pai1.horario->at(i));
         repr[nome].push_back(i - comeco_camada);
         novo_pai1[i - comeco_camada] = i - comeco_camada;
     }
 
     auto conversor = repr;
     for (auto i = comeco_camada; i < fim_camada; i++) {
-        const auto pd = pai2.horario->at(i);
-        const auto nome = pd ? pd->getDisciplina()->getId() : "null";
+        const auto nome = pd_name(pai2.horario->at(i));
         const auto x = conversor.at(nome).back();
         conversor[nome].pop_back();
         novo_pai2[i - comeco_camada] = x;
@@ -2588,17 +2592,13 @@ Solucao* Resolucao::crossoverPMXCamada(
     int camadaCruz
 )
 {
-    std::vector<std::string> repr;
-    std::vector<int> novo_pai1;
-    std::vector<int> novo_pai2;
-    std::tie(repr, novo_pai1, novo_pai2) = crossoverPMXCriarRepr(pai1, pai2, camadaCruz);
+    auto [repr, novo_pai1, novo_pai2] = crossoverPMXCriarRepr(pai1, pai2, camadaCruz);
 
     const auto tamanho_camada = blocosTamanho * dias_semana_util;
     const auto camada_inicio = pai1.horario->getPosition(0, 0, camadaCruz);
     const auto camada_fim = camada_inicio + tamanho_camada;
 
-    int xbegin, xend;
-    std::tie(xbegin, xend) = getCrossoverPoints(pai1, camadaCruz);
+    const auto [xbegin, xend] = getCrossoverPoints(pai1, camadaCruz);
 
     auto filho_repr = crossoverPMXSwap(novo_pai1, novo_pai2, xbegin - camada_inicio,
                                        xend - camada_inicio);
@@ -2609,8 +2609,7 @@ Solucao* Resolucao::crossoverPMXCamada(
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
         auto pdname = repr[filho_repr[i - camada_inicio]];
-        int dia, bloco, camada;
-        std::tie(dia, bloco, camada) = filho->horario->getCoords(i);
+        const auto [dia, bloco, camada] = filho->horario->getCoords(i);
         if (!filho->horario->insert(dia, bloco, camada, alocacoes[pdname])) {
             return nullptr;
         }
@@ -2706,8 +2705,7 @@ Solucao* Resolucao::crossoverCicloCamada(
         const auto curr_slot = comeco_camada + i;
         ProfessorDisciplina* pd {nullptr};
 
-        int dia, bloco, camada;
-        std::tie(dia, bloco, camada) = filho->horario->getCoords(curr_slot);
+        const auto [dia, bloco, camada] = filho->horario->getCoords(curr_slot);
 
         switch (xmask[i]) {
             case 0:
@@ -2760,7 +2758,7 @@ Disciplina*
 Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 {
     const auto distancia = getIntervaloAlfaGrasp(restantes);
-    return restantes[Util::random(0, distancia)];
+    return restantes[Util::random(0, distancia, this_thread_id)];
 }
 
 Solucao* Resolucao::selecaoTorneio(const std::vector<Solucao*>& pop) const
@@ -2849,9 +2847,7 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         auto viz = std::make_unique<Solucao>(sol);
 
         // Determina aleatoriamente qual disciplina terá seu professor substituído
-        int aloc_pos{};
-        ProfessorDisciplina* aloc{nullptr};
-        std::tie(aloc_pos, aloc) = get_random_notnull_aloc(*viz);
+        const auto [aloc_pos, aloc] = get_random_notnull_aloc(*viz);
 
         tsl::hopscotch_set<Professor*> professores_capacitados(
             begin(aloc->disciplina->professoresCapacitados),
@@ -2866,8 +2862,8 @@ std::unique_ptr<Solucao> Resolucao::resource_move(const Solucao& sol) const
         auto novo_prof = *Util::randomChoice(professores_capacitados);
 
         // Remove todas as ocorrências da alocãção, guardando suas posições
-        int camada{};
-        tie(std::ignore, std::ignore, camada) = sol.horario->getCoords(aloc_pos);
+        int camada;
+        std::tie(std::ignore, std::ignore, camada) = sol.horario->getCoords(aloc_pos);
         const auto posicoes_aloc = remove_aloc_memorizando(*viz, aloc, camada);
 
         // Modifica a alocação para o novo professor
@@ -2898,19 +2894,15 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
 
         // Determina os eventos e1 e e2 que terão seus professores trocados
         // (e1 e e2 precisam ser diferentes)
-        int pos_e1{};
-        ProfessorDisciplina* e1{nullptr};
-        std::tie(pos_e1, e1) = get_random_notnull_aloc(sol);
+        auto [pos_e1, e1] = get_random_notnull_aloc(sol);
 
-        int pos_e2{};
-        ProfessorDisciplina* e2{nullptr};
-        std::tie(pos_e2, e2) = [&] {
-            int pos{};
-            ProfessorDisciplina* e{nullptr};
-            do {
-                std::tie(pos, e) = get_random_notnull_aloc(sol);
-            } while (e == e1);
-            return std::make_pair(pos, e);
+        auto [pos_e2, e2] = [&] {
+            while (true) {
+                const auto [pos, event] = get_random_notnull_aloc(sol);
+                if (event != e1) {
+                    return std::make_pair(pos, event);
+                }
+            }
         }();
 
         // Estabelece se o professor de e1 pode lecionar e2 e vice-versa
@@ -2920,12 +2912,12 @@ std::unique_ptr<Solucao> Resolucao::resource_swap(const Solucao& sol) const
         }
 
         // Remove e1 e e2 da matriz
-        int camada_e1{};
-        tie(std::ignore, std::ignore, camada_e1) = sol.horario->getCoords(pos_e1);
+        int camada_e1;
+        std::tie(std::ignore, std::ignore, camada_e1) = sol.horario->getCoords(pos_e1);
         auto posicoes_e1 = remove_aloc_memorizando(*viz, e1, camada_e1);
 
-        int camada_e2{};
-        tie(std::ignore, std::ignore, camada_e2) = sol.horario->getCoords(pos_e2);
+        int camada_e2;
+        std::tie(std::ignore, std::ignore, camada_e2) = sol.horario->getCoords(pos_e2);
         auto posicoes_e2 = remove_aloc_memorizando(*viz, e2, camada_e2);
 
         // Troca os professores
@@ -2963,15 +2955,14 @@ std::unique_ptr<Solucao> Resolucao::permute_resources(const Solucao& sol) const
     for (auto j = 0; j < num_disc_per; j++) {
         // Escolhe aleatoriamente uma posição (dia, bloco) que ainda não
         // foi adicionada ao conjunto
-        bool inserido{false};
-        int dia{};
-        int bloco{};
+        bool inserido;
+        int dia, bloco;
 
         do {
             dia = Util::random(0, dias_semana_util);
             bloco = Util::random(0, blocosTamanho);
 
-            tie(std::ignore, inserido) = posicoes.emplace(dia, bloco);
+            std::tie(std::ignore, inserido) = posicoes.emplace(dia, bloco);
         } while (!inserido);
 
         // Salva o evento alocado nessa posição e a limpa
@@ -3016,8 +3007,7 @@ std::unique_ptr<Solucao> Resolucao::kempe_move(const Solucao& sol) const
     auto d_e1 = Util::random(0, dias_semana_util);
     auto b_e1 = 2 *Util::random(0, blocosTamanho/2);
 
-    int d_e2, b_e2;
-    std::tie(d_e2, b_e2) = [&] {
+    const auto [d_e2, b_e2] = [&] {
         int d, b;
         do {
             d = Util::random(0, dias_semana_util);
@@ -3085,7 +3075,7 @@ const std::vector<Disciplina*>& Resolucao::getDisciplinas() const
 
 std::vector<std::pair<int, int>> Resolucao::remove_aloc_memorizando(
     Solucao& sol,
-    ProfessorDisciplina* aloc,
+    const ProfessorDisciplina* aloc,
     int camada
 ) const
 {
@@ -3194,13 +3184,8 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
     const std::vector<int>& cadeia
 ) const
 {
-    int d_e1{};
-    int b_e1{};
-    std::tie(d_e1, b_e1) = t1;
-
-    int d_e2{};
-    int b_e2{};
-    std::tie(d_e2, b_e2) = t2;
+    const auto [d_e1, b_e1] = t1;
+    const auto [d_e2, b_e2] = t2;
 
     auto viz = std::make_unique<Solucao>(sol);
     auto& horario = *viz->horario;
@@ -3222,11 +3207,9 @@ std::unique_ptr<Solucao> Resolucao::swap_timeslots(
     }
 
     // Reinsere no timeslot invertido
-    bool ok{false};
+    auto ok = false;
     for (const auto& p : alocs) {
-        int e, b;
-        ProfessorDisciplina* aloc{nullptr};
-        std::tie(e, b, aloc) = p;
+        auto [e, b, aloc] = p;
 
         if (!aloc) {
             continue;
@@ -3349,86 +3332,84 @@ Resolucao::numThreadsGRASP() const
     return numThreadsGRASP_;
 }
 
+using GradeQueue = moodycamel::BlockingConcurrentQueue<std::unique_ptr<Grade>>;
+
 static void GRASP_producer(
   const Resolucao& res,
   AlunoPerfil* alunoPerfil,
   Solucao* solucao,
-  std::queue<std::unique_ptr<Grade>>& fila,
-  std::condition_variable& cv,
-  std::mutex& mu
+  GradeQueue& fila,
+  int thread_id,
+  int num_iter
 )
 {
-  const auto num_iter = res.maxIterSemEvoGrasp / res.numThreadsProdutorConsumidor();
+  this_thread_id = thread_id;
+  dbg("[{}] Oi\n", this_thread_id);
+
   for (auto i = 0; i < num_iter; i++) {
     auto candidata = res.gradeAleatoria(alunoPerfil, solucao);
-    {
-      std::lock_guard<std::mutex> lock(mu);
-      fila.push(std::move(candidata));
-    }
-    cv.notify_one();
+    fila.enqueue(std::move(candidata));
   }
+
+  dbg("[{}] Fin\n", this_thread_id);
 }
 
 static void GRASP_consumer(
   const Resolucao& res,
-  std::queue<std::unique_ptr<Grade>>& fila,
-  std::condition_variable& cv,
-  std::mutex& mu,
-  std::unique_ptr<Grade>& best
+  GradeQueue& fila,
+  std::unique_ptr<Grade>& best,
+  int thread_id,
+  int num_iter
 )
 {
-  const auto num_iter = res.maxIterSemEvoGrasp / res.numThreadsProdutorConsumidor();
-  for (auto i = 0; i < num_iter; i++) {
-    std::unique_ptr<Grade> grade = nullptr;
-    {
-      std::unique_lock<std::mutex> lock(mu);
-      cv.wait(lock, [&fila] { return !fila.empty(); });
+  this_thread_id = thread_id;
+  dbg("[{}] Oi\n", this_thread_id);
 
-      grade = std::move(fila.front());
-      fila.pop();
-    }
+  for (auto i = 0; i < num_iter; i++) {
+    dbg("[{}] Hmm: {}\n", this_thread_id, i);
+    std::unique_ptr<Grade> grade = nullptr;
+    fila.wait_dequeue(grade);
 
     res.buscaLocal(grade);
     if (!best || grade->getFO() > best->getFO()) {
       best = std::move(grade);
     }
   }
-}
 
+  dbg("[{}] Fin\n", this_thread_id);
+}
 
 Grade*
 Resolucao::GRASP_par_2(AlunoPerfil* alunoPerfil, Solucao* solucao) const
 {
-  std::vector<std::thread> produtores;
   std::vector<std::thread> consumidores;
 
-  std::vector<std::queue<std::unique_ptr<Grade>>> filas(numParesProdutorConsumidor_);
-  std::vector<std::mutex> mutexes(numParesProdutorConsumidor_);
-  std::vector<std::condition_variable> cvs(numParesProdutorConsumidor_);
-  std::vector<std::unique_ptr<Grade>> resultados(numParesProdutorConsumidor_);
+  GradeQueue fila;
+  const auto num_consumidores = numParesProdutorConsumidor_ - 1;
+  std::vector<std::unique_ptr<Grade>> resultados(num_consumidores);
 
-  for (auto i = 0; i < numParesProdutorConsumidor_; i++) {
-    std::thread produtor(GRASP_producer, std::cref(*this), alunoPerfil, solucao,
-                         std::ref(filas.at(i)), std::ref(cvs.at(i)),
-                         std::ref(mutexes.at(i)));
+  const auto num_iter_consumidor = maxIterSemEvoGrasp / num_consumidores;
 
-    std::thread consumidor(GRASP_consumer, std::cref(*this), std::ref(filas.at(i)),
-                           std::ref(cvs.at(i)), std::ref(mutexes.at(i)),
-                           std::ref(resultados.at(i)));
+  for (auto i = 0; i < num_consumidores; i++) {
+    auto this_iter = num_iter_consumidor;
+    if (i == 0) {
+      this_iter += maxIterSemEvoGrasp % num_consumidores;
+    }
 
-    produtores.push_back(std::move(produtor));
+    dbg("Thread {}: {} iter", i+1, this_iter);
+
+    std::thread consumidor(GRASP_consumer, std::cref(*this), std::ref(fila),
+                           std::ref(resultados[i]), i + 1, this_iter);
+
     consumidores.push_back(std::move(consumidor));
   }
 
+  GRASP_producer(*this, alunoPerfil, solucao, fila, 0, maxIterSemEvoGrasp);
   std::unique_ptr<Grade> best = nullptr;
 
-  for (auto i = 0; i < numParesProdutorConsumidor_; i++) {
-    produtores[i].join();
+  for (auto i = 0; i < num_consumidores; i++) {
     consumidores[i].join();
 
-    if (!filas[i].empty()) {
-      fmt::print("Fila terminou nao vazia\n");
-    }
     if (!best || resultados[i]->getFO() > best->getFO()) {
         best = std::move(resultados[i]);
     }
@@ -3690,5 +3671,11 @@ Resolucao::gerarSolucoesAleatoriasSerial(int numSolucoes)
         solucoes[i] = gerarSolucaoAleatoriaNotNull().release();
     }
     return solucoes;
+}
+
+Disciplina*
+Resolucao::getDisciplinaByCode(std::size_t d_code)
+{
+    return disciplinas[d_code - 1];
 }
 

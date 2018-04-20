@@ -44,7 +44,6 @@ private:
     int contaJanelasDia(int dia, int camada) const;
     int contaJanelasCamada(int camada) const;
 
-    bool isProfDia(std::size_t professor, int dia) const;
     int intervalosTrabalhoProf(std::size_t professor,
                                const std::vector<std::vector<uint8_t>>& prof_dia) const;
 
@@ -53,16 +52,11 @@ private:
 
     int aulasSabadoCamada(int camada) const;
 
-    int aulasSeguidasDiscDia(std::size_t disciplina, int dia) const;
-    int aulasSeguidasDisc(std::size_t disciplina) const;
-
     int aulasSeguidasDificilDia(int dia, int camada) const;
     int aulasSeguidasDificilCamada(int camada) const;
 
     bool aulaDificilUltimoHorarioDia(int dia, int camada) const;
     int aulaDificilUltimoHorarioCamada(int camada) const;
-
-    int aulasProfessor(std::size_t professor, int preferencia) const;
 };
 
 #endif /* HORARIO_H */

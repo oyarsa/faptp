@@ -274,8 +274,7 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::pick_event_and_move(
 {
     auto& horario = solucao.getHorario();
 
-    int dia, bloco, camada;
-    std::tie(dia, bloco, camada) = slot;
+    const auto [dia, bloco, camada] = slot;
 
     auto novo_dia = Util::random(0, dias_semana_util);
     auto novo_bloco = 2 *Util::random(0, res.getBlocosTamanho()/2);
@@ -298,8 +297,7 @@ std::vector<HySST::Impl::Event> HySST::Impl::list_all_liebhabers(
     Time_slot slot
 ) const
 {
-    int dia, bloco, camada;
-    std::tie(dia, bloco, camada) = slot;
+    const auto [dia, bloco, camada] = slot;
 
     std::vector<Event> liebhabers;
 
@@ -328,14 +326,10 @@ std::optional<HySST::Impl::Time_slot> HySST::Impl::choose_and_move(
     Time_slot dest
 ) const
 {
-    ProfessorDisciplina* pd = nullptr;
-    int d_og, b_og, c_og;
-    Time_slot slot;
-    std::tie(slot, pd) = *Util::randomChoice(liebhabers);
-    std::tie(d_og, b_og, c_og) = slot;
+    const auto [slot, pd] = *Util::randomChoice(liebhabers);
+    const auto [d_og, b_og, c_og] = slot;
 
-    int d_dest, b_dest, c_dest;
-    std::tie(d_dest, b_dest, c_dest) = dest;
+    const auto [d_dest, b_dest, c_dest] = dest;
 
     auto& horario = solucao.getHorario();
     horario.clearSlot(d_og, b_og, c_og);

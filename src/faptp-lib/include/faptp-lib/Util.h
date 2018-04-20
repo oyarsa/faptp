@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <chrono>
+#include <fmt/format.h>
 
 /// Contém funções utilitárias que não se encaixam em nenhuma classe,
 /// como conversão de escalas lineares, tempo, data etc.
@@ -115,6 +116,8 @@ constexpr int warpIntervalo(int i, int tamIntervalo, int comecoIntervalo)
 template <typename Container, typename T, typename Compare = std::less<T>>
 void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
 {
+    using std::begin;
+    using std::end;
     c.insert(
         std::upper_bound(begin(c), end(c), item, cmp),
         item
@@ -210,6 +213,8 @@ template <typename Container>
 auto
 randomChoice(Container& c)
 {
+  using std::begin;
+
   const auto n = random(0, static_cast<int>(c.size()));
   auto it = begin(c);
   std::advance(it, n);
@@ -305,6 +310,24 @@ std::string read_whole_file(std::istream& file);
 /// @param var Variável de ambiente a ser lida.
 /// @return String contendo o valor da variável `var`.
 std::string get_env_var(const std::string& var);
+
+constexpr auto kPrintDebug = false;
+
+template <typename ...A>
+void dbg(A... args)
+{
+  if constexpr (kPrintDebug) {
+    fmt::print("> ");
+    fmt::print(args...);
+  }
+}
+
+template <typename Container>
+void swap_remove(Container& container, std::size_t index)
+{
+  std::swap(container[index], container.back());
+  container.pop_back();
+}
 
 } // namespace Util
 

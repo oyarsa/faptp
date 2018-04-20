@@ -6,8 +6,7 @@
 #include <faptp-lib/Constantes.h>
 
 Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
-             const std::vector<Disciplina*>& pDisciplinasCurso,
-             const tsl::robin_map<std::string, int>& pDiscToIndex)
+             const std::vector<Disciplina*>& pDisciplinasCurso)
     : Representacao(pBlocosTamanho, 1)
       , aluno(pAlunoPerfil)
       , horario(pHorario)
@@ -16,7 +15,6 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
       , professorDisciplinaTemp(nullptr)
       , disciplinasAdicionadas()
       , disciplinasCurso(pDisciplinasCurso)
-      , discToIndex(pDiscToIndex)
       , fo(-1)
 {
     disciplinasAdicionadas.reserve(dias_semana_util * blocosTamanho);
@@ -31,12 +29,11 @@ Grade::Grade(const Grade& outro)
       , professorDisciplinaTemp(nullptr)
       , disciplinasAdicionadas(outro.disciplinasAdicionadas)
       , disciplinasCurso(outro.disciplinasCurso)
-      , discToIndex(outro.discToIndex)
       , fo(outro.fo) {}
 
-Disciplina* Grade::getDisciplina(const std::string& pNomeDisciplina)
+Disciplina* Grade::getDisciplina(std::size_t disciplina)
 {
-    return disciplinasCurso[discToIndex.at(pNomeDisciplina)];
+    return disciplinasCurso[disciplina];
 }
 
 Grade::~Grade()
@@ -46,7 +43,7 @@ Grade::~Grade()
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 {
-    return aluno->getPeriodoNum() >= pDisciplina->periodoMinimoNum();
+    return aluno->getPeriodoNum() >= pDisciplina->getPeriodoMinimoNum();
 }
 
 bool
@@ -62,7 +59,7 @@ Grade::discRepetida(const Disciplina* pDisciplina)
     return true;
   }
 
-  return !aluno->isRestante(pDisciplina->getId());
+  return !aluno->isRestante(pDisciplina->id_hash());
 }
 
 bool
@@ -71,7 +68,7 @@ Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
   const auto& corequisitos = pDisciplina->coRequisitos;
   const auto& cursadas = aluno->cursadas;
 
-  for (const auto& coreq : corequisitos) {
+  for (const auto coreq : corequisitos) {
     const auto& equivalentes = getDisciplina(coreq)->equivalentes;
 
     const auto cursou = std::find_first_of(
@@ -86,7 +83,7 @@ Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
       begin(equivalentes), end(equivalentes),
       begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
       [](auto a, auto b) {
-        return a == b->nome;
+        return a == b->id_hash();
       }
     ) != end(equivalentes);
 
@@ -123,6 +120,9 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
 {
     // Percorre a grade do aluno inteira procurando slots da disciplina atual
     // e verificando se já estão ocupados por alguma outra
+
+    // Quais são os slots dessa disciplina?
+    // Tem alguém neles?
     for (auto i = 0; i < dias_semana_util; i++) {
         for (auto j = 0; j < blocosTamanho; j++) {
             const auto currPosHorario = getPosition(i, j, pCamada);
@@ -172,17 +172,12 @@ void Grade::add(Disciplina* pDisciplina, int pCamada)
     disciplinasAdicionadas.push_back(pDisciplina);
 }
 
-bool Grade::insert2(Disciplina* pDisciplina)
+bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar)
 {
-    return insert(pDisciplina, {}, false);
+    return insertOld(pDisciplina, professorDisciplinasIgnorar, false);
 }
 
-bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar)
-{
-    return insert(pDisciplina, professorDisciplinasIgnorar, false);
-}
-
-bool Grade::insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>&, bool force)
+bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>&, bool force)
 {
     int camada {};
     int triDimensional[3] {};
@@ -241,6 +236,7 @@ bool Grade::insert(Disciplina* pDisciplina)
 
 Disciplina* Grade::remove(Disciplina* pDisciplina)
 {
+    // Limpa os slots ocupados pela disciplina
     for (auto d = 0; d < dias_semana_util; d++) {
         for (auto b = 0; b < blocosTamanho; b++) {
             const auto pos = getPosition(d, b, 0);
@@ -250,13 +246,14 @@ Disciplina* Grade::remove(Disciplina* pDisciplina)
             }
         }
     }
-    disciplinasAdicionadas.erase(std::remove(
-                                     begin(disciplinasAdicionadas), end(disciplinasAdicionadas), pDisciplina),
-                                 end(disciplinasAdicionadas));
+    // Remove-a da lista de adicionadas.
+    disciplinasAdicionadas.erase(
+        std::remove(begin(disciplinasAdicionadas), end(disciplinasAdicionadas), pDisciplina),
+                    end(disciplinasAdicionadas));
     return pDisciplina;
 }
 
-Disciplina* Grade::remove2(Disciplina* pDisciplina, ProfessorDisciplina* & pProfessorDisciplina)
+Disciplina* Grade::removeOld(Disciplina* pDisciplina, ProfessorDisciplina*& pProfessorDisciplina)
 {
     std::vector<Disciplina*>::iterator found;
     Disciplina* rDisciplina = NULL;
@@ -288,45 +285,6 @@ Disciplina* Grade::remove2(Disciplina* pDisciplina, ProfessorDisciplina* & pProf
     }
 
     return rDisciplina;
-}
-
-double Grade::getFO2()
-{
-    if (fo != -1) {
-        return fo;
-    }
-    fo = 0;
-
-    tsl::robin_map<std::string, int> discAvaliada;
-    const auto turmaAluno = aluno->turma;
-    const auto periodoAluno = aluno->periodo;
-
-    if (problemas.size() > 0) {
-        fo = -1;
-        return fo;
-    }
-
-    for (auto i = 0; i < size; i++) {
-        auto professorDisciplina = at(i);
-
-        if (professorDisciplina) {
-            fo++;
-
-            // Se a turma do aluno for a mesma da disciplina e o periodo do aluno
-            // for o mesmo da disciplina, ela cumpre uma prefer�ncia do aluno
-            const auto& nomeDisc = professorDisciplina->disciplina->nome;
-            const auto& turmaDisc = professorDisciplina->disciplina->turma;
-            const auto& periodoDisc = professorDisciplina->disciplina->periodo;
-
-            if (turmaAluno == turmaDisc && periodoAluno == periodoDisc
-                && !discAvaliada[nomeDisc]) {
-                discAvaliada[nomeDisc] = 1;
-                fo += 0.1;
-            }
-        }
-    }
-
-    return fo;
 }
 
 double Grade::getFO()

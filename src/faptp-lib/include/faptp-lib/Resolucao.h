@@ -223,9 +223,8 @@ private:
   void carregarSolucaoOld();
   std::unique_ptr<Solucao> carregarSolucao(const Json::Value& horarios);
 
-  Disciplina* getDisciplinaByName(const std::string& nomeDisc);
-  std::vector<Disciplina*> ordenarDisciplinas();
-  std::vector<Disciplina*> ordenarDisciplinas(std::vector<Disciplina*> pDisciplina);
+  Disciplina* getDisciplinaById(const std::string& disc_id);
+  Disciplina* getDisciplinaByCode(std::size_t d_code);
   void atualizarDisciplinasIndex();
   std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
   std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
@@ -257,7 +256,7 @@ private:
   double gerarGradeTipoGuloso(Solucao*& pSolucao);
 
   Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep, int deep,
-      tsl::hopscotch_set<std::string>::const_iterator current);
+      std::vector<std::size_t>::const_iterator current);
   Grade* gerarGradeTipoCombinacaoConstrutiva(Grade* pGrade, int maxDeep);
   double gerarGradeTipoCombinacaoConstrutiva(Solucao*& pSolucao);
 
@@ -319,7 +318,7 @@ private:
   // Remove as inst�ncias de `aloc` na camada `camada` da solu��o `sol`,
   // salvando os lugares em pares (dia, bloco)
   std::vector<std::pair<int, int>> remove_aloc_memorizando(
-                                  Solucao& sol, ProfessorDisciplina* aloc, int camada) const;
+      Solucao& sol, const ProfessorDisciplina* aloc, int camada) const;
 
   // Reinsere um ProfessorDisciplina `aloc` na camada `camada` da solu��o
   // `sol`, nas posi��es registradas por `posicoes_aloc`

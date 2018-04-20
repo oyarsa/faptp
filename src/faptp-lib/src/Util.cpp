@@ -10,7 +10,8 @@
 #include <faptp-lib/Aleatorio.h>
 
 #ifdef _WIN32
-#include <windows.h>
+  #define NOMINMAX 1
+  #include <windows.h>
 #endif
 
 constexpr int Util::getPosition(int y, int x, int z, int Y, int Z)
@@ -69,8 +70,7 @@ int Util::random(int a, int b)
 int
 Util::random(int a, int b, int thread_id)
 {
-  int min, max;
-  std::tie(min, max) = std::minmax(a, b);
+  const auto [min, max] = std::minmax(a, b);
 
   const auto rand = aleatorio::randomUInt(thread_id);
   return fastrange32(rand, max - min) + min;

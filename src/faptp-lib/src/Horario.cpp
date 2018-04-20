@@ -280,30 +280,6 @@ int Horario::aulasSabado() const
     return aulas;
 }
 
-int Horario::aulasSeguidasDiscDia(const std::size_t disciplina, int dia) const
-{
-    auto num = 0;
-    const auto camada = disc_camada_[disciplina];
-
-    for (auto b = 0; b < blocosTamanho; b++) {
-        const auto pd = at(dia, b, camada);
-        if (pd && pd->getDisciplina()->id_hash() == disciplina) {
-            num++;
-        }
-    }
-
-    return std::max(num - 2, 0);
-}
-
-int Horario::aulasSeguidasDisc(const std::size_t disciplina) const
-{
-    auto num = 0;
-    for (auto d = 0; d < dias_semana_util; d++) {
-        num += aulasSeguidasDiscDia(disciplina, d);
-    }
-    return num;
-}
-
 int Horario::aulasSeguidas() const
 {
   thread_local std::vector<int8_t> dias_discs(
@@ -414,7 +390,7 @@ int Horario::preferenciasProfessores() const
         continue;
       }
 
-      percorrido[disc] = true;
+      percorrido[disc] = 1;
       num += !professor->isDiscPreferencia(disc);
     }
     return num;

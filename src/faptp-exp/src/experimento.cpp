@@ -192,11 +192,9 @@ ag_cli(const std::string& input, const std::string& file,
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      long long tempo;
-      Solucao::FO_t fo;
-      std::tie(tempo, fo) =
-          ag(input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
-             grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
+      const auto [tempo, fo] = ag(
+          input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
+          grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
 
       Util::logprint(
         out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
@@ -381,11 +379,9 @@ sa_ils_cli(const std::string& input, const std::string& file,
     out_str << "ID Algoritmo, Numero execucao, Tempo total, FO\r\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      long long tempo;
-      Solucao::FO_t fo;
-      std::tie(tempo, fo) =
-          sa_ils(input, frac_time, alfa, t0, sa_iter, sa_reaq,
-                 sa_chances, ils_iter, ils_pmax, ils_p0, timeout);
+      const auto [tempo, fo] = sa_ils(
+          input, frac_time, alfa, t0, sa_iter, sa_reaq,
+          sa_chances, ils_iter, ils_pmax, ils_p0, timeout);
 
       Util::logprint(
         out_str, fmt::format("{},{},{},{}\r\n", id, i, tempo, fo));
@@ -455,10 +451,8 @@ hysst_cli(const std::string& input, const std::string& file,
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      long long tempo;
-      Solucao::FO_t fo;
-      std::tie(tempo, fo) = hysst(input, max_level, t_start, t_step,
-                                  it_hc, it_mut, timeout);
+      const auto [tempo, fo] = hysst(input, max_level, t_start, t_step,
+                                     it_hc, it_mut, timeout);
 
       Util::logprint(
         out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
@@ -526,10 +520,7 @@ wdju_cli(const std::string& input, const std::string& file,
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      long long tempo;
-      Solucao::FO_t fo;
-      std::tie(tempo, fo) =
-          wdju(input, stag_limit, jump_factor, timeout);
+      const auto [tempo, fo] = wdju(input, stag_limit, jump_factor, timeout);
 
       Util::logprint(
         out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
