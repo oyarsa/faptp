@@ -169,13 +169,10 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
 
     bool viavel = false;
     bool first = true;
-    ProfessorDisciplina* professorDisciplinaTemp = nullptr;
 
     if (find(disciplinasAdicionadas.begin(), disciplinasAdicionadas.end(), pDisciplina) == disciplinasAdicionadas.end()) {
         while (((pdIterFound = getFirstDisciplina(pdIterFound, pdIterEnd, pDisciplina)) != pdIterEnd) && (first || !viavel || force)) {
             x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
-
-            professorDisciplinaTemp = nullptr;
 
             get3DMatrix(x, triDimensional);
             camada = horario->disc_camada_[pDisciplina->id_hash()];

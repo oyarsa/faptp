@@ -311,7 +311,7 @@ std::string read_whole_file(std::istream& file);
 /// @return String contendo o valor da variável `var`.
 std::string get_env_var(const std::string& var);
 
-constexpr auto kPrintDebug = false;
+constexpr auto kPrintDebug = true;
 
 template <typename ...A>
 void dbg(A... args)

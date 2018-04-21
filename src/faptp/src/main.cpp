@@ -143,7 +143,7 @@ void run(const std::string& conf, const std::string& input,
     .timeout(timeout * 1000)
     .tipoFo(fo) };
 
-  r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
+  r.setGradeAlfa(json["parametros"]["GAlfa"].asInt());
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
   r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
   r.versaoGrasp = [&json]() {
@@ -232,7 +232,7 @@ void run_many(const std::string& conf, const std::string& input,
     .timeout(timeout * 1000)
     .tipoFo(fo) };
 
-  r.gradeAlfa = json["parametros"]["GAlfa"].asInt();
+  r.setGradeAlfa(json["parametros"]["GAlfa"].asInt());
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
   r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
   r.versaoGrasp = [&json]() {

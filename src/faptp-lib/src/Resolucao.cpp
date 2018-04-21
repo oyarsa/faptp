@@ -66,7 +66,6 @@ Resolucao::Resolucao(const Configuracao& c)
       , horarioMutacaoProbabilidade(c.mutProb_)
       , horarioMutacaoTentativas(c.mutTentativas_)
       , gradeTipoConstrucao(c.tipoConstr_)
-      , gradeAlfa(c.graspAlfa_)
       , gradeGraspVizinhanca(c.tipoVizinhanca_)
       , gradeGraspVizinhos(c.numVizinhos_)
       , gradeGraspTempoConstrucao(c.graspTempo_)
@@ -82,6 +81,8 @@ Resolucao::Resolucao(const Configuracao& c)
       , numThreadsAG_(c.numThreadsAG_)
       , numThreadsGRASP_(c.numThreadsGRASP_)
       , numParesProdutorConsumidor_(c.numParesProdutorConsumidor_)
+      , gradeAlfa(c.graspAlfa_)
+      , gradeAlfaCompl(1 - gradeAlfa)
 #ifdef MODELO
       , curso(nullptr)
       , alunos()
@@ -343,7 +344,6 @@ void Resolucao::carregarAlunoPerfis()
         });
 
         auto& aprovadasIdHashes = alunoPerfil->aprovadas;
-        dbg("AP: {} Size: {}\n", alunoPerfil->id, aprovadasIdHashes.size());
         for (const auto& aprovada : aprovadas) {
             aprovadasIdHashes.push_back(aprovada->id_hash());
         }
@@ -1619,12 +1619,12 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 int
 Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const
 {
-  const auto bestFIT = apRestante.front()->cargaHoraria;
-  const auto worstFIT = apRestante.back()->cargaHoraria;
-  const auto deltaFIT = bestFIT - worstFIT;
-  const auto acceptFIT = bestFIT - Util::fast_ceil((1 - gradeAlfa) * deltaFIT);
+  const auto best = apRestante.front()->cargaHoraria;
+  const auto worst = apRestante.back()->cargaHoraria;
+  const auto delta = best - worst;
+  const auto accept = best - static_cast<int>(gradeAlfaCompl * delta);
 
-  const auto it = std::lower_bound(begin(apRestante), end(apRestante), acceptFIT,
+  const auto it = std::lower_bound(begin(apRestante), end(apRestante), accept,
                                    [](auto d, int accept) {
                                      return d->cargaHoraria >= accept;
                                    });
@@ -3344,14 +3344,11 @@ static void GRASP_producer(
 )
 {
   this_thread_id = thread_id;
-  dbg("[{}] Oi\n", this_thread_id);
 
   for (auto i = 0; i < num_iter; i++) {
     auto candidata = res.gradeAleatoria(alunoPerfil, solucao);
     fila.enqueue(std::move(candidata));
   }
-
-  dbg("[{}] Fin\n", this_thread_id);
 }
 
 static void GRASP_consumer(
@@ -3363,10 +3360,8 @@ static void GRASP_consumer(
 )
 {
   this_thread_id = thread_id;
-  dbg("[{}] Oi\n", this_thread_id);
 
   for (auto i = 0; i < num_iter; i++) {
-    dbg("[{}] Hmm: {}\n", this_thread_id, i);
     std::unique_ptr<Grade> grade = nullptr;
     fila.wait_dequeue(grade);
 
@@ -3375,8 +3370,6 @@ static void GRASP_consumer(
       best = std::move(grade);
     }
   }
-
-  dbg("[{}] Fin\n", this_thread_id);
 }
 
 Grade*
@@ -3395,8 +3388,6 @@ Resolucao::GRASP_par_2(AlunoPerfil* alunoPerfil, Solucao* solucao) const
     if (i == 0) {
       this_iter += maxIterSemEvoGrasp % num_consumidores;
     }
-
-    dbg("Thread {}: {} iter", i+1, this_iter);
 
     std::thread consumidor(GRASP_consumer, std::cref(*this), std::ref(fila),
                            std::ref(resultados[i]), i + 1, this_iter);
@@ -3677,5 +3668,18 @@ Disciplina*
 Resolucao::getDisciplinaByCode(std::size_t d_code)
 {
     return disciplinas[d_code - 1];
+}
+
+double
+Resolucao::getGradeAlfa() const
+{
+    return gradeAlfa;
+}
+
+void
+Resolucao::setGradeAlfa(int alfa)
+{
+    gradeAlfa = alfa / 100.0;
+    gradeAlfaCompl = 1.0 - gradeAlfa;
 }
 

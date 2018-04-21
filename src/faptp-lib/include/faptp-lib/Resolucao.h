@@ -56,6 +56,7 @@ public:
   int numThreadsAG() const;
   int numThreadsGRASP() const;
   int numThreadsProdutorConsumidor() const;
+  double getGradeAlfa() const;
 
   int getBlocosTamanho() const;
   const std::map<std::string, std::vector<Disciplina*>>&
@@ -65,6 +66,7 @@ public:
   void setNumThreadsAG(int numThreads);
   void setNumThreadsGRASP(int numThreads);
   void setNumParesProdutorConsumidor(int numPares);
+  void setGradeAlfa(int alfa);
 
   Solucao* gerarHorarioAG();
   Solucao* gerarHorarioAGSerial();
@@ -155,7 +157,6 @@ public:
 
   // Grade tipo de constru��o
   Configuracao::TipoGrade gradeTipoConstrucao;
-  double gradeAlfa;
 
   // Grade GRASP
   Configuracao::TipoVizinhos gradeGraspVizinhanca;
@@ -214,6 +215,9 @@ private:
   int numThreadsGRASP_;
   int numParesProdutorConsumidor_;
   std::vector<Solucao*> populacao;
+  double gradeAlfa;
+  // 1 - gradeAlfa
+  double gradeAlfaCompl;
 
   void carregarDados();
   void carregarDadosProfessores();
