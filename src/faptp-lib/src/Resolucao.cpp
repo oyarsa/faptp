@@ -2268,6 +2268,7 @@ Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, const Solucao* sol) const
         if (success) {
             adicionados++;
         }
+
         restantes.erase(std::remove(begin(restantes), end(restantes), current),
                         end(restantes));
     }
@@ -2771,10 +2772,10 @@ Resolucao::getRandomDisc(const std::vector<Disciplina*>& restantes) const
 
 Solucao* Resolucao::selecaoTorneio(const std::vector<Solucao*>& pop) const
 {
-    auto best = *Util::randomChoice(pop);
+    auto best = *Util::randomChoice(pop, this_thread_id);
 
     for (auto i = 1; i < horarioTorneioPopulacao; i++) {
-        auto challenger = *Util::randomChoice(pop);
+        auto challenger = *Util::randomChoice(pop, this_thread_id);
         if (challenger->getFO() > best->getFO()) {
             best = challenger;
         }

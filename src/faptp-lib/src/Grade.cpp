@@ -41,17 +41,18 @@ bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 bool
 Grade::discRepetida(const Disciplina* pDisciplina)
 {
-  const auto found = std::find_if(
-    begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
-    [pDisciplina](auto d) {
-      return d == pDisciplina;
-    });
-
-  if (found != end(disciplinasAdicionadas)) {
+  // Se não for restante, o aluno já cursou. Se já cursou, é repetida.
+  const auto cursouDisciplina = !aluno->isRestante(pDisciplina->id_hash());
+  if (cursouDisciplina) {
     return true;
   }
 
-  return !aluno->isRestante(pDisciplina->id_hash());
+  // Procura nas adicionadas nessa grade
+  const auto found = std::find(disciplinasAdicionadas.begin(),
+                               disciplinasAdicionadas.end(), pDisciplina);
+
+  // Se não foi encontrada, não é repetida.
+  return found != end(disciplinasAdicionadas);
 }
 
 bool
@@ -108,7 +109,8 @@ Grade::havePreRequisitos(const Disciplina* const pDisciplina)
   return true;
 }
 
-bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
+bool
+Grade::checkCollision(const Disciplina* pDisciplina)
 {
   // Percorre a grade do aluno inteira procurando slots da disciplina atual
   // e verificando se já estão ocupados por alguma outra
@@ -126,29 +128,24 @@ bool Grade::checkCollision(const Disciplina* pDisciplina, int pCamada)
   return true;
 }
 
-bool Grade::isViable(const Disciplina* pDisciplina, int pCamada)
+bool
+Grade::isViable(const Disciplina* pDisciplina)
 {
     return pDisciplina->ofertada &&
            !discRepetida(pDisciplina) &&
            havePreRequisitos(pDisciplina) &&
-           checkCollision(pDisciplina, pCamada) &&
+           checkCollision(pDisciplina) &&
            hasPeriodoMinimo(pDisciplina);
 }
 
-void Grade::add(Disciplina* pDisciplina, int pCamada)
+void
+Grade::add(Disciplina* pDisciplina)
 {
-    for (int i = 0; i < dias_semana_util; i++) {
-        for (int j = 0; j < blocosTamanho; j++) {
-            auto currPosHorario = getPosition(i, j, pCamada);
-            auto currPosGrade = getPosition(i, j, 0);
+    const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
 
-            auto currPd = horario->matriz[currPosHorario];
-
-            if (currPd && currPd->disciplina == pDisciplina) {
-                matriz[currPosGrade] = currPd;
-            }
-
-        }
+    for (const auto& slot : slots) {
+        const auto gradePos = getPosition(slot.dia, slot.bloco, 0);
+        matriz[gradePos] =  horario->at(slot.dia, slot.bloco, slot.camada);
     }
 
     disciplinasAdicionadas.push_back(pDisciplina);
@@ -179,9 +176,9 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
             get3DMatrix(x, triDimensional);
             camada = horario->disc_camada_[pDisciplina->id_hash()];
 
-            viavel = isViable(pDisciplina, camada);
+            viavel = isViable(pDisciplina);
             if (viavel) {
-                add(pDisciplina, camada);
+              add(pDisciplina);
             }
 
             first = false;
@@ -194,19 +191,18 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
 
 bool Grade::insert(Disciplina* pDisciplina)
 {
-    const auto camada = horario->disc_camada_[pDisciplina->id_hash()];
-    const auto viavel = isViable(pDisciplina, camada);
+    const auto viavel = isViable(pDisciplina);
     if (!viavel) {
         return false;
     }
 
-    add(pDisciplina, camada);
+    add(pDisciplina);
     return true;
 }
 
 Disciplina* Grade::remove(Disciplina* pDisciplina)
 {
-    // Limpa os slots ocupados pela disciplina
+  /*
     for (auto d = 0; d < dias_semana_util; d++) {
         for (auto b = 0; b < blocosTamanho; b++) {
             const auto pos = getPosition(d, b, 0);
@@ -215,6 +211,13 @@ Disciplina* Grade::remove(Disciplina* pDisciplina)
                 matriz[pos] = nullptr;
             }
         }
+    }
+    */
+    // Limpa os slots ocupados pela disciplina
+    const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
+    for (const auto& slot : slots) {
+      const auto pos = getPosition(slot.dia, slot.bloco, 0);
+      matriz[pos] = nullptr;
     }
     // Remove-a da lista de adicionadas.
     disciplinasAdicionadas.erase(

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <chrono>
+#include <omp.h>
 #include <fmt/format.h>
 
 /// Contém funções utilitárias que não se encaixam em nenhuma classe,
@@ -211,14 +212,21 @@ fast_floor(double x)
 /// @return Iterator para um elemento aleatório de `c`.
 template <typename Container>
 auto
-randomChoice(Container& c)
+randomChoice(Container& c, int thread_num)
 {
   using std::begin;
 
-  const auto n = random(0, static_cast<int>(c.size()));
+  const auto n = random(0, static_cast<int>(c.size()), thread_num);
   auto it = begin(c);
   std::advance(it, n);
   return it;
+}
+
+template <typename Container>
+auto
+randomChoice(Container& c)
+{
+  return randomChoice(c, omp_get_thread_num());
 }
 
 /// A partir de um vector de pares representando a chance de cada elemento

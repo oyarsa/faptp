@@ -54,12 +54,12 @@ private:
     bool havePreRequisitos(const Disciplina* const pDisciplina);
     bool hasPeriodoMinimo(const Disciplina* const pDisciplina) const;
     bool hasCoRequisitos(const Disciplina* const pDisciplina);
-    bool checkCollision(const Disciplina* pDisciplina, int pCamada);
-    bool isViable(const Disciplina* pDisciplina, int pCamada);
+    bool checkCollision(const Disciplina* pDisciplina);
+    bool isViable(const Disciplina* pDisciplina);
     //! Verifica se a disciplina sendo considerada n�o est� na lista de equival�ncias
     //! de outra que j� foi inserida
     bool discRepetida(const Disciplina* pDisciplina);
-    void add(Disciplina* pDisciplina, int pCamada);
+    void add(Disciplina* pDisciplina);
 };
 
 #endif /* GRADE_H */
