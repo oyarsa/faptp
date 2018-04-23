@@ -13,7 +13,9 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
       , disciplinasAdicionadas()
       , disciplinasCurso(pDisciplinasCurso)
       , fo(-1)
-{}
+{
+    disciplinasAdicionadas.reserve(size / 2);
+}
 
 Grade::Grade(const Grade& outro)
     : Representacao(outro)

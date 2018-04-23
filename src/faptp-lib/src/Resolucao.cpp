@@ -2251,11 +2251,15 @@ std::unique_ptr<Solucao> Resolucao::gerarHorarioSA_ILS(long long timeout)
 std::unique_ptr<Grade>
 Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, const Solucao* sol) const
 {
+    thread_local std::vector<Disciplina*> restantes;
+    restantes.reserve(dias_semana_util * blocosTamanho);
+
     auto novaGrade = std::make_unique<Grade>(
         blocosTamanho, alunoPerfil, sol->horario.get(), disciplinas);
     const auto horariosMax = (dias_semana_util - 2) * blocosTamanho;
     auto adicionados = 0;
-    auto restantes = alunoPerfil->restanteOrd;
+
+    restantes = alunoPerfil->restanteOrd;
 
     while (!restantes.empty() && adicionados < horariosMax) {
         const auto current = getRandomDisc(restantes);
@@ -2273,6 +2277,9 @@ Resolucao::gradeAleatoria(AlunoPerfil* alunoPerfil, const Solucao* sol) const
 
 std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
 {
+    thread_local std::vector<Disciplina*> restantes;
+    restantes.reserve(dias_semana_util * blocosTamanho);
+
     auto currGrade = std::make_unique<Grade>(grade);
     currGrade->fo = -1;
 
@@ -2280,11 +2287,12 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
     Disciplina* discremovida {nullptr};
 
     if (!adicionadas.empty()) {
-        const auto rand = Util::random(0, static_cast<int>(adicionadas.size()));
+        const auto rand = Util::random(0, static_cast<int>(adicionadas.size()),
+            this_thread_id);
         discremovida = currGrade->remove(adicionadas[rand]);
     }
 
-    auto restantes = currGrade->aluno->restanteOrd;
+    restantes = currGrade->aluno->restanteOrd;
 
     while (!restantes.empty()) {
         auto current = getRandomDisc(restantes);
