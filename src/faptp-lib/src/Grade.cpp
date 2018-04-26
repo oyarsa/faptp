@@ -17,21 +17,10 @@ Grade::Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
     disciplinasAdicionadas.reserve(size / 2);
 }
 
-Grade::Grade(const Grade& outro)
-    : Representacao(outro)
-      , aluno(outro.aluno)
-      , horario(outro.horario)
-      , disciplinasAdicionadas(outro.disciplinasAdicionadas)
-      , disciplinasCurso(outro.disciplinasCurso)
-      , fo(outro.fo) {}
-
 Disciplina* Grade::getDisciplina(std::size_t disciplina)
 {
     return disciplinasCurso[disciplina];
 }
-
-Grade::~Grade()
-{}
 
 bool Grade::hasPeriodoMinimo(const Disciplina* const pDisciplina) const
 {
@@ -64,21 +53,17 @@ Grade::hasCoRequisitos(const Disciplina* const pDisciplina)
   for (const auto coreq : corequisitos) {
     const auto& equivalentes = getDisciplina(coreq)->equivalentes;
 
-    const auto cursou = std::find_first_of(
-      begin(equivalentes), end(equivalentes),
-      begin(cursadas), end(cursadas)) != end(equivalentes);
+    const auto cursou = Util::have_common_element(equivalentes, cursadas);
 
     if (cursou) {
       continue;
     }
 
-    const auto cursando = std::find_first_of(
-      begin(equivalentes), end(equivalentes),
-      begin(disciplinasAdicionadas), end(disciplinasAdicionadas),
-      [](auto a, auto b) {
-        return a == b->id_hash();
-      }
-    ) != end(equivalentes);
+    const auto cursando = Util::have_common_element(
+        equivalentes, disciplinasAdicionadas,
+        [](auto a, auto b) {
+          return static_cast<int>(a) - static_cast<int>(b->id_hash());
+        });
 
     if (!cursando) {
       return false;
@@ -98,9 +83,7 @@ Grade::havePreRequisitos(const Disciplina* const pDisciplina)
   for (const auto& prereq : pre_requisitos) {
     const auto& equivalentes = getDisciplina(prereq)->equivalentes;
     // Se não foi encontrado, retorna falso
-    const auto passou = std::find_first_of(
-      begin(equivalentes), end(equivalentes),
-      begin(aprovadas), end(aprovadas)) != end(equivalentes);
+    const auto passou = Util::have_common_element(equivalentes, aprovadas);
     if (!passou) {
       return false;
     }
@@ -120,7 +103,7 @@ Grade::checkCollision(const Disciplina* pDisciplina)
 
   for (const auto& slot : slots) {
     // Se tem algum PD não nulo no slot, existe uma colisão
-    if (at(slot.dia, slot.bloco)) {
+    if (at(slot.dia, slot.bloco) != nullptr) {
       return false;
     }
   }
@@ -144,7 +127,7 @@ Grade::add(Disciplina* pDisciplina)
     const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
 
     for (const auto& slot : slots) {
-        const auto gradePos = getPosition(slot.dia, slot.bloco, 0);
+        const auto gradePos = getPosition(slot.dia, slot.bloco);
         matriz[gradePos] =  horario->at(slot.dia, slot.bloco, slot.camada);
     }
 
@@ -158,7 +141,6 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
 
 bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>&, bool force)
 {
-    int camada {};
     int triDimensional[3] {};
     int x {};
 
@@ -174,7 +156,6 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
             x = getPositionDisciplina(pdIter, pdIterEnd, pdIterFound);
 
             get3DMatrix(x, triDimensional);
-            camada = horario->disc_camada_[pDisciplina->id_hash()];
 
             viavel = isViable(pDisciplina);
             if (viavel) {
@@ -189,41 +170,30 @@ bool Grade::insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDiscip
     return viavel;
 }
 
-bool Grade::insert(Disciplina* pDisciplina)
+bool Grade::insert(Disciplina* disciplina)
 {
-    const auto viavel = isViable(pDisciplina);
-    if (!viavel) {
+    if (!isViable(disciplina)) {
         return false;
     }
 
-    add(pDisciplina);
+    add(disciplina);
     return true;
 }
 
-Disciplina* Grade::remove(Disciplina* pDisciplina)
+Disciplina* Grade::remove(Disciplina* disciplina)
 {
-  /*
-    for (auto d = 0; d < dias_semana_util; d++) {
-        for (auto b = 0; b < blocosTamanho; b++) {
-            const auto pos = getPosition(d, b, 0);
-            const auto currPd = matriz[pos];
-            if (currPd && currPd->disciplina == pDisciplina) {
-                matriz[pos] = nullptr;
-            }
-        }
-    }
-    */
     // Limpa os slots ocupados pela disciplina
-    const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
+    const auto& slots = horario->getTimeSlotsDisciplina(disciplina);
     for (const auto& slot : slots) {
-      const auto pos = getPosition(slot.dia, slot.bloco, 0);
+      const auto pos = getPosition(slot.dia, slot.bloco);
       matriz[pos] = nullptr;
     }
+
     // Remove-a da lista de adicionadas.
     disciplinasAdicionadas.erase(
-        std::remove(begin(disciplinasAdicionadas), end(disciplinasAdicionadas), pDisciplina),
+        std::remove(begin(disciplinasAdicionadas), end(disciplinasAdicionadas), disciplina),
                     end(disciplinasAdicionadas));
-    return pDisciplina;
+    return disciplina;
 }
 
 Disciplina* Grade::removeOld(Disciplina* pDisciplina, ProfessorDisciplina*& pProfessorDisciplina)
@@ -277,5 +247,10 @@ ProfessorDisciplina*
 Grade::at(int dia, int bloco)
 {
   return Representacao::at(dia, bloco, 0);
+}
+
+int Grade::getPosition(int dia, int bloco)
+{
+  return Representacao::getPosition(dia, bloco, 0);
 }
 

@@ -80,3 +80,9 @@ int AlunoPerfil::calcPeriodoNum() const
     return std::stoi(periodo.substr(0, pos));
 }
 
+void AlunoPerfil::finalizarConstrucao()
+{
+    std::sort(cursadas.begin(), cursadas.end());
+    std::sort(aprovadas.begin(), aprovadas.end());
+    std::sort(restante.begin(), restante.end());
+}

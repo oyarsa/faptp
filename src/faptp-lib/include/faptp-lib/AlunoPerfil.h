@@ -29,6 +29,8 @@ public:
 
     int getPeriodoNum() const;
 
+    void finalizarConstrucao();
+
 private:
     int calcPeriodoNum() const;
 

@@ -14,7 +14,7 @@
 #include <modelo-grade/curso.h>
 #endif
 
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 #include <faptp-lib/Configuracao.h>
 
 class Professor;
@@ -117,6 +117,11 @@ public:
   std::unique_ptr<Grade> gradeAleatoria(AlunoPerfil* alunoPerfil,
                                         const Solucao* solucao) const;
   void buscaLocal(std::unique_ptr<Grade>& grade) const;
+
+  Disciplina* getDisciplinaById(const std::string& disc_id);
+
+  Disciplina* getDisciplinaByCode(std::size_t d_code);
+  const Disciplina& getDisciplinaByCode(std::size_t d_code) const;
 
   /*
        Par�metros da execu��o da solu��o
@@ -227,8 +232,6 @@ private:
   void carregarSolucaoOld();
   std::unique_ptr<Solucao> carregarSolucao(const Json::Value& horarios);
 
-  Disciplina* getDisciplinaById(const std::string& disc_id);
-  Disciplina* getDisciplinaByCode(std::size_t d_code);
   void atualizarDisciplinasIndex();
   std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
   std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
@@ -273,7 +276,7 @@ private:
 
   double gerarGradeTipoModelo(Solucao* pSolucao);
 
-  int getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const;
+  int getIntervaloAlfaGrasp(const std::vector<Disciplina*>& restantes) const;
 
   void showResult(Solucao* pSolucao);
 

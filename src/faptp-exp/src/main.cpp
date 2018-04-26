@@ -33,7 +33,7 @@ Onde:
 )";
 
 int
-main(int argc, const char** argv)
+main(int argc, char** argv)
 {
    curl_global_init(CURL_GLOBAL_ALL);
 

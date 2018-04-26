@@ -43,7 +43,7 @@ std::unique_ptr<Solucao> ag(Resolucao& r, const Json::Value& json)
   }();
   r.horarioMutacaoProbabilidade = json["TaxaMut"].asInt() / 100.0;
   r.versaoAg = [&json]() {
-    const auto x = json.get("VersaoAG", "Serial").asString();
+    const auto x = json.get("VersaoAG", "Single").asString();
     if (x == "Paralelo")
       return Configuracao::Versao_AG::Paralelo;
     else if (x == "Single")
@@ -121,6 +121,10 @@ void run(const std::string& conf, const std::string& input,
   Json::Value json;
   {
     std::ifstream file{ conf };
+    if (!file) {
+      fmt::print("Erro ao abrir arquivo de configuracao\n");
+      exit(1);
+    }
     file >> json;
   }
 
@@ -210,6 +214,10 @@ void run_many(const std::string& conf, const std::string& input,
   Json::Value json;
   {
     std::ifstream file{ conf };
+    if (!file) {
+      fmt::print("Erro ao abrir arquivo de configuracao\n");
+      exit(1);
+    }
     file >> json;
   }
 
@@ -236,7 +244,7 @@ void run_many(const std::string& conf, const std::string& input,
   r.maxIterSemEvoGrasp = json["parametros"]["GIter"].asInt();
   r.gradeGraspVizinhos = json["parametros"]["GNViz"].asInt();
   r.versaoGrasp = [&json]() {
-    const auto x = json["parametros"].get("VersaoGRASP", "Serial");
+    const auto x = json["parametros"].get("VersaoGRASP", "Single");
     if (x == "Single")
       return Configuracao::Versao_GRASP::Serial;
     else if (x == "Paralelo")
@@ -361,10 +369,10 @@ Onde:
       Nome do arquivo de sa�da a ser gerado com os resultados.
 
   -m, --mode
-      Modo de execu��o: 
-        * horario : gera��o da matriz de hor�rios. Default.
-        * grade : gera��o das grades dos alunos. A entrada deve conter
-                  o hor�rio pronto.
+      Modo de execucao:
+        * horario : geracao da matriz de horarios. Default.
+        * grade : geracao das grades dos alunos. A entrada deve conter
+                  o horario pronto.
 )";
 
 void 
@@ -385,21 +393,21 @@ check_arguments(const std::initializer_list<std::string> arguments,
   }
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, char** argv)
 {
   try {
     cxxopts::Options options{
       "faPTP",
-      "Gera��o de matrizes de hor�rio para institui��es de ensino superior privadas"
+      "Geracao de matrizes de hor�rio para instituicoes de ensino superior privadas"
     };
 
     options.add_options()
       ("h,help", "Mostrar ajuda")
       ("i,input", "Arquivo de entrada", cxxopts::value<std::string>())
-      ("c,config", "Arquivo de configura��o", cxxopts::value<std::string>())
-      ("o,output", "Arquivo de sa�da", cxxopts::value<std::string>())
-      ("m,mode", "Modo de execu��o", cxxopts::value<std::string>())
-      ("r,repetitions", "N�mero de repeti��es", cxxopts::value<int>());
+      ("c,config", "Arquivo de configuracao", cxxopts::value<std::string>())
+      ("o,output", "Arquivo de saida", cxxopts::value<std::string>())
+      ("m,mode", "Modo de execucao", cxxopts::value<std::string>())
+      ("r,repetitions", "Numero de repeticoes", cxxopts::value<int>());
 
     const auto result = options.parse(argc, argv);
 

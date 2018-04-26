@@ -81,6 +81,8 @@ private:
     bool dificil;
     std::size_t idHash;
     int periodoMinimoNum;
+
+    void finalizarConstrucao();
 };
 
 inline std::size_t Disciplina::id_hash() const

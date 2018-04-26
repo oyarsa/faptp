@@ -152,8 +152,8 @@ int Horario::contaJanelasDia(int dia, int camada) const
     auto contando = false;
     auto contador = 0;
 
-    for (auto j = 0; j < blocosTamanho; j++) {
-        if (at(dia, j, camada)) {
+    for (auto bloco = 0; bloco < blocosTamanho; bloco++) {
+        if (at(dia, bloco, camada) != nullptr) {
             if (!contando) {
                 contando = true;
             }
@@ -243,7 +243,7 @@ int Horario::intervalosTrabalho() const
 bool Horario::isAulaDia(int dia, int camada) const
 {
     for (auto b = 0; b < blocosTamanho; b++) {
-        if(at(dia, b, camada)) {
+        if (at(dia, b, camada)) {
             return true;
         }
     }

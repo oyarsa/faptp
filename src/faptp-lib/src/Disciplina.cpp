@@ -71,3 +71,9 @@ int Disciplina::calcPeriodoMinimoNum() const
     return std::stoi(periodoMinimo.substr(0, pos));
 }
 
+void Disciplina::finalizarConstrucao()
+{
+    std::sort(preRequisitos.begin(), preRequisitos.end());
+    std::sort(coRequisitos.begin(), coRequisitos.end());
+    std::sort(equivalentes.begin(), equivalentes.end());
+}

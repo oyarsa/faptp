@@ -18,11 +18,10 @@ class Grade : public Representacao
 public:
     Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
           const std::vector<Disciplina*>& pDisciplinasCurso);
-    Grade(const Grade& outro);
+    Grade(const Grade& outro) = default;
     Grade& operator=(const Grade&) = delete;
-    virtual ~Grade();
 
-    // Deprecated
+    // Begin deprecated
     bool insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
     bool insertOld(
         Disciplina* pDisciplina,
@@ -33,11 +32,12 @@ public:
     // End deprecated
 
     bool insert(Disciplina* pDisciplina);
-    Disciplina* remove(Disciplina* pDisciplina);
+    Disciplina* remove(Disciplina* disciplina);
 
     double getFO();
 
     ProfessorDisciplina* at(int dia, int bloco);
+    int getPosition(int dia, int bloco);
 
 private:
     AlunoPerfil* aluno;
@@ -45,7 +45,7 @@ private:
     std::vector<Disciplina*> disciplinasAdicionadas;
     const std::vector<Disciplina*>& disciplinasCurso;
 
-    //! Guarda a fun��o objetiva dessa grade, vale 0 se ainda n�o foi definida
+    //! Guarda a funcao objetiva dessa grade, vale 0 se ainda nao foi definida
     double fo;
 
     //! Recebe um nome e retorna um ponteiro para uma disciplina

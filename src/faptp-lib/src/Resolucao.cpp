@@ -280,6 +280,8 @@ void Resolucao::carregarDadosDisciplinas()
             disciplina->equivalentes.push_back(code);
         }
 
+        disciplina->finalizarConstrucao();
+
         disciplinas.push_back(disciplina);
         if (disciplina->ofertada) {
             const auto key = fmt::format("{}{}{}", curso, turma, periodo);
@@ -348,6 +350,7 @@ void Resolucao::carregarAlunoPerfis()
             aprovadasIdHashes.push_back(aprovada->id_hash());
         }
 
+        alunoPerfil->finalizarConstrucao();
         alunoPerfis[id] = alunoPerfil;
     }
 }
@@ -1617,19 +1620,19 @@ Solucao* Resolucao::gerarGradeTipoGraspRefinamentoCrescente(Solucao* pSolucao)
 
 
 int
-Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& apRestante) const
+Resolucao::getIntervaloAlfaGrasp(const std::vector<Disciplina*>& restantes) const
 {
-  const auto best = apRestante.front()->cargaHoraria;
-  const auto worst = apRestante.back()->cargaHoraria;
+  const auto best = restantes.front()->cargaHoraria;
+  const auto worst = restantes.back()->cargaHoraria;
   const auto delta = best - worst;
   const auto accept = best - static_cast<int>(gradeAlfaCompl * delta);
 
-  const auto it = std::lower_bound(begin(apRestante), end(apRestante), accept,
-                                   [](auto d, int accept) {
-                                     return d->cargaHoraria >= accept;
-                                   });
+  const auto it = std::find_if(restantes.begin(), restantes.end(),
+    [accept](auto d) {
+      return d->cargaHoraria < accept;
+  });
 
-  return static_cast<int>(std::distance(begin(apRestante), it));
+  return static_cast<int>(std::distance(restantes.begin(), it));
 }
 
 void Resolucao::showResult()
@@ -2285,7 +2288,7 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
     currGrade->fo = -1;
 
     const auto& adicionadas = currGrade->disciplinasAdicionadas;
-    Disciplina* discremovida {nullptr};
+    Disciplina* discremovida = nullptr;
 
     if (!adicionadas.empty()) {
         const auto rand = Util::random(0, static_cast<int>(adicionadas.size()),
@@ -2297,6 +2300,7 @@ std::unique_ptr<Grade> Resolucao::vizinhoGrasp(const Grade& grade) const
 
     while (!restantes.empty()) {
         auto current = getRandomDisc(restantes);
+
         const auto discJaAdicionada = std::find(
             begin(adicionadas), end(adicionadas), current) != end(adicionadas);
 
@@ -3690,5 +3694,10 @@ Resolucao::setGradeAlfa(int alfa)
 {
     gradeAlfa = alfa / 100.0;
     gradeAlfaCompl = 1.0 - gradeAlfa;
+}
+
+const Disciplina& Resolucao::getDisciplinaByCode(std::size_t d_code) const
+{
+    return *disciplinas[d_code - 1];
 }
 
