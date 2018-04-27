@@ -1,24 +1,24 @@
 #include "experimento.h"
 
+#include <chrono>
 #include <fstream>
 #include <sstream>
-#include <string>
-#include <chrono>
-#include <thread>
 #include <stdexcept>
+#include <string>
+#include <thread>
 
 #include <fmt/format.h>
 
-#include <iostream>
-#include <faptp-lib/Resolucao.h>
-#include <faptp-lib/Output.h>
 #include <faptp-lib/Configuracao.h>
-#include <faptp-lib/Util.h>
-#include <faptp-lib/Timer.h>
-#include <faptp-lib/SA.h>
-#include <faptp-lib/WDJU.h>
 #include <faptp-lib/HySST.h>
 #include <faptp-lib/ILS.h>
+#include <faptp-lib/Output.h>
+#include <faptp-lib/Resolucao.h>
+#include <faptp-lib/SA.h>
+#include <faptp-lib/Timer.h>
+#include <faptp-lib/Util.h>
+#include <faptp-lib/WDJU.h>
+#include <iostream>
 
 #include <curl/curl.h>
 
@@ -43,15 +43,17 @@ struct Entrada
 constexpr Entrada input_all_json{ 33, 1392 };
 constexpr Entrada input_json{ 4, 10 };
 
-int num_tentativas_upload = 15;
-int segundos_espera = 30;
+static const auto num_tentativas_upload = 15;
+static const auto segundos_espera = 30;
 
 // número de iterações grande para o algoritmo se encerrar por tempo
 constexpr auto infinito = static_cast<int>(1e9);
 
 void
-upload_result(const std::string& id, const std::string& resultado,
-              const int num_config, const std::string& servidor)
+upload_result(const std::string& id,
+              const std::string& resultado,
+              const int num_config,
+              const std::string& servidor)
 {
   const auto payload = fmt::format("result={}&nome={}", resultado, id);
 
@@ -73,7 +75,9 @@ upload_result(const std::string& id, const std::string& resultado,
       return;
     }
 
-    fmt::print("{}) tentativa {} falhou: {}\n\n", num_config, i + 1,
+    fmt::print("{}) tentativa {} falhou: {}\n\n",
+               num_config,
+               i + 1,
                curl_easy_strerror(rv));
   }
 
@@ -117,38 +121,46 @@ print_violacoes(const tsl::robin_map<std::string, int>& m)
 }
 
 std::pair<long long, Solucao::FO_t>
-ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
-   const std::string& oper_cruz, int grasp_iter, int grasp_nviz,
-   int grasp_alfa, int n_tour, int n_mut, long long timeout)
+ag(const std::string& input,
+   int n_indiv,
+   int taxa_mut,
+   int p_cruz,
+   const std::string& oper_cruz,
+   int grasp_iter,
+   int grasp_nviz,
+   int grasp_alfa,
+   int n_tour,
+   int n_mut,
+   long long timeout)
 {
   auto cruzamento = [&] {
-        if (oper_cruz == "PMX") {
-          return Configuracao::TipoCruzamento::pmx;
-        } else if (oper_cruz == "CX") {
-          return Configuracao::TipoCruzamento::ciclo;
-        } else if (oper_cruz == "OX") {
-          return Configuracao::TipoCruzamento::ordem;
-        } else {
-          return Configuracao::TipoCruzamento::pmx;
-        }
-      }();
+    if (oper_cruz == "PMX") {
+      return Configuracao::TipoCruzamento::pmx;
+    } else if (oper_cruz == "CX") {
+      return Configuracao::TipoCruzamento::ciclo;
+    } else if (oper_cruz == "OX") {
+      return Configuracao::TipoCruzamento::ordem;
+    } else {
+      return Configuracao::TipoCruzamento::pmx;
+    }
+  }();
 
   Resolucao r{ Configuracao()
-    .arquivoEntrada(input)
-    .populacaoInicial(n_indiv)
-    .porcentagemCruzamentos(p_cruz) // %
-    .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
-    .numMaximoIteracoesSemEvolucaoAG(infinito)
-    .tipoCruzamento(cruzamento)
-    .mutacaoProbabilidade(taxa_mut) // %
-    .graspNumVizinhos(grasp_nviz)
-    .graspAlfa(grasp_alfa) // %
-    .camadaTamanho(input_all_json.camadasTamanho)
-    .perfilTamanho(input_all_json.perfilTamanho)
-    .numTorneioPopulacao(n_tour)
-    .tentativasMutacao(n_mut)
-    .tipoFo(Configuracao::TipoFo::Soft_constraints)
-    .timeout(timeout) };
+                 .arquivoEntrada(input)
+                 .populacaoInicial(n_indiv)
+                 .porcentagemCruzamentos(p_cruz) // %
+                 .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
+                 .numMaximoIteracoesSemEvolucaoAG(infinito)
+                 .tipoCruzamento(cruzamento)
+                 .mutacaoProbabilidade(taxa_mut) // %
+                 .graspNumVizinhos(grasp_nviz)
+                 .graspAlfa(grasp_alfa) // %
+                 .camadaTamanho(input_all_json.camadasTamanho)
+                 .perfilTamanho(input_all_json.perfilTamanho)
+                 .numTorneioPopulacao(n_tour)
+                 .tentativasMutacao(n_mut)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
+                 .timeout(timeout) };
 
   Timer t;
   r.gerarHorarioAG();
@@ -159,8 +171,10 @@ ag(const std::string& input, int n_indiv, int taxa_mut, int p_cruz,
 }
 
 void
-ag_cli(const std::string& input, const std::string& file,
-       const std::string& servidor, long long timeout)
+ag_cli(const std::string& input,
+       const std::string& file,
+       const std::string& servidor,
+       long long timeout)
 {
   // formato entrada:
   // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
@@ -185,32 +199,39 @@ ag_cli(const std::string& input, const std::string& file,
   auto num_config = 1;
 
   while (config >> id >> taxa_mut >> n_indiv >> p_cruz >> cruz_oper >> n_mut >>
-    n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
+         n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
 
     std::cout << "ID: " << id << "\n\n";
     std::ostringstream out;
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      const auto [tempo, fo] = ag(
-          input, n_indiv, taxa_mut, p_cruz, cruz_oper, grasp_iter,
-          grasp_nviz, grasp_alfa, n_tour, n_mut, timeout);
+      const auto [tempo, fo] = ag(input,
+                                 n_indiv,
+                                 taxa_mut,
+                                 p_cruz,
+                                 cruz_oper,
+                                 grasp_iter,
+                                 grasp_nviz,
+                                 grasp_alfa,
+                                 n_tour,
+                                 n_mut,
+                                 timeout);
 
-      Util::logprint(
-        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
+      Util::logprint(out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
+      std::cout << "\n";
+
+      threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+      num_config++;
     }
-    std::cout << "\n";
 
-    threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
-    num_config++;
-  }
-
-  for (auto& t : threads) {
-    t.join();
+    for (auto& t : threads) {
+      t.join();
+    }
   }
 }
 
-template <typename F>
+template<typename F>
 std::string
 teste_tempo_iter(int num_exec, F f)
 {
@@ -218,38 +239,39 @@ teste_tempo_iter(int num_exec, F f)
 
   for (auto i = 0; i < num_exec; i++) {
     Resolucao r{ Configuracao()
-      .arquivoEntrada(
-        Util::join_path({ "entradas" }, "input.all.json"))
-      .populacaoInicial(20)
-      .porcentagemCruzamentos(80)
-      .numMaximoIteracoesSemEvolucaoGRASP(15)
-      .numMaximoIteracoesSemEvolucaoAG(infinito)
-      .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
-      .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-      .mutacaoProbabilidade(35) // %
-      .graspNumVizinhos(2)
-      .graspAlfa(20) // %
-      .camadaTamanho(input_all_json.camadasTamanho)
-      .perfilTamanho(input_all_json.perfilTamanho)
-      .tentativasMutacao(4)
-      .numTorneioPopulacao(4)
-      .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-      .tipoConstrucao(Configuracao::TipoGrade::grasp)
-      .tipoFo(Configuracao::TipoFo::Soft_constraints) };
+                   .arquivoEntrada(
+                     Util::join_path({ "entradas" }, "input.all.json"))
+                   .populacaoInicial(20)
+                   .porcentagemCruzamentos(80)
+                   .numMaximoIteracoesSemEvolucaoGRASP(15)
+                   .numMaximoIteracoesSemEvolucaoAG(infinito)
+                   .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+                   .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+                   .mutacaoProbabilidade(35) // %
+                   .graspNumVizinhos(2)
+                   .graspAlfa(20) // %
+                   .camadaTamanho(input_all_json.camadasTamanho)
+                   .perfilTamanho(input_all_json.perfilTamanho)
+                   .tentativasMutacao(4)
+                   .numTorneioPopulacao(4)
+                   .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+                   .tipoConstrucao(Configuracao::TipoGrade::grasp)
+                   .tipoFo(Configuracao::TipoFo::Soft_constraints) };
 
     Util::logprint(oss, fmt::format("i: {}", i + 1));
 
     Timer t;
     auto s = f(r);
 
-    Util::logprint(oss, fmt::format(" - fo: {} - t: {}\n", s->getFO(),
-                                    t.elapsed()));
-    Util::logprint(oss, fmt::format("\t fo_alvo: {} - tempo_alvo: {}\n",
-                                    r.foAlvo, r.tempoAlvo));
+    Util::logprint(oss,
+                   fmt::format(" - fo: {} - t: {}\n", s->getFO(), t.elapsed()));
+    Util::logprint(
+      oss,
+      fmt::format("\t fo_alvo: {} - tempo_alvo: {}\n", r.foAlvo, r.tempoAlvo));
     print_violacoes(s->reportarViolacoes());
 
     auto savePath =
-        Util::join_path({ "teste", "fo" + std::to_string(s->getFO()) });
+      Util::join_path({ "teste", "fo" + std::to_string(s->getFO()) });
     // Output::writeHtml(s.get(), savePath);
     Output::writeJson(*s, "result.json");
   }
@@ -283,25 +305,31 @@ teste_tempo(int timeout_sec)
 
   Util::logprint(oss, "WDJU\n");
   oss << teste_tempo_iter(
-    num_exec, [&](Resolucao& r) {
-      return r.gerarHorarioWDJU(timeout_ms);
-    });
+    num_exec, [&](Resolucao& r) { return r.gerarHorarioWDJU(timeout_ms); });
 
   Util::logprint(oss, "AG\n");
   oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-                            r.setTimeout(timeout_ms);
-                            return r.gerarHorarioAG()->clone();
-                          });
+    r.setTimeout(timeout_ms);
+    return r.gerarHorarioAG()->clone();
+  });
 
   std::ofstream out{ (fmt::format("resultados{}.txt", timeout_sec)),
-    std::ios::out | std::ios::app };
+                     std::ios::out | std::ios::app };
   out << oss.str() << std::endl;
 }
 
 std::pair<long long, Solucao::FO_t>
-sa_ils(const std::string& input, int frac_time, double alfa,
-       double t0, int sa_iter, int sa_reaq, int sa_chances,
-       int ils_iter, int ils_pmax, int ils_p0, long long timeout)
+sa_ils(const std::string& input,
+       int frac_time,
+       double alfa,
+       double t0,
+       int sa_iter,
+       int sa_reaq,
+       int sa_chances,
+       int ils_iter,
+       int ils_pmax,
+       int ils_p0,
+       long long timeout)
 {
   static const auto a = std::vector<std::pair<Resolucao::Vizinhanca, int>>{
     { Resolucao::Vizinhanca::ES, 25 },
@@ -320,18 +348,18 @@ sa_ils(const std::string& input, int frac_time, double alfa,
   };
 
   const auto& escolhido = [&] {
-        if (sa_chances == 0) {
-          return a;
-        } else {
-          return b;
-        }
-      }();
+    if (sa_chances == 0) {
+      return a;
+    } else {
+      return b;
+    }
+  }();
 
   Resolucao r{ Configuracao()
-    .arquivoEntrada(input)
-    .camadaTamanho(input_all_json.camadasTamanho)
-    .tipoFo(Configuracao::TipoFo::Soft_constraints)
-    .perfilTamanho(input_all_json.perfilTamanho) };
+                 .arquivoEntrada(input)
+                 .camadaTamanho(input_all_json.camadasTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
+                 .perfilTamanho(input_all_json.perfilTamanho) };
 
   Timer t;
   SA sa{ r, alfa, t0, sa_iter, sa_reaq, timeout / frac_time, escolhido };
@@ -344,8 +372,10 @@ sa_ils(const std::string& input, int frac_time, double alfa,
 }
 
 void
-sa_ils_cli(const std::string& input, const std::string& file,
-           const std::string& servidor, long long timeout)
+sa_ils_cli(const std::string& input,
+           const std::string& file,
+           const std::string& servidor,
+           long long timeout)
 {
   // formato entrada:
   // ID FracTime Alfa t0 SAiter SAreaq SAchances ILSiter ILSpmax ILSp0 NExec
@@ -372,24 +402,31 @@ sa_ils_cli(const std::string& input, const std::string& file,
   auto num_config = 1;
 
   while (config >> id >> frac_time >> alfa >> t0 >> sa_iter >> sa_reaq >>
-    sa_chances >> ils_iter >> ils_pmax >> ils_p0 >> n_exec) {
+         sa_chances >> ils_iter >> ils_pmax >> ils_p0 >> n_exec) {
 
     std::cout << num_config << ") Executando ID: " << id << "\n\n";
     std::ostringstream out_str;
     out_str << "ID Algoritmo, Numero execucao, Tempo total, FO\r\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      const auto [tempo, fo] = sa_ils(
-          input, frac_time, alfa, t0, sa_iter, sa_reaq,
-          sa_chances, ils_iter, ils_pmax, ils_p0, timeout);
+      const auto[tempo, fo] = sa_ils(input,
+                                     frac_time,
+                                     alfa,
+                                     t0,
+                                     sa_iter,
+                                     sa_reaq,
+                                     sa_chances,
+                                     ils_iter,
+                                     ils_pmax,
+                                     ils_p0,
+                                     timeout);
 
-      Util::logprint(
-        out_str, fmt::format("{},{},{},{}\r\n", id, i, tempo, fo));
+      Util::logprint(out_str, fmt::format("{},{},{},{}\r\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
-    threads.emplace_back(upload_result, id, out_str.str(), num_config,
-                         servidor);
+    threads.emplace_back(
+      upload_result, id, out_str.str(), num_config, servidor);
     num_config++;
   }
 
@@ -399,15 +436,20 @@ sa_ils_cli(const std::string& input, const std::string& file,
 }
 
 std::pair<long long, Solucao::FO_t>
-hysst(const std::string& input, int max_level, int t_start,
-      int t_step, int it_hc, int it_mut, long long timeout)
+hysst(const std::string& input,
+      int max_level,
+      int t_start,
+      int t_step,
+      int it_hc,
+      int it_mut,
+      long long timeout)
 {
   Resolucao r{ Configuracao()
-    .arquivoEntrada(input)
-    .camadaTamanho(input_all_json.camadasTamanho)
-    .perfilTamanho(input_all_json.perfilTamanho)
-    .tipoFo(Configuracao::TipoFo::Soft_constraints)
-    .tentativasMutacao(it_mut) };
+                 .arquivoEntrada(input)
+                 .camadaTamanho(input_all_json.camadasTamanho)
+                 .perfilTamanho(input_all_json.perfilTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
+                 .tentativasMutacao(it_mut) };
 
   Timer t;
   HySST hysst{ r, timeout, 100, 100, max_level, t_start, t_step, it_hc };
@@ -419,8 +461,10 @@ hysst(const std::string& input, int max_level, int t_start,
 }
 
 void
-hysst_cli(const std::string& input, const std::string& file,
-          const std::string& servidor, long long timeout)
+hysst_cli(const std::string& input,
+          const std::string& file,
+          const std::string& servidor,
+          long long timeout)
 {
   // formato entrada:
   // ID MaxLevel TStart TStep IterHc IterMut NExec
@@ -445,17 +489,16 @@ hysst_cli(const std::string& input, const std::string& file,
   auto num_config = 1;
 
   while (config >> id >> max_level >> t_start >> t_step >> it_hc >> it_mut >>
-    n_exec) {
+         n_exec) {
     std::cout << "ID: " << id << "\n\n";
     std::ostringstream out;
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      const auto [tempo, fo] = hysst(input, max_level, t_start, t_step,
-                                     it_hc, it_mut, timeout);
+      const auto[tempo, fo] =
+        hysst(input, max_level, t_start, t_step, it_hc, it_mut, timeout);
 
-      Util::logprint(
-        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
+      Util::logprint(out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
@@ -469,14 +512,16 @@ hysst_cli(const std::string& input, const std::string& file,
 }
 
 std::pair<long long, Solucao::FO_t>
-wdju(const std::string& input, int stag_limit, double jump_factor,
+wdju(const std::string& input,
+     int stag_limit,
+     double jump_factor,
      long long timeout)
 {
   Resolucao r{ Configuracao()
-    .arquivoEntrada(input)
-    .camadaTamanho(input_all_json.camadasTamanho)
-    .tipoFo(Configuracao::TipoFo::Soft_constraints)
-    .perfilTamanho(input_all_json.perfilTamanho) };
+                 .arquivoEntrada(input)
+                 .camadaTamanho(input_all_json.camadasTamanho)
+                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
+                 .perfilTamanho(input_all_json.perfilTamanho) };
 
   Timer t;
   WDJU wdju{ r, timeout, stag_limit, jump_factor };
@@ -488,8 +533,10 @@ wdju(const std::string& input, int stag_limit, double jump_factor,
 }
 
 void
-wdju_cli(const std::string& input, const std::string& file,
-         const std::string& servidor, long long timeout)
+wdju_cli(const std::string& input,
+         const std::string& file,
+         const std::string& servidor,
+         long long timeout)
 {
   // formato entrada:
   // ID StagLimit JumpFactor NExec
@@ -520,10 +567,9 @@ wdju_cli(const std::string& input, const std::string& file,
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
-      const auto [tempo, fo] = wdju(input, stag_limit, jump_factor, timeout);
+      const auto[tempo, fo] = wdju(input, stag_limit, jump_factor, timeout);
 
-      Util::logprint(
-        out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
+      Util::logprint(out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
     }
     std::cout << "\n";
 
@@ -536,7 +582,7 @@ wdju_cli(const std::string& input, const std::string& file,
   }
 }
 
-template <typename F>
+template<typename F>
 void
 comparacao_iter(int num_exec, const std::string& nome, F heuristica)
 {
@@ -547,24 +593,24 @@ comparacao_iter(int num_exec, const std::string& nome, F heuristica)
 
   for (auto i = 0; i < num_exec; i++) {
     Resolucao r{ Configuracao()
-      .arquivoEntrada(
-        Util::join_path({ "entradas" }, "input.all.json"))
-      .populacaoInicial(20)
-      .porcentagemCruzamentos(80)
-      .numMaximoIteracoesSemEvolucaoGRASP(15)
-      .numMaximoIteracoesSemEvolucaoAG(infinito)
-      .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
-      .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
-      .mutacaoProbabilidade(35) // %
-      .graspNumVizinhos(2)
-      .graspAlfa(20) // %
-      .camadaTamanho(input_all_json.camadasTamanho)
-      .perfilTamanho(input_all_json.perfilTamanho)
-      .tentativasMutacao(4)
-      .numTorneioPopulacao(4)
-      .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
-      .tipoConstrucao(Configuracao::TipoGrade::grasp)
-      .tipoFo(Configuracao::TipoFo::Soma_carga) };
+                   .arquivoEntrada(
+                     Util::join_path({ "entradas" }, "input.all.json"))
+                   .populacaoInicial(20)
+                   .porcentagemCruzamentos(80)
+                   .numMaximoIteracoesSemEvolucaoGRASP(15)
+                   .numMaximoIteracoesSemEvolucaoAG(infinito)
+                   .tipoCruzamento(Configuracao::TipoCruzamento::pmx)
+                   .tipoMutacao(Configuracao::TipoMutacao::substiui_disciplina)
+                   .mutacaoProbabilidade(35) // %
+                   .graspNumVizinhos(2)
+                   .graspAlfa(20) // %
+                   .camadaTamanho(input_all_json.camadasTamanho)
+                   .perfilTamanho(input_all_json.perfilTamanho)
+                   .tentativasMutacao(4)
+                   .numTorneioPopulacao(4)
+                   .graspVizinhanca(Configuracao::TipoVizinhos::aleatorios)
+                   .tipoConstrucao(Configuracao::TipoGrade::grasp)
+                   .tipoFo(Configuracao::TipoFo::Soma_carga) };
 
     auto s = heuristica(r);
     saida << nome << "," << s->getFO() << "\n";
@@ -572,7 +618,7 @@ comparacao_iter(int num_exec, const std::string& nome, F heuristica)
   }
   std::cout << "\n";
 
-  std::ofstream arquivo{ std::string{ nome } +".csv" };
+  std::ofstream arquivo{ std::string{ nome } + ".csv" };
   arquivo << saida.str();
 }
 
@@ -582,31 +628,33 @@ comparacao(int timeout_sec = 60, int num_exec = 30)
   const auto timeout_ms = timeout_sec * 1000;
 
   std::cout << "SA-ILS\n";
-  comparacao_iter(
-    num_exec, "SA-ILS", [&](Resolucao& r) {
-      SA sa{ r, 0.97, 2, 100, 500, timeout_ms / 100,{
-        { Resolucao::Vizinhanca::ES, 25 },
-        { Resolucao::Vizinhanca::EM, 43 },
-        { Resolucao::Vizinhanca::RS, 20 },
-        { Resolucao::Vizinhanca::RM, 10 },
-        { Resolucao::Vizinhanca::KM, 2 }
-      } };
-      ILS ils{ r, infinito, 30, 3, 10, timeout_ms / 100 };
-      return r.gerarHorarioSA_ILS(sa, ils, timeout_ms);
-    });
+  comparacao_iter(num_exec, "SA-ILS", [&](Resolucao& r) {
+    SA sa{ r,
+           0.97,
+           2,
+           100,
+           500,
+           timeout_ms / 100,
+           { { Resolucao::Vizinhanca::ES, 25 },
+             { Resolucao::Vizinhanca::EM, 43 },
+             { Resolucao::Vizinhanca::RS, 20 },
+             { Resolucao::Vizinhanca::RM, 10 },
+             { Resolucao::Vizinhanca::KM, 2 } } };
+    ILS ils{ r, infinito, 30, 3, 10, timeout_ms / 100 };
+    return r.gerarHorarioSA_ILS(sa, ils, timeout_ms);
+  });
 
   std::cout << "HySST\n";
   comparacao_iter(num_exec, "HySST", [&](Resolucao& r) {
-                    HySST hysst{ r, timeout_ms, 100, 100, 15, 1, 10, 5 };
-                    return r.gerarHorarioHySST(hysst, 5);
-                  });
+    HySST hysst{ r, timeout_ms, 100, 100, 15, 1, 10, 5 };
+    return r.gerarHorarioHySST(hysst, 5);
+  });
 
   std::cout << "WDJU\n";
-  comparacao_iter(
-    num_exec, "WDJU", [&](Resolucao& r) {
-      WDJU wdju{ r, timeout_ms, 30, 0.002 };
-      return r.gerarHorarioWDJU(wdju);
-    });
+  comparacao_iter(num_exec, "WDJU", [&](Resolucao& r) {
+    WDJU wdju{ r, timeout_ms, 30, 0.002 };
+    return r.gerarHorarioWDJU(wdju);
+  });
 
   /*
   std::cout << "AG\n";

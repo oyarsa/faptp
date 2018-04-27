@@ -339,6 +339,12 @@ void run_many(const std::string& conf, const std::string& input,
 
     fmt::print("{},{},{},{},{}\n",
                i, tempo, s->getFO(), r.ultimaIteracao, t_por_iter);
+
+    const auto violacoes = s->reportarViolacoes();
+    for (const auto& [nome, valor] : violacoes) {
+      fmt::print("{}: {} ({})\n", nome, valor, r.pesos_soft[nome]);
+    }
+    fmt::print("\n");
   }
 
   fmt::print("\n");
