@@ -4,6 +4,18 @@
 #include <tsl/robin_map.h>
 #include "Representacao.h"
 
+struct TimeSlot
+{
+  int dia;
+  int bloco;
+  int camada;
+
+  explicit TimeSlot(const std::tuple<int, int, int>& tuple);
+  TimeSlot(int dia, int bloco, int camada);
+
+  std::tuple<int, int, int> toTuple() const;
+};
+
 class Horario : public Representacao
 {
     friend class Resolucao;
@@ -35,16 +47,19 @@ public:
     int preferenciasProfessores() const;
     int aulasProfessores(
         const tsl::robin_map<std::string, Professor*>& professores) const;
+
+    const std::vector<TimeSlot>&
+    getTimeSlotsDisciplina(const Disciplina* disc) const;
 private:
     std::vector<int> disc_camada_;
     std::vector<int> creditos_alocados_disc_;
     std::vector<int> creditos_alocados_prof_;
     std::size_t hash_;
+    std::vector<std::vector<TimeSlot>> timeslots_disciplinas_;
 
     int contaJanelasDia(int dia, int camada) const;
     int contaJanelasCamada(int camada) const;
 
-    bool isProfDia(std::size_t professor, int dia) const;
     int intervalosTrabalhoProf(std::size_t professor,
                                const std::vector<std::vector<uint8_t>>& prof_dia) const;
 
@@ -53,16 +68,11 @@ private:
 
     int aulasSabadoCamada(int camada) const;
 
-    int aulasSeguidasDiscDia(std::size_t disciplina, int dia) const;
-    int aulasSeguidasDisc(std::size_t disciplina) const;
-
     int aulasSeguidasDificilDia(int dia, int camada) const;
     int aulasSeguidasDificilCamada(int camada) const;
 
     bool aulaDificilUltimoHorarioDia(int dia, int camada) const;
     int aulaDificilUltimoHorarioCamada(int camada) const;
-
-    int aulasProfessor(std::size_t professor, int preferencia) const;
 };
 
 #endif /* HORARIO_H */

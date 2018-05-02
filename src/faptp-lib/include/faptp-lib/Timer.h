@@ -31,6 +31,16 @@ public:
     return std::chrono::duration_cast<std::chrono::milliseconds>(e).count();
   }
 
+  /// Calcula o tempo decorrido (em ns) do momento inicial ao momento da chamada.
+  ///
+  /// @return Tempo em nanosegundos entre o momento inicial e o "agora".
+  long long
+  elapsed_ns() const
+  {
+    auto e = std::chrono::high_resolution_clock::now() - start_;
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(e).count();
+  }
+
   /// Imprime a representação textual do tempo decorrido para a `os`,
   /// exemplo: `150ms`.
   ///

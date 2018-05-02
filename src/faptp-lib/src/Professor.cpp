@@ -116,6 +116,11 @@ Professor::addDiscPreferencia(std::size_t disc)
   preferenciasDisciplina[disc] = true;
 }
 
+void Professor::setPreferenciasAll()
+{
+    std::fill(preferenciasDisciplina.begin(), preferenciasDisciplina.end(), 1);
+}
+
 int Professor::credito_maximo() const
 {
     return creditoMaximo;

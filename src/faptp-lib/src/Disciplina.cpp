@@ -27,7 +27,8 @@ Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriod
       equivalentes(),
       professoresCapacitados(),
       dificil(false),
-      idHash(Next_code++)
+      idHash(Next_code++),
+      periodoMinimoNum(calcPeriodoMinimoNum())
 {}
 
 void
@@ -57,14 +58,22 @@ int Disciplina::periodoNum() const
     return per_num;
 }
 
-int Disciplina::periodoMinimoNum() const
+int Disciplina::calcPeriodoMinimoNum() const
 {
     if (periodoMinimo.empty())
         return 0;
 
-    static auto pos = periodoMinimo.find('-');
-    static auto permin_num = std::stoi(periodoMinimo.substr(0, pos));
+    auto pos = periodoMinimo.find('-');
+    if (pos == std::string::npos) {
+      return 0;
+    }
 
-    return permin_num;
+    return std::stoi(periodoMinimo.substr(0, pos));
 }
 
+void Disciplina::finalizarConstrucao()
+{
+    std::sort(preRequisitos.begin(), preRequisitos.end());
+    std::sort(coRequisitos.begin(), coRequisitos.end());
+    std::sort(equivalentes.begin(), equivalentes.end());
+}

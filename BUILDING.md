@@ -13,10 +13,11 @@ Pré-requisito: Vcpkg e Cmake (2.8+)
     > cmake -G "Visual Studio 15 Win64" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT$\scripts\buildsystems\vcpkg.cmake
     > cmake --build . --config Release
 
-## Ubuntu 16.04 (GCC 5.4)
+## Ubuntu 17.10 (GCC 7.2)
+Instalar o fmtlib à parte (só clonar, cmake, make, make install).
 
     # apt update
-    # apt install cmake libcurl
+    # apt install cmake libcurl4-openssl-dev libjsoncpp-dev
     $ git clone https://github.com/oyarsa/faptp.git
     $ cd faptp
     $ mkdir .build && cd .build

@@ -150,14 +150,14 @@ tsl::robin_map<std::string, int> Solucao::reportarViolacoes() const
     tsl::robin_map<std::string, int> m;
 
     m["Janelas"] = horario->contaJanelas();
-    m["Intervalos"] = horario->intervalosTrabalho();
-    m["Dias de Aula"] = horario->numDiasAula();
-    m["Sabado"] = horario->aulasSabado();
-    m["Seguidas"] = horario->aulasSeguidas();
-    m["Seguidas Dificil"] = horario->aulasSeguidasDificil();
-    m["Dificil Ultimo Horario"] = horario->aulaDificilUltimoHorario();
-    m["Preferencias disc"] = horario->preferenciasProfessores();
-    m["Preferencias aulas"] = horario->aulasProfessores(res.getProfessores());
+    m["IntervalosTrabalho"] = horario->intervalosTrabalho();
+    m["NumDiasAula"] = horario->numDiasAula();
+    m["AulasSabado"] = horario->aulasSabado();
+    m["AulasSeguidas"] = horario->aulasSeguidas();
+    m["AulasSeguidasDificil"] = horario->aulasSeguidasDificil();
+    m["AulaDificilUltimoHorario"] = horario->aulaDificilUltimoHorario();
+    m["PreferenciasProfessores"] = horario->preferenciasProfessores();
+    m["AulasProfessores"] = horario->aulasProfessores(res.getProfessores());
 
     return m;
 }

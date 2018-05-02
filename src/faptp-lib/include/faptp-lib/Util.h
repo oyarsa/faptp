@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <iostream>
 #include <chrono>
+#include <omp.h>
+#include <fmt/format.h>
 
 /// Contém funções utilitárias que não se encaixam em nenhuma classe,
 /// como conversão de escalas lineares, tempo, data etc.
@@ -115,6 +117,8 @@ constexpr int warpIntervalo(int i, int tamIntervalo, int comecoIntervalo)
 template <typename Container, typename T, typename Compare = std::less<T>>
 void insert_sorted(Container& c, const T& item, Compare cmp = Compare())
 {
+    using std::begin;
+    using std::end;
     c.insert(
         std::upper_bound(begin(c), end(c), item, cmp),
         item
@@ -208,12 +212,21 @@ fast_floor(double x)
 /// @return Iterator para um elemento aleatório de `c`.
 template <typename Container>
 auto
-randomChoice(Container& c)
+randomChoice(Container& c, int thread_num)
 {
-  const auto n = random(0, static_cast<int>(c.size()));
+  using std::begin;
+
+  const auto n = random(0, static_cast<int>(c.size()), thread_num);
   auto it = begin(c);
   std::advance(it, n);
   return it;
+}
+
+template <typename Container>
+auto
+randomChoice(Container& c)
+{
+  return randomChoice(c, omp_get_thread_num());
 }
 
 /// A partir de um vector de pares representando a chance de cada elemento
@@ -305,6 +318,110 @@ std::string read_whole_file(std::istream& file);
 /// @param var Variável de ambiente a ser lida.
 /// @return String contendo o valor da variável `var`.
 std::string get_env_var(const std::string& var);
+
+/// Determina se as funções dbg e thdbg irão imprimir algo.
+constexpr auto kPrintDebug = true;
+
+/// Imprime uma saída de debug de acordo com os parâmetros em args, definidos
+/// no padrão do fmt::print (format string e valores).
+///
+/// @tparam A Varadic template para parâmetros no formato do fmt::print.
+/// @param args Varadic variable para parâmetros no formato do fmt::print.
+template <typename ...A>
+void dbg(A... args)
+{
+  if constexpr (kPrintDebug) {
+    fmt::print("> ");
+    fmt::print(args...);
+  }
+}
+
+/// Remove um item de um Container com acesso randômico através da troca com o
+/// último elemento seguido de sua remoção. Operação com complexidade O(1), mas
+/// rompe a ordenação do Container.
+///
+/// @tparam Container Coleção com suporte a operator[], back() e pop_back().
+/// @param container Coleção que terá o elemento removido.
+/// @param index Índice do elemento a ser removido.
+template <typename Container>
+void swap_remove(Container& container, std::size_t index)
+{
+  std::swap(container[index], container.back());
+  container.pop_back();
+}
+
+/// Determina se dois intervalos ordenados [first1, last1) e [fist2, last2)
+/// possuem elementos em comum.
+///
+/// @tparam ForwardIterator_1 ForwardIterator do primeiro intervalo.
+/// @tparam ForwardIterator_2 ForwardIterator do segundo intervalo.
+/// @param first1 Início do primeiro intervalo (inclusivo).
+/// @param last1 Fim do primeiro intervalo (exclusivo).
+/// @param first2 Início do segundo intervalo (inclusivo).
+/// @param last2 Fim do segundo intervalo (exclusivo).
+/// @return Verdadeiro se existe pelo menos um elemento em comum dos intervalos.
+template <typename ForwardIterator_1, typename ForwardIterator_2>
+bool have_common_element(ForwardIterator_1 first1, ForwardIterator_1 last1,
+                         ForwardIterator_2 first2, ForwardIterator_2 last2)
+{
+  while (first1 != last1 && first2 != last2) {
+    if (*first1 < *first2) {
+      ++first1;
+    } else if (*first2 < *first1) {
+      ++first2;
+    } else {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Determina se dois intervalos ordenados [first1, last1) e [fist2, last2)
+/// possuem elementos em comum, utilizando um predicado. O predicado deve retornar
+/// <0 se a < b, =0 se a = b e >0 se a > b.
+///
+/// @tparam ForwardIterator_1 ForwardIterator do primeiro intervalo.
+/// @tparam ForwardIterator_2 ForwardIterator do segundo intervalo.
+/// @tparam Comparator Functor de comparação entre os elementos.
+/// @param first1 Início do primeiro intervalo (inclusivo).
+/// @param last1 Fim do primeiro intervalo (exclusivo).
+/// @param first2 Início do segundo intervalo (inclusivo).
+/// @param last2 Fim do segundo intervalo (exclusivo).
+/// @return Verdadeiro se existe pelo menos um elemento em comum dos intervalos.
+template <typename ForwardIterator_1, typename ForwardIterator_2, typename Comparator>
+bool have_common_element(ForwardIterator_1 first1, ForwardIterator_1 last1,
+                         ForwardIterator_2 first2, ForwardIterator_2 last2,
+                         Comparator cmp = Comparator{})
+{
+  while (first1 != last1 && first2 != last2) {
+    const auto result = cmp(*first1, *first2);
+    if (result < 0) {
+      ++first1;
+    } else if (result > 0) {
+      ++first2;
+    } else {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename Container1, typename Container2>
+bool have_common_element(const Container1& c1, const Container2& c2)
+{
+  using std::begin;
+  using std::end;
+  return have_common_element(begin(c1), end(c1), begin(c2), end(c2));
+}
+
+template <typename Container1, typename Container2, typename Comparator>
+bool have_common_element(const Container1& c1, const Container2& c2,
+                         Comparator cmp = Comparator{})
+{
+  using std::begin;
+  using std::end;
+  return have_common_element(begin(c1), end(c1), begin(c2), end(c2), cmp);
+}
 
 } // namespace Util
 

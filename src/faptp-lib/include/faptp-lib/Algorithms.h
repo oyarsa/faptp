@@ -82,7 +82,7 @@ void RemoveDisciplinasNome(Container& c,
     const auto found = std::find_if(
       std::begin(disciplinas), std::end(disciplinas),
       [&](const Disciplina* d) {
-        return d->getNome() == *it;
+        return d->id_hash() == *it;
       });
     if (found != std::end(disciplinas)) {
       c.erase(it);

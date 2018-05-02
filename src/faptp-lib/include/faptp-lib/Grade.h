@@ -17,49 +17,49 @@ class Grade : public Representacao
     friend class Output;
 public:
     Grade(int pBlocosTamanho, AlunoPerfil* pAlunoPerfil, Horario* pHorario,
-          const std::vector<Disciplina*>& pDisciplinasCurso,
-          const tsl::robin_map<std::string, int>& pDiscToIndex);
-    Grade(const Grade& outro);
+          const std::vector<Disciplina*>& pDisciplinasCurso);
+    Grade(const Grade& outro) = default;
     Grade& operator=(const Grade&) = delete;
-    virtual ~Grade();
 
-    bool insert2(Disciplina* pDisciplina);
-    bool insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
-    bool insert(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar, bool force);
+    // Begin deprecated
+    bool insertOld(Disciplina* pDisciplina, const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar);
+    bool insertOld(
+        Disciplina* pDisciplina,
+        const std::vector<ProfessorDisciplina*>& professorDisciplinasIgnorar,
+        bool force
+    );
+    Disciplina* removeOld(Disciplina* pDisciplina, ProfessorDisciplina*& pProfessorDisciplina);
+    // End deprecated
+
     bool insert(Disciplina* pDisciplina);
-    Disciplina* remove2(Disciplina* pDisciplina, ProfessorDisciplina* & pProfessorDisciplina);
-    Disciplina* remove(Disciplina* pDisciplina);
+    Disciplina* remove(Disciplina* disciplina);
 
     double getFO();
-    double getFO2();
+
+    ProfessorDisciplina* at(int dia, int bloco);
+    int getPosition(int dia, int bloco);
 
 private:
     AlunoPerfil* aluno;
     Horario* horario;
-
-    std::vector<ProfessorDisciplina*> professorDisciplinas;
-    std::vector<std::string> problemas;
-    ProfessorDisciplina* professorDisciplinaTemp;
     std::vector<Disciplina*> disciplinasAdicionadas;
-
     const std::vector<Disciplina*>& disciplinasCurso;
-    const tsl::robin_map<std::string, int>& discToIndex;
 
-    //! Guarda a função objetiva dessa grade, vale 0 se ainda não foi definida
+    //! Guarda a funcao objetiva dessa grade, vale 0 se ainda nao foi definida
     double fo;
 
     //! Recebe um nome e retorna um ponteiro para uma disciplina
-    Disciplina* getDisciplina(const std::string& pNomeDisc);
+    Disciplina* getDisciplina(std::size_t disciplina);
 
     bool havePreRequisitos(const Disciplina* const pDisciplina);
     bool hasPeriodoMinimo(const Disciplina* const pDisciplina) const;
     bool hasCoRequisitos(const Disciplina* const pDisciplina);
-    bool checkCollision(const Disciplina* pDisciplina, int pCamada);
-    bool isViable(const Disciplina* pDisciplina, int pCamada);
-    //! Verifica se a disciplina sendo considerada não está na lista de equivalências
-    //! de outra que já foi inserida
+    bool checkCollision(const Disciplina* pDisciplina);
+    bool isViable(const Disciplina* pDisciplina);
+    //! Verifica se a disciplina sendo considerada nï¿½o estï¿½ na lista de equivalï¿½ncias
+    //! de outra que jï¿½ foi inserida
     bool discRepetida(const Disciplina* pDisciplina);
-    void add(Disciplina* pDisciplina, int pCamada);
+    void add(Disciplina* pDisciplina);
 };
 
 #endif /* GRADE_H */

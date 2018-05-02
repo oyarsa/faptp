@@ -30,7 +30,7 @@ public:
 
     int periodoNum() const;
 
-    int periodoMinimoNum() const;
+    int calcPeriodoMinimoNum() const;
 
     const std::string& getNome() const;
     void setNome(const std::string& pNome);
@@ -47,8 +47,8 @@ public:
     int getAulasSemana();
     int getCreditos();
 
-    void addPreRequisito(const std::string& pDisciplina);
-    bool isPreRequisito(const std::string& pDisciplina);
+    void addPreRequisito(std::size_t disciplina);
+    bool isPreRequisito(std::size_t disciplina) const;
 
     void addProfessorCapacitado(Professor* professor);
 
@@ -57,6 +57,8 @@ public:
     std::size_t id_hash() const;
 
     static std::size_t max_hash();
+
+    int getPeriodoMinimoNum() const;
 
 private:
     static std::atomic_size_t Next_code;
@@ -72,12 +74,15 @@ private:
     int capacidade;
     int alocados;
     bool ofertada;
-    tsl::hopscotch_set<std::string> preRequisitos;
-    tsl::hopscotch_set<std::string> coRequisitos;
-    tsl::hopscotch_set<std::string> equivalentes;
+    std::vector<std::size_t> preRequisitos;
+    std::vector<std::size_t> coRequisitos;
+    std::vector<std::size_t> equivalentes;
     std::vector<Professor*> professoresCapacitados;
     bool dificil;
     std::size_t idHash;
+    int periodoMinimoNum;
+
+    void finalizarConstrucao();
 };
 
 inline std::size_t Disciplina::id_hash() const
@@ -140,20 +145,27 @@ inline int Disciplina::getCreditos()
   return getAulasSemana();
 }
 
-inline void Disciplina::addPreRequisito(const std::string& pDisciplina)
+inline void Disciplina::addPreRequisito(std::size_t disciplina)
 {
-  preRequisitos.insert(pDisciplina);
+  preRequisitos.push_back(disciplina);
 }
 
-inline bool Disciplina::isPreRequisito(const std::string& pDisciplina)
+inline bool Disciplina::isPreRequisito(std::size_t disciplina) const
 {
-  return preRequisitos.find(pDisciplina) != end(preRequisitos);
+  return std::find(preRequisitos.begin(), preRequisitos.end(), disciplina)
+      != preRequisitos.end();
 }
 
 inline std::size_t
 Disciplina::max_hash()
 {
   return Next_code + 1;
+}
+
+inline int
+Disciplina::getPeriodoMinimoNum() const
+{
+  return periodoMinimoNum;
 }
 
 #endif /* DISCIPLINA_H */

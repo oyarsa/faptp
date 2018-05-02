@@ -27,6 +27,7 @@ add_subdirectory(lib/cxxopts)
 add_subdirectory(lib/fastrange)
 add_subdirectory(lib/range)
 add_subdirectory(lib/tsl)
+add_subdirectory(lib/concurrentqueue)
 
 # Módulos
 add_subdirectory(src/faptp)

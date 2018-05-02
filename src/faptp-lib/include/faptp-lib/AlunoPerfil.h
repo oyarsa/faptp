@@ -21,15 +21,18 @@ public:
     double getPeso() const;
     void setPeso(double pPeso);
 
-    void addCursada(const std::string& pCursada);
-    bool isCursada(const std::string& pCursada);
+    void addCursada(std::size_t cursada);
+    bool isCursada(std::size_t cursada);
 
     void addRestante(Disciplina* pRestante);
-    bool isRestante(const std::string& pRestante);
+    bool isRestante(std::size_t restante);
 
     int getPeriodoNum() const;
 
+    void finalizarConstrucao();
+
 private:
+    int calcPeriodoNum() const;
 
     struct DisciplinaCargaHorariaDesc
     {
@@ -44,11 +47,18 @@ private:
     std::string periodo;
     double peso;
     long long hash;
-    tsl::hopscotch_set<std::string> cursadas;
-    tsl::hopscotch_set<std::string> aprovadas;
-    tsl::hopscotch_set<std::string> restante;
+    std::vector<std::size_t> cursadas;
+    std::vector<std::size_t> aprovadas;
+    std::vector<std::size_t> restante;
     std::vector<Disciplina*> restanteOrd;
+    int periodo_num;
 };
+
+inline int
+AlunoPerfil::getPeriodoNum() const
+{
+    return periodo_num;
+}
 
 #endif /* ALUNOPERFIL_H */
 
