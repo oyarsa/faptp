@@ -666,14 +666,6 @@ comparacao(int timeout_sec = 60, int num_exec = 30)
     WDJU wdju{ r, timeout_ms, 30, 0.002 };
     return r.gerarHorarioWDJU(wdju);
   });
-
-  /*
-  std::cout << "AG\n";
-  comparacao_iter(num_exec, "AG", [&](Resolucao& r) {
-  r.setTimeout(timeout_ms);
-  return r.gerarHorarioAG()->clone();
-  });
-  */
 }
 
 } // namespace experimento

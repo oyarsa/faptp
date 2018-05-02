@@ -307,7 +307,7 @@ void Resolucao::carregarDadosProfessorDisciplinas()
         const auto disciplina = jsonProfessorDisciplinas[i]["disciplina"].asString();
 
         ProfessorDisciplina* professorDisciplina = new ProfessorDisciplina(
-            professores[professor], getDisciplinaById(disciplina), id);
+            professores[professor], getDisciplinaById(disciplina));
 
         double competenciaPeso = 1.0;
         professorDisciplina->professor->addCompetencia(disciplina, competenciaPeso);
@@ -448,8 +448,7 @@ Resolucao::carregarSolucao(const Json::Value& horarios)
       sol->horario->disc_camada_[disc->id_hash()] = camada;
 
       if (!professorDisciplinas[pdId]) {
-        professorDisciplinas[pdId] = new ProfessorDisciplina(
-          professores[professor], disc, pdId);
+        professorDisciplinas[pdId] = new ProfessorDisciplina(professores[professor], disc);
       }
 
       auto ok = sol->horario->insert(dia, bloco, camada, professorDisciplinas[pdId]);
