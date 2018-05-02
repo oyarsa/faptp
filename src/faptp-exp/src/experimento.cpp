@@ -191,6 +191,11 @@ ag_cli(const std::string& input,
   }
 
   std::ifstream config{ conf_file };
+  if (!config) {
+    fmt::print("Erro ao abrir arquivo de configuracao: {}\n", conf_file);
+    return;
+  }
+
   std::vector<std::thread> threads;
 
   std::string id, cruz_oper;
@@ -206,6 +211,7 @@ ag_cli(const std::string& input,
     out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
 
     for (auto i = 0; i < n_exec; i++) {
+      std::cout << i << "\n";
       const auto [tempo, fo] = ag(input,
                                  n_indiv,
                                  taxa_mut,
@@ -315,7 +321,7 @@ teste_tempo(int timeout_sec)
 
   std::ofstream out{ (fmt::format("resultados{}.txt", timeout_sec)),
                      std::ios::out | std::ios::app };
-  out << oss.str() << std::endl;
+  out << oss.str() << "\n";
 }
 
 std::pair<long long, Solucao::FO_t>
@@ -367,6 +373,11 @@ sa_ils(const std::string& input,
   auto s = r.gerarHorarioSA_ILS(sa, ils, timeout);
   auto fo = s->getFO();
   auto tempo = t.elapsed();
+
+  const auto violacoes = s->reportarViolacoes();
+  for (const auto& p : violacoes) {
+    fmt::print("{}: {}\n", p.first, p.second);
+  }
 
   return { tempo, fo };
 }

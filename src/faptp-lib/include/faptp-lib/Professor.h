@@ -40,6 +40,8 @@ public:
 
     bool isDiscPreferencia(std::size_t disc) const;
     void addDiscPreferencia(std::size_t disc);
+    // Estabelece que esse professor tem preferência por todas as disciplinas
+    void setPreferenciasAll();
 
     int credito_maximo() const;
 
@@ -80,6 +82,7 @@ Professor::max_hash()
 {
   return Next_code + 1;
 }
+
 
 #endif /* PROFESSOR_H */
 

@@ -37,7 +37,7 @@ main(int argc, char** argv)
 {
    curl_global_init(CURL_GLOBAL_ALL);
 
-   const auto timeout = 60 * 60 * 1000;
+   const auto timeout = 0.5 * 60 * 1000;
 
    if (argc == 1) {
        fmt::print("Sem argumentos. Executando: ");

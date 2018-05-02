@@ -226,12 +226,17 @@ void Resolucao::carregarDadosProfessores()
             }
         }
 
-        const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
-        for (const auto& d_id : preferencias) {
-            const auto d = getDisciplinaById(d_id.asString());
-            professores[id]->addDiscPreferencia(d->id_hash());
+        if (jsonProfessores[k].isMember("preferenciasDiscs") == 1) {
+            const auto& preferencias = jsonProfessores[k]["preferenciasDiscs"];
+            for (const auto& d_id : preferencias) {
+                const auto d = getDisciplinaById(d_id.asString());
+                professores[id]->addDiscPreferencia(d->id_hash());
 
+            }
+        } else {
+            professores[id]->setPreferenciasAll();
         }
+
 
         professores[id]->preferenciaNumAulas = jsonProfessores[k].get(
             "preferenciaHoras", professores[id]->credito_maximo()).asInt();
