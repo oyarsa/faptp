@@ -6,6 +6,11 @@
 
 std::atomic_size_t Disciplina::Next_code{ 1 };
 
+void Disciplina::reset_hash()
+{
+  Next_code = 1;
+}
+
 Disciplina::Disciplina(std::string pNome, int pCargaHoraria, std::string pPeriodo, std::string pCurso, std::string pTurma, int pCapacidade, std::string pPeriodoMinimo)
     : Disciplina(pNome, pCargaHoraria, pPeriodo, pCurso, fagoc::UUID::GenerateUuid(),
                  pTurma, pCapacidade, pPeriodoMinimo) {}

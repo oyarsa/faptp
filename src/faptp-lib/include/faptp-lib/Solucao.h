@@ -33,6 +33,7 @@ public:
     FO_t calculaFOSoftConstraints() const;
     FO_t getFO();
     FO_t getFO() const;
+    bool hasFO() const;
 
     tsl::robin_map<std::string, int> reportarViolacoes() const;
 

@@ -18,4 +18,7 @@ void wdju_cli(const std::string& input, const std::string& file,
 void hysst_cli(const std::string& input, const std::string& file,
                const std::string& servidor, long long timeout);
 
+void grasp_cli(const std::string& input, const std::string& file,
+               const std::string& servidor, long long timeout);
+
 } // namespace experimento

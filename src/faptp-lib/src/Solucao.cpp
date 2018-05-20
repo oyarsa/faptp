@@ -145,6 +145,11 @@ Solucao::FO_t Solucao::getFO() const
     return *fo;
 }
 
+bool Solucao::hasFO() const
+{
+  return fo.has_value();
+}
+
 tsl::robin_map<std::string, int> Solucao::reportarViolacoes() const
 {
     tsl::robin_map<std::string, int> m;

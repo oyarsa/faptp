@@ -5,6 +5,11 @@
 
 std::atomic_size_t Professor::Next_code{ 1 };
 
+void Professor::reset_hash()
+{
+    Next_code = 1;
+}
+
 Professor::Professor(const std::string& pNome) 
 : creditoMaximo(), numDisponibilidade(), 
   preferenciasDisciplina(Disciplina::max_hash())

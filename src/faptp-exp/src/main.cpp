@@ -4,6 +4,8 @@
 
 #include "experimento.h"
 
+constexpr int infinito = static_cast<int>(1e6);
+
 const auto usage = R"(
 Usage:
     faptp -h | --help
@@ -37,8 +39,6 @@ main(int argc, char** argv)
 {
    curl_global_init(CURL_GLOBAL_ALL);
 
-   const auto timeout = 0.5 * 60 * 1000;
-
    if (argc == 1) {
        fmt::print("Sem argumentos. Executando: ");
        experimento::teste_tempo(1 * 60);
@@ -58,7 +58,9 @@ main(int argc, char** argv)
        ("c,config", "Arquivo de configuracao",
         cxxopts::value<std::string>()->default_value("auto"))
        ("s,server", "Servidor para submissao dos resultados",
-        cxxopts::value<std::string>());
+        cxxopts::value<std::string>())
+       ("t,timeout", "Tempo maximo para cada execucao de um algoritmo",
+        cxxopts::value<int>())  ;
 
      const auto result = options.parse(argc, argv);
 
@@ -72,6 +74,9 @@ main(int argc, char** argv)
      const auto configuracao = result["config"].as<std::string>();
      const auto servidor = result["server"].as<std::string>();
 
+     const auto timeout_s = result.count("timeout") ? result["timeout"].as<int>() : infinito;
+     const auto timeout = timeout_s * 1000;
+
      if (algo == "ag") {
        experimento::ag_cli(entrada, configuracao, servidor, timeout);
      } else if (algo == "sa_ils") {
@@ -80,6 +85,8 @@ main(int argc, char** argv)
        experimento::hysst_cli(entrada, configuracao, servidor, timeout);
      } else if (algo == "wdju") {
        experimento::wdju_cli(entrada, configuracao, servidor, timeout);
+     } else if (algo == "grasp") {
+       experimento::grasp_cli(entrada, configuracao, servidor, timeout);
      } else {
        std::cout << "Algoritmo invalido\n";
        return 1;

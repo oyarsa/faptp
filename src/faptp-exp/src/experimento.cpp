@@ -44,7 +44,7 @@ constexpr Entrada input_all_json{ 33, 1392 };
 constexpr Entrada input_json{ 4, 10 };
 
 static const auto num_tentativas_upload = 15;
-static const auto segundos_espera = 30;
+static const auto segundos_espera = 10;
 
 // número de iterações grande para o algoritmo se encerrar por tempo
 constexpr auto infinito = static_cast<int>(1e9);
@@ -58,8 +58,6 @@ upload_result(const std::string& id,
   const auto payload = fmt::format("result={}&nome={}", resultado, id);
 
   for (auto i = 0; i < num_tentativas_upload; i++) {
-    std::this_thread::sleep_for(std::chrono::seconds(segundos_espera));
-
     const auto curl = curl_easy_init();
     if (!curl) {
       throw std::logic_error{ "Impossível inicializar CURL" };
@@ -70,7 +68,7 @@ upload_result(const std::string& id,
 
     const auto rv = curl_easy_perform(curl);
 
-    if (rv != CURLE_OK) {
+    if (rv == CURLE_OK) {
       fmt::print("{}) {}: enviado com sucesso\n\n", num_config, id);
       return;
     }
@@ -79,6 +77,8 @@ upload_result(const std::string& id,
                num_config,
                i + 1,
                curl_easy_strerror(rv));
+
+    std::this_thread::sleep_for(std::chrono::seconds(segundos_espera));
   }
 
   fmt::print("{}) Erro ao enviar {}. Salvo em 'falhas/'\n", num_config, id);
@@ -120,8 +120,9 @@ print_violacoes(const tsl::robin_map<std::string, int>& m)
   std::cout << "\n";
 }
 
-std::pair<long long, Solucao::FO_t>
-ag(const std::string& input,
+
+std::tuple<long long, Solucao::FO_t>
+grasp(const std::string& input,
    int n_indiv,
    int taxa_mut,
    int p_cruz,
@@ -131,53 +132,107 @@ ag(const std::string& input,
    int grasp_alfa,
    int n_tour,
    int n_mut,
+   int ag_iter,
+   const std::string& tipo_fo_,
+   const std::string& versao_ag_,
+   const std::string& versao_grasp_,
+   int nt_ag,
+   int nt_grasp,
+   int nt_prodcons,
    long long timeout)
 {
-  auto cruzamento = [&] {
+  const auto cruzamento = [&] {
     if (oper_cruz == "PMX") {
       return Configuracao::TipoCruzamento::pmx;
     } else if (oper_cruz == "CX") {
       return Configuracao::TipoCruzamento::ciclo;
     } else if (oper_cruz == "OX") {
       return Configuracao::TipoCruzamento::ordem;
-    } else {
+    } else if (oper_cruz == "PMX"){
       return Configuracao::TipoCruzamento::pmx;
+    } else {
+      fmt::print("Operador de cruzamento inválido\n");
+      std::exit(1);
+    }
+  }();
+
+  const auto tipo_fo = [&] {
+    if (tipo_fo_ == "pref") {
+      return Configuracao::TipoFo::Soft_constraints;
+    } else if (tipo_fo_ == "grade") {
+      return Configuracao::TipoFo::Soma_carga;
+    } else {
+      fmt::print("Tipo de FO inválido\n");
+      std::exit(1);
+    }
+  }();
+
+  const auto versao_ag = [&] {
+    if (versao_ag_ == "Single") {
+      return Configuracao::Versao_AG::Serial;
+    } else if (versao_ag_ == "Paralelo") {
+      return Configuracao::Versao_AG::Paralelo;
+    } else {
+      fmt::print("Versão do AG inválida\n");
+      std::exit(1);
+    }
+  }();
+
+  const auto versao_grasp = [&] {
+    if (versao_grasp_ == "Single") {
+      return Configuracao::Versao_GRASP::Serial;
+    } else if (versao_grasp_ == "Paralelo") {
+      return Configuracao::Versao_GRASP::Paralelo;
+    } else if (versao_grasp_ == "ProdutorConsumidor") {
+      return Configuracao::Versao_GRASP::ProdutorConsumidor;
+    } else if (versao_grasp_ == "ParaleloProdutorConsumidor") {
+      return Configuracao::Versao_GRASP::Paralelo_ProdutoConsumidor;
+    } else {
+      fmt::print("Versão do GRASP inválida\n");
+      std::exit(1);
     }
   }();
 
   Resolucao r{ Configuracao()
-                 .arquivoEntrada(input)
-                 .populacaoInicial(n_indiv)
-                 .porcentagemCruzamentos(p_cruz) // %
-                 .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
-                 .numMaximoIteracoesSemEvolucaoAG(infinito)
-                 .tipoCruzamento(cruzamento)
-                 .mutacaoProbabilidade(taxa_mut) // %
-                 .graspNumVizinhos(grasp_nviz)
-                 .graspAlfa(grasp_alfa) // %
-                 .camadaTamanho(input_all_json.camadasTamanho)
-                 .perfilTamanho(input_all_json.perfilTamanho)
-                 .numTorneioPopulacao(n_tour)
-                 .tentativasMutacao(n_mut)
-                 .tipoFo(Configuracao::TipoFo::Soft_constraints)
-                 .timeout(timeout) };
+                   .arquivoEntrada(input)
+                   .populacaoInicial(n_indiv)
+                   .porcentagemCruzamentos(p_cruz) // %
+                   .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
+                   .numMaximoIteracoesSemEvolucaoAG(ag_iter)
+                   .tipoCruzamento(cruzamento)
+                   .mutacaoProbabilidade(taxa_mut) // %
+                   .graspNumVizinhos(grasp_nviz)
+                   .graspAlfa(grasp_alfa) // %
+                   .camadaTamanho(input_all_json.camadasTamanho)
+                   .perfilTamanho(input_all_json.perfilTamanho)
+                   .numTorneioPopulacao(n_tour)
+                   .tentativasMutacao(n_mut)
+                   .tipoFo(tipo_fo)
+                   .versaoAg(versao_ag)
+                   .versaoGrasp(versao_grasp)
+                   .numThreadsAG(nt_ag)
+                   .numThreadsGRASP(nt_grasp)
+                   .numParesProdutoConsumidor(nt_prodcons)
+                   .timeout(timeout) };
+
+  const auto s = r.carregarSolucao(input);
 
   Timer t;
-  r.gerarHorarioAG();
-  auto fo = r.getSolucao()->getFO();
-  auto tempo = t.elapsed();
+  const auto fo = s->getFO();
+  const auto tempo = t.elapsed();
 
   return { tempo, fo };
 }
 
 void
-ag_cli(const std::string& input,
+grasp_cli(const std::string& input,
        const std::string& file,
        const std::string& servidor,
        long long timeout)
 {
   // formato entrada:
   // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
+  // AGIter TipoFO VersaoAG VersaoGRASP NumThreadsAG NumThreadsGRASP NumThreadsProdCons
   // NExec
   // formato saida:
   // ID,NExec,Tempo,Fo
@@ -193,47 +248,230 @@ ag_cli(const std::string& input,
   std::ifstream config{ conf_file };
   if (!config) {
     fmt::print("Erro ao abrir arquivo de configuracao: {}\n", conf_file);
-    return;
+    std::exit(1);
   }
 
   std::vector<std::thread> threads;
 
-  std::string id, cruz_oper;
+  std::string id, cruz_oper, tipo_fo, versao_ag, versao_grasp;
   int taxa_mut, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
-  int grasp_nviz, grasp_alfa, n_exec;
+  int grasp_nviz, grasp_alfa, n_exec, ag_iter, nt_ag, nt_grasp, nt_prodcons;
   auto num_config = 1;
 
   while (config >> id >> taxa_mut >> n_indiv >> p_cruz >> cruz_oper >> n_mut >>
-         n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> n_exec) {
+                n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> ag_iter >>
+                tipo_fo >> versao_ag >> versao_grasp >> nt_ag >> nt_grasp >>
+                nt_prodcons >> n_exec) {
 
-    std::cout << "ID: " << id << "\n\n";
+    fmt::print("ID: {}\n", id);
     std::ostringstream out;
-    out << "ID Algoritmo, Numero execucao, Tempo total, FO\n";
+
+    Util::logprint(out, fmt::format("ID_Algoritmo,Num_Exec,Tempo,FO\n"));
 
     for (auto i = 0; i < n_exec; i++) {
-      std::cout << i << "\n";
-      const auto [tempo, fo] = ag(input,
-                                 n_indiv,
-                                 taxa_mut,
-                                 p_cruz,
-                                 cruz_oper,
-                                 grasp_iter,
-                                 grasp_nviz,
-                                 grasp_alfa,
-                                 n_tour,
-                                 n_mut,
-                                 timeout);
+      const auto [tempo, fo] = grasp(input,
+                                     n_indiv,
+                                     taxa_mut,
+                                     p_cruz,
+                                     cruz_oper,
+                                     grasp_iter,
+                                     grasp_nviz,
+                                     grasp_alfa,
+                                     n_tour,
+                                     n_mut,
+                                     ag_iter,
+                                     tipo_fo,
+                                     versao_ag,
+                                     versao_grasp,
+                                     nt_ag,
+                                     nt_grasp,
+                                     nt_prodcons,
+                                     timeout);
 
       Util::logprint(out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
-      std::cout << "\n";
-
-      threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
-      num_config++;
     }
+    threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+    num_config++;
+  }
+  for (auto& t : threads) {
+    t.join();
+  }
+}
 
-    for (auto& t : threads) {
-      t.join();
+std::tuple<long long, Solucao::FO_t>
+ag(const std::string& input,
+   int n_indiv,
+   int taxa_mut,
+   int p_cruz,
+   const std::string& oper_cruz,
+   int grasp_iter,
+   int grasp_nviz,
+   int grasp_alfa,
+   int n_tour,
+   int n_mut,
+   int ag_iter,
+   const std::string& tipo_fo_,
+   const std::string& versao_ag_,
+   const std::string& versao_grasp_,
+   int nt_ag,
+   int nt_grasp,
+   int nt_prodcons,
+   long long timeout)
+{
+  const auto cruzamento = [&] {
+    if (oper_cruz == "PMX") {
+      return Configuracao::TipoCruzamento::pmx;
+    } else if (oper_cruz == "CX") {
+      return Configuracao::TipoCruzamento::ciclo;
+    } else if (oper_cruz == "OX") {
+      return Configuracao::TipoCruzamento::ordem;
+    } else if (oper_cruz == "PMX"){
+      return Configuracao::TipoCruzamento::pmx;
+    } else {
+      fmt::print("Operador de cruzamento inválido\n");
+      std::exit(1);
     }
+  }();
+
+  const auto tipo_fo = [&] {
+    if (tipo_fo_ == "pref") {
+      return Configuracao::TipoFo::Soft_constraints;
+    } else if (tipo_fo_ == "grade") {
+      return Configuracao::TipoFo::Soma_carga;
+    } else {
+      fmt::print("Tipo de FO inválido\n");
+      std::exit(1);
+    }
+  }();
+
+  const auto versao_ag = [&] {
+    if (versao_ag_ == "Single") {
+      return Configuracao::Versao_AG::Serial;
+    } else if (versao_ag_ == "Paralelo") {
+      return Configuracao::Versao_AG::Paralelo;
+    } else {
+      fmt::print("Versão do AG inválida\n");
+      std::exit(1);
+    }
+  }();
+
+  const auto versao_grasp = [&] {
+    if (versao_grasp_ == "Single") {
+      return Configuracao::Versao_GRASP::Serial;
+    } else if (versao_grasp_ == "Paralelo") {
+      return Configuracao::Versao_GRASP::Paralelo;
+    } else if (versao_grasp_ == "ProdutorConsumidor") {
+      return Configuracao::Versao_GRASP::ProdutorConsumidor;
+    } else if (versao_grasp_ == "ParaleloProdutorConsumidor") {
+      return Configuracao::Versao_GRASP::Paralelo_ProdutoConsumidor;
+    } else {
+      fmt::print("Versão do GRASP inválida\n");
+      std::exit(1);
+    }
+  }();
+
+  Resolucao r{ Configuracao()
+                 .arquivoEntrada(input)
+                 .populacaoInicial(n_indiv)
+                 .porcentagemCruzamentos(p_cruz) // %
+                 .numMaximoIteracoesSemEvolucaoGRASP(grasp_iter)
+                 .numMaximoIteracoesSemEvolucaoAG(ag_iter)
+                 .tipoCruzamento(cruzamento)
+                 .mutacaoProbabilidade(taxa_mut) // %
+                 .graspNumVizinhos(grasp_nviz)
+                 .graspAlfa(grasp_alfa) // %
+                 .camadaTamanho(input_all_json.camadasTamanho)
+                 .perfilTamanho(input_all_json.perfilTamanho)
+                 .numTorneioPopulacao(n_tour)
+                 .tentativasMutacao(n_mut)
+                 .tipoFo(tipo_fo)
+                 .versaoAg(versao_ag)
+                 .versaoGrasp(versao_grasp)
+                 .numThreadsAG(nt_ag)
+                 .numThreadsGRASP(nt_grasp)
+                 .numParesProdutoConsumidor(nt_prodcons)
+                 .timeout(timeout) };
+
+  Timer t;
+  const auto s = r.gerarHorarioAG();
+  const auto fo = s->getFO();
+  const auto tempo = t.elapsed();
+
+  return { tempo, fo };
+}
+
+void
+ag_cli(const std::string& input,
+       const std::string& file,
+       const std::string& servidor,
+       long long timeout)
+{
+  // formato entrada:
+  // ID TaxaMut NIndiv %Cruz CruzOper NMut NTour GRASPIter GRASPNVzi GRASPAlfa
+  // AGIter TipoFO VersaoAG VersaoGRASP NumThreadsAG NumThreadsGRASP NumThreadsProdCons
+  // NExec
+  // formato saida:
+  // ID,NExec,Tempo,Fo
+
+  std::string conf_file;
+
+  if (file == "auto") {
+    conf_file = get_auto_file_name();
+  } else {
+    conf_file = file;
+  }
+
+  std::ifstream config{ conf_file };
+  if (!config) {
+    fmt::print("Erro ao abrir arquivo de configuracao: {}\n", conf_file);
+    std::exit(1);
+  }
+
+  std::vector<std::thread> threads;
+
+  std::string id, cruz_oper, tipo_fo, versao_ag, versao_grasp;
+  int taxa_mut, n_indiv, p_cruz, n_mut, n_tour, grasp_iter;
+  int grasp_nviz, grasp_alfa, n_exec, ag_iter, nt_ag, nt_grasp, nt_prodcons;
+  auto num_config = 1;
+
+  while (config >> id >> taxa_mut >> n_indiv >> p_cruz >> cruz_oper >> n_mut >>
+                n_tour >> grasp_iter >> grasp_nviz >> grasp_alfa >> ag_iter >>
+                tipo_fo >> versao_ag >> versao_grasp >> nt_ag >> nt_grasp >>
+                nt_prodcons >> n_exec) {
+
+    fmt::print("ID: {}\n", id);
+    std::ostringstream out;
+
+    Util::logprint(out, fmt::format("ID_Algoritmo,Num_Exec,Tempo,FO\n"));
+
+    for (auto i = 0; i < n_exec; i++) {
+      const auto [tempo, fo] = ag(input,
+                                  n_indiv,
+                                  taxa_mut,
+                                  p_cruz,
+                                  cruz_oper,
+                                  grasp_iter,
+                                  grasp_nviz,
+                                  grasp_alfa,
+                                  n_tour,
+                                  n_mut,
+                                  ag_iter,
+                                  tipo_fo,
+                                  versao_ag,
+                                  versao_grasp,
+                                  nt_ag,
+                                  nt_grasp,
+                                  nt_prodcons,
+                                  timeout);
+
+      Util::logprint(out, fmt::format("{},{},{},{}\n", id, i, tempo, fo));
+    }
+    threads.emplace_back(upload_result, id, out.str(), num_config, servidor);
+    num_config++;
+
+  }
+  for (auto& t : threads) {
+    t.join();
   }
 }
 
@@ -300,15 +538,6 @@ teste_tempo(int timeout_sec)
   oss << "Tempo maximo: " << timeout_ms << "\n";
   oss << "Numero de execucoes: " << num_exec << "\n\n";
 
-  /*Util::logprint(oss, "SA-ILS\n");
-  oss << teste_tempo_iter(
-  num_exec, [&](Resolucao& r) { return r.gerarHorarioSA_ILS(timeout_ms); });
-
-  Util::logprint(oss, "HySST\n");
-  oss << teste_tempo_iter(num_exec, [&](Resolucao& r) {
-  return r.gerarHorarioHySST(timeout_ms, 100, 100);
-  });*/
-
   Util::logprint(oss, "WDJU\n");
   oss << teste_tempo_iter(
     num_exec, [&](Resolucao& r) { return r.gerarHorarioWDJU(timeout_ms); });
@@ -373,11 +602,6 @@ sa_ils(const std::string& input,
   auto s = r.gerarHorarioSA_ILS(sa, ils, timeout);
   auto fo = s->getFO();
   auto tempo = t.elapsed();
-
-  const auto violacoes = s->reportarViolacoes();
-  for (const auto& p : violacoes) {
-    fmt::print("{}: {}\n", p.first, p.second);
-  }
 
   return { tempo, fo };
 }

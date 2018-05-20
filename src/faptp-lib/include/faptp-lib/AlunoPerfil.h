@@ -16,7 +16,7 @@ class AlunoPerfil
 public:
     AlunoPerfil(double pPeso, const std::string& pId, const std::string& pTurma, const std::string& pPeriodo);
 
-    long long getHash();
+    std::size_t getHash() const;
 
     double getPeso() const;
     void setPeso(double pPeso);
@@ -33,6 +33,7 @@ public:
 
 private:
     int calcPeriodoNum() const;
+    std::size_t calcHash() const;
 
     struct DisciplinaCargaHorariaDesc
     {
@@ -46,7 +47,7 @@ private:
     std::string turma;
     std::string periodo;
     double peso;
-    long long hash;
+    std::size_t hash;
     std::vector<std::size_t> cursadas;
     std::vector<std::size_t> aprovadas;
     std::vector<std::size_t> restante;
@@ -59,6 +60,13 @@ AlunoPerfil::getPeriodoNum() const
 {
     return periodo_num;
 }
+
+inline std::size_t
+AlunoPerfil::getHash() const
+{
+    return hash;
+}
+
 
 #endif /* ALUNOPERFIL_H */
 

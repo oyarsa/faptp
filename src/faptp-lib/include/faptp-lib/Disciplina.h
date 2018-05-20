@@ -57,6 +57,7 @@ public:
     std::size_t id_hash() const;
 
     static std::size_t max_hash();
+    static void reset_hash();
 
     int getPeriodoMinimoNum() const;
 

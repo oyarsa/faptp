@@ -156,6 +156,7 @@ void Resolucao::carregarDados()
         myfile >> jsonRoot;
         myfile.close();
 
+        resetIds();
         carregarDadosDisciplinas();
         carregarDadosProfessores();
         carregarAlunoPerfis();
@@ -3296,6 +3297,9 @@ Resolucao::carregarSolucao(const std::string& file)
   Json::Value root;
   {
     std::ifstream in{ file };
+    if (!in) {
+      throw std::runtime_error{ "Não foi possível abrir o arquivo da solução.de entrada" };
+    }
     in >> root;
   }
 
@@ -3324,7 +3328,7 @@ Resolucao::GRASP_par_1(AlunoPerfil* alunoPerfil, Solucao* solucao) const
     this_thread_id = omp_get_thread_num();
     std::unique_ptr<Grade> thread_best = nullptr;
 
-    #pragma omp for schedule(dynamic, 1) nowait
+    #pragma omp for nowait
     for (auto i = 0; i < maxIterSemEvoGrasp; i++) {
       auto candidata = gradeAleatoria(alunoPerfil, solucao);
       buscaLocal(candidata);
@@ -3418,7 +3422,7 @@ Resolucao::GRASP_par_2(AlunoPerfil* alunoPerfil, Solucao* solucao) const
   for (auto i = 0; i < num_consumidores; i++) {
     consumidores[i].join();
 
-    if (!best || resultados[i]->getFO() > best->getFO()) {
+    if (!best || (resultados[i] && resultados[i]->getFO() > best->getFO())) {
         best = std::move(resultados[i]);
     }
   }
@@ -3429,7 +3433,7 @@ Resolucao::GRASP_par_2(AlunoPerfil* alunoPerfil, Solucao* solucao) const
 Grade*
 Resolucao::GRASP_par_3(AlunoPerfil* alunoPerfil, Solucao* solucao) const
 {
-   std::unique_ptr<Grade> best = nullptr;
+  std::unique_ptr<Grade> best = nullptr;
 
   #pragma omp parallel num_threads(numThreadsGRASP_)
   {
@@ -3445,7 +3449,7 @@ Resolucao::GRASP_par_3(AlunoPerfil* alunoPerfil, Solucao* solucao) const
     }
 
     #pragma omp critical (grade_best)
-    if (!best || thread_best->getFO() > best->getFO()) {
+    if (!best || (thread_best && thread_best->getFO() > best->getFO())) {
       best = std::move(thread_best);
     }
   }
@@ -3472,7 +3476,7 @@ Resolucao::gerarHorarioAGSerial()
   std::vector<Solucao*> proxima_geracao;
   this_thread_id = 0;
 
-  while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
+  while (iter < maxIterSemEvolAG && t.elapsed() < timeout_) {
     for (auto i = 0; i < numCruz; i++) {
       // Cruzamento
       const auto pais = gerarHorarioAGTorneioPar(populacao);
@@ -3508,10 +3512,10 @@ Resolucao::gerarHorarioAGSerial()
     proxima_geracao.clear();
     populacao.resize(horarioPopulacaoInicial);
 
-    if (populacao[0]->getFO() > foAlvo) {
-        iteracaoAlvo = iter;
-        foAlvo = populacao[0]->getFO();
-    }
+//    if (populacao[0]->getFO() > foAlvo) {
+//        iteracaoAlvo = iter;
+//        foAlvo = populacao[0]->getFO();
+//    }
 
     iter++;
   }
@@ -3550,7 +3554,7 @@ Resolucao::gerarHorarioAGPar()
   std::vector<Solucao*> proxima_geracao;
 
   #pragma omp parallel num_threads(numThreadsAG_)
-  while (iter - iteracaoAlvo <= maxIterSemEvolAG && t.elapsed() < timeout_) {
+  while (iter < maxIterSemEvolAG && t.elapsed() < timeout_) {
     this_thread_id = omp_get_thread_num();
     thread_local std::vector<Solucao*> prole;
     prole.clear();
@@ -3602,10 +3606,10 @@ Resolucao::gerarHorarioAGPar()
       proxima_geracao.clear();
       populacao.resize(horarioPopulacaoInicial);
 
-      if (populacao[0]->getFO() > foAlvo) {
-          iteracaoAlvo = iter;
-          foAlvo = populacao[0]->getFO();
-      }
+//      if (populacao[0]->getFO() > foAlvo) {
+//          iteracaoAlvo = iter;
+//          foAlvo = populacao[0]->getFO();
+//      }
 
       iter++;
     }
@@ -3630,14 +3634,12 @@ Grade*
 Resolucao::GRASP_serial(AlunoPerfil* alunoPerfil, Solucao* solucao) const
 {
     auto best = gradeAleatoria(alunoPerfil, solucao);
-    auto ultimaMelhoriaIter = -1;
 
-    for (auto i = 0; i - ultimaMelhoriaIter < maxIterSemEvoGrasp; i++) {
+    for (auto i = 0; i < maxIterSemEvoGrasp; i++) {
         auto candidata = gradeAleatoria(alunoPerfil, solucao);
         buscaLocal(candidata);
 
         if (candidata->getFO() > best->getFO()) {
-            ultimaMelhoriaIter = i;
             best = std::move(candidata);
         }
     }
@@ -3703,5 +3705,11 @@ Resolucao::setGradeAlfa(int alfa)
 const Disciplina& Resolucao::getDisciplinaByCode(std::size_t d_code) const
 {
     return *disciplinas[d_code - 1];
+}
+
+void Resolucao::resetIds()
+{
+    Disciplina::reset_hash();
+    Professor::reset_hash();
 }
 

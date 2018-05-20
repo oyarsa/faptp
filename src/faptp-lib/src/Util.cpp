@@ -106,7 +106,7 @@ void Util::create_folder(const std::string& path)
 #else
     std::string command {"mkdir -p \"\"" + path + "\"\" > /dev/null 2>&1"};
 #endif
-    system(command.c_str());
+    (void)system(command.c_str());
 }
 
 std::size_t Util::hash_string(const std::string& str)

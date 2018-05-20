@@ -10,7 +10,6 @@ AlunoPerfil::AlunoPerfil(double pPeso, const std::string& pId,
       turma(pTurma),
       periodo(pPeriodo),
       peso(pPeso),
-      hash(0),
       periodo_num(calcPeriodoNum())
     {}
 
@@ -19,12 +18,8 @@ double AlunoPerfil::getPeso() const
     return peso;
 }
 
-long long AlunoPerfil::getHash()
+std::size_t AlunoPerfil::calcHash() const
 {
-    if (hash != 0) {
-        return hash;
-    }
-
     std::ostringstream oss;
     oss << turma << periodo;
     for (auto& disc : aprovadas) {
@@ -34,8 +29,7 @@ long long AlunoPerfil::getHash()
         oss << disc;
     }
 
-    hash = std::hash<std::string> {}(oss.str());
-    return hash;
+    return std::hash<std::string>{}(oss.str());
 }
 
 void AlunoPerfil::setPeso(double pPeso)
@@ -85,4 +79,5 @@ void AlunoPerfil::finalizarConstrucao()
     std::sort(cursadas.begin(), cursadas.end());
     std::sort(aprovadas.begin(), aprovadas.end());
     std::sort(restante.begin(), restante.end());
+    hash = calcHash();
 }

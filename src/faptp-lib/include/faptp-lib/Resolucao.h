@@ -182,7 +182,7 @@ public:
 
   // N�mero de itera��es m�ximo que o AG continuar� sem evoluir a solu��o
   int maxIterSemEvolAG;
-  int ultimaIteracao{};
+  int ultimaIteracao;
   // N�mero de itera��es m�ximo que o GRASP continuar� sem evoluir a grade
   int maxIterSemEvoGrasp;
 
@@ -388,6 +388,8 @@ private:
 
   Solucao* selecaoTorneio(const std::vector<Solucao*>& pop) const;
   void printCamada(const Solucao& s, int camada) const;
+
+  static void resetIds();
 };
 
 #endif /* RESOLUCAO_H */

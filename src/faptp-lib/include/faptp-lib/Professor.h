@@ -48,6 +48,7 @@ public:
     std::size_t id_hash() const;
 
     static std::size_t max_hash();
+    static void reset_hash();
 private:
     static std::atomic_size_t Next_code;
 
@@ -82,7 +83,6 @@ Professor::max_hash()
 {
   return Next_code + 1;
 }
-
 
 #endif /* PROFESSOR_H */
 
