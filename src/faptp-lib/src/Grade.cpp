@@ -97,15 +97,11 @@ Grade::checkCollision(const Disciplina* pDisciplina)
 {
   // Percorre a grade do aluno inteira procurando slots da disciplina atual
   // e verificando se já estão ocupados por alguma outra
-
-  // Timeslots ocupados pela disciplina
-  const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
-
-  for (const auto& slot : slots) {
-    // Se tem algum PD não nulo no slot, existe uma colisão
-    if (at(slot.dia, slot.bloco) != nullptr) {
-      return false;
-    }
+  for (auto i = 0; i < size; i++) {
+      // Se tem algum PD não nulo no slot, existe uma colisão
+      if (matriz[i] != nullptr) {
+        return false;
+      }
   }
 
   return true;
@@ -124,11 +120,16 @@ Grade::isViable(const Disciplina* pDisciplina)
 void
 Grade::add(Disciplina* pDisciplina)
 {
-    const auto& slots = horario->getTimeSlotsDisciplina(pDisciplina);
-
-    for (const auto& slot : slots) {
-        const auto gradePos = getPosition(slot.dia, slot.bloco);
-        matriz[gradePos] =  horario->at(slot.dia, slot.bloco, slot.camada);
+    for (auto dia = 0; dia < dias_semana_util; dia++) {
+      for (auto camada = 0; camada < camadasTamanho; camada++) {
+        for (auto bloco = 0; bloco < blocosTamanho; bloco++) {
+          auto pd = horario->at(dia, bloco, camada);
+          if (pd && pd->getDisciplina() == pDisciplina) {
+            const auto gradePos = getPosition(dia, bloco);
+            matriz[gradePos] = pd;
+          }
+        }
+      }
     }
 
     disciplinasAdicionadas.push_back(pDisciplina);
@@ -183,10 +184,10 @@ bool Grade::insert(Disciplina* disciplina)
 Disciplina* Grade::remove(Disciplina* disciplina)
 {
     // Limpa os slots ocupados pela disciplina
-    const auto& slots = horario->getTimeSlotsDisciplina(disciplina);
-    for (const auto& slot : slots) {
-      const auto pos = getPosition(slot.dia, slot.bloco);
-      matriz[pos] = nullptr;
+    for (auto i = 0; i < size; i++) {
+      if (matriz[i] && matriz[i]->getDisciplina() == disciplina) {
+        matriz[i] = nullptr;
+      }
     }
 
     // Remove-a da lista de adicionadas.
