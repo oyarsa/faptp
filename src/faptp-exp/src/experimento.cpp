@@ -349,6 +349,8 @@ ag(const std::string& input,
       return Configuracao::Versao_AG::Serial;
     } else if (versao_ag_ == "Paralelo") {
       return Configuracao::Versao_AG::Paralelo;
+    } else if (versao_ag_ == "MultiPopulacao") {
+      return Configuracao::Versao_AG::MultiPopulacao;
     } else {
       fmt::print("Versão do AG inválida\n");
       std::exit(1);

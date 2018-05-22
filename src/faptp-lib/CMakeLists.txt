@@ -54,6 +54,7 @@ target_link_libraries(faptp-lib PUBLIC tsl)
 target_link_libraries(faptp-lib PUBLIC range)
 target_link_libraries(faptp-lib PRIVATE fastrange)
 target_link_libraries(faptp-lib PRIVATE concurrentqueue)
+target_link_libraries(faptp-lib PRIVATE readerwriterqueue)
 
 target_compile_features(faptp-lib PUBLIC cxx_std_17)
 target_compile_definitions(faptp-lib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)

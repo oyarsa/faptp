@@ -37,6 +37,7 @@
 #include <condition_variable>
 #include <thread>
 #include <blockingconcurrentqueue.h>
+#include <readerwriterqueue.h>
 
 using Util::dbg;
 
@@ -480,7 +481,7 @@ void Resolucao::atualizarDisciplinasIndex()
     }
 }
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor)
+std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor) const
 {
     std::vector<Solucao*> filhos {};
 
@@ -638,12 +639,14 @@ Solucao* Resolucao::gerarHorarioAG()
             return gerarHorarioAGSerial();
         case Configuracao::Versao_AG::Paralelo:
             return gerarHorarioAGPar();
+        case Configuracao::Versao_AG::MultiPopulacao:
+            return gerarHorarioAGMultiPopulacao();
     }
     return nullptr;
 }
 
 
-std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao)
+std::vector<Solucao*> Resolucao::gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao) const
 {
     const auto pai1 = selecaoTorneio(solucoesPopulacao);
     const auto pai2 = selecaoTorneio(solucoesPopulacao);
@@ -3533,6 +3536,124 @@ Resolucao::gerarHorarioAGSerial()
   solucao = solucaoAG;
 
   return solucaoAG;
+}
+
+using SolucaoQueue = moodycamel::BlockingReaderWriterQueue<std::unique_ptr<Solucao>>;
+
+static void
+executarAGMulti(
+  Resolucao& res,
+  std::vector<Solucao*> populacao,
+  const int iteracoes,
+  const int thread_id,
+  const int ponto_sincronia,
+  std::vector<SolucaoQueue>& migracao,
+  std::unique_ptr<Solucao>& resultado,
+  const int tamanho_migracao
+)
+{
+  const auto tamanho_populacao = populacao.size();
+  this_thread_id = thread_id;
+  const auto numCruz = std::max(
+      1,
+      static_cast<int>(tamanho_populacao * res.horarioCruzamentoPorcentagem));
+
+  std::vector<Solucao*> proxima_geracao;
+
+  Timer t;
+  for (auto iter = 0; iter < iteracoes && t.elapsed() < res.timeout(); iter++) {
+    for (auto i = 0; i < numCruz; i++) {
+      // Cruzamento
+      const auto pais = res.gerarHorarioAGTorneioPar(populacao);
+      auto filhos = res.gerarHorarioAGCruzamento(pais);
+
+      // Mutação
+      for (auto& filho : filhos) {
+        const auto chance = Util::randomDouble();
+        if (chance <= res.horarioMutacaoProbabilidade) {
+          auto s = res.gerarHorarioAGMutacao(filho);
+          if (s) {
+            delete filho;
+            filho = s;
+          }
+        }
+      }
+
+      for (auto s : filhos) {
+        s->calculaFO();
+      }
+
+      proxima_geracao.insert(proxima_geracao.end(), filhos.begin(), filhos.end());
+    }
+
+    populacao.insert(populacao.end(), proxima_geracao.begin(), proxima_geracao.end());
+    std::sort(populacao.begin(), populacao.end(), SolucaoComparaMaior{});
+
+    if (iter % ponto_sincronia == 0) {
+      const auto next = (this_thread_id+1) % res.numThreadsAG();
+
+      for (auto i = 0; i < tamanho_migracao; i++) {
+        migracao[next].enqueue(populacao[i]->clone());
+      }
+
+      for (auto i = 0; i < tamanho_migracao; i++) {
+        std::unique_ptr<Solucao> migrante;
+        migracao[this_thread_id].wait_dequeue(migrante);
+        Util::insert_sorted(populacao, migrante.release(), SolucaoComparaMaior{});
+      }
+    }
+
+    for (auto i = tamanho_populacao; i < populacao.size(); i++) {
+      delete populacao[i];
+    }
+
+    proxima_geracao.clear();
+    populacao.resize(tamanho_populacao);
+  }
+  resultado = std::unique_ptr<Solucao>(populacao[0]);
+  for (auto i = 1u; i < populacao.size(); i++) {
+    delete populacao[i];
+  }
+}
+
+Solucao*
+Resolucao::gerarHorarioAGMultiPopulacao()
+{
+  std::vector<std::unique_ptr<Solucao>> resultados(numThreadsAG());
+  std::vector<SolucaoQueue> migracao(numThreadsAG());
+  std::vector<std::thread> threads;
+
+  const auto populacao = gerarHorarioAGPopulacaoInicialParalelo();
+  const auto tam_pop = horarioPopulacaoInicial / numThreadsAG();
+  const auto iteracoes = maxIterSemEvolAG;
+  const auto ponto_sincronia = 50;
+  const auto tamanho_migracao = 1;
+
+  for (auto i = 1; i < numThreadsAG(); i++) {
+    std::vector<Solucao*> cur_pop(populacao.begin() + i*tam_pop,
+                                  populacao.begin() + (i+1) * tam_pop);
+    threads.emplace_back(executarAGMulti,
+                         std::ref(*this), std::move(cur_pop), iteracoes, i,
+                         ponto_sincronia, std::ref(migracao),
+                         std::ref(resultados[i]), tamanho_migracao);
+  }
+
+  std::vector<Solucao*> cur_pop(populacao.begin(), populacao.begin() + tam_pop);
+  executarAGMulti(*this, std::move(cur_pop), iteracoes, 0, ponto_sincronia,
+                  std::ref(migracao), std::ref(resultados[0]), tamanho_migracao);
+
+  for (auto& t : threads) {
+    t.join();
+  }
+
+  std::unique_ptr<Solucao> best;
+  for (auto& cur : resultados) {
+    if (!best || (cur && cur->getFO() > best->getFO())) {
+      best = std::move(cur);
+    }
+  }
+
+  return best.release();
 }
 
 Solucao*

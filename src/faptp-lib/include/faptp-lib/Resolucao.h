@@ -71,6 +71,7 @@ public:
   Solucao* gerarHorarioAG();
   Solucao* gerarHorarioAGSerial();
   Solucao* gerarHorarioAGPar();
+  Solucao* gerarHorarioAGMultiPopulacao();
 
   std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
   std::unique_ptr<Solucao> gerarHorarioSA_ILS(SA& sa, ILS& ils, long long timeout);
@@ -195,6 +196,10 @@ public:
   long long tempoTotalMut[numcruz] {};
   long long tempoTotalSelec{};
   long long tempoTotalElit{};
+
+  std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao) const;
+  std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor) const;
+  Solucao* gerarHorarioAGMutacao(const Solucao* pSolucao) const;
 private:
   int blocosTamanho;
   int camadasTamanho;
@@ -233,10 +238,8 @@ private:
   std::unique_ptr<Solucao> carregarSolucao(const Json::Value& horarios);
 
   void atualizarDisciplinasIndex();
-  std::vector<Solucao*> gerarHorarioAGCruzamento(const std::vector<Solucao*>& parVencedor);
   std::vector<Solucao*> gerarHorarioAGCruzamentoExper(const std::vector<Solucao*>& parVencedor,
       Configuracao::TipoCruzamento tipoCruz);
-  std::vector<Solucao*> gerarHorarioAGTorneioPar(std::vector<Solucao*>& solucoesPopulacao);
   Solucao* gerarHorarioAGTorneio(std::vector<Solucao*>& solucoesPopulacao) const;
   Solucao* gerarHorarioAGTorneio2(std::vector<Solucao*>& pop) const;
 
@@ -256,7 +259,6 @@ private:
       Configuracao::TipoMutacao tipoMut);
   Solucao* gerarHorarioAGMutacaoSubstDisc(Solucao* pSolucao);
   bool swapSlots(Solucao& sol, int posX1, int posX2) const;
-  Solucao* gerarHorarioAGMutacao(const Solucao* pSolucao) const;
 
   void gerarGradeTipoGrasp(Solucao* sol) const;
 

@@ -28,6 +28,7 @@ add_subdirectory(lib/fastrange)
 add_subdirectory(lib/range)
 add_subdirectory(lib/tsl)
 add_subdirectory(lib/concurrentqueue)
+add_subdirectory(lib/readerwriterqueue)
 
 # Módulos
 add_subdirectory(src/faptp)

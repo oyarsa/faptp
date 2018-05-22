@@ -49,7 +49,8 @@ public:
 
     enum class Versao_AG {
       Serial,
-      Paralelo
+      Paralelo,
+      MultiPopulacao
     };
 
     enum class Versao_GRASP {
