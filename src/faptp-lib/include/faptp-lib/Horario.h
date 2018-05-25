@@ -33,8 +33,9 @@ public:
     bool insert(int dia, int bloco, int camada, ProfessorDisciplina* pd, bool force) override;
     void clearSlot(int pDia, int pBloco, int pCamada) override;
     void clearCamada(int camada);
-    tsl::robin_map<std::string, ProfessorDisciplina*> getAlocFromDiscNames(int camada) const;
-
+    void getAlocFromDiscNames(
+        int camada, tsl::robin_map<std::string, ProfessorDisciplina*>& alocacoes
+    ) const;
     std::size_t getHash();
 
     int contaJanelas() const;

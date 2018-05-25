@@ -432,21 +432,21 @@ int Horario::aulasProfessores(
   return num;
 }
 
-tsl::robin_map<std::string, ProfessorDisciplina*>
-Horario::getAlocFromDiscNames(int camada) const
+void
+Horario::getAlocFromDiscNames(
+    int camada,
+    tsl::robin_map<std::string, ProfessorDisciplina*>& alocacoes
+) const
 {
+    alocacoes.clear();
     const auto camada_inicio = getPosition(0, 0, camada);
     const auto camada_fim = camada_inicio + blocosTamanho * dias_semana_util;
-
-    tsl::robin_map<std::string, ProfessorDisciplina*> alocs;
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
         const auto pd = at(i);
         const auto nome = pd ? pd->getDisciplina()->getId() : "null";
-        alocs[nome] = pd;
+        alocacoes[nome] = pd;
     }
-
-    return alocs;
 }
 
 TimeSlot::TimeSlot(const std::tuple<int, int, int>& tuple)

@@ -48,7 +48,7 @@ void thdbg(std::string_view format, Args...args)
 {
   if constexpr (Util::kPrintDebug) {
     fmt::print("> [{}] ", this_thread_id);
-    fmt::print(args...);
+    fmt::print(format, args...);
   }
 }
 
@@ -486,27 +486,10 @@ std::vector<Solucao*> Resolucao::gerarHorarioAGCruzamento(const std::vector<Solu
     std::vector<Solucao*> filhos {};
 
     switch (horarioTipoCruzamento) {
-        case Configuracao::TipoCruzamento::construtivo_reparo: {
-            auto filhos1 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[0], parVencedor[1]);
-            auto filhos2 = gerarHorarioAGCruzamentoConstrutivoReparo(parVencedor[1], parVencedor[0]);
-            filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
-            filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
+        case Configuracao::TipoCruzamento::construtivo_reparo:
+        case Configuracao::TipoCruzamento::simples:
+        case Configuracao::TipoCruzamento::substitui_bloco:
             break;
-        }
-
-        case Configuracao::TipoCruzamento::simples: {
-            auto filhos1 = gerarHorarioAGCruzamentoSimples(parVencedor[0], parVencedor[1]);
-            filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
-            break;
-        }
-
-        case Configuracao::TipoCruzamento::substitui_bloco: {
-            auto filhos1 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[0], parVencedor[1]);
-            auto filhos2 = gerarHorarioAGCruzamentoSubstBloco(parVencedor[1], parVencedor[0]);
-            filhos.insert(filhos.end(), filhos1.begin(), filhos1.end());
-            filhos.insert(filhos.end(), filhos2.begin(), filhos2.end());
-            break;
-        }
 
         case Configuracao::TipoCruzamento::ordem: {
             auto filho1 = crossoverOrdem(*parVencedor[0], *parVencedor[1]);
@@ -640,7 +623,7 @@ Solucao* Resolucao::gerarHorarioAG()
         case Configuracao::Versao_AG::Paralelo:
             return gerarHorarioAGPar();
         case Configuracao::Versao_AG::MultiPopulacao:
-            return gerarHorarioAGMultiPopulacao();
+            return gerarHorarioAGMultiPopulacaoOpenMP();
     }
     return nullptr;
 }
@@ -2383,7 +2366,8 @@ void Resolucao::printCamada(const Solucao& s, int camada) const
 Solucao* Resolucao::crossoverOrdemCamada(
     const Solucao& pai1,
     const Solucao& pai2,
-    int camadaCruz)
+    int camadaCruz
+) const
 {
     // Gera o ponto de cruzamento e encontra as coordenadas dele na matriz 3D
     const auto [xbegin, xend] = getCrossoverPoints(pai1, camadaCruz);
@@ -2441,7 +2425,7 @@ Solucao* Resolucao::crossoverOrdemCamada(
     return filho.release();
 }
 
-Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2)
+Solucao* Resolucao::crossoverOrdem(const Solucao& pai1, const Solucao& pai2) const
 {
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -2491,7 +2475,7 @@ bool Resolucao::insereSubTour(
     const std::vector<ProfessorDisciplina*>& genes,
     Solucao& filho,
     int xbegin
-)
+) const
 {
     for (auto i = 0u; i < genes.size(); i++) {
         auto [dia, bloco, camada] = filho.horario->getCoords(i + xbegin);
@@ -2504,7 +2488,7 @@ bool Resolucao::insereSubTour(
     return true;
 }
 
-Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2)
+Solucao* Resolucao::crossoverPMX(const Solucao& pai1, const Solucao& pai2) const
 {
     std::vector<bool> camadas_visitadas(camadasTamanho);
     auto num_camadas_visitadas = 0;
@@ -2611,8 +2595,9 @@ Solucao* Resolucao::crossoverPMXCamada(
     const Solucao& pai1,
     const Solucao& pai2,
     int camadaCruz
-)
+) const
 {
+    thread_local tsl::robin_map<std::string, ProfessorDisciplina*> alocacoes;
     auto [repr, novo_pai1, novo_pai2] = crossoverPMXCriarRepr(pai1, pai2, camadaCruz);
 
     const auto tamanho_camada = blocosTamanho * dias_semana_util;
@@ -2625,13 +2610,15 @@ Solucao* Resolucao::crossoverPMXCamada(
                                        xend - camada_inicio);
 
     auto filho = pai2.clone();
-    auto alocacoes = filho->horario->getAlocFromDiscNames(camadaCruz);
+    filho->horario->getAlocFromDiscNames(camadaCruz, alocacoes);
     filho->horario->clearCamada(camadaCruz);
 
     for (auto i = camada_inicio; i < camada_fim; i++) {
-        auto pdname = repr[filho_repr[i - camada_inicio]];
+        const auto pdname = repr[filho_repr[i - camada_inicio]];
         const auto [dia, bloco, camada] = filho->horario->getCoords(i);
-        if (!filho->horario->insert(dia, bloco, camada, alocacoes[pdname])) {
+        auto pd_substituto = alocacoes[pdname];
+
+        if (!filho->horario->insert(dia, bloco, camada, pd_substituto)) {
             return nullptr;
         }
     }
@@ -3542,7 +3529,7 @@ using SolucaoQueue = moodycamel::BlockingReaderWriterQueue<std::unique_ptr<Soluc
 
 static void
 executarAGMulti(
-  Resolucao& res,
+  const Resolucao& res,
   std::vector<Solucao*> populacao,
   const int iteracoes,
   const int thread_id,
@@ -3633,7 +3620,7 @@ Resolucao::gerarHorarioAGMultiPopulacao()
     std::vector<Solucao*> cur_pop(populacao.begin() + i*tam_pop,
                                   populacao.begin() + (i+1) * tam_pop);
     threads.emplace_back(executarAGMulti,
-                         std::ref(*this), std::move(cur_pop), iteracoes, i,
+                         std::cref(*this), std::move(cur_pop), iteracoes, i,
                          ponto_sincronia, std::ref(migracao),
                          std::ref(resultados[i]), tamanho_migracao);
   }
@@ -3787,11 +3774,17 @@ Resolucao::setNumParesProdutorConsumidor(int numPares)
 }
 
 std::vector<Solucao*>
+Resolucao::gerarHorarioAGPopulacaoInicialSerial(int num_individuos)
+{
+  auto solucoes = gerarSolucoesAleatoriasSerial(num_individuos);
+  std::sort(begin(solucoes), end(solucoes), SolucaoComparaMaior());
+  return solucoes;
+}
+
+std::vector<Solucao*>
 Resolucao::gerarHorarioAGPopulacaoInicialSerial()
 {
-    auto solucoes = gerarSolucoesAleatoriasSerial(horarioPopulacaoInicial);
-    std::sort(begin(solucoes), end(solucoes), SolucaoComparaMaior());
-    return solucoes;
+  return gerarHorarioAGPopulacaoInicialSerial(horarioPopulacaoInicial);
 }
 
 std::vector<Solucao*>
@@ -3833,4 +3826,91 @@ void Resolucao::resetIds()
     Disciplina::reset_hash();
     Professor::reset_hash();
 }
+
+Solucao* Resolucao::gerarHorarioAGMultiPopulacaoOpenMP()
+{
+  std::vector<std::unique_ptr<Solucao>> resultados(numThreadsAG());
+  std::vector<SolucaoQueue> migracao(numThreadsAG());
+
+  const auto tamanho_populacao = static_cast<std::size_t>(horarioPopulacaoInicial / numThreadsAG());
+  const auto iteracoes = maxIterSemEvolAG;
+  const auto ponto_sincronia = 50;
+  const auto tamanho_migracao = 1;
+  const auto numCruz = std::max(
+      1,
+      static_cast<int>(tamanho_populacao * horarioCruzamentoPorcentagem));
+
+  #pragma omp parallel num_threads(numThreadsAG())
+  {
+    this_thread_id = omp_get_thread_num();
+
+    auto cur_pop = gerarHorarioAGPopulacaoInicialSerial(tamanho_populacao);
+    thread_local std::vector<Solucao*> proxima_geracao;
+
+    Timer t;
+    for (auto iter = 0; iter < iteracoes && t.elapsed() < timeout(); iter++) {
+      for (auto i = 0; i < numCruz; i++) {
+        // Cruzamento
+        const auto pais = gerarHorarioAGTorneioPar(cur_pop);
+        auto filhos = gerarHorarioAGCruzamento(pais);
+
+        // Mutação
+        for (auto& filho : filhos) {
+          const auto chance = Util::randomDouble();
+          if (chance <= horarioMutacaoProbabilidade) {
+            auto s = gerarHorarioAGMutacao(filho);
+            if (s) {
+              delete filho;
+              filho = s;
+            }
+          }
+        }
+
+        for (auto s : filhos) {
+          s->calculaFO();
+        }
+
+        proxima_geracao.insert(proxima_geracao.end(), filhos.begin(), filhos.end());
+      }
+
+      cur_pop.insert(cur_pop.end(), proxima_geracao.begin(), proxima_geracao.end());
+      std::sort(cur_pop.begin(), cur_pop.end(), SolucaoComparaMaior{});
+
+      if (iter % ponto_sincronia == 0) {
+        const auto next = (this_thread_id+1) % numThreadsAG();
+
+        for (auto i = 0; i < tamanho_migracao; i++) {
+          migracao[next].enqueue(cur_pop[i]->clone());
+        }
+
+        for (auto i = 0; i < tamanho_migracao; i++) {
+          std::unique_ptr<Solucao> migrante;
+          migracao[this_thread_id].wait_dequeue(migrante);
+          Util::insert_sorted(cur_pop, migrante.release(), SolucaoComparaMaior{});
+        }
+      }
+
+      for (auto i = tamanho_populacao; i < cur_pop.size(); i++) {
+        delete cur_pop[i];
+      }
+
+      proxima_geracao.clear();
+      cur_pop.resize(tamanho_populacao);
+    }
+    resultados[this_thread_id] = std::unique_ptr<Solucao>(cur_pop[0]);
+    for (auto i = 1u; i < cur_pop.size(); i++) {
+      delete cur_pop[i];
+    }
+  }
+
+  std::unique_ptr<Solucao> best;
+  for (auto& cur : resultados) {
+    if (!best || (cur && cur->getFO() > best->getFO())) {
+      best = std::move(cur);
+    }
+  }
+
+  return best.release();
+}
+
 

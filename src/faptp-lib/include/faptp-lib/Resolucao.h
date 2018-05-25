@@ -72,6 +72,7 @@ public:
   Solucao* gerarHorarioAGSerial();
   Solucao* gerarHorarioAGPar();
   Solucao* gerarHorarioAGMultiPopulacao();
+  Solucao* gerarHorarioAGMultiPopulacaoOpenMP();
 
   std::unique_ptr<Solucao> gerarHorarioSA_ILS(long long timeout);
   std::unique_ptr<Solucao> gerarHorarioSA_ILS(SA& sa, ILS& ils, long long timeout);
@@ -288,6 +289,7 @@ private:
 
   std::vector<Solucao*> gerarHorarioAGPopulacaoInicialParalelo();
   std::vector<Solucao*> gerarHorarioAGPopulacaoInicialSerial();
+  std::vector<Solucao*> gerarHorarioAGPopulacaoInicialSerial(int num_individuos);
 
   bool gerarCamada(Solucao* sol, int camada, const std::vector<Disciplina*>& discs,
                    tsl::robin_map<std::string, int>& creditos_alocados_prof) const;
@@ -368,14 +370,14 @@ private:
   std::vector<ProfessorDisciplina*>
   getSubTour(const Solucao& pai, int xbegin, int xend) const;
   Solucao* crossoverOrdemCamada(const Solucao& pai1, const Solucao& pai2,
-                                int camadaCruz);
-  Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2);
+                                int camadaCruz) const;
+  Solucao* crossoverOrdem(const Solucao& pai1, const Solucao& pai2) const;
   std::pair<int, int> getCrossoverPoints(const Solucao& pai, int camada) const;
   bool insereSubTour(const std::vector<ProfessorDisciplina*>& genes,
-                     Solucao& filho, int xbegin);
-  Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2);
+                     Solucao& filho, int xbegin) const;
+  Solucao* crossoverPMX(const Solucao& pai1, const Solucao& pai2) const;
   Solucao* crossoverPMXCamada(const Solucao& pai1, const Solucao& pai2,
-                              int camadaCruz);
+                              int camadaCruz) const;
   std::tuple<std::vector<std::string>, std::vector<int>, std::vector<int>>
       crossoverPMXCriarRepr(const Solucao& pai1, const Solucao& pai2, int camada) const;
   std::vector<std::string> inverterPMXRepr(
