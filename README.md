@@ -1,32 +1,36 @@
 # faPTP
-## Geração de matrizes de horário para instituições de ensino superior privadas
+## Timetabling solver for higher education institutions
 
-Implementa os algoritmos descritos em Silva et al., 2016 e Silva e Cunha, 2017. Consiste em um Algoritmo Genético para a evolução das matrizes de horário e uma implementação do GRASP para geração das grades de disciplinas dos estudantes, além de implementados algoritmos da literatura implementados a título de comparação.
+This repository implements the algorithms describe in Silva et al. 2016 and Silva and Cunha 2017.
+They consist in a Genetic Algorithm for evolving course timetables and an implementation of GRASP
+for student timetables, as well as other algorithms from the literature for benchmarking.
 
-### Algortimos implementados
-- Algoritmo genético
-  - População inicial: geração aleatória
-  - Seleção: torneio n-ário
-  - Cruzamento: OX, CX, PMX, entre outros
-  - Mutação: swap
-  - FO: soma das FOs das grades geradas a partir da solução
-- GRASP (resolução das grades)
-  - Construção: aleatória
-  - Busca local: remoção e reinserção aleatórios
-  - FO: número de horas-aula semanais
+### Implemented algorithms
+- Genetic Algorithm
+  - Initial population: random generation
+  - Selection: n-ary tournament
+  - Crossover: OX, CX, PMX, and others
+  - Mutation: swap
+  - Objective function:
+      1. Sum of the objective functions from the student timetables
+      2. Custom weighted sum of quality parameters
+- GRASP (student timetable)
+  - Construction: random
+  - Local search: removal and random reinsertion
+  - Objective function: number of allocated hours per week
 - SA-ILS (Fonseca 2013)
-  - SA: comum com reheating
-  - ILS: comum com perturbações e descent phase baseado em Random Non Descent
-- WDJU (Wilke e Killer 2010)
-  - Utiliza fluxo de rapid descent a um ótimo local seguido de perturbação
-    para encontrar um outro ótimo, buscando encontrar o ótimo local
+  - Simulated Annealing: standard with reheating
+  - Iterated Local Search: standard with perturbations and descent phase based in Random Non Descent
+- WDJU (Wilke and Killer 2010)
+  - Uses rapid descent flow to a good local optimum followed by a perturbation
+    with the goal of finding another optimum, repeatedly looking for the best
+    solution
 - HySST (Kheiri 2014)
-  - Hyper-heurística que navega o espaço de busca através de dois estágios alternados
-  - Estágio de mutação: heurísticas de movimentação de vizinhanca para mutação da solução
-  - Estágio de hill-climbing: heurísticas de hill climbing para realizar movimentos
-    grandes na solução.
+  - Hyper-heuristic that traverses the search space through two alternating stages
+  - Mutation stage: neighbourhood movements heuristic make small changes to the solution
+  - Hill-climbing stage: hill-climbing heuristics that make large changes
 
-### Movimentos implementados
+### Implemented movements
 - Event Swap
 - Event Move
 - Resource Swap
@@ -36,28 +40,22 @@ Implementa os algoritmos descritos em Silva et al., 2016 e Silva e Cunha, 2017. 
 - First Improvement
 - Ejection Chain
 
-### Dependências
-- C++14 (testado com Visual C++ 2017 e GCC 5.4)
-- Bibliotecas:
+### Dependencies
+- C++14 (tested on Visual C++ 2017 and GCC 5.4)
+- Libraries:
   - JsonCpp
   - fmt
   - CPR
   - CxxOpts
-	* O gerenciador de pacotes Conan é utilizado, com as dependências descritas em conanfile.txt
-- Se o modelo matemático for utilizado (configurar com MODELO = True no CMakeLists.txt), uma instalação
-  do CPLEX é necessária, assim como uma copia do repositório ModeloGrade na mesma pasta do faPTP
 
-### Compilação
-Instruções de compilação no arquivo BUILDING.md.
+We use the Conan package manager. Dependencies are listed on conanfile.txt.
 
-### Orientações
-- O código é escrito em C++14. O estilo utilizado é o C++ Moderno. Refira-se à https://github.com/isocpp/CppCoreGuidelines.
-- O código deve compilar sem warnings no -Wall do GCC e no /W4 do Visual Studio.
-- O código não deve gerar mensagens de erro na ferramenta Cpp Core Checker, ou no Checker do clang-tidy.
-  - Exceções: o arquivo UUID.cpp, que utiliza técnicas que as Guidelines proibem, teve suas warnings suprimidas
-    - A supressão de warnings deve ser de comum acordo
-    - Os arquivos da biblioteca JsonCpp também disparam warnings. Elas devem ser ignoradas.
-- O projeto inclui muitas instâncias que violam as Guidelines. Modificações para conformar essas
-  instâncias são bem-vindas. Commits que incluam códigos que não sigam as Guidelines estão sujeitos a discussão.
+### Compilation
+Compilation structres are on the BUILDING.md file.
+
+### Coding guidance
+- Code is written in C++14, using a modern C++ style. Refer to https://github.com/isocpp/CppCoreGuidelines.
+- Code must compile without warnings with -Wall for GCC and /W4 for Visual Studio.
+- Code should not generate error messages on Cpp Core Checker or clang-tidy Checker.
 
 Copyright 2016 Italo Silva, Saulo Campos, Pedro Mázala
